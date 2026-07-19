@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const philosophes = await getCollection('philosophes');
+  return philosophes.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const p = entry.data;
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{p.name} — La Philo</title>
+</head>
+<body>
+  <article class="fiche">
+    {p.thumbnail && <img class="portrait" src={p.thumbnail} alt={p.name} />}
+    <h1>{p.name}</h1>
+    <p class="dates">{p.display_date}</p>
+    {p.nationalite && <p class="nationalite">{p.nationalite}</p>}
+    {p.courants && p.courants.length > 0 && (
+      <ul class="courants">
+        {p.courants.map((c: string) => <li>{c}</li>)}
+      </ul>
+    )}
+    <div class="text" set:html={p.text} />
+    {p.media_credit && <p class="credit">{p.media_credit}</p>}
+  </article>
+</body>
+</html>
