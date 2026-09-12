@@ -1,0 +1,173 @@
+---
+const branches = [
+  {
+    name: 'La métaphysique',
+    tag: 'Existence · Réalité · Dieu',
+    ytId: 'XFQN6J_4SxU',
+    text: `La métaphysique est la branche la plus ancienne et la plus audacieuse de la philosophie : elle interroge la nature profonde de tout ce qui existe. Existe-t-il quelque chose au-delà du monde sensible ? Sommes-nous dotés d'une âme distincte du corps ? Le temps et l'espace ont-ils une existence indépendante de notre perception ? Ce sont des questions que la science ne peut pas trancher seule, car elles précèdent toute expérience.
+<br><br>
+<strong>Définition</strong> : Étude de l'être en tant qu'être — des réalités ultimes comme Dieu, l'âme, le temps, la liberté.
+<br>
+<strong>Philosophes clés</strong> : Aristote (fondateur de l'ontologie), Platon (théorie des Idées), Descartes (dualisme corps/esprit), Kant (limites de la raison pure), Heidegger (question de l'Être), Leibniz (harmonie préétablie).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : Même si nous ne pouvons résoudre ces questions, les poser nous oblige à clarifier nos présupposés sur la réalité — ce qui transforme notre rapport au monde et à nous-mêmes.`,
+    audioTitle: 'Métaphysique et philosophie de la connaissance – France Culture',
+    audioSrc: 'https://cdn.radiofrance.fr/s3/cruiser-production/static/culture/sons/2013/10/s43/RF_0CBC7C1B-9246-402D-863E-47DF3E2CA58D_GENE.MP3',
+  },
+  {
+    name: "L'épistémologie",
+    tag: 'Connaissance · Vérité · Rationalité',
+    ytId: 'GvRTbv-8QGA',
+    text: `L'épistémologie s'interroge sur ce que signifie <em>vraiment</em> savoir quelque chose. Comment distinguer une opinion d'une connaissance ? Nos sens peuvent-ils nous tromper ? Peut-on tout démontrer ? La raison suffit-elle à atteindre la vérité ? Qu'est-ce qui fait qu'une théorie scientifique est valable ? Ces questions sont au fondement de toute démarche intellectuelle rigoureuse.
+<br><br>
+<strong>Définition</strong> : Théorie de la connaissance — étude des sources, de la nature, des limites et de nos savoirs.
+<br>
+<strong>Philosophes clés</strong> : Platon (connaissance vraie vs opinion), Descartes (doute méthodique et cogito), Locke et Hume (empirisme — toute connaissance vient de l'expérience), Kant (synthèse critique), Karl Popper (falsifiabilité comme critère scientifique).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : En questionnant nos certitudes, l'épistémologie nous rend intellectuellement humbles et plus rigoureux — deux qualités indispensables dans un monde saturé d'informations.`,
+    audioTitle: "Qu'est-ce que l'épistémologie ? – France Culture",
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/21713-01.12.2021-ITEMA_22856798-2021C45539E0067-21.mp3',
+  },
+  {
+    name: "L'éthique",
+    tag: 'Bien · Mal · Morale',
+    ytId: 'jLZPZ3qt-7k',
+    text: `L'éthique est la branche qui nous concerne le plus directement dans notre vie quotidienne : elle explore ce que signifie bien agir. Faut-il toujours dire la vérité, même si cela blesse ? Peut-on justifier un mensonge par la bonté de ses intentions ? Le bonheur individuel compte-t-il plus que le bien commun ? Ces questions n'ont pas de réponse simple — et c'est précisément pourquoi les philosophes y ont consacré des siècles de réflexion.
+<br><br>
+<strong>Définition</strong> : Réflexion sur le bien, le mal, le devoir moral, le bonheur et la conduite juste dans nos relations aux autres et à nous-mêmes.
+<br>
+<strong>Philosophes clés</strong> : Aristote (éthique des vertus — la vie bonne comme épanouissement), Kant (impératif catégorique — agir selon des principes universalisables), John Stuart Mill (utilitarisme — maximiser le bonheur du plus grand nombre), Simone de Beauvoir (éthique de l'ambiguïté et de la liberté).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : L'éthique ne dicte pas quoi faire — elle nous donne les outils pour décider par nous-mêmes, avec plus de clarté et de cohérence.`,
+    audioTitle: "Comment Aristote a-t-il inventé l'Éthique ? – France Culture",
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/10467-06.04.2022-ITEMA_22986757-2022C45539E0068-21.mp3',
+  },
+  {
+    name: 'La politique',
+    tag: 'Pouvoir · Justice · Démocratie',
+    ytId: 'G4WUWw0etbs',
+    text: `La philosophie politique questionne les fondements du vivre-ensemble. D'où vient le pouvoir ? Qui a le droit de gouverner ? La démocratie est-elle le meilleur régime possible ? Quand est-il légitime de désobéir à la loi ? Ces questions, posées dès l'Antiquité, restent brûlantes d'actualité. Elles traversent tous les grands débats de nos sociétés : démocratie, justice sociale, liberté individuelle et autorité collective.
+<br><br>
+<strong>Définition</strong> : Analyse du pouvoir, de la légitimité, de la justice, de l'État et des formes d'organisation sociale.
+<br>
+<strong>Philosophes clés</strong> : Platon (<em>La République</em> — la cité juste gouvernée par les philosophes), Aristote (<em>La Politique</em> — l'homme est un animal politique), Hobbes (<em>Léviathan</em> — l'État fort contre la guerre de tous contre tous), Locke et Rousseau (contrat social et droits naturels), Marx (critique du capitalisme), Hannah Arendt (pouvoir, totalitarisme et liberté politique).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : La philosophie politique nous rappelle que les institutions ne sont pas naturelles — elles résultent de choix humains, et peuvent donc être remises en question et transformées.`,
+    audioTitle: 'Les philosophes et le pouvoir – France Culture',
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/10467-06.02.2023-ITEMA_23279677-2023C48904S0037-21.mp3',
+  },
+  {
+    name: "L'esthétique",
+    tag: 'Beauté · Art · Perception',
+    ytId: 'aQkAENuP8EU',
+    text: `L'esthétique est la philosophie de l'expérience sensible et artistique. Qu'est-ce qui fait qu'une œuvre est belle ou émouvante ? La beauté existe-t-elle objectivement dans le monde, ou est-elle entièrement dans l'œil du spectateur ? L'art a-t-il une fonction morale ou sociale, ou doit-il être libre de toute utilité ? Ces questions touchent à l'essence même de ce qui nous rend humains — notre capacité à créer et à contempler.
+<br><br>
+<strong>Définition</strong> : Philosophie du beau, de l'art, du goût, de la perception sensible et du rôle de l'œuvre dans notre rapport au monde.
+<br>
+<strong>Philosophes clés</strong> : Platon (l'art comme imitation trompeuse), Aristote (la catharsis), Kant (<em>Critique de la faculté de juger</em> — le sublime et le beau), Hegel (la fin de l'art et l'esprit absolu), Nietzsche (Apollon vs Dionysos — deux forces de la création), Walter Benjamin (l'œuvre d'art à l'ère de la reproductibilité technique).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : L'esthétique révèle que notre rapport à la beauté n'est jamais naïf — il est traversé par la culture, l'histoire et notre vision du monde.`,
+    audioTitle: "Qu'est-ce que l'Art en philosophie ? – France Culture",
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/22127-20.05.2021-ITEMA_22679834-2013C12410S0301.mp3',
+  },
+  {
+    name: 'La logique',
+    tag: 'Analyse · Validité · Règle',
+    ytId: 'sR4W4kpBvrw',
+    text: `La logique est la discipline qui étudie les règles du raisonnement valide. Un argument peut être formellement correct tout en étant fondé sur des prémisses fausses — et inversement, des intuitions vraies peuvent reposer sur des raisonnements défectueux. La logique nous donne les outils pour distinguer l'un de l'autre, et pour construire des argumentations solides.
+<br><br>
+<strong>Définition</strong> : Science du raisonnement valide — étude des règles formelles de la pensée correcte, indépendamment du contenu des propositions.
+<br>
+<strong>Philosophes clés</strong> : Aristote (invention du syllogisme et du principe de non-contradiction), Leibniz (rêve d'une langue logique universelle), Frege et Russell (logique symbolique moderne), Wittgenstein (<em>Tractatus</em> — les limites du langage sont les limites du monde), Kurt Gödel (théorème d'incomplétude — certaines vérités échappent à tout système formel).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : La logique est l'outil de base de toute pensée rigoureuse. Elle ne dit pas ce qui est vrai — elle dit comment raisonner correctement pour le découvrir.`,
+    audioTitle: 'Les territoires de la logique – France Culture',
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/16256-17.09.2012-ITEMA_20401016-2012C6256S0261-NET_CDC48275-DC3E-45C1-B7F3-86D283756A5E_DF-21.mp3',
+  },
+  {
+    name: 'Le langage',
+    tag: 'Communication · Argumentation',
+    ytId: 'CocKcq8J_H4',
+    text: `La philosophie du langage interroge le lien entre les mots, la pensée et le monde. Quand je dis "justice", "bonheur", est-ce que je désigne quelque chose de réel ? Le langage nous permet-il de tout dire, ou y a-t-il des expériences fondamentalement indicibles ? Le langage crée-t-il la réalité, ou se contente-t-il de la décrire ?
+<br><br>
+<strong>Définition</strong> : Étude des relations entre les mots, leurs sens, leurs références et leur usage dans la communication.
+<br>
+<strong>Philosophes clés</strong> : Frege (distinction sens/référence), Saussure (le signe linguistique est arbitraire), Wittgenstein (<em>les jeux de langage</em> — le sens naît de l'usage, pas de l'essence), Derrida (déconstruction — les mots ne renvoient qu'à d'autres mots), J.L. Austin (les actes de langage — dire, c'est aussi faire).
+<br>
+<strong>Ce qu'elle nous apprend</strong> : Comprendre le langage, c'est comprendre comment nous construisons notre réalité — pourquoi tant de malentendus, de manipulations et de conflits naissent d'un mauvais usage des mots.`,
+    audioTitle: 'Wittgenstein : Décrire les usages du langage – France Culture',
+    audioSrc: 'https://media.radiofrance-podcast.net/podcast09/10467-15.03.2016-ITEMA_20936507-2016C12410S0075-21.mp3',
+  },
+];
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C'est quoi la philosophie ? Les 7 branches — La Philo</title>
+  <meta name="description" content="Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage : les 7 grandes branches de la philosophie expliquées, avec vidéos et podcasts." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <a href="/" class="fha-btn" style="display:inline-block;margin-bottom:1rem;">⌂ Accueil</a>
+  <h1 class="site-title">C'est quoi la philosophie ?</h1>
+  <p class="site-subtitle">Définition · Les 7 grandes branches</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page">
+  <div class="intro-text-col">
+    <p class="intro-drop-cap">La philosophie est l'art de penser avec rigueur ce que tout le monde ressent confusément. Elle pose des questions fondamentales sur l'existence, la connaissance, la réalité, la morale, la politique et le langage — non pour y répondre définitivement, mais pour mieux comprendre ce que ces questions impliquent. Philosopher, c'est refuser les réponses toutes faites et s'engager dans un dialogue exigeant.</p>
+    <p class="intro-body">Contrairement aux sciences qui cherchent des lois vérifiables, à la religion qui s'appuie sur la révélation, elle avance par arguments, par dialogues et par remises en question successives. Elle n'a pas d'objet fixe : elle peut interroger aussi bien la nature du temps que la légitimité du pouvoir, la possibilité du bonheur ou les fondements des mathématiques.</p>
+    <p class="intro-body">Elle se divise en plusieurs branches qui chacune constitue un champ d'investigation autonome, mais toutes partagent la même ambition : penser plus clairement le monde et notre place en lui.</p>
+  </div>
+
+  <div class="drawer-intro-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <div class="acc-list">
+    {branches.map((b) => (
+      <div class="acc-item">
+        <button class="acc-toggle" aria-expanded="false" type="button">
+          <span class="acc-name">{b.name}</span>
+          <span class="acc-date">{b.tag}</span>
+          <span class="acc-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="acc-content">
+          <div class="acc-video">
+            <div class="youtube-container" data-id={b.ytId}>
+              <img src={`https://img.youtube.com/vi/${b.ytId}/hqdefault.jpg`} alt={`Vidéo : ${b.name}`} loading="lazy" width="480" height="360" />
+              <button class="play-button" aria-label={`Lancer la vidéo : ${b.name}`}></button>
+            </div>
+          </div>
+          <div class="acc-text" set:html={b.text} />
+          <div class="acc-audio">
+            <span class="acc-audio-lbl">France Culture</span>
+            <audio controls title={b.audioTitle}>
+              <source src={b.audioSrc} type="audio/mpeg" />
+            </audio>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</main>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/accordion.js" defer></script>
+
+</body>
+</html>
