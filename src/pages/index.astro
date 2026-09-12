@@ -1,17 +1,69 @@
 ---
+import { getCollection } from 'astro:content';
 
+const philosophes = await getCollection('philosophes');
+const courants = await getCollection('courants');
+
+function groupBySource(entries: typeof philosophes) {
+  const map = new Map<string, { label: string; count: number }>();
+  for (const e of entries) {
+    const key = e.data.frise_source;
+    if (!map.has(key)) map.set(key, { label: e.data.frise_label, count: 0 });
+    map.get(key)!.count++;
+  }
+  return Array.from(map.entries()).map(([slug, v]) => ({ slug, ...v }));
+}
+
+const friseListePhilosophes = groupBySource(philosophes);
+const friseListeCourants = groupBySource(courants);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>La Philo — Frises chronologiques de philosophie</title>
+  <meta name="description" content={`${philosophes.length} philosophes et ${courants.length} courants de pensée, en frises chronologiques.`} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles-f.css" />
+  <link rel="stylesheet" href="/css/list-page.css" />
+</head>
+<body class="list-page-body">
+
+<header class="frise-header">
+  <h1>La Philo</h1>
+  <p>{philosophes.length} philosophes · {courants.length} courants de pensée</p>
+  <div class="header-rule"></div>
+</header>
+
+<main class="list-page">
+  <h2 class="home-section-title">Philosophes</h2>
+  <ul class="list-page-items">
+    {friseListePhilosophes.map((f) => (
+      <li>
+        <a href={`/philosophes/frise/${f.slug}/`}>
+          <span class="lp-name">{f.label}</span>
+          <span class="lp-date">{f.count} fiches</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <h2 class="home-section-title">Courants de pensée</h2>
+  <ul class="list-page-items">
+    {friseListeCourants.map((f) => (
+      <li>
+        <a href={`/courants/frise/${f.slug}/`}>
+          <span class="lp-name">{f.label}</span>
+          <span class="lp-date">{f.count} fiches</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</main>
+
+</body>
 </html>

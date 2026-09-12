@@ -1,0 +1,41 @@
+---
+interface NavItem {
+  id: string;
+  name: string;
+  display_date: string;
+}
+
+interface Props {
+  basePath: string;
+  prev?: NavItem;
+  next?: NavItem;
+  current: number;
+  total: number;
+  listHref: string;
+  listLabel: string;
+}
+
+const { basePath, prev, next, current, total, listHref, listLabel } = Astro.props;
+---
+
+<div class="mobile-header" style="display:flex">
+  {prev ? (
+    <a class="mh-btn prev" href={`${basePath}/${prev.id}/`} aria-label="Précédent">&#8249;</a>
+  ) : (
+    <button class="mh-btn prev" disabled aria-label="Précédent">&#8249;</button>
+  )}
+  <a class="mh-center" href={listHref} title={listLabel}>
+    <div class="mh-name">{listLabel}</div>
+    <div class="mh-dates">{current} / {total}</div>
+  </a>
+  {next ? (
+    <a class="mh-btn next" href={`${basePath}/${next.id}/`} aria-label="Suivant">&#8250;</a>
+  ) : (
+    <button class="mh-btn next" disabled aria-label="Suivant">&#8250;</button>
+  )}
+</div>
+
+<style>
+  .mh-btn { text-decoration: none; }
+  .mh-center { text-decoration: none; cursor: pointer; }
+</style>

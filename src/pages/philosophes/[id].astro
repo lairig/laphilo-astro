@@ -1,16 +1,37 @@
 ---
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
+import FicheNav from '../../components/FicheNav.astro';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
-  return philosophes.map((entry) => ({
-    params: { id: entry.id },
-    props: { entry },
-  }));
+  const bySource = new Map<string, typeof philosophes>();
+  for (const entry of philosophes) {
+    const key = entry.data.frise_source;
+    if (!bySource.has(key)) bySource.set(key, []);
+    bySource.get(key)!.push(entry);
+  }
+  for (const items of bySource.values()) {
+    items.sort((a, b) => a.data.year - b.data.year);
+  }
+
+  return philosophes.map((entry) => {
+    const siblings = bySource.get(entry.data.frise_source)!;
+    const index = siblings.findIndex((e) => e.id === entry.id);
+    return {
+      params: { id: entry.id },
+      props: {
+        entry,
+        prev: index > 0 ? siblings[index - 1] : undefined,
+        next: index < siblings.length - 1 ? siblings[index + 1] : undefined,
+        position: index + 1,
+        total: siblings.length,
+      },
+    };
+  });
 }
 
-const { entry } = Astro.props;
+const { entry, prev, next, position, total } = Astro.props;
 const p = entry.data;
 ---
 
@@ -35,6 +56,15 @@ const p = entry.data;
 </header>
 
 <div class="frise-body">
+  <FicheNav
+    basePath="/philosophes"
+    prev={prev ? { id: prev.id, name: prev.data.name, display_date: prev.data.display_date } : undefined}
+    next={next ? { id: next.id, name: next.data.name, display_date: next.data.display_date } : undefined}
+    current={position}
+    total={total}
+    listHref={`/philosophes/frise/${p.frise_source}/`}
+    listLabel={p.frise_label}
+  />
   <div class="slide-area">
     <div class="slides-container">
       <SlideCard

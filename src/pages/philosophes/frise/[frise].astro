@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const philosophes = await getCollection('philosophes');
+  const bySource = new Map<string, { label: string; items: typeof philosophes }>();
+  for (const entry of philosophes) {
+    const key = entry.data.frise_source;
+    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, items: [] });
+    bySource.get(key)!.items.push(entry);
+  }
+  return Array.from(bySource.entries()).map(([frise, { label, items }]) => ({
+    params: { frise },
+    props: {
+      label,
+      items: items
+        .slice()
+        .sort((a, b) => a.data.year - b.data.year)
+        .map((e) => ({ id: e.id, name: e.data.name, display_date: e.data.display_date })),
+    },
+  }));
+}
+
+const { label, items } = Astro.props;
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{label} — La Philo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles-f.css" />
+  <link rel="stylesheet" href="/css/list-page.css" />
+</head>
+<body class="list-page-body">
+
+<header class="frise-header">
+  <a href="/" class="fha-btn fha-home">⌂ Accueil</a>
+  <h1>{label}</h1>
+  <p>{items.length} fiches</p>
+  <div class="header-rule"></div>
+</header>
+
+<main class="list-page">
+  <ul class="list-page-items">
+    {items.map((p) => (
+      <li>
+        <a href={`/philosophes/${p.id}/`}>
+          <span class="lp-name">{p.name}</span>
+          <span class="lp-date">{p.display_date}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</main>
+
+</body>
+</html>
