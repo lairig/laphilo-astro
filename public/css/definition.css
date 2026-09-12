@@ -37,9 +37,22 @@
   box-shadow: 4px 4px 0 rgba(120, 80, 20, 0.18), 0 12px 32px rgba(10, 5, 2, 0.35);
 }
 
+.definition-page .soc-page-wrap {
+  background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 30%, #e7d494 65%, #dfc87c 100%);
+  border: 1px solid var(--parch-border);
+  border-radius: var(--radius);
+  padding: 1.6rem 2rem;
+  box-shadow: 4px 4px 0 rgba(120, 80, 20, 0.18), 0 12px 32px rgba(10, 5, 2, 0.35);
+}
+
+.definition-page .soc-page-wrap > *:first-child {
+  margin-top: 0;
+}
+
 @media (max-width: 640px) {
   .definition-page .intro-text-col,
-  .definition-page .acc-list {
+  .definition-page .acc-list,
+  .definition-page .soc-page-wrap {
     padding-left: 1.2rem;
     padding-right: 1.2rem;
   }
