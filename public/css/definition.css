@@ -29,12 +29,23 @@
 }
 
 .definition-page .acc-list {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-top: 1.5rem;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.definition-page .acc-list .acc-item {
   background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 30%, #e7d494 65%, #dfc87c 100%);
   border: 1px solid var(--parch-border);
   border-radius: var(--radius);
-  padding: 0.4rem 2rem 1rem;
-  margin-top: 1.5rem;
-  box-shadow: 4px 4px 0 rgba(120, 80, 20, 0.18), 0 12px 32px rgba(10, 5, 2, 0.35);
+  box-shadow: 4px 4px 0 rgba(120, 80, 20, 0.18), 0 8px 24px rgba(10, 5, 2, 0.3);
+  padding: 0 1.4rem;
 }
 
 .definition-page .soc-page-wrap {
@@ -51,10 +62,12 @@
 
 @media (max-width: 640px) {
   .definition-page .intro-text-col,
-  .definition-page .acc-list,
   .definition-page .soc-page-wrap {
     padding-left: 1.2rem;
     padding-right: 1.2rem;
+  }
+  .definition-page .acc-list .acc-item {
+    padding: 0 1rem;
   }
 }
 
