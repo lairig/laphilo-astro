@@ -1,25 +1,16 @@
 import { defineCollection, z } from 'astro:content';
 import { file } from 'astro/loaders';
 
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 const philosophes = defineCollection({
-  loader: file('src/data/frise-philosophes-france.json', {
+  loader: file('src/data/philosophes.json', {
     parser: (text) => {
-      const entries = JSON.parse(text) as { name: string }[];
-      return entries.map((entry) => ({ id: slugify(entry.name), ...entry }));
+      const entries = JSON.parse(text) as { _id: string }[];
+      return entries.map(({ _id, ...entry }) => ({ id: _id, ...entry }));
     },
   }),
   schema: z.object({
     year: z.number(),
-    end_year: z.number().optional(),
+    end_year: z.union([z.number(), z.literal('')]).optional().transform((v) => (v === '' ? undefined : v)),
     display_date: z.string(),
     name: z.string(),
     text: z.string(),
@@ -31,6 +22,8 @@ const philosophes = defineCollection({
     branches: z.array(z.string()).optional(),
     courants: z.array(z.string()).optional(),
     description: z.string().optional(),
+    frise_source: z.string(),
+    frise_label: z.string(),
   }),
 });
 
