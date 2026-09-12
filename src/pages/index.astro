@@ -22,49 +22,255 @@ const friseListeCourants = groupBySource(courants);
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>La Philo — Frises chronologiques de philosophie</title>
-  <meta name="description" content={`${philosophes.length} philosophes et ${courants.length} courants de pensée, en frises chronologiques.`} />
+  <title>{philosophes.length} philosophes, {courants.length} courants de pensée : LaPhilo.fr</title>
+  <meta name="description" content={`${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`} />
+  <meta name="theme-color" content="#2b1d0e" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles-f.css" />
-  <link rel="stylesheet" href="/css/list-page.css" />
-</head>
-<body class="list-page-body">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://www.youtube-nocookie.com" />
+  <link rel="preconnect" href="https://i.ytimg.com" />
 
-<header class="frise-header">
-  <h1>La Philo</h1>
-  <p>{philosophes.length} philosophes · {courants.length} courants de pensée</p>
-  <a href="/recherche/" class="fha-btn" style="margin-top:0.8rem;display:inline-block;">🔍 Recherche</a>
-  <div class="header-rule"></div>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/home-extra.css" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <h1 class="site-title">l'Homme &amp; la Philosophie</h1>
+  <p class="site-subtitle">LaPhilo.fr — Refonte en cours</p>
+  <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="list-page">
-  <h2 class="home-section-title">Philosophes</h2>
-  <ul class="list-page-items">
-    {friseListePhilosophes.map((f) => (
-      <li>
-        <a href={`/philosophes/frise/${f.slug}/`}>
-          <span class="lp-name">{f.label}</span>
-          <span class="lp-date">{f.count} fiches</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+<main>
 
-  <h2 class="home-section-title">Courants de pensée</h2>
-  <ul class="list-page-items">
-    {friseListeCourants.map((f) => (
-      <li>
-        <a href={`/courants/frise/${f.slug}/`}>
-          <span class="lp-name">{f.label}</span>
-          <span class="lp-date">{f.count} fiches</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+<div class="timeline-section timeline-section--top">
+  <p class="timeline-section-title">✦ Explorer la philosophie ✦</p>
+  <p class="timeline-section-subtitle" id="js-stats-fr"></p>
+
+  <nav class="entry-guide" aria-label="Par où commencer ?">
+    <div class="entry-guide-items">
+      <a class="entry-guide-btn" href="/courants/frise/occidental/">
+        <span class="entry-guide-icon">☿</span>
+        <span class="entry-guide-text">
+          <strong>Nouveau ici</strong>
+          <span>Les courants de pensée</span>
+        </span>
+      </a>
+      <a class="entry-guide-btn" href="/recherche/">
+        <span class="entry-guide-icon">⌕</span>
+        <span class="entry-guide-text">
+          <strong>Recherche par nom</strong>
+          <span>Philosophes ou courants de pensée</span>
+        </span>
+      </a>
+      <a class="entry-guide-btn" href="/philosophes/frise/greco-romains/">
+        <span class="entry-guide-icon">◈</span>
+        <span class="entry-guide-text">
+          <strong>Je veux explorer</strong>
+          <span>Parcourir les frises</span>
+        </span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<div class="alaune-wrap" id="alaune-wrap"></div>
+
+<div class="alaune-sep" aria-hidden="true"><span class="alaune-sep-mark">✦</span></div>
+
+<div class="intro-cartouche">
+  <div class="intro-cartouche-inner">
+    <div class="intro-video-col">
+      <div class="youtube-container" data-id="8R_91lwL62A">
+        <img src="https://img.youtube.com/vi/8R_91lwL62A/hqdefault.jpg"
+             alt="Vidéo : Introduction à la philosophie"
+             fetchpriority="high" width="480" height="360" />
+        <button class="play-button" aria-label="Lancer la vidéo : Introduction à la philosophie"></button>
+      </div>
+      <p class="intro-video-caption">Philosopher, c'est s'étonner</p>
+    </div>
+    <div class="intro-text-col">
+      <p class="intro-drop-cap">Née de la Grèce antique, la philosophie est l'art de questionner nos évidences, l'existence, la liberté, la justice. Éveiller, transformer le doute en curiosité.</p>
+      <p class="intro-body">Sur 25 siècles de traditions occidentale, arabe, indienne, chinoise, africaine, chacune a apporté sa lumière sur des énigmes fondamentales : Qui suis-je ? Qu'est-ce que la vérité ?</p>
+      <p class="intro-body">LaPhilo.fr vous propose un voyage à travers le temps et les cultures, frises interactives, textes, vidéos et podcasts pour comprendre comment la pensée humaine s'est construite.</p>
+    </div>
+  </div>
+</div>
+
+<div class="timeline-section">
+  <div class="timeline-spine" role="list" aria-label="Accès aux grandes sections philosophiques">
+
+    <article class="tl-node tl-node--featured" role="listitem">
+      <div class="tl-jewel tl-jewel--featured" aria-hidden="true"></div>
+      <div class="tl-card tl-card--featured">
+        <div class="tl-era">☿ Définition · Branches</div>
+        <h2 class="tl-title">C'est quoi la philosophie ?</h2>
+        <p class="tl-desc">Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage… Sept grandes branches pour explorer les questions fondamentales de l'existence. Un portail d'entrée idéal pour tout débutant ou curieux.</p>
+        <a class="tl-cta-alt" href="/courants/frise/occidental/">Découvrir <span class="tl-arrow">→</span></a>
+      </div>
+    </article>
+
+    <article class="tl-node tl-node--left" role="listitem">
+      <div class="tl-jewel" aria-hidden="true"></div>
+      <div class="tl-card">
+        <div class="tl-era">🏛 VI<sup>e</sup> av. J.-C. → aujourd'hui</div>
+        <h2 class="tl-title">Les Philosophes</h2>
+        <p class="tl-desc">Des présocratiques grecs aux penseurs de tout horizons, orientaux, antiques, modernes, contemporains, découvrez les grandes figures qui ont questionné l'existence, la vérité et la liberté à travers les âges.</p>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="#philosophes-list">Explorer <span class="tl-arrow">→</span></a>
+      </div>
+    </article>
+
+    <article class="tl-node" role="listitem">
+      <div class="tl-jewel" aria-hidden="true"></div>
+      <div class="tl-card">
+        <div class="tl-era">🌍 Occident · Orient · Afrique · Amériques</div>
+        <h2 class="tl-title">Les Courants de pensée</h2>
+        <p class="tl-desc">Du cosmos présocratique au Tao de Laozi, du stoïcisme au bouddhisme, de l'Ubuntu africain aux Lumières européennes : les grandes familles d'idées qui ont façonné la réflexion humaine à travers toutes les civilisations.</p>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="#courants-list">Explorer <span class="tl-arrow">→</span></a>
+      </div>
+    </article>
+
+    <article class="tl-node" role="listitem">
+      <div class="tl-jewel" aria-hidden="true"></div>
+      <div class="tl-card">
+        <div class="tl-era">📜 Égypte ancienne → XXI<sup>e</sup> siècle</div>
+        <h2 class="tl-title">Les Frises Temporelles</h2>
+        <p class="tl-desc">Naviguez dans les frises chronologiques interactives : philosophes par pays et par époques, grands courants de pensée occidentaux et orientaux.</p>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="#philosophes-list">Accéder <span class="tl-arrow">→</span></a>
+      </div>
+    </article>
+
+    <article class="tl-node tl-node--right" role="listitem">
+      <div class="tl-jewel" aria-hidden="true"></div>
+      <div class="tl-card">
+        <div class="tl-era">🔍 Recherche &amp; filtres</div>
+        <h2 class="tl-title">Listes &amp; Recherche</h2>
+        <p class="tl-desc">Recherche par nom parmi les philosophes et courants de pensée. Ou accès direct à chaque frise chronologique. De l'Égypte ancienne au monde contemporain.</p>
+        <a class="tl-cta-alt" href="/recherche/" aria-label="Ouvrir la recherche complète">Rechercher <span class="tl-arrow">↗</span></a>
+      </div>
+    </article>
+
+  </div>
+</div>
+
+<div class="intro-cartouche">
+  <div class="intro-cartouche-inner">
+    <div class="intro-video-col">
+      <div class="youtube-container" data-id="-VdXi2LMPyE">
+        <img src="https://img.youtube.com/vi/-VdXi2LMPyE/hqdefault.jpg"
+             alt="Vidéo : 2500 ans de philosophie"
+             loading="lazy" width="480" height="360" />
+        <button class="play-button" aria-label="Lancer la vidéo : 2500 ans de philosophie"></button>
+      </div>
+      <p class="intro-video-caption">2500 ans de philosophie</p>
+    </div>
+    <div class="intro-text-col">
+      <p class="intro-drop-cap">L'histoire de la philosophie est une conversation vivante où les idées ont évolué, se sont heurtées et nourries les unes les autres, c'est comprendre pourquoi nous pensons comme nous pensons aujourd'hui.</p>
+      <p class="intro-body">Des présocratiques et le cosmos, aux contemporains et l'A.I, le transhumanisme ou autres formes de pouvoir numérique — chaque génération a repris le flambeau du questionnement. Ces questions habitent chacun d'entre nous, prenons le temps de nous demander pourquoi nous croyons ce que nous croyons, ou ce qui justifie vraiment nos choix moraux et politiques.</p>
+    </div>
+  </div>
+</div>
+
+<section class="home-frise-lists">
+  <div class="home-frise-col" id="philosophes-list">
+    <h2 class="home-section-title">Philosophes</h2>
+    <ul class="list-page-items">
+      {friseListePhilosophes.map((f) => (
+        <li>
+          <a href={`/philosophes/frise/${f.slug}/`}>
+            <span class="lp-name">{f.label}</span>
+            <span class="lp-date">{f.count} fiches</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="home-frise-col" id="courants-list">
+    <h2 class="home-section-title">Courants de pensée</h2>
+    <ul class="list-page-items">
+      {friseListeCourants.map((f) => (
+        <li>
+          <a href={`/courants/frise/${f.slug}/`}>
+            <span class="lp-name">{f.label}</span>
+            <span class="lp-date">{f.count} fiches</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
 </main>
+
+<section class="faq-section" aria-label="Questions fréquentes sur la philosophie">
+  <div class="faq-inner">
+    <h2 class="faq-title">✦ Questions fréquentes</h2>
+    <p class="faq-subtitle">Des réponses accessibles aux questions essentielles sur la philosophie</p>
+
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary class="faq-question">C'est quoi la philosophie, exactement&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>La philosophie est la discipline qui interroge les fondements de notre existence, de notre connaissance et de nos valeurs. Elle ne produit pas de résultats mesurables comme la science, ni de dogmes comme la religion — elle avance par questions, arguments et dialogues. Philosopher, c'est refuser les réponses toutes faites et penser par soi-même, avec rigueur et honnêteté intellectuelle.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Quelle est la différence entre la philosophie et la religion&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>La religion s'appuie sur la foi, la révélation et des textes sacrés pour répondre aux grandes questions. La philosophie, elle, n'accepte que les arguments rationnels — elle remet tout en question, y compris Dieu, l'âme ou l'au-delà, sans s'appuyer sur une autorité extérieure. Cela ne signifie pas qu'elles s'opposent : beaucoup de grands philosophes étaient croyants, et certaines traditions religieuses ont développé une pensée philosophique très rigoureuse.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Quels sont les 3 philosophes les plus importants de l'histoire&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>Il est impossible de hiérarchiser objectivement, mais trois noms reviennent invariablement : <strong>Socrate</strong> (fondateur de la méthode dialectique), <strong>Platon</strong> (fondateur de la métaphysique idéaliste) et <strong>Aristote</strong> (bases de la logique, de l'éthique et de la politique). Kant est souvent considéré comme l'autre pivot incontournable de la philosophie moderne.</p>
+          <p class="faq-link-row"><a href="/philosophes/frise/greco-romains/" class="faq-link">Frise des philosophes gréco-romains</a></p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">À quoi sert la philosophie dans la vie concrète&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>La philosophie affûte la pensée critique : elle apprend à distinguer un argument solide d'un sophisme, à repérer les manipulations rhétoriques, à clarifier ses propres valeurs et à prendre des décisions plus cohérentes. Elle ne change pas le monde directement, mais elle transforme la façon dont on le perçoit et dont on y agit.</p>
+          <p class="faq-link-row"><a href="/courants/frise/occidental/" class="faq-link">Frise des courants de pensée occidentaux</a></p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Quelle est la différence entre la philosophie orientale et occidentale&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>La philosophie occidentale, née en Grèce, tend à distinguer le sujet pensant et le monde extérieur, à valoriser l'argumentation logique formelle et à chercher des vérités universelles. La philosophie orientale insiste davantage sur l'harmonie avec la nature, la dissolution de l'ego, la pratique spirituelle et la sagesse vécue. Ces grandes tendances ne sont pas des règles absolues : les deux traditions se sont influencées de plus en plus depuis le XIXe siècle.</p>
+          <p class="faq-link-row"><a href="/philosophes/frise/orientaux/" class="faq-link">Philosophes orientaux &amp; africains</a> · <a href="/courants/frise/oriental/" class="faq-link">Courants de pensée orientaux</a></p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Comment commencer à étudier la philosophie&nbsp;?</summary>
+        <div class="faq-answer">
+          <p>La meilleure entrée est de lire directement les textes fondateurs : les dialogues de Platon (commencez par l'<em>Apologie de Socrate</em>), les <em>Méditations métaphysiques</em> de Descartes ou les <em>Lettres à Lucilius</em> de Sénèque. Les podcasts de France Culture et les frises chronologiques interactives de LaPhilo.fr sont également d'excellents outils pour s'orienter.</p>
+          <p class="faq-link-row"><a href="/philosophes/frise/greco-romains/" class="faq-link">Antiquité gréco-romaine</a> · <a href="/philosophes/frise/modernes/" class="faq-link">Philosophes modernes</a> · <a href="/philosophes/frise/contemporains-monde/" class="faq-link">Contemporains</a></p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p class="footer-tagline" style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.65rem;color:var(--gold,#c8962a);margin-bottom:1.4rem;letter-spacing:0.03em;">
+    Sans la musique, la vie serait une erreur
+  </p>
+  <p>© 2026 – laphilo.fr – Refonte en cours</p>
+</footer>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/home-alaune.js" defer></script>
 
 </body>
 </html>

@@ -1,0 +1,59 @@
+.home-frise-lists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+@media (max-width: 720px) {
+  .home-frise-lists {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-frise-col .home-section-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 1.1rem;
+  color: var(--gold-light, #d4a843);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.home-frise-col .list-page-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.home-frise-col .list-page-items a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(180, 130, 20, 0.18);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s;
+}
+.home-frise-col .list-page-items a:hover {
+  background: rgba(180, 130, 20, 0.14);
+  border-color: rgba(180, 130, 20, 0.4);
+}
+
+.home-frise-col .lp-name {
+  font-family: 'EB Garamond', serif;
+  color: var(--gold-light, #d4a843);
+}
+
+.home-frise-col .lp-date {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--parch-dark);
+  white-space: nowrap;
+}
