@@ -3,19 +3,6 @@ import { getCollection } from 'astro:content';
 
 const philosophes = await getCollection('philosophes');
 const courants = await getCollection('courants');
-
-function groupBySource(entries: typeof philosophes) {
-  const map = new Map<string, { label: string; count: number }>();
-  for (const e of entries) {
-    const key = e.data.frise_source;
-    if (!map.has(key)) map.set(key, { label: e.data.frise_label, count: 0 });
-    map.get(key)!.count++;
-  }
-  return Array.from(map.entries()).map(([slug, v]) => ({ slug, ...v }));
-}
-
-const friseListePhilosophes = groupBySource(philosophes);
-const friseListeCourants = groupBySource(courants);
 ---
 
 <html lang="fr">
@@ -140,7 +127,7 @@ const friseListeCourants = groupBySource(courants);
         <div class="tl-era">📜 Égypte ancienne → XXI<sup>e</sup> siècle</div>
         <h2 class="tl-title">Les Frises Temporelles</h2>
         <p class="tl-desc">Naviguez dans les frises chronologiques interactives : philosophes par pays et par époques, grands courants de pensée occidentaux et orientaux.</p>
-        <a class="tl-cta-alt tl-cta-alt--sec" href="#philosophes-list">Accéder <span class="tl-arrow">→</span></a>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="/frises/">Accéder <span class="tl-arrow">→</span></a>
       </div>
     </article>
 
@@ -174,36 +161,6 @@ const friseListeCourants = groupBySource(courants);
     </div>
   </div>
 </div>
-
-<section class="home-frise-lists">
-  <div class="home-frise-col" id="philosophes-list">
-    <h2 class="home-section-title">Philosophes</h2>
-    <ul class="list-page-items">
-      {friseListePhilosophes.map((f) => (
-        <li>
-          <a href={`/philosophes/frise/${f.slug}/`}>
-            <span class="lp-name">{f.label}</span>
-            <span class="lp-date">{f.count} fiches</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <div class="home-frise-col" id="courants-list">
-    <h2 class="home-section-title">Courants de pensée</h2>
-    <ul class="list-page-items">
-      {friseListeCourants.map((f) => (
-        <li>
-          <a href={`/courants/frise/${f.slug}/`}>
-            <span class="lp-name">{f.label}</span>
-            <span class="lp-date">{f.count} fiches</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-</section>
 
 </main>
 
