@@ -1,0 +1,51 @@
+---
+interface LinkItem {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  label: string;
+  items: LinkItem[];
+  threshold?: number;
+}
+
+const { label, items, threshold = 6 } = Astro.props;
+
+const visible = items.slice(0, threshold);
+const hidden = items.slice(threshold);
+---
+
+{items.length > 0 && (
+  <div class="cross-links">
+    <span class="cross-links-label">{label}</span>
+    <div class="cross-links-list">
+      {visible.map((it) => (
+        <a class="cross-link-badge" href={it.href}>{it.label}</a>
+      ))}
+      {hidden.length > 0 && (
+        <details class="cross-links-more">
+          <summary class="cross-link-badge cross-link-badge--more">+{hidden.length} autres</summary>
+          <div class="cross-links-list cross-links-list--expanded">
+            {hidden.map((it) => (
+              <a class="cross-link-badge" href={it.href}>{it.label}</a>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  </div>
+)}
+
+<style>
+  .cross-links-more { display: inline; }
+  .cross-links-more summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .cross-links-more summary::-webkit-details-marker { display: none; }
+  .cross-links-list--expanded {
+    margin-top: 0.4rem;
+    width: 100%;
+  }
+</style>

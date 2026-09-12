@@ -2,9 +2,13 @@
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
+import CrossLinks from '../../components/CrossLinks.astro';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
+  const courants = await getCollection('courants');
+  const courantIdByName = new Map(courants.map((c) => [c.data.name, c.id]));
+
   const bySource = new Map<string, typeof philosophes>();
   for (const entry of philosophes) {
     const key = entry.data.frise_source;
@@ -18,6 +22,12 @@ export async function getStaticPaths() {
   return philosophes.map((entry) => {
     const siblings = bySource.get(entry.data.frise_source)!;
     const index = siblings.findIndex((e) => e.id === entry.id);
+    const courantLinks = (entry.data.courants || [])
+      .map((name) => {
+        const id = courantIdByName.get(name);
+        return id ? { href: `/courants/${id}/`, label: name } : null;
+      })
+      .filter((x): x is { href: string; label: string } => x !== null);
     return {
       params: { id: entry.id },
       props: {
@@ -26,12 +36,13 @@ export async function getStaticPaths() {
         next: index < siblings.length - 1 ? siblings[index + 1] : undefined,
         position: index + 1,
         total: siblings.length,
+        courantLinks,
       },
     };
   });
 }
 
-const { entry, prev, next, position, total } = Astro.props;
+const { entry, prev, next, position, total, courantLinks } = Astro.props;
 const p = entry.data;
 ---
 
@@ -75,7 +86,9 @@ const p = entry.data;
         mediaCredit={p.media_credit}
         thumbnail={p.thumbnail}
         imageMedia={p.image_media}
-      />
+      >
+        <CrossLinks label="Courants de pensée" items={courantLinks} threshold={6} />
+      </SlideCard>
     </div>
   </div>
 </div>

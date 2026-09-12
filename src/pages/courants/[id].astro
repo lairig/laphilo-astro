@@ -2,10 +2,24 @@
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
+import CrossLinks from '../../components/CrossLinks.astro';
 import { markerColor, eraLabel } from '../../lib/era';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
+  const philosophes = await getCollection('philosophes');
+
+  const philosophesByCourant = new Map<string, { id: string; name: string; year: number }[]>();
+  for (const p of philosophes) {
+    for (const cname of p.data.courants || []) {
+      if (!philosophesByCourant.has(cname)) philosophesByCourant.set(cname, []);
+      philosophesByCourant.get(cname)!.push({ id: p.id, name: p.data.name, year: p.data.year });
+    }
+  }
+  for (const list of philosophesByCourant.values()) {
+    list.sort((a, b) => a.year - b.year);
+  }
+
   const bySource = new Map<string, typeof courants>();
   for (const entry of courants) {
     const key = entry.data.frise_source;
@@ -19,6 +33,10 @@ export async function getStaticPaths() {
   return courants.map((entry) => {
     const siblings = bySource.get(entry.data.frise_source)!;
     const index = siblings.findIndex((e) => e.id === entry.id);
+    const philosopheLinks = (philosophesByCourant.get(entry.data.name) || []).map((p) => ({
+      href: `/philosophes/${p.id}/`,
+      label: p.name,
+    }));
     return {
       params: { id: entry.id },
       props: {
@@ -28,12 +46,13 @@ export async function getStaticPaths() {
         next: index < siblings.length - 1 ? siblings[index + 1] : undefined,
         position: index + 1,
         total: siblings.length,
+        philosopheLinks,
       },
     };
   });
 }
 
-const { entry, indexInFrise, prev, next, position, total } = Astro.props;
+const { entry, indexInFrise, prev, next, position, total, philosopheLinks } = Astro.props;
 const c = entry.data;
 
 const eraBadge = { color: markerColor(indexInFrise), label: eraLabel(c.year) };
@@ -79,7 +98,9 @@ const eraBadge = { color: markerColor(indexInFrise), label: eraLabel(c.year) };
         mediaCredit={c.media_credit}
         imageMedia={c.image_media}
         eraBadge={eraBadge}
-      />
+      >
+        <CrossLinks label="Principaux représentants" items={philosopheLinks} threshold={6} />
+      </SlideCard>
     </div>
   </div>
 </div>
