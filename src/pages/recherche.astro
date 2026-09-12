@@ -1,0 +1,43 @@
+---
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recherche — La Philo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles-f.css" />
+  <link rel="stylesheet" href="/css/list-page.css" />
+  <link rel="stylesheet" href="/css/search.css" />
+</head>
+<body class="list-page-body">
+
+<header class="frise-header">
+  <a href="/" class="fha-btn fha-home">⌂ Accueil</a>
+  <h1>Recherche</h1>
+  <div class="header-rule"></div>
+</header>
+
+<main class="list-page search-page">
+  <div class="search-controls">
+    <input type="search" id="search-input" class="search-input" placeholder="Rechercher un nom…" autocomplete="off" />
+    <div class="search-type-filter" role="group" aria-label="Filtrer par type">
+      <button class="phi-filter-btn phi-filter-btn--active" data-type="all" type="button">Tous</button>
+      <button class="phi-filter-btn" data-type="philosophe" type="button">Philosophes</button>
+      <button class="phi-filter-btn" data-type="courant" type="button">Courants</button>
+    </div>
+  </div>
+
+  <p id="search-count" class="search-count"></p>
+
+  <ul class="list-page-items" id="search-results"></ul>
+</main>
+
+<script src="/js/search-lite.js" defer></script>
+
+</body>
+</html>
