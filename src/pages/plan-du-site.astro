@@ -1,0 +1,119 @@
+---
+const sections = [
+  {
+    label: 'Explorer',
+    items: [
+      { icon: '⌂', title: 'Accueil', desc: "Page d'entrée du site : frises, philosophes et courants de pensée.", href: '/' },
+      { icon: '📜', title: 'Toutes les frises', desc: 'Le catalogue complet des 13 frises chronologiques — philosophes et courants, occidentaux et non-occidentaux.', href: '/frises/' },
+      { icon: '🔍', title: 'Recherche', desc: 'Recherche par nom, filtres par époque et par type.', href: '/recherche/' },
+    ],
+  },
+  {
+    label: 'Comprendre la philosophie',
+    items: [
+      { icon: '❓', title: 'C’est quoi la philosophie ?', desc: 'Définition et les 7 grandes branches de la philosophie.', href: '/definition/' },
+      { icon: '📖', title: 'Histoire des philosophes', desc: 'Des présocratiques aux penseurs contemporains, par grandes périodes.', href: '/histoire-des-philosophes/' },
+      { icon: '🕮', title: 'Histoire des courants', desc: "Les grands courants de pensée à travers l'histoire.", href: '/histoire-des-courants/' },
+    ],
+  },
+  {
+    label: 'Ressources · Infos',
+    items: [
+      { icon: '♪', title: 'Lairig Music', desc: 'Musique ambient instrumentale composée pour accompagner la lecture et la réflexion philosophique.', href: '/lairig/' },
+      { icon: '📚', title: 'Ressources utilisées', desc: 'Chaînes YouTube, Persée, encyclopédies — sources et outils ayant contribué aux frises.', href: '/ressources/' },
+      { icon: '☞', title: 'Pourquoi ce site ?', desc: 'Le créateur, la genèse du projet et la musique Lairig qui accompagne les frises.', href: '/pourquoi/' },
+      { icon: '💬', title: 'Échanges & Contact', desc: 'Une question, une suggestion ? Écrivez directement via le formulaire, ou participez au lieu d’échanges.', href: '/echanges/' },
+    ],
+  },
+];
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plan du site — La Philo</title>
+  <meta name="description" content="Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques, aux pages de contenu et aux ressources du site." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <a href="/" class="fha-btn" style="display:inline-block;margin-bottom:1rem;">⌂ Accueil</a>
+  <h1 class="site-title">Plan du site</h1>
+  <p class="site-subtitle">Toutes les pages de La Philo</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page">
+  <div class="soc-page-wrap">
+    {sections.map((section, si) => (
+      <>
+        {si > 0 && (
+          <div class="definition-section-sep" aria-hidden="true">
+            <span class="drawer-intro-sep-line"></span>
+            <span class="drawer-intro-sep-ornament">{section.label}</span>
+            <span class="drawer-intro-sep-line"></span>
+          </div>
+        )}
+        {si === 0 && (
+          <h3 style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 .8rem;opacity:.8;">✦ {section.label}</h3>
+        )}
+        <div class="soc-res-list">
+          {section.items.map((it) => (
+            <a href={it.href} class="soc-res-row" style="text-decoration:none;">
+              <div class="soc-res-icon-w" aria-hidden="true">{it.icon}</div>
+              <div class="soc-res-body">
+                <div class="soc-res-name">{it.title}</div>
+                <div class="soc-res-desc">{it.desc}</div>
+              </div>
+              <span class="parch-link soc-res-link">Ouvrir →</span>
+            </a>
+          ))}
+        </div>
+      </>
+    ))}
+  </div>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-social-nav" aria-label="Lien Social">
+    <a class="footer-social-btn" href="/" aria-label="Accueil">
+      <span class="footer-social-icon">⌂</span>
+      <span class="footer-social-label">Accueil</span>
+    </a>
+    <a class="footer-social-btn" href="/lairig/" aria-label="Lairig Music">
+      <span class="footer-social-icon">♪</span>
+      <span class="footer-social-label">Lairig</span>
+    </a>
+    <a class="footer-social-btn" href="/ressources/" aria-label="Ressources">
+      <span class="footer-social-icon">📚</span>
+      <span class="footer-social-label">Ressources</span>
+    </a>
+    <a class="footer-social-btn" href="/echanges/" aria-label="Échanges">
+      <span class="footer-social-icon">💬</span>
+      <span class="footer-social-label">Échanges</span>
+    </a>
+    <a class="footer-social-btn" href="/pourquoi/" aria-label="Pourquoi ce site">
+      <span class="footer-social-icon">☞</span>
+      <span class="footer-social-label">Pourquoi</span>
+    </a>
+    <a class="footer-social-btn" href="/plan-du-site/" aria-label="Plan du site">
+      <span class="footer-social-icon">🗺</span>
+      <span class="footer-social-label">Plan du site</span>
+    </a>
+  </nav>
+  <p>© 2026 – laphilo.fr – Refonte en cours</p>
+</footer>
+
+<script src="/js/home-main.js" defer></script>
+
+</body>
+</html>
