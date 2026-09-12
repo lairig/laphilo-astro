@@ -11,6 +11,19 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const p = entry.data;
+
+const hasMedia = Boolean(p.yt_id || p.image_media);
+const ytThumb = p.yt_id ? `https://i.ytimg.com/vi/${p.yt_id}/hqdefault.jpg` : '';
+
+const audioBlocks: { src: string; title: string }[] = [];
+const textWithoutAudio = p.text.replace(/<audio[\s\S]*?<\/audio>/gi, (match: string) => {
+  const srcMatch = match.match(/<source[^>]*src="([^"]+)"/i);
+  const titleMatch = match.match(/title="([^"]*)"/i);
+  const src = srcMatch?.[1] || '';
+  const title = titleMatch?.[1] || 'Écouter le podcast';
+  if (src) audioBlocks.push({ src, title });
+  return '';
+});
 ---
 
 <html lang="fr">
@@ -18,20 +31,72 @@ const p = entry.data;
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{p.name} — La Philo</title>
+  <meta name="description" content={p.description || p.display_date} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/css/styles-f.css" />
 </head>
 <body>
-  <article class="fiche">
-    {p.thumbnail && <img class="portrait" src={p.thumbnail} alt={p.name} />}
-    <h1>{p.name}</h1>
-    <p class="dates">{p.display_date}</p>
-    {p.nationalite && <p class="nationalite">{p.nationalite}</p>}
-    {p.courants && p.courants.length > 0 && (
-      <ul class="courants">
-        {p.courants.map((c: string) => <li>{c}</li>)}
-      </ul>
-    )}
-    <div class="text" set:html={p.text} />
-    {p.media_credit && <p class="credit">{p.media_credit}</p>}
-  </article>
+
+<header class="frise-header">
+  <h1>{p.name}</h1>
+  <div class="header-rule"></div>
+</header>
+
+<div class="frise-body">
+  <div class="slide-area">
+    <div class="slides-container">
+      <div class="slide">
+        <div class:list={["slide-media", { "no-media": !hasMedia }]}>
+          <img class="slide-portrait" src={p.thumbnail} alt={p.name} />
+
+          {p.yt_id && (
+            <div class="yt-lazy" data-ytid={p.yt_id} role="button" tabindex="0" aria-label={`Lire la vidéo — ${p.name}`}>
+              <img src={ytThumb} alt={`Vidéo — ${p.name}`} loading="lazy" />
+              <div class="yt-play-btn">
+                <div class="yt-play-icon">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                </div>
+              </div>
+              <iframe title={`Vidéo — ${p.name}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+            </div>
+          )}
+
+          {!p.yt_id && p.image_media && (
+            <div class="slide-media-frame">
+              <img class="slide-media-img" src={p.image_media} alt={p.name} loading="lazy" />
+            </div>
+          )}
+
+          {p.media_credit && <div class="slide-credit">{p.media_credit}</div>}
+        </div>
+
+        <div class="slide-text">
+          <div class="slide-text-inner">
+            <h2 class="slide-headline">{p.name}</h2>
+            <div class="slide-dates">{p.display_date}</div>
+            <div class="slide-body" set:html={textWithoutAudio} />
+          </div>
+
+          {audioBlocks.length > 0 && (
+            <div class="slide-audio">
+              {audioBlocks.map((a) => (
+                <button class="audio-lazy-btn" data-src={a.src} data-title={a.title}>
+                  <span class="audio-lazy-btn-icon">🎧</span>
+                  <span>{a.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
