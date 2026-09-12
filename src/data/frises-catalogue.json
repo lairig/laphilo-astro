@@ -1,0 +1,93 @@
+{
+  "intro": "<p style=\"font-size:.88rem;line-height:1.8;color:var(--ink-light);margin-bottom:1.4rem;\">Explorez l'ensemble des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité, par époque, et grands courants de pensée de l'Égypte ancienne au XXIe siècle. Ces frises vous permettent de visualiser d'un seul coup d'œil la continuité et les ruptures de la pensée humaine, de découvrir les contemporains qui ne se sont pas connus, et de relier les idées à leur contexte historique. Un outil pédagogique unique pour étudiants, enseignants et curieux de philosophie.</p>",
+  "groups": [
+    {
+      "label": "Les Courants de Pensée",
+      "items": [
+        {
+          "name": "La Pensée occidentale",
+          "tag": "Toutes époques",
+          "text": "Des présocratiques au wokisme, découvrez la frise complète des courants de la pensée philosophique occidentale. Visualisez comment chaque courant naît dans un contexte historique précis, réagit aux courants précédents, et ouvre les questions que ses successeurs devront résoudre. Une ligne du temps de 2 500 ans de dialogue ininterrompu.",
+          "href": "/courants/frise/occidental/"
+        },
+        {
+          "name": "La Pensée orientale",
+          "tag": "Toutes époques",
+          "text": "Confucianisme, Taoïsme, Soufisme, Ubuntu… découvrez la frise complète des courants de la pensée philosophique orientale. De la Chine ancienne à l'Inde védique, du Japon médiéval à l'Afrique subsaharienne, cette frise révèle la richesse et la diversité des réponses que l'humanité a apportées aux grandes questions de l'existence.",
+          "href": "/courants/frise/oriental/"
+        }
+      ]
+    },
+    {
+      "label": "Les Philosophes",
+      "items": [
+        {
+          "name": "Philosophes Contemporains Français",
+          "tag": "1930 → 2026",
+          "text": "Frise des philosophes contemporains français encore en activité en 2026.<br> De Pierre Magnard à Marylin Maeso, en passant par Michel Onfray, Sandra Laugier ou Frédéric Worms, découvrez ses penseurs qui font la philosophie française d'aujourd'hui.",
+          "href": "/philosophes/frise/france-contemporains/"
+        },
+        {
+          "name": "Autres Philosophes Contemporains",
+          "tag": "1926 → 2026",
+          "text": "Frise des philosophes contemporains non français encore en activité en 2026. <br> Des États-Unis à l'Allemagne, de Corée du Sud à l'Italie, retrouvez les grandes figures mondiales de la philosophie actuelle : Slavoj Žižek, Peter Singer, Martha Nussbaum, Byung-Chul Han et bien d'autres.",
+          "href": "/philosophes/frise/contemporains-monde/"
+        },
+        {
+          "name": "Philosophes Modernes Français",
+          "tag": "1770 → 1960",
+          "text": "Frise des philosophes Français modernes nés entre 1772 et 1959. <br> Ils forment une lignée qui va des penseurs comme Charles Fourier ou Auguste Comte aux grands auteurs du XXᵉ siècle comme Henri Bergson, Sartre, Simone de Beauvoir, Camus, Merleau‑Ponty, Levinas, Foucault, etc.",
+          "href": "/philosophes/frise/france/"
+        },
+        {
+          "name": "Philosophes Modernes Allemands",
+          "tag": "1760 → 1950",
+          "text": "Hegel, Nietzsche, Heidegger… la tradition philosophique germanique a profondément marqué l'histoire de la pensée occidentale. De l'idéalisme à la phénoménologie, du romantisme à la Théorie Critique de l'École de Francfort (Adorno, Habermas), l'Allemagne a été pendant deux siècles le laboratoire philosophique du monde.",
+          "href": "/philosophes/frise/allemands/"
+        },
+        {
+          "name": "Philosophes Modernes Russes &amp; Europe de l'Est",
+          "tag": "1710 → 1930",
+          "text": "De 1711 avec Mikhaïl Lomonossov aux postmodernes russes, en passant par Dostoïevski, Tolstoï, Bakounine, Blavatsky, Berdiaev ou Trotski — deux siècles de pensée slave et orthodoxe. Slavophiles contre occidentalistes, nihilistes, cosmistes, existentialistes : l'une des traditions philosophiques les plus méconnues et les plus fascinantes d'Europe.",
+          "href": "/philosophes/frise/russes/"
+        },
+        {
+          "name": "Philosophes Modernes Américains",
+          "tag": "1650 → 1945",
+          "text": "Du pragmatisme de William James et John Dewey au néopragmatisme de Richard Rorty, la philosophie américaine et sud américaine a développé une approche originale : la vérité se mesure à ses effets pratiques. Thoreau, Emerson et le transcendantalisme ont posé les bases d'une philosophie de la nature et de la désobéissance civile qui influencera Gandhi et Martin Luther King.",
+          "href": "/philosophes/frise/americains/"
+        },
+        {
+          "name": "Autres Philosophes Modernes",
+          "tag": "1755 → 1950",
+          "text": "Frise rassemblant les philosophes occidentaux de la modernité, actifs entre 1755 et 1950, en excluant les traditions française, allemande, américaine et russe. Elle met en valeur des penseurs d'autres aires européennes, comme les philosophes écossais, britanniques, italiens, espagnols, danois ou néerlandais, afin de montrer la diversité des courants de cette période.",
+          "href": "/philosophes/frise/modernes/"
+        },
+        {
+          "name": "Philosophes Renaissance &amp; Lumières",
+          "tag": "1460 → 1760",
+          "text": "Frise qui met en lumière des penseurs comme Érasme, Montaigne, Descartes, Hobbes ou Locke, qui ont repensé la raison, la foi, la politique et les droits de l'individu. En suivant leur ordre chronologique, la frise permet de visualiser l'émergence de la modernité philosophique en Europe occidentale.",
+          "href": "/philosophes/frise/renaissance-lumieres/"
+        },
+        {
+          "name": "Philosophes Médiévaux",
+          "tag": "500 → 1460",
+          "text": "Frise qui met en avant des figures comme Boèce, Augustin, Jean Scot Érigène, Anselme de Canterbury, Abélard ou Thomas d'Aquin, qui ont articulé foi chrétienne et raisonnement philosophique dans l'Empire romain puis en Europe médiévale. En suivant leur ordre chronologique, la frise permet de visualiser l'évolution progressive de la pensée occidentale, de la fin de l'Antiquité jusqu'aux prémices de la Renaissance.",
+          "href": "/philosophes/frise/medievaux/"
+        },
+        {
+          "name": "Philosophes Gréco-Romains",
+          "tag": "-650 av. J.-C. → 500",
+          "text": "De Thalès de Milet à Augustin d'Hippone, les fondateurs de la pensée occidentale ont posé les questions qui traverseront toute l'histoire de la philosophie : qu'est-ce que l'être ? Peut-on connaître la vérité ? Comment vivre bien ? La Grèce antique donna naissance à Socrate, Platon, Aristote — trois piliers dont l'ombre porte encore sur notre siècle.",
+          "href": "/philosophes/frise/greco-romains/"
+        },
+        {
+          "name": "Philosophes Orientaux",
+          "tag": "Toutes époques",
+          "text": "A toutes les époques, des penseurs comme Confucius, Lao-Tseu, Nagarjuna, Al-Farabi, Ibn Rushd, Avicenne et bien d'autres ont bâti des systèmes de pensée aussi rigoureux et profonds que leurs homologues occidentaux. Cette frise vous invite à un voyage à travers l'Asie, le Moyen-Orient et l'Afrique pour découvrir des philosophies longtemps méconnues en Europe.",
+          "href": "/philosophes/frise/orientaux/"
+        }
+      ]
+    }
+  ]
+}
