@@ -1,0 +1,80 @@
+---
+interface Props {
+  name: string;
+  displayDate: string;
+  text: string;
+  ytId?: string;
+  mediaCredit?: string;
+  thumbnail?: string;
+  imageMedia?: string;
+  eraBadge?: { color: string; label: string };
+}
+
+const { name, displayDate, text, ytId, mediaCredit, thumbnail, imageMedia, eraBadge } = Astro.props;
+
+const hasMedia = Boolean(ytId || imageMedia || eraBadge);
+const ytThumb = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : '';
+
+const audioBlocks: { src: string; title: string }[] = [];
+const textWithoutAudio = text.replace(/<audio[\s\S]*?<\/audio>/gi, (match: string) => {
+  const srcMatch = match.match(/<source[^>]*src="([^"]+)"/i);
+  const titleMatch = match.match(/title="([^"]*)"/i);
+  const src = srcMatch?.[1] || '';
+  const title = titleMatch?.[1] || 'Écouter le podcast';
+  if (src) audioBlocks.push({ src, title });
+  return '';
+});
+---
+
+<div class="slide">
+  <div class:list={["slide-media", { "no-media": !hasMedia }]}>
+    {thumbnail && <img class="slide-portrait" src={thumbnail} alt={name} />}
+
+    {ytId && (
+      <div class="yt-lazy" data-ytid={ytId} role="button" tabindex="0" aria-label={`Lire la vidéo — ${name}`}>
+        <img src={ytThumb} alt={`Vidéo — ${name}`} loading="lazy" />
+        <div class="yt-play-btn">
+          <div class="yt-play-icon">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+          </div>
+        </div>
+        <iframe title={`Vidéo — ${name}`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"></iframe>
+      </div>
+    )}
+
+    {!ytId && imageMedia && (
+      <div class="slide-media-frame">
+        <img class="slide-media-img" src={imageMedia} alt={name} loading="lazy" />
+      </div>
+    )}
+
+    {!ytId && !imageMedia && eraBadge && (
+      <div class="slide-era-badge" style={`--mc:${eraBadge.color}`}>
+        <div class="slide-era-name">{name}</div>
+        <div class="slide-era-period">{eraBadge.label}</div>
+      </div>
+    )}
+
+    {mediaCredit && <div class="slide-credit">{mediaCredit}</div>}
+  </div>
+
+  <div class="slide-text">
+    <div class="slide-text-inner">
+      <h2 class="slide-headline">{name}</h2>
+      <div class="slide-dates">{displayDate}</div>
+      <div class="slide-body" set:html={textWithoutAudio} />
+    </div>
+
+    {audioBlocks.length > 0 && (
+      <div class="slide-audio">
+        {audioBlocks.map((a) => (
+          <button class="audio-lazy-btn" data-src={a.src} data-title={a.title}>
+            <span class="audio-lazy-btn-icon">🎧</span>
+            <span>{a.title}</span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>

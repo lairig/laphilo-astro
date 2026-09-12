@@ -1,25 +1,28 @@
 ---
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
+import { markerColor, eraLabel } from '../../lib/era';
 
 export async function getStaticPaths() {
-  const philosophes = await getCollection('philosophes');
-  return philosophes.map((entry) => ({
+  const courants = await getCollection('courants');
+  return courants.map((entry, index) => ({
     params: { id: entry.id },
-    props: { entry },
+    props: { entry, index },
   }));
 }
 
-const { entry } = Astro.props;
-const p = entry.data;
+const { entry, index } = Astro.props;
+const c = entry.data;
+
+const eraBadge = { color: markerColor(index), label: eraLabel(c.year) };
 ---
 
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{p.name} — La Philo</title>
-  <meta name="description" content={p.description || p.display_date} />
+  <title>{c.name} — La Philo</title>
+  <meta name="description" content={c.description || c.display_date} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,7 +33,7 @@ const p = entry.data;
 <body>
 
 <header class="frise-header">
-  <h1>{p.name}</h1>
+  <h1>{c.name}</h1>
   <div class="header-rule"></div>
 </header>
 
@@ -38,13 +41,13 @@ const p = entry.data;
   <div class="slide-area">
     <div class="slides-container">
       <SlideCard
-        name={p.name}
-        displayDate={p.display_date}
-        text={p.text}
-        ytId={p.yt_id}
-        mediaCredit={p.media_credit}
-        thumbnail={p.thumbnail}
-        imageMedia={p.image_media}
+        name={c.name}
+        displayDate={c.display_date}
+        text={c.text}
+        ytId={c.yt_id}
+        mediaCredit={c.media_credit}
+        imageMedia={c.image_media}
+        eraBadge={eraBadge}
       />
     </div>
   </div>
