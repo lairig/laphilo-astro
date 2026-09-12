@@ -1,0 +1,79 @@
+---
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Échanges &amp; Contact — La Philo</title>
+  <meta name="description" content="Une question, une suggestion, une erreur à signaler ? Contactez LaPhilo.fr ou participez au Lieu d'Échanges, un espace de discussion ouvert à tous." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <a href="/" class="fha-btn" style="display:inline-block;margin-bottom:1rem;">⌂ Accueil</a>
+  <h1 class="site-title">Échanges &amp; Contact</h1>
+  <p class="site-subtitle">Une question, une suggestion, un espace de discussion</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page">
+
+  <div id="contact-form" class="soc-section-block soc-panel soc-panel--gold">
+    <p class="soc-section-label soc-section-label--gold">📬 Me Contacter</p>
+    <p class="soc-contact-intro">Une question, une suggestion, une erreur à signaler ? Écrivez-moi directement.</p>
+
+    <form id="social-contact-form" action="https://formspree.io/f/mzdkrdoy" method="POST" class="soc-form">
+
+      <div class="soc-form-group">
+        <label for="sc-name" class="soc-form-label">Nom</label>
+        <input type="text" id="sc-name" name="name" required placeholder="Votre nom" class="soc-form-input" />
+      </div>
+
+      <div class="soc-form-group">
+        <label for="sc-email" class="soc-form-label">E-mail</label>
+        <input type="email" id="sc-email" name="email" required placeholder="votre@email.com" class="soc-form-input" />
+      </div>
+
+      <div class="soc-form-group">
+        <label for="sc-message" class="soc-form-label">Message</label>
+        <textarea id="sc-message" name="message" required rows="5" placeholder="Votre message…" class="soc-form-textarea"></textarea>
+      </div>
+
+      <input type="text" name="_gotcha" class="soc-form-honey" tabindex="-1" autocomplete="off" />
+
+      <button type="submit" class="soc-form-submit">Envoyer →</button>
+
+      <p id="sc-success" class="soc-form-success">Message envoyé avec succès. Merci !</p>
+      <p id="sc-error" class="soc-form-error">Une erreur s'est produite. Veuillez réessayer.</p>
+
+    </form>
+  </div>
+
+  <div class="soc-section-block soc-panel soc-panel--purple">
+    <p class="soc-section-label soc-section-label--gold">💬 Lieu d'Échanges</p>
+    <p class="soc-contact-intro">Un espace de discussion ouvert à tous — questions, réflexions, suggestions.</p>
+    <div id="cusdis_thread"
+         data-host="https://cusdis.com"
+         data-app-id="67cee3a1-49d5-4661-b0d1-d471a2dd49d1"
+         data-page-id="echanges-fr"
+         data-page-url="https://laphilo.fr/"
+         data-page-title="Lieu d'Échanges — La Philo"
+         data-lang="fr"></div>
+  </div>
+
+</main>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/soc-widgets.js" defer></script>
+
+</body>
+</html>
