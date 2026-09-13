@@ -1,4 +1,5 @@
 ---
+import Favicons from '../../components/Favicons.astro';
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
@@ -79,6 +80,7 @@ const jsonLd = [
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
   <title>{title}</title>
   <meta name="description" content={description} />
   <SeoHead title={title} description={description} path={path} jsonLd={jsonLd} />
