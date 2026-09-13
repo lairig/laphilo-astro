@@ -67,6 +67,16 @@
       color: #1e1208;
     }
     .list-page .phi-all-count { color: #d4a843; }
+
+    /* Le menu déroulant OUVERT d'un <select> (les <option>) est rendu par le
+       navigateur/OS, pas par la page — le CSS ne peut y appliquer que
+       background-color/color (pas de gradient ni de police custom). On garde
+       la même teinte parchemin unie que le select fermé plutôt que le blanc
+       par défaut du navigateur. */
+    .list-page .phi-all-select option {
+      background-color: #eddfa0;
+      color: #3d2410;
+    }
   </style>
 </head>
 <body class="list-page-body">
