@@ -1,27 +1,24 @@
 ---
 import { getCollection } from 'astro:content';
+import { philosopheFriseConfig } from '../../../data/frise-engine-config';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
-  const bySource = new Map<string, { label: string; items: typeof philosophes }>();
+  const bySource = new Map<string, { label: string; count: number }>();
   for (const entry of philosophes) {
     const key = entry.data.frise_source;
-    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, items: [] });
-    bySource.get(key)!.items.push(entry);
+    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0 });
+    bySource.get(key)!.count++;
   }
-  return Array.from(bySource.entries()).map(([frise, { label, items }]) => ({
+  return Array.from(bySource.entries()).map(([frise, { label, count }]) => ({
     params: { frise },
-    props: {
-      label,
-      items: items
-        .slice()
-        .sort((a, b) => a.data.year - b.data.year)
-        .map((e) => ({ id: e.id, name: e.data.name, display_date: e.data.display_date })),
-    },
+    props: { label, count },
   }));
 }
 
-const { label, items } = Astro.props;
+const { frise } = Astro.params;
+const { label, count } = Astro.props;
+const cfg = philosopheFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9 };
 ---
 
 <html lang="fr">
@@ -29,34 +26,65 @@ const { label, items } = Astro.props;
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{label} — La Philo</title>
+  <meta name="description" content={`${label} : ${count} fiches sur une frise chronologique interactive.`} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,500;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles-f.css" />
-  <link rel="stylesheet" href="/css/list-page.css" />
 </head>
-<body class="list-page-body">
+<body>
+
+<div id="loader">
+  <div class="loader-ornament">{label.toUpperCase()}</div>
+  <div class="loader-bar"><div class="loader-bar-fill" id="loaderFill"></div></div>
+  <div class="loader-msg" id="loaderMsg">Chargement…</div>
+</div>
 
 <header class="frise-header">
-  <a href="/" class="fha-btn fha-home">⌂ Accueil</a>
+  <div class="frise-header-actions">
+    <a href="/" class="fha-btn fha-home" aria-label="Accueil">⌂ <span>Accueil</span></a>
+    <div class="fha-right">
+      <button id="frise-mini-list-btn" class="fha-btn" type="button" aria-label="Liste">&#9776; <span>Liste</span></button>
+      <a href="/recherche/" class="fha-btn" aria-label="Recherche">&#128269; <span>Recherche</span></a>
+    </div>
+  </div>
   <h1>{label}</h1>
-  <p>{items.length} fiches</p>
+  <p>{count} fiches sur une frise chronologique interactive.</p>
   <div class="header-rule"></div>
 </header>
 
-<main class="list-page">
-  <ul class="list-page-items">
-    {items.map((p) => (
-      <li>
-        <a href={`/philosophes/${p.id}/`}>
-          <span class="lp-name">{p.name}</span>
-          <span class="lp-date">{p.display_date}</span>
-        </a>
-      </li>
-    ))}
-  </ul>
-</main>
+<div class="frise-body" id="friseBody" style="visibility:hidden">
+  <div class="frise-cols">
+    <div class="timeline-nav-wrap" id="navWrap">
+      <div class="timeline-axis"></div>
+      <div class="nav-cursor"></div>
+      <div class="nav-counter" id="navCounter"></div>
+      <div class="timeline-nav-track" id="navTrack"></div>
+      <div class="time-rule-track" id="timeRuleTrack"></div>
+    </div>
+
+    <div id="mobileHeader" class="mobile-header" aria-live="polite"></div>
+
+    <div class="slide-area" id="slideArea">
+      <div class="slides-container" id="slidesContainer"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="frise-footer">
+  <p class="ff-tagline footer-tagline">Sans la musique, la vie serait une erreur ♪</p>
+  <p class="ff-copy">© 2026 – laphilo.fr – Refonte en cours</p>
+</footer>
+
+<script define:vars={{ frise, cfg }}>
+  window.FRISE_CONFIG = {
+    jsonUrl: `/philosophes/frise/${frise}.json`,
+    ...cfg,
+  };
+</script>
+
+<script src="/js/frise-engine.js" defer></script>
 
 </body>
 </html>
