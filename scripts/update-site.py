@@ -48,15 +48,19 @@ def main():
         shutil.rmtree(dist_dir)
 
     print('\n=== 3/4 — Vérification des changements git ===')
-    status = subprocess.run(['git', 'status', '--porcelain'], cwd=BASE, capture_output=True, text=True)
+    tracked_paths = ['data/', 'src/data/philosophes.json', 'src/data/courants.json']
+    status = subprocess.run(
+        ['git', 'status', '--porcelain', '--'] + tracked_paths,
+        cwd=BASE, capture_output=True, text=True,
+    )
     if not status.stdout.strip():
-        print('  Aucun changement détecté — rien à déployer.')
+        print('  Aucun changement détecté sur les données — rien à déployer.')
         return
 
     print(status.stdout)
 
     print('\n=== 4/4 — Commit et push ===')
-    run(['git', 'add', 'data/', 'src/data/philosophes.json', 'src/data/courants.json'])
+    run(['git', 'add', '--'] + tracked_paths)
     run(['git', 'commit', '-m', commit_message])
     run(['git', 'push'])
 
