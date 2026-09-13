@@ -45,6 +45,28 @@
       background-position: right 0.55rem center, 0 0;
       background-size: 9px 7px, auto;
     }
+
+    /* Onglets Alphabétique/Temporelle, barre de recherche, boutons Type et
+       lettres A-Z : mêmes fonds translucides sombres (rgba(90,55,15,…)) que
+       .phi-result-name/.phi-all-select ci-dessus, pensés pour le fond
+       parchemin clair du drawer original — quasi invisibles ici. Alignés sur
+       le même fond clair que les menus déroulants. */
+    .list-page .phi-all-mode-tab,
+    .list-page .phi-all-bar,
+    .list-page .phi-all-btn,
+    .list-page .phi-alpha-btn {
+      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
+      color: #3d2410;
+    }
+    .list-page .phi-all-input { color: #3d2410; }
+    .list-page .phi-all-input::placeholder { color: rgba(61, 36, 16, 0.55); }
+    .list-page .phi-all-mode-tab--active,
+    .list-page .phi-all-btn--active,
+    .list-page .phi-alpha-btn--active {
+      background: linear-gradient(160deg, #f0dca0 0%, #e0c07a 100%);
+      color: #1e1208;
+    }
+    .list-page .phi-all-count { color: #d4a843; }
   </style>
 </head>
 <body class="list-page-body">
