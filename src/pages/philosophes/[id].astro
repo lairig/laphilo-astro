@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
+import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
 
@@ -88,10 +89,7 @@ const jsonLd = [
 </head>
 <body>
 
-<header class="frise-header">
-  <h1>{p.name}</h1>
-  <div class="header-rule"></div>
-</header>
+<FicheHeader title={p.name} listHref={`/philosophes/frise/${p.frise_source}/`} />
 
 <div class="frise-body">
   <FicheNav

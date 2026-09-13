@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+  listHref: string;
+}
+
+const { title, listHref } = Astro.props;
+---
+
+<header class="frise-header">
+  <div class="frise-header-actions">
+    <a href="/" class="fha-btn fha-home" aria-label="Accueil">⌂ <span>Accueil</span></a>
+    <div class="fha-right">
+      <a href={listHref} class="fha-btn" aria-label="Liste">&#9776; <span>Liste</span></a>
+      <a href="/recherche/" class="fha-btn" aria-label="Recherche">&#128269; <span>Recherche</span></a>
+    </div>
+  </div>
+  <h1>{title}</h1>
+  <div class="header-rule"></div>
+</header>
