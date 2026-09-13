@@ -8,6 +8,12 @@ Enchaine :
      automatiquement a la reception du push, aucune etape manuelle
      supplementaire cote hebergement)
 
+Suit aussi public/pho/ (portraits miniatures) et public/photo/ (images
+de fiche) : deposer une image dans l'un de ces dossiers puis renseigner
+son chemin (/pho/xxx.webp ou /photo/xxx.webp) dans la colonne
+Thumbnail_URL / Image_media du xlsx suffit, le script s'occupe de la
+committer et de la deployer en meme temps que les donnees.
+
 Usage : python scripts/update-site.py "Message de commit optionnel"
         (depuis la racine laphilo-astro)
 
@@ -48,7 +54,10 @@ def main():
         shutil.rmtree(dist_dir)
 
     print('\n=== 3/4 — Vérification des changements git ===')
-    tracked_paths = ['data/', 'src/data/philosophes.json', 'src/data/courants.json']
+    tracked_paths = [
+        'data/', 'src/data/philosophes.json', 'src/data/courants.json',
+        'public/pho/', 'public/photo/',
+    ]
     status = subprocess.run(
         ['git', 'status', '--porcelain', '--'] + tracked_paths,
         cwd=BASE, capture_output=True, text=True,

@@ -20,9 +20,19 @@ Crédit_media, Thumbnail_URL, Image_media, Nationalité, Branche, Courant,
 Description...). Mettre `NON` dans la colonne `Actif` pour désactiver une
 fiche sans la supprimer.
 
+## 1bis. Ajouter un portrait ou une image (si besoin)
+
+- Portrait miniature (colonne `Thumbnail_URL`) → déposer le fichier `.webp`
+  dans `public/pho/`, puis renseigner `/pho/nom-du-fichier.webp` dans le xlsx.
+- Image de fiche (colonne `Image_media`) → déposer le fichier dans
+  `public/photo/`, puis renseigner `/photo/nom-du-fichier.webp` dans le xlsx.
+
+Le nom de fichier est libre, seul le chemin renseigné dans le xlsx compte.
+
 ## 2. Régénérer et déployer
 
-Depuis la racine `laphilo-astro` :
+Double-cliquer sur `update-site.bat` (ou le raccourci bureau), ou depuis un
+terminal à la racine `laphilo-astro` :
 
 ```
 python scripts/update-site.py "Ajoute [Nom du philosophe/courant]"
@@ -32,8 +42,9 @@ Ce script :
 1. régénère `src/data/philosophes.json` et `src/data/courants.json` depuis
    les xlsx (`build-data.py`) ;
 2. lance `astro build` pour vérifier que le site se génère sans erreur ;
-3. s'il n'y a aucun changement, s'arrête là (rien à déployer) ;
-4. sinon, commit et push automatiquement.
+3. s'il n'y a aucun changement (xlsx, données, ou images dans `public/pho/`
+   et `public/photo/`), s'arrête là (rien à déployer) ;
+4. sinon, commit et push automatiquement — xlsx, données ET images comprises.
 
 Cloudflare Pages détecte le push sur GitHub et reconstruit/déploie le site
 tout seul en quelques minutes — aucune étape manuelle supplémentaire.
