@@ -119,13 +119,15 @@
 .definition-page p.ldl-li {
   margin: 1.1rem 0 0.3rem;
 }
-.definition-page .ldl-frise-link {
+.definition-page a.ldl-frise-link,
+.definition-page a.ldl-frise-link:visited {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   color: #fff3d6;
   background: linear-gradient(165deg, #8b5a1f 0%, #6b3f12 100%);
   text-decoration: none;
+  border-bottom: none;
   font-family: 'Cinzel', serif;
   font-size: 0.72rem;
   font-weight: 600;
@@ -136,7 +138,7 @@
   box-shadow: 0 2px 6px rgba(40, 20, 5, 0.3);
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
-.definition-page .ldl-frise-link:hover {
+.definition-page a.ldl-frise-link:hover {
   background: linear-gradient(165deg, #a06f2c 0%, #7d4a17 100%);
   border-color: rgba(120, 80, 20, 0.7);
   box-shadow: 0 3px 10px rgba(40, 20, 5, 0.4);
