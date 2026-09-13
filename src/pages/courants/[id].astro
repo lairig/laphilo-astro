@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
+import SeoHead from '../../components/SeoHead.astro';
 import { markerColor, eraLabel } from '../../lib/era';
 
 export async function getStaticPaths() {
@@ -56,14 +57,38 @@ const { entry, indexInFrise, prev, next, position, total, philosopheLinks } = As
 const c = entry.data;
 
 const eraBadge = { color: markerColor(indexInFrise), label: eraLabel(c.year) };
+
+const title = `${c.name} — La Philo`;
+const description = c.description || c.display_date;
+const path = `/courants/${entry.id}/`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 2, name: c.frise_label, item: new URL(`/courants/frise/${c.frise_source}/`, Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: c.name, item: new URL(path, Astro.site).toString() },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: c.name,
+    description,
+    url: new URL(path, Astro.site).toString(),
+    inDefinedTermSet: new URL('/histoire-des-courants/', Astro.site).toString(),
+  },
+];
 ---
 
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{c.name} — La Philo</title>
-  <meta name="description" content={c.description || c.display_date} />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path={path} jsonLd={jsonLd} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

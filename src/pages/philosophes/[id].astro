@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import SlideCard from '../../components/SlideCard.astro';
 import FicheNav from '../../components/FicheNav.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
+import SeoHead from '../../components/SeoHead.astro';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
@@ -44,14 +45,40 @@ export async function getStaticPaths() {
 
 const { entry, prev, next, position, total, courantLinks } = Astro.props;
 const p = entry.data;
+
+const title = `${p.name} — La Philo`;
+const description = p.description || p.display_date;
+const path = `/philosophes/${entry.id}/`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 2, name: p.frise_label, item: new URL(`/philosophes/frise/${p.frise_source}/`, Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: p.name, item: new URL(path, Astro.site).toString() },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: p.name,
+    description,
+    url: new URL(path, Astro.site).toString(),
+    ...(p.nationalite ? { nationality: p.nationalite } : {}),
+    ...(p.thumbnail ? { image: new URL(p.thumbnail, Astro.site).toString() } : {}),
+    knowsAbout: p.courants,
+  },
+];
 ---
 
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{p.name} — La Philo</title>
-  <meta name="description" content={p.description || p.display_date} />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path={path} jsonLd={jsonLd} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
