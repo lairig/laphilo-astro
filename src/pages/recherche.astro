@@ -11,8 +11,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/styles-f.css" />
   <link rel="stylesheet" href="/css/list-page.css" />
+  <style is:global>
+    /* .phi-all .phi-result-name{color:var(--ink)} (styles.css) suppose un fond
+       parchemin clair (le vrai drawer laphilo.fr) ; cette page affiche la
+       liste sur le fond sombre du site, donc on restaure une couleur claire.
+       is:global requis : le HTML des résultats est injecté par search-full.js
+       et ne porte pas l'attribut de scope Astro. */
+    .list-page .phi-all .phi-result-name { color: #f7ecce; }
+  </style>
 </head>
 <body class="list-page-body">
 
