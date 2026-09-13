@@ -15,12 +15,36 @@
   <link rel="stylesheet" href="/css/styles-f.css" />
   <link rel="stylesheet" href="/css/list-page.css" />
   <style is:global>
-    /* .phi-all .phi-result-name{color:var(--ink)} (styles.css) suppose un fond
-       parchemin clair (le vrai drawer laphilo.fr) ; cette page affiche la
-       liste sur le fond sombre du site, donc on restaure une couleur claire.
-       is:global requis : le HTML des résultats est injecté par search-full.js
-       et ne porte pas l'attribut de scope Astro. */
+    /* Plusieurs règles .phi-* de styles.css supposent le fond parchemin clair
+       du vrai drawer laphilo.fr (.drawer{background:linear-gradient(...#f9f2d8...)}) ;
+       cette page affiche la recherche en pleine largeur sur le fond sombre du
+       site, ce qui rendait le texte quasi illisible (contraste WCAG < 2.5).
+       is:global requis : le HTML des résultats/filtres est injecté par
+       search-full.js et ne porte pas l'attribut de scope Astro. */
     .list-page .phi-all .phi-result-name { color: #f7ecce; }
+    .list-page .phi-all-filter-lbl,
+    .list-page .phi-card-dates-row,
+    .list-page .phi-color-item-lbl { color: #d4a843; }
+    .list-page .phi-card-desc { color: #ead9a8; }
+
+    /* Bug préexistant dans styles.css : .phi-filter-select,.phi-all-select
+       déclare `background:linear-gradient(...)` PUIS `background-image:url(...)`
+       dans la même règle — la seconde déclaration écrase entièrement la
+       première (le raccourci `background` est réinitialisé), donc le fond
+       parchemin du menu déroulant ne s'affichait jamais. Recombine les deux
+       dans une seule déclaration `background` valide. */
+    .list-page .phi-all-select,
+    .list-page .phi-year-input {
+      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
+    }
+    .list-page .phi-all-select {
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1.5l4 4 4-4' stroke='%238b3a0f' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
+      background-repeat: no-repeat;
+      background-position: right 0.55rem center, 0 0;
+      background-size: 9px 7px, auto;
+    }
   </style>
 </head>
 <body class="list-page-body">
