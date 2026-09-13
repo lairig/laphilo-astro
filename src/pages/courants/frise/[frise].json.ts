@@ -23,11 +23,11 @@ function crossLinksHtml(label: string, items: { href: string; label: string }[],
 function getRepresentants(
   courantName: string,
   figuresCles: string[] | undefined,
-  philosophesByCourant: { id: string; name: string; year: number }[],
+  philosophesByCourant: { id: string; name: string; year: number; frise: string }[],
   n: number,
 ) {
   if (!philosophesByCourant.length) return [];
-  const top: { id: string; name: string; year: number }[] = [];
+  const top: { id: string; name: string; year: number; frise: string }[] = [];
   const used = new Set<string>();
 
   (figuresCles || []).forEach((name) => {
@@ -75,11 +75,16 @@ export const GET: APIRoute = async ({ params }) => {
   const courants = await getCollection('courants');
   const philosophes = await getCollection('philosophes');
 
-  const philosophesByCourantName = new Map<string, { id: string; name: string; year: number }[]>();
+  const philosophesByCourantName = new Map<string, { id: string; name: string; year: number; frise: string }[]>();
   for (const p of philosophes) {
     for (const courantName of p.data.courants || []) {
       if (!philosophesByCourantName.has(courantName)) philosophesByCourantName.set(courantName, []);
-      philosophesByCourantName.get(courantName)!.push({ id: p.id, name: p.data.name, year: p.data.year });
+      philosophesByCourantName.get(courantName)!.push({
+        id: p.id,
+        name: p.data.name,
+        year: p.data.year,
+        frise: p.data.frise_source,
+      });
     }
   }
 
@@ -96,7 +101,10 @@ export const GET: APIRoute = async ({ params }) => {
       philosophesByCourantName.get(c.name) || [],
       4,
     );
-    const repLinks = reps.map((r) => ({ href: `/philosophes/${r.id}/`, label: r.name }));
+    const repLinks = reps.map((r) => ({
+      href: `/philosophes/frise/${r.frise}/?p=${encodeURIComponent(r.name)}`,
+      label: r.name,
+    }));
 
     return {
       year: c.year,

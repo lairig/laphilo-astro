@@ -11,11 +11,16 @@ export async function getStaticPaths() {
   const courants = await getCollection('courants');
   const philosophes = await getCollection('philosophes');
 
-  const philosophesByCourant = new Map<string, { id: string; name: string; year: number }[]>();
+  const philosophesByCourant = new Map<string, { id: string; name: string; year: number; frise: string }[]>();
   for (const p of philosophes) {
     for (const cname of p.data.courants || []) {
       if (!philosophesByCourant.has(cname)) philosophesByCourant.set(cname, []);
-      philosophesByCourant.get(cname)!.push({ id: p.id, name: p.data.name, year: p.data.year });
+      philosophesByCourant.get(cname)!.push({
+        id: p.id,
+        name: p.data.name,
+        year: p.data.year,
+        frise: p.data.frise_source,
+      });
     }
   }
   for (const list of philosophesByCourant.values()) {
@@ -36,7 +41,7 @@ export async function getStaticPaths() {
     const siblings = bySource.get(entry.data.frise_source)!;
     const index = siblings.findIndex((e) => e.id === entry.id);
     const philosopheLinks = (philosophesByCourant.get(entry.data.name) || []).map((p) => ({
-      href: `/philosophes/${p.id}/`,
+      href: `/philosophes/frise/${p.frise}/?p=${encodeURIComponent(p.name)}`,
       label: p.name,
     }));
     return {

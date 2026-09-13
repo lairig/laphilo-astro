@@ -27,7 +27,7 @@ export async function getStaticPaths() {
 export const GET: APIRoute = async ({ params }) => {
   const philosophes = await getCollection('philosophes');
   const courants = await getCollection('courants');
-  const courantIdByName = new Map(courants.map((c) => [c.data.name, c.id]));
+  const courantFriseByName = new Map(courants.map((c) => [c.data.name, c.data.frise_source]));
 
   const items = philosophes
     .filter((p) => p.data.frise_source === params.frise)
@@ -38,8 +38,10 @@ export const GET: APIRoute = async ({ params }) => {
     const p = entry.data;
     const courantLinks = (p.courants || [])
       .map((name) => {
-        const id = courantIdByName.get(name);
-        return id ? { href: `/courants/${id}/`, label: name } : null;
+        const frise = courantFriseByName.get(name);
+        return frise
+          ? { href: `/courants/frise/${frise}/?p=${encodeURIComponent(name)}`, label: name }
+          : null;
       })
       .filter((x): x is { href: string; label: string } => x !== null);
 

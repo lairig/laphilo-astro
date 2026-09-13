@@ -9,7 +9,7 @@ import SeoHead from '../../components/SeoHead.astro';
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
   const courants = await getCollection('courants');
-  const courantIdByName = new Map(courants.map((c) => [c.data.name, c.id]));
+  const courantFriseByName = new Map(courants.map((c) => [c.data.name, c.data.frise_source]));
 
   const bySource = new Map<string, typeof philosophes>();
   for (const entry of philosophes) {
@@ -26,8 +26,10 @@ export async function getStaticPaths() {
     const index = siblings.findIndex((e) => e.id === entry.id);
     const courantLinks = (entry.data.courants || [])
       .map((name) => {
-        const id = courantIdByName.get(name);
-        return id ? { href: `/courants/${id}/`, label: name } : null;
+        const frise = courantFriseByName.get(name);
+        return frise
+          ? { href: `/courants/frise/${frise}/?p=${encodeURIComponent(name)}`, label: name }
+          : null;
       })
       .filter((x): x is { href: string; label: string } => x !== null);
     return {
