@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import data from '../data/frises-catalogue.json';
 
@@ -14,6 +15,7 @@ const { intro, groups } = data as {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
+  <GoatCounter />
   <title>Toutes les frises chronologiques — La Philo</title>
   <meta name="description" content="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée occidentaux et orientaux." />
   <SeoHead

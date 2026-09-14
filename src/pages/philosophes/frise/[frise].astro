@@ -1,5 +1,6 @@
 ---
 import Favicons from '../../../components/Favicons.astro';
+import GoatCounter from '../../../components/GoatCounter.astro';
 import SeoHead from '../../../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
@@ -76,6 +77,7 @@ const jsonLd = [
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
+  <GoatCounter />
   <title>{title}</title>
   <meta name="description" content={`${label} — ${descriptionText}`} />
   <SeoHead title={title} description={`${label} — ${descriptionText}`} path={path} jsonLd={jsonLd} />
