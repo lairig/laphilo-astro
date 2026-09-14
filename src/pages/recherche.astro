@@ -83,8 +83,13 @@ import Favicons from '../components/Favicons.astro';
 </head>
 <body class="list-page-body">
 
-<header class="frise-header">
-  <a href="/" class="fha-btn fha-home">⌂ Accueil</a>
+<header class="frise-header" style="position:relative;">
+  <div class="sitemap-switcher">
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
   <h1>Recherche</h1>
   <div class="header-rule"></div>
 </header>
