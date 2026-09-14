@@ -28,7 +28,7 @@
       var entryCur = poolCur[(dayOfYear + 47) % poolCur.length];
 
       var friseUrl = function (e, base) {
-        return e.frise ? '/' + base + '/frise/' + e.frise + '/' : e.url;
+        return e.frise ? '/' + base + '/frise/' + e.frise + '/?p=' + encodeURIComponent(e.name) : e.url;
       };
       var entryFriseUrl = friseUrl(entry, 'philosophes');
       var entryCurFriseUrl = friseUrl(entryCur, 'courants');
