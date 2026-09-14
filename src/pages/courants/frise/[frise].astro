@@ -2,6 +2,7 @@
 import Favicons from '../../../components/Favicons.astro';
 import { getCollection } from 'astro:content';
 import { courantFriseConfig } from '../../../data/frise-engine-config';
+import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
@@ -20,6 +21,8 @@ export async function getStaticPaths() {
 const { frise } = Astro.params;
 const { label, count } = Astro.props;
 const cfg = courantFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9, mode: 'courant' };
+const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
+const descriptionText = description.replace(/<[^>]+>/g, '');
 ---
 
 <html lang="fr">
@@ -28,7 +31,7 @@ const cfg = courantFriseConfig[frise as string] ?? { defaultIndex: 0, scale_fact
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <title>{label} — La Philo</title>
-  <meta name="description" content={`${label} : ${count} fiches sur une frise chronologique interactive.`} />
+  <meta name="description" content={`${label} — ${descriptionText}`} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -52,7 +55,7 @@ const cfg = courantFriseConfig[frise as string] ?? { defaultIndex: 0, scale_fact
     </div>
   </div>
   <h1>{label}</h1>
-  <p>{count} fiches sur une frise chronologique interactive.</p>
+  <p set:html={description} />
   <div class="header-rule"></div>
 </header>
 
