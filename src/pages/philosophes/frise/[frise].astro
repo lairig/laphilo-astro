@@ -1,5 +1,6 @@
 ---
 import Favicons from '../../../components/Favicons.astro';
+import SeoHead from '../../../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
@@ -23,6 +24,26 @@ const { label, count } = Astro.props;
 const cfg = philosopheFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9 };
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
+const title = `${label} — La Philo`;
+const path = `/philosophes/frise/${frise}/`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 2, name: 'Toutes les frises', item: new URL('/frises/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: label, item: new URL(path, Astro.site).toString() },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: label,
+    description: descriptionText,
+    url: new URL(path, Astro.site).toString(),
+  },
+];
 ---
 
 <html lang="fr">
@@ -30,8 +51,9 @@ const descriptionText = description.replace(/<[^>]+>/g, '');
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
-  <title>{label} — La Philo</title>
+  <title>{title}</title>
   <meta name="description" content={`${label} — ${descriptionText}`} />
+  <SeoHead title={title} description={`${label} — ${descriptionText}`} path={path} jsonLd={jsonLd} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

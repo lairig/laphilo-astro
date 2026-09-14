@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 import data from '../data/frises-catalogue.json';
 
 const { intro, groups } = data as {
@@ -15,6 +16,11 @@ const { intro, groups } = data as {
   <Favicons />
   <title>Toutes les frises chronologiques — La Philo</title>
   <meta name="description" content="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée occidentaux et orientaux." />
+  <SeoHead
+    title="Toutes les frises chronologiques — La Philo"
+    description="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée occidentaux et orientaux."
+    path="/frises/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

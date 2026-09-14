@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 const comprendre = [
   { icon: '❓', title: 'C’est quoi la philosophie ?', desc: 'Définition et les 7 grandes branches de la philosophie.', href: '/definition/' },
   { icon: '📖', title: 'Histoire des philosophes', desc: 'Des présocratiques aux penseurs contemporains, par grandes périodes.', href: '/histoire-des-philosophes/' },
@@ -14,6 +15,11 @@ const comprendre = [
   <Favicons />
   <title>Plan du site — La Philo</title>
   <meta name="description" content="Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site." />
+  <SeoHead
+    title="Plan du site — La Philo"
+    description="Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site."
+    path="/plan-du-site/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

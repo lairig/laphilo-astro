@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 const branches = [
   {
     name: 'La métaphysique',
@@ -109,6 +110,11 @@ const branches = [
   <Favicons />
   <title>C'est quoi la philosophie ? Les 7 branches — La Philo</title>
   <meta name="description" content="Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage : les 7 grandes branches de la philosophie expliquées, avec vidéos et podcasts." />
+  <SeoHead
+    title="C'est quoi la philosophie ? Les 7 branches — La Philo"
+    description="Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage : les 7 grandes branches de la philosophie expliquées, avec vidéos et podcasts."
+    path="/definition/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

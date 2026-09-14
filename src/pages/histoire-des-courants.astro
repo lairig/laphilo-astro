@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 import data from '../data/definition-courants.json';
 
 const { intro, items } = data as {
@@ -24,6 +25,11 @@ const sections = Array.from(new Set(items.map((it) => it.section)));
   <Favicons />
   <title>Histoire des courants de pensée : Occident & Orient — La Philo</title>
   <meta name="description" content="Des présocratiques au structuralisme, des Upanishads au bouddhisme zen : les grandes familles de pensée occidentales et orientales expliquées par période." />
+  <SeoHead
+    title="Histoire des courants de pensée : Occident & Orient — La Philo"
+    description="Des présocratiques au structuralisme, des Upanishads au bouddhisme zen : les grandes familles de pensée occidentales et orientales expliquées par période."
+    path="/histoire-des-courants/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

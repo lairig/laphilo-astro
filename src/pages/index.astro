@@ -1,9 +1,30 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
 
 const philosophes = await getCollection('philosophes');
 const courants = await getCollection('courants');
+
+const title = `${philosophes.length} philosophes, ${courants.length} courants de pensée : LaPhilo.fr`;
+const description = `${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`;
+const path = '/';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'LaPhilo.fr',
+    url: new URL('/', Astro.site).toString(),
+    description,
+    inLanguage: 'fr-FR',
+    publisher: {
+      '@type': 'Organization',
+      name: 'LaPhilo.fr',
+      url: new URL('/', Astro.site).toString(),
+      logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).toString() },
+    },
+  },
+];
 ---
 
 <html lang="fr">
@@ -11,9 +32,9 @@ const courants = await getCollection('courants');
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
-  <title>{philosophes.length} philosophes, {courants.length} courants de pensée : LaPhilo.fr</title>
-  <meta name="description" content={`${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`} />
-  <meta name="theme-color" content="#2b1d0e" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path={path} jsonLd={jsonLd} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

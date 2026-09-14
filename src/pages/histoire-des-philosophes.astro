@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 import data from '../data/definition-philosophes.json';
 
 const { intro, items } = data as {
@@ -17,6 +18,11 @@ const westernCount = 13;
   <Favicons />
   <title>Histoire des philosophes : des présocratiques à aujourd'hui — La Philo</title>
   <meta name="description" content="Des présocratiques grecs aux penseurs contemporains, occidentaux et non-occidentaux : l'histoire de la philosophie racontée par grandes périodes et traditions." />
+  <SeoHead
+    title="Histoire des philosophes : des présocratiques à aujourd'hui — La Philo"
+    description="Des présocratiques grecs aux penseurs contemporains, occidentaux et non-occidentaux : l'histoire de la philosophie racontée par grandes périodes et traditions."
+    path="/histoire-des-philosophes/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

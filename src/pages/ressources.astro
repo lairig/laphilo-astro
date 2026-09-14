@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 ---
 
 <html lang="fr">
@@ -9,6 +10,11 @@ import Favicons from '../components/Favicons.astro';
   <Favicons />
   <title>Ressources utilisées — La Philo</title>
   <meta name="description" content="Sources et outils ayant contribué à la construction des frises et des contenus de LaPhilo.fr : Wikipédia, France Culture, Persée et chaînes YouTube de philosophie." />
+  <SeoHead
+    title="Ressources utilisées — La Philo"
+    description="Sources et outils ayant contribué à la construction des frises et des contenus de LaPhilo.fr : Wikipédia, France Culture, Persée et chaînes YouTube de philosophie."
+    path="/ressources/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

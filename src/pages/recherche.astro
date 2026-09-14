@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 ---
 
 <html lang="fr">
@@ -9,6 +10,11 @@ import Favicons from '../components/Favicons.astro';
   <Favicons />
   <title>Recherche — La Philo</title>
   <meta name="description" content="Recherche parmi les philosophes et courants de pensée : filtres par époque, nationalité, branche, courant et période." />
+  <SeoHead
+    title="Recherche — La Philo"
+    description="Recherche parmi les philosophes et courants de pensée : filtres par époque, nationalité, branche, courant et période."
+    path="/recherche/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

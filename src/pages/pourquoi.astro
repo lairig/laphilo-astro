@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import SeoHead from '../components/SeoHead.astro';
 ---
 
 <html lang="fr">
@@ -9,6 +10,11 @@ import Favicons from '../components/Favicons.astro';
   <Favicons />
   <title>Pourquoi ce site ? — La Philo</title>
   <meta name="description" content="La genèse de LaPhilo.fr : pourquoi ce site, par qui, et le lien entre philosophie et musique dans le projet Lairig." />
+  <SeoHead
+    title="Pourquoi ce site ? — La Philo"
+    description="La genèse de LaPhilo.fr : pourquoi ce site, par qui, et le lien entre philosophie et musique dans le projet Lairig."
+    path="/pourquoi/"
+  />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
