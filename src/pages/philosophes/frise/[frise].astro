@@ -7,20 +7,45 @@ import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
-  const bySource = new Map<string, { label: string; count: number }>();
+  const courants = await getCollection('courants');
+  const courantFriseByName = new Map(courants.map((c) => [c.data.name, c.data.frise_source]));
+
+  const bySource = new Map<string, { label: string; count: number; items: typeof philosophes }>();
   for (const entry of philosophes) {
     const key = entry.data.frise_source;
-    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0 });
-    bySource.get(key)!.count++;
+    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0, items: [] });
+    const bucket = bySource.get(key)!;
+    bucket.count++;
+    bucket.items.push(entry);
   }
-  return Array.from(bySource.entries()).map(([frise, { label, count }]) => ({
-    params: { frise },
-    props: { label, count },
-  }));
+  return Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
+    const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
+    const indexItems = sorted.map((entry) => {
+      const p = entry.data;
+      const courantLinks = (p.courants || [])
+        .map((name) => {
+          const cFrise = courantFriseByName.get(name);
+          return cFrise ? { href: `/courants/frise/${cFrise}/?p=${encodeURIComponent(name)}`, label: name } : null;
+        })
+        .filter((x): x is { href: string; label: string } => x !== null);
+      return {
+        name: p.name,
+        displayDate: p.display_date,
+        nationalite: p.nationalite,
+        courants: p.courants,
+        description: p.description,
+        courantLinks,
+      };
+    });
+    return {
+      params: { frise },
+      props: { label, count, indexItems },
+    };
+  });
 }
 
 const { frise } = Astro.params;
-const { label, count } = Astro.props;
+const { label, count, indexItems } = Astro.props;
 const cfg = philosopheFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9 };
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
@@ -80,6 +105,30 @@ const jsonLd = [
   <p set:html={description} />
   <div class="header-rule"></div>
 </header>
+
+<section class="ff-index" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
+  <h2>{label} ({count})</h2>
+  <ul>
+    {indexItems.map((it) => (
+      <li>
+        <strong>{it.name}</strong>
+        {' '}({it.displayDate}{it.nationalite ? ` · ${it.nationalite}` : ''}{it.courants && it.courants.length ? ` · ${it.courants.join(', ')}` : ''})
+        {' — '}{it.description}
+        {it.courantLinks.length > 0 && (
+          <span>
+            {' '}Courants associés :{' '}
+            {it.courantLinks.map((c, i) => (
+              <>
+                {i > 0 && ', '}
+                <a href={c.href}>{c.label}</a>
+              </>
+            ))}
+          </span>
+        )}
+      </li>
+    ))}
+  </ul>
+</section>
 
 <div class="frise-body" id="friseBody" style="visibility:hidden">
   <div class="frise-cols">

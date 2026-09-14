@@ -7,20 +7,32 @@ import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
-  const bySource = new Map<string, { label: string; count: number }>();
+  const bySource = new Map<string, { label: string; count: number; items: typeof courants }>();
   for (const entry of courants) {
     const key = entry.data.frise_source;
-    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0 });
-    bySource.get(key)!.count++;
+    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0, items: [] });
+    const bucket = bySource.get(key)!;
+    bucket.count++;
+    bucket.items.push(entry);
   }
-  return Array.from(bySource.entries()).map(([frise, { label, count }]) => ({
-    params: { frise },
-    props: { label, count },
-  }));
+  return Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
+    const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
+    const indexItems = sorted.map((entry) => ({
+      id: entry.id,
+      name: entry.data.name,
+      displayDate: entry.data.display_date,
+      branches: entry.data.branches,
+      description: entry.data.description,
+    }));
+    return {
+      params: { frise },
+      props: { label, count, indexItems },
+    };
+  });
 }
 
 const { frise } = Astro.params;
-const { label, count } = Astro.props;
+const { label, count, indexItems } = Astro.props;
 const cfg = courantFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9, mode: 'courant' };
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
@@ -80,6 +92,19 @@ const jsonLd = [
   <p set:html={description} />
   <div class="header-rule"></div>
 </header>
+
+<section class="ff-index" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
+  <h2>{label} ({count})</h2>
+  <ul>
+    {indexItems.map((it) => (
+      <li>
+        <strong><a href={`/courants/${it.id}/`}>{it.name}</a></strong>
+        {' '}({it.displayDate}{it.branches && it.branches.length ? ` · ${it.branches.join(', ')}` : ''})
+        {' — '}{it.description}
+      </li>
+    ))}
+  </ul>
+</section>
 
 <div class="frise-body" id="friseBody" style="visibility:hidden">
   <div class="frise-cols">
