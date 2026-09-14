@@ -57,3 +57,78 @@
   color: var(--parch-dark);
   white-space: nowrap;
 }
+
+/* ── Portraits philosophes flottants (desktop uniquement) ── */
+.philo-portrait {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.philo-portrait.visible {
+  opacity: 1;
+}
+.philo-portrait-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.philo-portrait img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: sepia(55%) brightness(.88) contrast(1.08);
+  border: 2px solid var(--parch-border);
+  box-shadow: 0 0 0 4px rgba(180,130,20,.18), 0 0 24px rgba(180,130,20,.22), 0 4px 18px rgba(0,0,0,.55);
+  display: block;
+}
+.philo-portrait-name {
+  margin-top: 7px;
+  font-family: 'Cinzel', serif;
+  font-size: .7rem;
+  font-style: italic;
+  color: var(--gold-light, #d4a843);
+  letter-spacing: .06em;
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0,0,0,.9), 0 0 12px rgba(180,130,20,.3);
+  white-space: nowrap;
+}
+.philo-portrait-dates {
+  font-size: .58rem;
+  color: rgba(212,168,67,.55);
+  letter-spacing: .08em;
+  text-align: center;
+  margin-top: 2px;
+}
+.philo-portrait-halo {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,130,20,.12) 0%, transparent 70%);
+  animation: halo-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes halo-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: .6; }
+  50% { transform: translateX(-50%) scale(1.25); opacity: 1; }
+}
+@keyframes drift-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-26px); }
+}
+@keyframes drift-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(26px); }
+}
+@media (max-width: 660px) {
+  .philo-portrait {
+    display: none;
+  }
+}
