@@ -1,0 +1,154 @@
+---
+import Favicons from '../components/Favicons.astro';
+import GoatCounter from '../components/GoatCounter.astro';
+import SeoHead from '../components/SeoHead.astro';
+
+const title = 'Page introuvable — La Philo';
+const description = "Page introuvable – Revenez à l'accueil de LaPhilo.fr pour explorer les frises chronologiques des philosophes et courants de pensée.";
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/404/" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" />
+
+  <style>
+    :root {
+      --bg:         #160d05;
+      --parch:      #f5ead6;
+      --gold:       #b8861a;
+      --gold-light: #d4a843;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      font-family: 'EB Garamond', serif;
+      color: var(--parch);
+      text-align: center;
+    }
+
+    .ornament {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      letter-spacing: .35em;
+      color: var(--gold);
+      opacity: .7;
+      margin-bottom: 1.4rem;
+    }
+
+    .code {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(5rem, 18vw, 9rem);
+      color: var(--gold-light);
+      line-height: 1;
+      text-shadow: 0 0 60px rgba(180,130,20,.25);
+      margin-bottom: .6rem;
+    }
+
+    .rule {
+      width: clamp(120px, 40vw, 280px);
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 0 auto 1.6rem;
+    }
+
+    .title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(.9rem, 3vw, 1.25rem);
+      font-weight: 600;
+      letter-spacing: .1em;
+      color: var(--parch);
+      margin-bottom: 1rem;
+    }
+
+    .message {
+      font-size: clamp(.9rem, 2.5vw, 1.05rem);
+      font-style: italic;
+      line-height: 1.9;
+      color: rgba(245,234,214,.72);
+      max-width: 480px;
+      margin: 0 auto 2.2rem;
+    }
+
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .7rem 1.6rem;
+      background: rgba(180,130,20,.12);
+      border: 1px solid rgba(180,130,20,.55);
+      border-radius: 4px;
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      transition: background .2s, border-color .2s;
+      margin: .4rem;
+    }
+    .btn-home:hover {
+      background: rgba(180,130,20,.22);
+      border-color: rgba(180,130,20,.85);
+    }
+    .btn-home .arrow { font-style: normal; }
+
+    .phi {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      opacity: .55;
+      margin-top: 3rem;
+      letter-spacing: .08em;
+    }
+  </style>
+</head>
+<body>
+
+  <p class="ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+
+  <div class="code">404</div>
+
+  <div class="rule"></div>
+
+  <h1 class="title">Cette page n'existe pas</h1>
+
+  <p class="message">
+    « Ce que nous ne savons pas est infiniment plus grand<br>
+    que ce que nous savons. » — Newton
+    <br><br>
+    La page que vous cherchez a peut-être été déplacée,<br>
+    renommée, ou n'a jamais existé.
+  </p>
+
+  <div>
+    <a href="/" class="btn-home">
+      <span class="arrow">←</span> Accueil
+    </a>
+    <a href="/plan-du-site/" class="btn-home">
+      Plan du site
+    </a>
+  </div>
+
+  <p class="phi">Φ</p>
+
+</body>
+</html>
