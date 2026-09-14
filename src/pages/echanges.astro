@@ -21,7 +21,12 @@ import Favicons from '../components/Favicons.astro';
 <a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
 
 <header class="site-header">
-  <a href="/" class="fha-btn" style="display:inline-block;margin-bottom:1rem;">⌂ Accueil</a>
+  <div class="sitemap-switcher">
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
   <h1 class="site-title">Échanges &amp; Contact</h1>
   <p class="site-subtitle">Une question, une suggestion, un espace de discussion</p>
   <div class="header-rule" aria-hidden="true"></div>

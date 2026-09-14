@@ -79,6 +79,17 @@ import Favicons from '../components/Favicons.astro';
       background-color: #eddfa0;
       color: #3d2410;
     }
+
+    /* .frise-header a un padding-top bien plus faible que .site-header
+       (pensé pour les pages de frise, où le bouton retour vit dans un
+       .frise-header-actions séparé au-dessus du <h1>). Ici le bouton
+       Accueil est en position absolute au même endroit que sur les pages
+       .site-header : sans marge supplémentaire, il chevauche le titre
+       "Recherche" en dessous de 480px. */
+    .frise-header { padding-top: 3rem; }
+    @media (max-width: 480px) {
+      .frise-header { padding-top: 2.6rem; }
+    }
   </style>
 </head>
 <body class="list-page-body">
