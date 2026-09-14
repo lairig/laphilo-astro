@@ -27,6 +27,12 @@
       var entry = pool[dayOfYear % pool.length];
       var entryCur = poolCur[(dayOfYear + 47) % poolCur.length];
 
+      var friseUrl = function (e, base) {
+        return e.frise ? '/' + base + '/frise/' + e.frise + '/' : e.url;
+      };
+      var entryFriseUrl = friseUrl(entry, 'philosophes');
+      var entryCurFriseUrl = friseUrl(entryCur, 'courants');
+
       var titleCase = function (s) {
         return s.toLowerCase().replace(/(^|[^a-zàâäéèêëïîôöùûüç])([a-zàâäéèêëïîôöùûüç])/gi, function (m, sep, c) {
           return sep + c.toUpperCase();
@@ -44,7 +50,7 @@
         '<div class="alaune-group">' +
         '  <span class="alaune-eyebrow">✦ À la une aujourd\'hui ✦</span>' +
         '  <div class="alaune-group-grid">' +
-        '    <a class="alaune-card alaune-card--phi" href="' + entry.url + '">' +
+        '    <a class="alaune-card alaune-card--phi" href="' + entryFriseUrl + '">' +
         '      <span class="alaune-subeyebrow">Philosophe à la une</span>' +
         '      <div class="alaune-inner">' +
         '        <img class="alaune-portrait" src="' + entry.thumbnail + '" alt="' + entry.name + '" width="72" height="72" loading="lazy">' +
@@ -56,7 +62,7 @@
         '        <span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
         '      </div>' +
         '    </a>' +
-        '    <a class="alaune-card alaune-card--cur" href="' + entryCur.url + '">' +
+        '    <a class="alaune-card alaune-card--cur" href="' + entryCurFriseUrl + '">' +
         '      <span class="alaune-subeyebrow">Courant de pensée à la une</span>' +
         '      <div class="alaune-inner">' +
         (domName ? '        <span class="alaune-dom-badge" style="--dom-hue:' + domHue + '">' + domName + '</span>' : '') +
