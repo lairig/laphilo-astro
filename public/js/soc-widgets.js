@@ -62,40 +62,4 @@
       });
     });
   }
-
-  /* Cusdis (Lieu d'échanges) */
-  function cusdisPatchIframeStyle(threadEl) {
-    var observer = new MutationObserver(function () {
-      var iframe = threadEl.querySelector('iframe');
-      if (!iframe || iframe.dataset.contrastPatch) return;
-      iframe.dataset.contrastPatch = '1';
-      var applyPatch = function () {
-        try {
-          var doc = iframe.contentDocument;
-          if (!doc || doc.getElementById('cusdis-contrast-patch')) return;
-          var style = doc.createElement('style');
-          style.id = 'cusdis-contrast-patch';
-          style.textContent = 'input,textarea{box-sizing:border-box!important;border:1px solid #8a8a8a!important;background:#fff!important;color:#111!important}' +
-            'input:focus,textarea:focus{border-color:#b8860b!important;box-shadow:0 0 0 2px rgba(184,134,11,.25)!important}';
-          doc.head.appendChild(style);
-          setTimeout(function () {
-            if (doc.body && doc.body.scrollHeight) iframe.style.height = doc.body.scrollHeight + 'px';
-          }, 50);
-        } catch (e) { /* cross-origin: silently ignore */ }
-      };
-      iframe.addEventListener('load', applyPatch);
-      applyPatch();
-      observer.disconnect();
-    });
-    observer.observe(threadEl, { childList: true });
-  }
-
-  var cusdisThread = document.querySelector('#cusdis_thread');
-  if (cusdisThread) {
-    cusdisPatchIframeStyle(cusdisThread);
-    var cusdisScript = document.createElement('script');
-    cusdisScript.src = 'https://cusdis.com/js/cusdis.es.js';
-    cusdisScript.async = true;
-    document.body.appendChild(cusdisScript);
-  }
 })();
