@@ -17,6 +17,11 @@ pnpm-debug.log*
 .env
 .env.production
 
+# credentials Google Search Console (suivi SEO, ne jamais publier)
+scripts/gsc-credentials.json
+scripts/seo-history.json
+scripts/rapports-seo/
+
 # macOS-specific files
 .DS_Store
 
