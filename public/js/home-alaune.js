@@ -1,9 +1,10 @@
 (function () {
-  fetch('/data/search-index.json')
+  fetch('/data/search-full-index.json')
     .then(function (r) { return r.json(); })
-    .then(function (idx) {
-      var phi = idx.filter(function (e) { return e.type === 'philosophe'; }).length;
-      var cur = idx.filter(function (e) { return e.type === 'courant'; }).length;
+    .then(function (data) {
+      var idx = (data && data.index) || [];
+      var phi = idx.filter(function (e) { return e.y === 'philosophe'; }).length;
+      var cur = idx.filter(function (e) { return e.y === 'courant'; }).length;
       var statsEl = document.getElementById('js-stats-fr');
       if (statsEl) {
         statsEl.innerHTML =
@@ -11,11 +12,11 @@
       }
 
       var pool = idx
-        .filter(function (e) { return e.type === 'philosophe' && e.thumbnail && e.description; })
-        .sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+        .filter(function (e) { return e.y === 'philosophe' && e.t && e.desc; })
+        .sort(function (a, b) { return a.n < b.n ? -1 : a.n > b.n ? 1 : 0; });
       var poolCur = idx
-        .filter(function (e) { return e.type === 'courant' && e.description; })
-        .sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+        .filter(function (e) { return e.y === 'courant' && e.desc; })
+        .sort(function (a, b) { return a.n < b.n ? -1 : a.n > b.n ? 1 : 0; });
 
       var wrap = document.getElementById('alaune-wrap');
       if (!wrap || !pool.length || !poolCur.length) return;
@@ -27,11 +28,11 @@
       var entry = pool[dayOfYear % pool.length];
       var entryCur = poolCur[(dayOfYear + 47) % poolCur.length];
 
-      var friseUrl = function (e, base) {
-        return e.frise ? '/' + base + '/frise/' + e.frise + '/?p=' + encodeURIComponent(e.name) : e.url;
+      var friseUrl = function (e) {
+        return e.u + '?p=' + encodeURIComponent(e.n);
       };
-      var entryFriseUrl = friseUrl(entry, 'philosophes');
-      var entryCurFriseUrl = friseUrl(entryCur, 'courants');
+      var entryFriseUrl = friseUrl(entry);
+      var entryCurFriseUrl = friseUrl(entryCur);
 
       var titleCase = function (s) {
         return s.toLowerCase().replace(/(^|[^a-zàâäéèêëïîôöùûüç])([a-zàâäéèêëïîôöùûüç])/gi, function (m, sep, c) {
@@ -40,7 +41,7 @@
       };
 
       var domHue = 0;
-      var domName = (entryCur.branches && entryCur.branches[0]) || '';
+      var domName = (entryCur.dom && entryCur.dom[0]) || '';
       for (var i = 0; i < domName.length; i++) {
         domHue = (domHue * 31 + domName.charCodeAt(i)) >>> 0;
       }
@@ -53,11 +54,11 @@
         '    <a class="alaune-card alaune-card--phi" href="' + entryFriseUrl + '">' +
         '      <span class="alaune-subeyebrow">Philosophe à la une</span>' +
         '      <div class="alaune-inner">' +
-        '        <img class="alaune-portrait" src="' + entry.thumbnail + '" alt="' + entry.name + '" width="72" height="72" loading="lazy">' +
+        '        <img class="alaune-portrait" src="' + entry.t + '" alt="' + entry.n + '" width="72" height="72" loading="lazy">' +
         '        <div class="alaune-text">' +
-        '          <span class="alaune-name">' + titleCase(entry.name) + '</span>' +
-        '          <span class="alaune-dates">' + (entry.date || '') + '</span>' +
-        '          <span class="alaune-desc">' + entry.description + '</span>' +
+        '          <span class="alaune-name">' + titleCase(entry.n) + '</span>' +
+        '          <span class="alaune-dates">' + (entry.d || '') + '</span>' +
+        '          <span class="alaune-desc">' + entry.desc + '</span>' +
         '        </div>' +
         '        <span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
         '      </div>' +
@@ -67,9 +68,9 @@
         '      <div class="alaune-inner">' +
         (domName ? '        <span class="alaune-dom-badge" style="--dom-hue:' + domHue + '">' + domName + '</span>' : '') +
         '        <div class="alaune-text">' +
-        '          <span class="alaune-name">' + entryCur.name + '</span>' +
-        '          <span class="alaune-dates">' + (entryCur.date || '') + '</span>' +
-        '          <span class="alaune-desc">' + entryCur.description + '</span>' +
+        '          <span class="alaune-name">' + entryCur.n + '</span>' +
+        '          <span class="alaune-dates">' + (entryCur.d || '') + '</span>' +
+        '          <span class="alaune-desc">' + entryCur.desc + '</span>' +
         '        </div>' +
         '        <span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
         '      </div>' +
