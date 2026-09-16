@@ -21,14 +21,19 @@
       var wrap = btn.closest('.soc-track-row').nextElementSibling;
       if (wrap.querySelector('iframe')) {
         wrap.innerHTML = '';
+        wrap.style.display = 'none';
         btn.querySelector('.soc-btn-listen-label').textContent = '▶ Écouter';
         return;
       }
-      document.querySelectorAll('.lrg-embed').forEach(function (w) { w.innerHTML = ''; });
+      document.querySelectorAll('.lrg-embed').forEach(function (w) {
+        w.innerHTML = '';
+        w.style.display = 'none';
+      });
       document.querySelectorAll('.soc-btn-listen-label').forEach(function (l) {
         l.textContent = '▶ Écouter';
       });
       wrap.innerHTML = '<iframe style="border-radius:8px;border:none;width:100%;margin-top:6px" height="80" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy" src="https://open.spotify.com/embed/track/' + btn.dataset.lrgTid + '?utm_source=generator&theme=0&autoplay=1"></iframe>';
+      wrap.style.display = 'block';
       btn.querySelector('.soc-btn-listen-label').textContent = '■ Stop';
     });
   });
