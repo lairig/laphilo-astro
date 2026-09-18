@@ -1,0 +1,145 @@
+---
+import Favicons from '../../../components/Favicons.astro';
+import GoatCounter from '../../../components/GoatCounter.astro';
+import SeoHead from '../../../components/SeoHead.astro';
+import { getCollection } from 'astro:content';
+import { courantBranchGroups } from '../../../data/frise-engine-config';
+
+const courants = await getCollection('courants');
+const occidentaux = courants.filter((c) => c.data.frise_source === 'occidental');
+
+const cards = courantBranchGroups.map((group) => {
+  const count = occidentaux.filter((c) => (c.data.branches || []).some((b) => group.branches.includes(b))).length;
+  return {
+    name: group.shortLabel,
+    text: group.description,
+    count,
+    href: `/courants/frise/${group.slug}/`,
+  };
+});
+
+const title = 'La Pensée occidentale — Choisir une frise — La Philo';
+const description = "Explorez les 165 courants de pensée occidentaux par grand thème (métaphysique & théologie, politique & éthique, connaissance & sciences) ou parcourez la frise complète.";
+const path = '/courants/occidental/';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 2, name: 'Toutes les frises', item: new URL('/frises/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: 'La Pensée occidentale', item: new URL(path, Astro.site).toString() },
+    ],
+  },
+];
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path={path} jsonLd={jsonLd} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <div class="sitemap-switcher">
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
+  <h1 class="site-title">La Pensée occidentale</h1>
+  <p class="site-subtitle">165 courants, quatre façons de les parcourir</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page">
+  <div class="intro-text-col">
+    <p style="font-size:.88rem;line-height:1.8;color:var(--ink-light);margin-bottom:1.4rem;">
+      La frise complète des courants de pensée occidentaux réunit 165 fiches, des présocratiques au XXI<sup>e</sup> siècle.
+      Pour une lecture plus ciblée, choisissez l'une des trois frises thématiques ci-dessous — chacune reprend le même
+      classement chronologique, filtré par grande branche philosophique.
+    </p>
+  </div>
+
+  <div class="drawer-intro-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <div class="acc-list">
+    <div class="acc-item">
+      <button class="acc-toggle" aria-expanded="false" type="button">
+        <span class="acc-name">Frise complète</span>
+        <span class="acc-date">{occidentaux.length} fiches · toutes époques</span>
+        <span class="acc-chevron" aria-hidden="true">▶</span>
+      </button>
+      <div class="acc-content">
+        <div class="acc-text">
+          Des présocratiques au wokisme : la ligne du temps intégrale des 165 courants de la pensée philosophique occidentale.
+          <br />
+          <div style="display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap;">
+            <a href="/courants/frise/occidental/" class="parch-link">Accéder à la frise →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {cards.map((card) => (
+      <div class="acc-item">
+        <button class="acc-toggle" aria-expanded="false" type="button">
+          <span class="acc-name">{card.name}</span>
+          <span class="acc-date">{card.count} fiches</span>
+          <span class="acc-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="acc-content">
+          <div class="acc-text">
+            {card.text}
+            <br />
+            <div style="display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap;">
+              <a href={card.href} class="parch-link">Accéder à la frise →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-social-nav" aria-label="Lien Social">
+    <a class="footer-social-btn" href="/" aria-label="Accueil">
+      <span class="footer-social-icon">⌂</span>
+      <span class="footer-social-label">Accueil</span>
+    </a>
+    <a class="footer-social-btn" href="/plan-du-site/" aria-label="Plan du site">
+      <span class="footer-social-icon">🗺</span>
+      <span class="footer-social-label">Plan du site</span>
+    </a>
+    <a class="footer-social-btn" href="/recherche/" aria-label="Recherche">
+      <span class="footer-social-icon">🔍</span>
+      <span class="footer-social-label">Recherche</span>
+    </a>
+  </nav>
+  <p>© 2026 – laphilo.fr – Tous droits réservés</p>
+</footer>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/accordion.js" defer></script>
+
+</body>
+</html>

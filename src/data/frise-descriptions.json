@@ -11,5 +11,8 @@
   "renaissance-lumieres": "La Renaissance & les Lumières (1500 à 1780) : Descartes, Montesquieu, Machiavel, Voltaire, Pascal.",
   "russes": "De Lomonossov au postmodernisme russe : slavophiles, nihilistes, cosmistes, existentialistes, anarchistes.",
   "occidental": "De la Grèce antique à nos jours : présocratiques, stoïcisme, platonisme, existentialisme, phénoménologie…",
-  "oriental": "De l'Égypte antique à nos jours : mysticisme, taoïsme, confucianisme, bouddhisme, jaïnisme, hindouisme…"
+  "oriental": "De l'Égypte antique à nos jours : mysticisme, taoïsme, confucianisme, bouddhisme, jaïnisme, hindouisme…",
+  "occidental--metaphysique-theologie": "L'être et le divin, du polythéisme antique aux métaphysiques modernes : platonisme, théologie chrétienne, idéalisme, phénoménologie…",
+  "occidental--politique-ethique": "Le pouvoir et la vie bonne : cités grecques, contrat social, libéralisme, socialisme, éthiques contemporaines…",
+  "occidental--connaissance-sciences": "Ce que l'on peut savoir : logique antique, empirisme, rationalisme, positivisme, philosophie des sciences et de l'esprit…"
 }

@@ -3,7 +3,7 @@ import Favicons from '../../../components/Favicons.astro';
 import GoatCounter from '../../../components/GoatCounter.astro';
 import SeoHead from '../../../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
-import { courantFriseConfig } from '../../../data/frise-engine-config';
+import { courantFriseConfig, courantBranchGroups } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
@@ -16,7 +16,8 @@ export async function getStaticPaths() {
     bucket.count++;
     bucket.items.push(entry);
   }
-  return Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
+
+  const sourcePaths = Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
     const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
     const indexItems = sorted.map((entry) => ({
       id: entry.id,
@@ -30,6 +31,25 @@ export async function getStaticPaths() {
       props: { label, count, indexItems },
     };
   });
+
+  const occidentaux = courants.filter((c) => c.data.frise_source === 'occidental');
+  const branchGroupPaths = courantBranchGroups.map((group) => {
+    const items = occidentaux.filter((c) => (c.data.branches || []).some((b) => group.branches.includes(b)));
+    const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
+    const indexItems = sorted.map((entry) => ({
+      id: entry.id,
+      name: entry.data.name,
+      displayDate: entry.data.display_date,
+      branches: entry.data.branches,
+      description: entry.data.description,
+    }));
+    return {
+      params: { frise: group.slug },
+      props: { label: group.label, count: sorted.length, indexItems },
+    };
+  });
+
+  return [...sourcePaths, ...branchGroupPaths];
 }
 
 const { frise } = Astro.params;

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { courantBranchGroups } from '../../../data/frise-engine-config';
 
 function escapeAttr(s: string) {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
@@ -68,7 +69,8 @@ function getRepresentants(
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
   const frises = new Set(courants.map((c) => c.data.frise_source));
-  return Array.from(frises).map((frise) => ({ params: { frise } }));
+  const branchGroupSlugs = courantBranchGroups.map((g) => g.slug);
+  return [...Array.from(frises), ...branchGroupSlugs].map((frise) => ({ params: { frise } }));
 }
 
 export const GET: APIRoute = async ({ params }) => {
@@ -88,8 +90,14 @@ export const GET: APIRoute = async ({ params }) => {
     }
   }
 
+  const branchGroup = courantBranchGroups.find((g) => g.slug === params.frise);
+
   const items = courants
-    .filter((c) => c.data.frise_source === params.frise)
+    .filter((c) =>
+      branchGroup
+        ? c.data.frise_source === 'occidental' && (c.data.branches || []).some((b) => branchGroup.branches.includes(b))
+        : c.data.frise_source === params.frise,
+    )
     .slice()
     .sort((a, b) => a.data.year - b.data.year);
 
