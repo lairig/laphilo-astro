@@ -479,7 +479,9 @@
     function renderCurBranchGroups(colorVal) {
       if (!curBranchRow) return;
       _filters.curBranchGroup = '';
-      var groups = colorVal === 'courant-occ' ? (_meta.courantBranchGroups || []) : [];
+      var srcMap = { 'courant-occ': 'occidental', 'courant-ori': 'oriental' };
+      var src = srcMap[colorVal];
+      var groups = src ? (_meta.courantBranchGroups || []).filter(function (g) { return g.source === src; }) : [];
       if (!groups.length) { curBranchRow.hidden = true; curBranchRow.innerHTML = ''; return; }
       curBranchRow.innerHTML = groups.map(function (g) { return '<button class="phi-cur-subera-btn" data-branch-group="' + g.slug + '">' + g.label + '</button>'; }).join('');
       curBranchRow.hidden = false;

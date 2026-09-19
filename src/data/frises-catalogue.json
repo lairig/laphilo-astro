@@ -18,8 +18,13 @@
         {
           "name": "La Pensée orientale",
           "tag": "Toutes époques",
-          "text": "Confucianisme, Taoïsme, Soufisme, Ubuntu… découvrez la frise complète des courants de la pensée philosophique orientale. De la Chine ancienne à l'Inde védique, du Japon médiéval à l'Afrique subsaharienne, cette frise révèle la richesse et la diversité des réponses que l'humanité a apportées aux grandes questions de l'existence.",
-          "href": "/courants/frise/oriental/"
+          "text": "Confucianisme, Taoïsme, Soufisme, Ubuntu… découvrez les courants de la pensée philosophique orientale : la frise complète (64 fiches), ou trois frises thématiques plus courtes — théologie &amp; spiritualité, politique &amp; métaphysique, logique, éthique &amp; sciences.",
+          "links": [
+            { "label": "Frise complète", "href": "/courants/frise/oriental/" },
+            { "label": "Théologie &amp; Spiritualité", "href": "/courants/frise/oriental--theologie-spiritualite/" },
+            { "label": "Politique &amp; Métaphysique", "href": "/courants/frise/oriental--politique-metaphysique/" },
+            { "label": "Logique, Éthique &amp; Sciences", "href": "/courants/frise/oriental--logique-ethique-sciences/" }
+          ]
         }
       ]
     },

@@ -95,7 +95,7 @@ export const GET: APIRoute = async ({ params }) => {
   const items = courants
     .filter((c) =>
       branchGroup
-        ? c.data.frise_source === 'occidental' && (c.data.branches || []).some((b) => branchGroup.branches.includes(b))
+        ? c.data.frise_source === branchGroup.source && (c.data.branches || []).some((b) => branchGroup.branches.includes(b))
         : c.data.frise_source === params.frise,
     )
     .slice()

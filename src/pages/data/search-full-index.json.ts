@@ -91,6 +91,7 @@ export const GET: APIRoute = async () => {
       curs: Array.from(cursSet).sort(),
       courantBranchGroups: courantBranchGroups.map((g) => ({
         slug: g.slug,
+        source: g.source,
         label: g.shortLabel,
         branches: g.branches,
       })),

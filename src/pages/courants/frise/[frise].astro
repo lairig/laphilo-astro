@@ -32,9 +32,9 @@ export async function getStaticPaths() {
     };
   });
 
-  const occidentaux = courants.filter((c) => c.data.frise_source === 'occidental');
   const branchGroupPaths = courantBranchGroups.map((group) => {
-    const items = occidentaux.filter((c) => (c.data.branches || []).some((b) => group.branches.includes(b)));
+    const sourceItems = courants.filter((c) => c.data.frise_source === group.source);
+    const items = sourceItems.filter((c) => (c.data.branches || []).some((b) => group.branches.includes(b)));
     const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
     const indexItems = sorted.map((entry) => ({
       id: entry.id,
@@ -113,10 +113,10 @@ const jsonLd = [
   <h1>{label}</h1>
   <p set:html={description} />
   <div class="header-rule"></div>
-  {frise === 'occidental' && (
+  {(frise === 'occidental' || frise === 'oriental') && (
     <div class="frise-branch-filters" id="friseBranchFilters" role="group" aria-label="Filtrer par thème">
       <button type="button" class="fbf-btn fbf-btn--active" data-branches="[]">Tout</button>
-      {courantBranchGroups.map((group) => (
+      {courantBranchGroups.filter((group) => group.source === frise).map((group) => (
         <button type="button" class="fbf-btn" data-branches={JSON.stringify(group.branches)}>{group.shortLabel}</button>
       ))}
     </div>
@@ -168,7 +168,7 @@ const jsonLd = [
 
 <script src="/js/frise-engine.js" defer></script>
 
-{frise === 'occidental' && (
+{(frise === 'occidental' || frise === 'oriental') && (
   <script>
     (function () {
       var wrap = document.getElementById('friseBranchFilters');
