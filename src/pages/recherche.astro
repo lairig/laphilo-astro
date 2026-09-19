@@ -78,6 +78,26 @@ import SeoHead from '../components/SeoHead.astro';
     }
     .list-page .phi-all-count { color: #d4a843; }
 
+    /* Même bug que .phi-all-btn ci-dessus : les boutons de sous-filtre
+       courant (sous-époque "Actuel/Moderne/Antique" et groupes
+       thématiques "Politique & Éthique"…) utilisent un texte rust sur
+       fond quasi transparent, pensé pour le fond parchemin clair du
+       drawer original — illisible sur le fond sombre de cette page. */
+    .list-page .phi-cur-subera-btn {
+      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
+      color: #3d2410;
+      border-color: rgba(61, 36, 16, 0.4);
+    }
+    .list-page .phi-cur-subera-btn:hover {
+      background: linear-gradient(160deg, #f0dca0 0%, #e0c07a 100%);
+      color: #1e1208;
+    }
+    .list-page .phi-cur-subera-btn--active {
+      background: linear-gradient(160deg, #e0c07a 0%, #c9a052 100%);
+      color: #1e1208;
+      border-color: #8b3a0f;
+    }
+
     /* Le menu déroulant OUVERT d'un <select> (les <option>) est rendu par le
        navigateur/OS, pas par la page — le CSS ne peut y appliquer que
        background-color/color (pas de gradient ni de police custom). On garde
