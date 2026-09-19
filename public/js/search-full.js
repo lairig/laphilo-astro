@@ -183,13 +183,13 @@
       '<option value="renaissance">Renaissance</option>' +
       '<option value="modernes">Modernes</option>' +
       '</select></div>' +
-      '<div class="phi-all-filter-row">' +
+      '<div class="phi-all-filter-row phi-all-nat-row">' +
       '<span class="phi-all-filter-lbl">Nationalité</span>' +
       '<select class="phi-all-select" id="' + uid + '-nat-sel"><option value="">— Toutes origines —</option></select></div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Branche</span>' +
       '<select class="phi-all-select" id="' + uid + '-dom-sel"><option value="">— Toutes branches —</option></select></div>' +
-      '<div class="phi-all-filter-row">' +
+      '<div class="phi-all-filter-row phi-all-cur-row">' +
       '<span class="phi-all-filter-lbl">Courant</span>' +
       '<select class="phi-all-select" id="' + uid + '-cur-sel"><option value="">— Tous courants —</option></select></div>' +
       '<div class="phi-all-filter-row">' +
@@ -240,8 +240,10 @@
     var primaryBtns = container.querySelectorAll('.phi-all-primary-btn');
     var eraSel = container.querySelector('#' + uid + '-era-sel');
     var natSel = container.querySelector('#' + uid + '-nat-sel');
+    var natRow = container.querySelector('.phi-all-nat-row');
     var domSel = container.querySelector('#' + uid + '-dom-sel');
     var curSel = container.querySelector('#' + uid + '-cur-sel');
+    var curRow = container.querySelector('.phi-all-cur-row');
     var yearFromSel = container.querySelector('#' + uid + '-year-from');
     var yearToSel = container.querySelector('#' + uid + '-year-to');
     var modeTabs = container.querySelectorAll('.phi-all-mode-tab');
@@ -388,8 +390,11 @@
       var isCourant = tx === 'courant-all' || tx === 'courant-occ' || tx === 'courant-ori';
       if (natSel) { natSel.disabled = isCourant; if (isCourant) { natSel.value = ''; _filters.nat = ''; } }
       if (curSel) { curSel.disabled = isCourant; if (isCourant) { curSel.value = ''; _filters.cur = ''; } }
+      if (natRow) natRow.hidden = isCourant;
+      if (curRow) curRow.hidden = isCourant;
       if (colorRow) { colorRow.classList.toggle('phi-all-color-row--hidden', isCourant); if (isCourant && _filters.color) setColorFilter(''); }
       if (curColorRow) { curColorRow.classList.toggle('phi-all-color-row--hidden', !isCourant); if (!isCourant && _filters.curColor) setCurColorFilter(''); }
+      curColorRow.classList.toggle('phi-all-cur-color-row--emphasis', isCourant);
     }
 
     function populateSubType(primary, preferredValue) {
