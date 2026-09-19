@@ -6,6 +6,7 @@ import {
   epoqueFromYear,
   branchOfCourant,
 } from '../../data/search-frise-meta';
+import { courantBranchGroups } from '../../data/frise-engine-config';
 
 export const GET: APIRoute = async () => {
   const philosophes = await getCollection('philosophes');
@@ -88,6 +89,11 @@ export const GET: APIRoute = async () => {
       doms: Array.from(domsSet).sort(),
       doms_cur: Array.from(domsCurSet).sort(),
       curs: Array.from(cursSet).sort(),
+      courantBranchGroups: courantBranchGroups.map((g) => ({
+        slug: g.slug,
+        label: g.shortLabel,
+        branches: g.branches,
+      })),
     },
     index,
   };

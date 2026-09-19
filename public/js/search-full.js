@@ -216,7 +216,8 @@
           '<button class="phi-cur-color-btn" data-cur-color="' + c.v + '" title="' + c.fr + '" aria-label="' + c.fr + '" style="background:' + c.grad + '"></button>' +
           '<span class="phi-color-item-lbl">' + c.fr + '</span></span>';
       }).join('') +
-      '</div><div class="phi-cur-subera-row" hidden></div></div>' +
+      '</div><div class="phi-cur-subera-row" hidden></div>' +
+      '<div class="phi-cur-branch-row" hidden></div></div>' +
       '<div class="phi-all-count" id="' + uid + '-count"></div>' +
       '<ul class="phi-all-list" id="' + uid + '-list"></ul>' +
       '<button class="phi-all-more" id="' + uid + '-more" hidden>Afficher plus…</button>' +
@@ -235,6 +236,7 @@
     var curColorBtns = container.querySelectorAll('.phi-cur-color-btn');
     var curColorRow = container.querySelector('.phi-all-cur-color-row');
     var curSuberaRow = container.querySelector('.phi-cur-subera-row');
+    var curBranchRow = container.querySelector('.phi-cur-branch-row');
     var primaryBtns = container.querySelectorAll('.phi-all-primary-btn');
     var eraSel = container.querySelector('#' + uid + '-era-sel');
     var natSel = container.querySelector('#' + uid + '-nat-sel');
@@ -246,7 +248,7 @@
     var alphaRow = container.querySelector('.phi-all-alpha-row');
 
     var _mode = 'alpha';
-    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curSubera: '', yearFrom: null, yearTo: null };
+    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curSubera: '', curBranchGroup: '', yearFrom: null, yearTo: null };
     var _query = '';
     var _page = 1;
     var _debounce = null;
@@ -272,6 +274,10 @@
         var defs = COURANT_SUBERAS[_filters.curColor] || [];
         var def = defs.filter(function (s) { return s.v === _filters.curSubera; })[0];
         if (def && def.epoques.indexOf(p.epoque) === -1) return false;
+      }
+      if (_filters.curBranchGroup) {
+        var groupDef = (_meta.courantBranchGroups || []).filter(function (g) { return g.slug === _filters.curBranchGroup; })[0];
+        if (groupDef && (!p.dom || !p.dom.some(function (d) { return groupDef.branches.indexOf(d) !== -1; }))) return false;
       }
       if ((_filters.yearFrom !== null || _filters.yearTo !== null) && !inYearRange(p, _filters.yearFrom, _filters.yearTo)) return false;
       return true;
@@ -470,11 +476,30 @@
         });
       });
     }
+    function renderCurBranchGroups(colorVal) {
+      if (!curBranchRow) return;
+      _filters.curBranchGroup = '';
+      var groups = colorVal === 'courant-occ' ? (_meta.courantBranchGroups || []) : [];
+      if (!groups.length) { curBranchRow.hidden = true; curBranchRow.innerHTML = ''; return; }
+      curBranchRow.innerHTML = groups.map(function (g) { return '<button class="phi-cur-subera-btn" data-branch-group="' + g.slug + '">' + g.label + '</button>'; }).join('');
+      curBranchRow.hidden = false;
+      curBranchRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var v = btn.dataset.branchGroup;
+          var isActive = _filters.curBranchGroup === v;
+          curBranchRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (b) { b.classList.remove('phi-cur-subera-btn--active'); });
+          _filters.curBranchGroup = isActive ? '' : v;
+          if (!isActive) btn.classList.add('phi-cur-subera-btn--active');
+          refresh();
+        });
+      });
+    }
     function setCurColorFilter(c) {
       _filters.curColor = c;
       curColorBtns.forEach(function (b) { b.classList.remove('phi-cur-color-btn--active'); });
       if (c) { var a = container.querySelector('.phi-cur-color-btn[data-cur-color="' + c + '"]'); if (a) a.classList.add('phi-cur-color-btn--active'); }
       renderCurSuberas(c);
+      renderCurBranchGroups(c);
     }
     curColorBtns.forEach(function (btn) { btn.addEventListener('click', function () { setCurColorFilter(_filters.curColor === btn.dataset.curColor ? '' : btn.dataset.curColor); refresh(); }); });
 

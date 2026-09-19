@@ -138,7 +138,7 @@
 .phi-color-btn:hover,.phi-cur-color-btn:hover{transform:scale(1.15);border-color:#8b3a0f}
 .phi-color-btn--active,.phi-cur-color-btn--active{border-color:#1e1208;box-shadow:0 0 0 2px #f7ecce,0 0 0 3px #8b3a0f,inset 0 0 0 1px rgba(0,0,0,.15)}
 .phi-color-item-lbl{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.02em;text-align:center;color:#8b3a0f;line-height:1.15;text-transform:uppercase;height:2.3em;display:flex;align-items:flex-start;justify-content:center}
-.phi-cur-subera-row{display:flex;flex-wrap:wrap;gap:.35rem;flex-basis:100%;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed rgba(139,58,15,.25)}
+.phi-cur-subera-row,.phi-cur-branch-row{display:flex;flex-wrap:wrap;gap:.35rem;flex-basis:100%;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed rgba(139,58,15,.25)}
 .phi-cur-subera-btn{padding:.24rem .7rem;border-radius:11px;border:1px solid rgba(139,58,15,.4);background:rgba(90,55,15,.08);color:#8b3a0f;font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .phi-cur-subera-btn:hover{background:rgba(139,58,15,.16);border-color:#8b3a0f;color:#1e1208}
 .phi-cur-subera-btn--active{background:rgba(139,58,15,.24);border-color:#8b3a0f;color:#1e1208;font-weight:700}
@@ -237,3 +237,8 @@ a.cross-link-badge:hover{background:rgba(180,130,20,.24);border-color:rgba(180,1
 @media (max-width:768px){.cross-links-list{gap:.5rem}.cross-link-badge{font-size:.72rem;padding:.5rem .75rem;min-height:44px;display:inline-flex;align-items:center}}
 @media (orientation:landscape) and (max-height:500px){.cross-links{margin-top:.6rem;padding-top:.5rem;padding-bottom:.6rem}.cross-links-label{font-size:.46rem;margin-bottom:.3rem}.cross-link-badge{font-size:.66rem;padding:.22rem .5rem;min-height:0}}
 @media (orientation:landscape) and (max-height:500px){.frise-header-actions{display:none}}
+.frise-branch-filters{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem;margin-top:.8rem}
+.fbf-btn{display:inline-flex;align-items:center;font-family:'Cinzel',serif;font-size:.56rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-light,#d4a843);border:1px solid rgba(180,130,20,.5);border-radius:12px;padding:.32rem .8rem;background:rgba(180,130,20,.07);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.fbf-btn:hover{background:rgba(180,130,20,.2);border-color:var(--gold,#b8860b)}
+.fbf-btn--active{background:var(--gold,#b8860b);border-color:var(--gold,#b8860b);color:#1e1208}
+@media (orientation:landscape) and (max-height:500px){.frise-branch-filters{display:none}}

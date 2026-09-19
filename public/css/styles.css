@@ -188,7 +188,7 @@
 .phi-color-btn:hover,.phi-cur-color-btn:hover{transform:scale(1.15);border-color:var(--rust)}
 .phi-color-btn--active,.phi-cur-color-btn--active{border-color:var(--ink);box-shadow:0 0 0 2px var(--parch-light),0 0 0 3px var(--rust),inset 0 0 0 1px rgba(0,0,0,.15)}
 .phi-color-item-lbl{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.02em;text-align:center;color:var(--rust);line-height:1.15;text-transform:uppercase;height:2.3em;display:flex;align-items:flex-start;justify-content:center}
-.phi-cur-subera-row{display:flex;flex-wrap:wrap;gap:.35rem;flex-basis:100%;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed rgba(139,58,15,.25)}
+.phi-cur-subera-row,.phi-cur-branch-row{display:flex;flex-wrap:wrap;gap:.35rem;flex-basis:100%;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed rgba(139,58,15,.25)}
 .phi-cur-subera-btn{padding:.24rem .7rem;border-radius:11px;border:1px solid rgba(139,58,15,.4);background:rgba(90,55,15,.08);color:var(--rust);font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .phi-cur-subera-btn:hover{background:rgba(139,58,15,.16);border-color:var(--rust);color:var(--ink-mid)}
 .phi-cur-subera-btn--active{background:rgba(139,58,15,.24);border-color:var(--rust);color:var(--ink);font-weight:700}

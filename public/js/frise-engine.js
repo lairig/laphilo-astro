@@ -106,7 +106,8 @@
   /* ══════════════════════════════════════════════════════
      2. ÉTAT GLOBAL
   ══════════════════════════════════════════════════════ */
-  let DATA    = [];
+  let DATA     = [];
+  let DATA_ALL = []; /* copie non filtrée, pour restaurer après un filtre par branche */
   let current = 0;
   let _initialized = false;
   let IFRAME_BLOCKED_DOMAINS = [];
@@ -209,8 +210,10 @@
       }
       return entry;
     });
+    DATA_ALL = DATA.slice();
 
     setProgress(85, _isEN ? 'Building the timeline…' : 'Construction de la frise…');
+    initSlideDelegation();
     buildNav();
     buildSlides();
 
@@ -772,6 +775,14 @@
         });
       });
     });
+  }
+
+  /* ── Délégation d'événements sur #slidesContainer, attachée une seule
+     fois (buildSlides() peut être rappelée par applyBranchFilter() pour
+     reconstruire les slides ; ré-attacher ces listeners à chaque appel
+     les empilerait en doublons) ── */
+  function initSlideDelegation() {
+    const container = document.getElementById('slidesContainer');
 
     /* ── Délégation : boutons YouTube ── */
     container.addEventListener('click', e => {
@@ -1230,6 +1241,19 @@
   }
 
   /* ══════════════════════════════════════════════════════
+     10b. FILTRE PAR BRANCHE (mode 'courant' uniquement)
+  ══════════════════════════════════════════════════════ */
+  function applyBranchFilter(branches) {
+    DATA = (branches && branches.length)
+      ? DATA_ALL.filter(p => (p.branches || []).some(b => branches.indexOf(b) !== -1))
+      : DATA_ALL.slice();
+    if (!DATA.length) DATA = DATA_ALL.slice();
+    buildNav();
+    buildSlides();
+    goTo(0);
+  }
+
+  /* ══════════════════════════════════════════════════════
      11. NAVIGATION
   ══════════════════════════════════════════════════════ */
   function goTo(index) {
@@ -1491,7 +1515,7 @@
      18. API PUBLIQUE  (pour les onclick inline du HTML)
          window._frise.goTo(n) / window._frise.zoomFrise(dir)
   ══════════════════════════════════════════════════════ */
-  window._frise = { goTo, zoomFrise, showFriseListDrawer: () => showFriseListDrawer(
+  window._frise = { goTo, zoomFrise, applyBranchFilter, showFriseListDrawer: () => showFriseListDrawer(
     document.querySelector('.frise-header h1') ? document.querySelector('.frise-header h1').textContent.trim() : ''
   ) };
 
