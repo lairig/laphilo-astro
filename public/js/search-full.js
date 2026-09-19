@@ -345,7 +345,7 @@
         var isCourantItem = p.y === 'courant';
         var badgeHtml = (p.badgeFr && !isCourantItem) ? '<span class="phi-result-badge phi-result-badge--' + p.badgeCls + '">' + p.badgeFr + '</span>' : '';
         var thumb = isCourantItem
-          ? '<img src="/favicon/logo.svg" alt="" class="phi-result-thumb" style="object-fit:contain;padding:3px;">'
+          ? '<img src="/favicon.svg" alt="" class="phi-result-thumb" style="object-fit:contain;padding:3px;">'
           : (p.t ? '<img src="' + p.t + '" alt="" class="phi-result-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
             : '<span class="phi-result-thumb phi-result-thumb--ph"></span>');
         var href = p.u + '?p=' + encodeURIComponent(p.n);
