@@ -48,6 +48,13 @@
 .sitemap-card--orient:hover { border-left-color:#c0a8f8; }
 .sitemap-card--orient .sitemap-card-title { color:#c0a8f8; }
 
+/* Carte à plusieurs liens (pas de cible unique cliquable) */
+.sitemap-card--multi { cursor:default; }
+.sitemap-card--multi:hover { transform:none; box-shadow:none; }
+.sitemap-card-links { display:flex; flex-wrap:wrap; gap:.3rem .9rem; margin-top:.4rem; }
+.sitemap-card-links a { font-family:'Cinzel',serif; font-size:.68rem; letter-spacing:.05em; color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(184,134,11,.35); padding-bottom:1px; transition:color .2s,border-color .2s; }
+.sitemap-card-links a:hover { color:var(--gold-light); border-color:var(--gold-light); }
+
 .sitemap-card--drawer { background:linear-gradient(145deg,rgba(180,130,20,.09) 0%,rgba(180,130,20,.05) 100%); border-left-color:var(--gold); }
 .sitemap-card--drawer:hover { border-left-color:var(--gold-light); }
 .sitemap-card--drawer .sitemap-card-title { color:var(--gold-light); }

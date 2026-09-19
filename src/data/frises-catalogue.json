@@ -8,7 +8,12 @@
           "name": "La Pensée occidentale",
           "tag": "Toutes époques",
           "text": "Des présocratiques au wokisme, découvrez les courants de la pensée philosophique occidentale : la frise complète (165 fiches), ou trois frises thématiques plus courtes — métaphysique &amp; théologie, politique &amp; éthique, connaissance &amp; sciences.",
-          "href": "/courants/occidental/"
+          "links": [
+            { "label": "Frise complète", "href": "/courants/frise/occidental/" },
+            { "label": "Métaphysique &amp; Théologie", "href": "/courants/frise/occidental--metaphysique-theologie/" },
+            { "label": "Politique &amp; Éthique", "href": "/courants/frise/occidental--politique-ethique/" },
+            { "label": "Connaissance &amp; Sciences", "href": "/courants/frise/occidental--connaissance-sciences/" }
+          ]
         },
         {
           "name": "La Pensée orientale",

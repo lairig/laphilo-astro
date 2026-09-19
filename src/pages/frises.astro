@@ -6,7 +6,16 @@ import data from '../data/frises-catalogue.json';
 
 const { intro, groups } = data as {
   intro: string;
-  groups: { label: string; items: { name: string; tag: string; text: string; href: string }[] }[];
+  groups: {
+    label: string;
+    items: {
+      name: string;
+      tag: string;
+      text: string;
+      href?: string;
+      links?: { label: string; href: string }[];
+    }[];
+  }[];
 };
 ---
 
@@ -80,7 +89,11 @@ const { intro, groups } = data as {
                 {it.text}
                 <br />
                 <div style="display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap;">
-                  <a href={it.href} class="parch-link">Accéder à la frise →</a>
+                  {it.links
+                    ? it.links.map((link) => (
+                        <a href={link.href} class="parch-link" set:html={`${link.label} →`} />
+                      ))
+                    : <a href={it.href} class="parch-link">Accéder à la frise →</a>}
                 </div>
               </div>
             </div>
