@@ -210,7 +210,9 @@
           '<span class="phi-color-item-lbl">' + c.fr + '</span></span>';
       }).join('') +
       '</div></div>' +
-      '<div class="phi-all-filter-row phi-all-cur-color-row"><div class="phi-all-colors">' +
+      '<div class="phi-all-filter-row phi-all-cur-color-row">' +
+      '<span class="phi-all-filter-lbl phi-cur-color-lbl">Tradition</span>' +
+      '<div class="phi-all-colors">' +
       COURANT_COLOR_FILTERS.map(function (c) {
         return '<span class="phi-color-item">' +
           '<button class="phi-cur-color-btn" data-cur-color="' + c.v + '" title="' + c.fr + '" aria-label="' + c.fr + '" style="background:' + c.grad + '"></button>' +
