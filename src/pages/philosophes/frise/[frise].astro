@@ -50,7 +50,11 @@ const { label, count, indexItems } = Astro.props;
 const cfg = philosopheFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9 };
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
-const title = `${label} — La Philo`;
+const seoTitles: Record<string, string> = {
+  'france-contemporains': 'Philosophes français actuels et contemporains : frise chronologique',
+  'contemporains-monde': 'Philosophes actuels et contemporains du monde : frise chronologique',
+};
+const title = `${seoTitles[frise as string] ?? label} — La Philo`;
 const path = `/philosophes/frise/${frise}/`;
 const jsonLd = [
   {
