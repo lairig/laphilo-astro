@@ -98,6 +98,35 @@
           "href": "/philosophes/frise/orientaux/"
         }
       ]
+    },
+    {
+      "label": "Les Philosophes par Nationalité",
+      "items": [
+        {
+          "name": "Tous les Philosophes Français",
+          "tag": "775 → 2026",
+          "text": "Frise de tous les philosophes français, toutes époques confondues : du Moyen Âge avec Abélard et Bernard de Clairvaux, à Descartes, Pascal et Rousseau, jusqu'à Bergson, Sartre, Foucault et aux penseurs d'aujourd'hui.",
+          "href": "/philosophes/frise/francais-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Allemands",
+          "tag": "1098 → 2026",
+          "text": "Frise de tous les philosophes allemands, toutes époques confondues : de Hildegarde de Bingen et Maître Eckhart à Leibniz, Kant, Hegel, Nietzsche, Heidegger et Markus Gabriel.",
+          "href": "/philosophes/frise/allemands-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Américains",
+          "tag": "1648 → 2026",
+          "text": "Frise de tous les philosophes américains, toutes époques confondues : d'Emerson et Thoreau au pragmatisme de James et Dewey, jusqu'à Rawls, Nussbaum et aux penseurs d'aujourd'hui.",
+          "href": "/philosophes/frise/americains-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Russes",
+          "tag": "1711 → 2026",
+          "text": "Frise de tous les philosophes russes, toutes époques confondues : de Lomonossov à Bakounine, Dostoïevski, Tolstoï, Soloviev, Berdiaev et aux penseurs contemporains.",
+          "href": "/philosophes/frise/russes-toutes-epoques/"
+        }
+      ]
     }
   ]
 }

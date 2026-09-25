@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
+import { virtualPhilosopheFrises } from '../../../data/virtual-frises';
 
 function escapeAttr(s: string) {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
@@ -21,6 +22,7 @@ function crossLinksHtml(label: string, items: { href: string; label: string }[],
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
   const frises = new Set(philosophes.map((p) => p.data.frise_source));
+  for (const key of Object.keys(virtualPhilosopheFrises)) frises.add(key);
   return Array.from(frises).map((frise) => ({ params: { frise } }));
 }
 
@@ -30,7 +32,10 @@ export const GET: APIRoute = async ({ params }) => {
   const courantFriseByName = new Map(courants.map((c) => [c.data.name, c.data.frise_source]));
 
   const items = philosophes
-    .filter((p) => p.data.frise_source === params.frise)
+    .filter((p) => {
+      const virtual = virtualPhilosopheFrises[params.frise as string];
+      return virtual ? virtual.match(p.data) : p.data.frise_source === params.frise;
+    })
     .slice()
     .sort((a, b) => a.data.year - b.data.year);
 

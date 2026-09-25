@@ -5,6 +5,7 @@ import SeoHead from '../../../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
+import { virtualPhilosopheFrises } from '../../../data/virtual-frises';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
@@ -18,6 +19,10 @@ export async function getStaticPaths() {
     const bucket = bySource.get(key)!;
     bucket.count++;
     bucket.items.push(entry);
+  }
+  for (const [key, v] of Object.entries(virtualPhilosopheFrises)) {
+    const items = philosophes.filter((e) => v.match(e.data));
+    bySource.set(key, { label: v.label, count: items.length, items });
   }
   return Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
     const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
@@ -53,6 +58,10 @@ const descriptionText = description.replace(/<[^>]+>/g, '');
 const seoTitles: Record<string, string> = {
   'france-contemporains': 'Philosophes français actuels et contemporains : frise chronologique',
   'contemporains-monde': 'Philosophes actuels et contemporains du monde : frise chronologique',
+  'francais-toutes-epoques': 'Philosophes français de toutes les époques : frise chronologique',
+  'allemands-toutes-epoques': 'Philosophes allemands de toutes les époques : frise chronologique',
+  'americains-toutes-epoques': 'Philosophes américains de toutes les époques : frise chronologique',
+  'russes-toutes-epoques': 'Philosophes russes de toutes les époques : frise chronologique',
 };
 const title = `${seoTitles[frise as string] ?? label} — La Philo`;
 const path = `/philosophes/frise/${frise}/`;
