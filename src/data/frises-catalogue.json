@@ -2,6 +2,7 @@
   "intro": "<p style=\"font-size:.88rem;line-height:1.8;color:var(--ink-light);margin-bottom:1.4rem;\">Explorez l'ensemble des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité, par époque, et grands courants de pensée de l'Égypte ancienne au XXIe siècle. Ces frises vous permettent de visualiser d'un seul coup d'œil la continuité et les ruptures de la pensée humaine, de découvrir les contemporains qui ne se sont pas connus, et de relier les idées à leur contexte historique. Un outil pédagogique unique pour étudiants, enseignants et curieux de philosophie.</p>",
   "groups": [
     {
+      "section": "Les Courants de Pensée",
       "label": "Les Courants de Pensée",
       "items": [
         {
@@ -29,7 +30,8 @@
       ]
     },
     {
-      "label": "Les Philosophes Contemporains",
+      "section": "Les Philosophes",
+      "label": "Contemporains",
       "items": [
         {
           "name": "Philosophes Contemporains Français",
@@ -46,7 +48,7 @@
       ]
     },
     {
-      "label": "Les Philosophes Modernes",
+      "label": "Modernes",
       "items": [
         {
           "name": "Philosophes Modernes Français",
@@ -81,7 +83,7 @@
       ]
     },
     {
-      "label": "Les Philosophes Anciens",
+      "label": "Anciens",
       "items": [
         {
           "name": "Philosophes Renaissance &amp; Lumières",
@@ -110,7 +112,7 @@
       ]
     },
     {
-      "label": "Les Philosophes par Nationalité",
+      "label": "Par Nationalité",
       "items": [
         {
           "name": "Tous les Philosophes Français",

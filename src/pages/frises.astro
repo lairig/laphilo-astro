@@ -7,6 +7,7 @@ import data from '../data/frises-catalogue.json';
 const { intro, groups } = data as {
   intro: string;
   groups: {
+    section?: string;
     label: string;
     items: {
       name: string;
@@ -38,6 +39,23 @@ const { intro, groups } = data as {
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/definition.css" />
+  <style>
+    .frises-section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-align: center;
+      color: #d4a843;
+      margin: 3.2rem 0 1.2rem;
+      padding: 0.9rem 1rem;
+      border-top: 1px solid rgba(212, 168, 67, 0.5);
+      border-bottom: 1px solid rgba(212, 168, 67, 0.5);
+      background: linear-gradient(90deg, transparent, rgba(180, 130, 20, 0.16), transparent);
+      text-shadow: 0 0 18px rgba(212, 168, 67, 0.25);
+    }
+    .drawer-intro-sep + .frises-section-title { margin-top: 0.4rem; }
+  </style>
 </head>
 <body>
 
@@ -66,6 +84,7 @@ const { intro, groups } = data as {
 
   {groups.map((group, gi) => (
     <>
+      {group.section && <h2 class="frises-section-title">{group.section}</h2>}
       {gi > 0 && (
         <div class="definition-section-sep" aria-hidden="true">
           <span class="drawer-intro-sep-line"></span>
@@ -73,7 +92,7 @@ const { intro, groups } = data as {
           <span class="drawer-intro-sep-line"></span>
         </div>
       )}
-      {gi === 0 && (
+      {gi === 0 && !group.section && (
         <h3 style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 .8rem;opacity:.8;">✦ {group.label}</h3>
       )}
       <div class="acc-list">
