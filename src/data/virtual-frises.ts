@@ -28,4 +28,8 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes russes — toutes époques',
     match: (p) => p.nationalite === 'Russe',
   },
+  'britanniques-toutes-epoques': {
+    label: 'Philosophes britanniques — toutes époques',
+    match: (p) => p.nationalite === 'Britannique',
+  },
 };

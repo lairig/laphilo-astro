@@ -21,12 +21,13 @@
     { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f0b400 50%,#d21e1e 50%)' },
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(180deg,#f7f4ea 50%,#1464d2 50%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
+    { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
     { fr: 'Par époque', accent: '#d4a843', items: ['greco', 'medieval', 'renaissance', 'moderne', 'live'] },
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'americain', 'russe', 'oriental'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'britannique', 'americain', 'russe', 'oriental'] },
   ];
-  var TRADITION_NATS = { france: 'Française', allemand: 'Allemande', americain: 'Américaine', russe: 'Russe' };
+  var TRADITION_NATS = { france: 'Française', allemand: 'Allemande', americain: 'Américaine', russe: 'Russe', britannique: 'Britannique' };
   function pillValue(v) {
     return TRADITION_NATS[v] ? 'nat:' + TRADITION_NATS[v] : v;
   }
@@ -35,6 +36,7 @@
     allemand: { href: '/philosophes/frise/allemands-toutes-epoques/', fr: 'Voir la frise de tous les philosophes allemands' },
     americain: { href: '/philosophes/frise/americains-toutes-epoques/', fr: 'Voir la frise de tous les philosophes américains' },
     russe: { href: '/philosophes/frise/russes-toutes-epoques/', fr: 'Voir la frise de tous les philosophes russes' },
+    britannique: { href: '/philosophes/frise/britanniques-toutes-epoques/', fr: 'Voir la frise de tous les philosophes britanniques' },
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
