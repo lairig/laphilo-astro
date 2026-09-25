@@ -17,13 +17,27 @@
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(180deg,#f7f4ea 50%,#1464d2 50%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
     { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
+    { v: 'germanophone', fr: 'Germanophones', grad: 'linear-gradient(180deg,#0a0a0a 33%,#d21e1e 33% 66%,#f0b400 66%)' },
+    { v: 'arabo-persan', fr: 'Arabo-persans', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
+    { v: 'africain', fr: 'Africains', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
+    { v: 'hispanique', fr: 'Hispaniques', grad: 'linear-gradient(180deg,#c60b1e 50%,#ffc400 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'britannique', 'americain', 'russe', 'oriental'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'oriental', 'arabo-persan', 'africain'] },
   ];
-  var TRADITION_NATS = { france: 'Française', allemand: 'Allemande', americain: 'Américaine', russe: 'Russe', britannique: 'Britannique' };
+  var TRADITION_RULES = {
+    france: { nats: ['Française'] },
+    allemand: { nats: ['Allemande'] },
+    americain: { nats: ['Américaine'] },
+    russe: { nats: ['Russe'] },
+    britannique: { nats: ['Britannique'] },
+    'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
+    'arabo-persan': { nats: ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'] },
+    'africain': { nats: ['Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'] },
+    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'] },
+  };
   function pillValue(v) {
-    return TRADITION_NATS[v] ? 'nat:' + TRADITION_NATS[v] : v;
+    return TRADITION_RULES[v] ? 'trad:' + v : v;
   }
   var VIRTUAL_FRISE_LINKS = {
     france: { href: '/philosophes/frise/francais-toutes-epoques/', fr: 'Voir la frise de tous les philosophes français' },
@@ -31,6 +45,10 @@
     americain: { href: '/philosophes/frise/americains-toutes-epoques/', fr: 'Voir la frise de tous les philosophes américains' },
     russe: { href: '/philosophes/frise/russes-toutes-epoques/', fr: 'Voir la frise de tous les philosophes russes' },
     britannique: { href: '/philosophes/frise/britanniques-toutes-epoques/', fr: 'Voir la frise de tous les philosophes britanniques' },
+    'germanophone': { href: '/philosophes/frise/germanophones-toutes-epoques/', fr: "Voir la frise des philosophes germanophones" },
+    'arabo-persan': { href: '/philosophes/frise/arabo-persans-toutes-epoques/', fr: "Voir la frise des philosophes du monde arabo-persan" },
+    'africain': { href: '/philosophes/frise/africains-toutes-epoques/', fr: "Voir la frise des philosophes africains" },
+    'hispanique': { href: '/philosophes/frise/hispaniques-toutes-epoques/', fr: "Voir la frise des philosophes hispaniques" },
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
@@ -128,7 +146,10 @@
 
   function matchesColorFilter(p, color) {
     if (!color) return true;
-    if (color.indexOf('nat:') === 0) return p.nat === color.slice(4);
+    if (color.indexOf('trad:') === 0) {
+      var rule = TRADITION_RULES[color.slice(5)];
+      return rule.nats.indexOf(p.nat) !== -1 && (!rule.exclude || rule.exclude.indexOf(p.n) === -1);
+    }
     if (color === 'oriental' && p.isOriental) return true;
     return p.colorFilter === color;
   }

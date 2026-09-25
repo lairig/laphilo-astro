@@ -2,6 +2,7 @@
 // de plusieurs frises réelles selon une règle.
 
 interface PhilosopheData {
+  name: string;
   nationalite?: string;
   frise_source: string;
 }
@@ -31,5 +32,21 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'britanniques-toutes-epoques': {
     label: 'Philosophes britanniques — toutes époques',
     match: (p) => p.nationalite === 'Britannique',
+  },
+  'germanophones-toutes-epoques': {
+    label: 'Philosophes germanophones — toutes époques',
+    match: (p) => ['Allemande', 'Autrichienne', 'Suisse'].includes(p.nationalite ?? '') && !['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'].includes(p.name),
+  },
+  'arabo-persans-toutes-epoques': {
+    label: 'Philosophes du monde arabo-persan — toutes époques',
+    match: (p) => ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'].includes(p.nationalite ?? ''),
+  },
+  'africains-toutes-epoques': {
+    label: 'Philosophes africains — toutes époques',
+    match: (p) => ['Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'].includes(p.nationalite ?? ''),
+  },
+  'hispaniques-toutes-epoques': {
+    label: 'Philosophes hispaniques — toutes époques',
+    match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'].includes(p.nationalite ?? ''),
   },
 };
