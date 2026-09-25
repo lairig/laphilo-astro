@@ -22,6 +22,23 @@
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(180deg,#f7f4ea 50%,#1464d2 50%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
   ];
+  var PHILO_COLOR_GROUPS = [
+    { fr: 'Par époque', accent: '#d4a843', items: ['greco', 'medieval', 'renaissance', 'moderne', 'live'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'americain', 'russe', 'oriental'] },
+  ];
+  var TRADITION_NATS = { france: 'Française', allemand: 'Allemande', americain: 'Américaine', russe: 'Russe' };
+  function pillValue(v) {
+    return TRADITION_NATS[v] ? 'nat:' + TRADITION_NATS[v] : v;
+  }
+  var VIRTUAL_FRISE_LINKS = {
+    france: { href: '/philosophes/frise/francais-toutes-epoques/', fr: 'Voir la frise de tous les philosophes français' },
+    allemand: { href: '/philosophes/frise/allemands-toutes-epoques/', fr: 'Voir la frise de tous les philosophes allemands' },
+    americain: { href: '/philosophes/frise/americains-toutes-epoques/', fr: 'Voir la frise de tous les philosophes américains' },
+    russe: { href: '/philosophes/frise/russes-toutes-epoques/', fr: 'Voir la frise de tous les philosophes russes' },
+  };
+  function colorDef(v) {
+    return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
+  }
   var COURANT_COLOR_FILTERS = [
     { v: 'courant-occ', fr: 'Occidental', grad: '#0e6882' },
     { v: 'courant-ori', fr: 'Oriental', grad: '#6e2e9a' },
@@ -116,6 +133,8 @@
   function matchesColorFilter(p, color) {
     if (!color) return true;
     if (color === 'live') return !!p.live;
+    if (color.indexOf('nat:') === 0) return p.nat === color.slice(4);
+    if (color === 'oriental' && p.isOriental) return true;
     return p.colorFilter === color;
   }
   function matchesCourantColorFilter(p, color) {
@@ -158,7 +177,11 @@
 
     container.innerHTML =
       '<div class="phi-all">' +
-      '<div class="phi-all-mode-tabs" role="tablist">' +
+      '<div class="phi-all-mode-tabs phi-all-type-tabs" role="tablist" aria-label="Type de recherche">' +
+      '<button type="button" class="phi-all-mode-tab" data-primary="philosophes" role="tab" aria-selected="false">🏛️ Philosophes</button>' +
+      '<button type="button" class="phi-all-mode-tab" data-primary="courants" role="tab" aria-selected="false">🌿 Courants</button>' +
+      '</div>' +
+      '<div class="phi-all-mode-tabs" role="tablist" aria-label="Ordre d\'affichage">' +
       '<button type="button" class="phi-all-mode-tab phi-all-mode-tab--active" data-mode="alpha" role="tab" aria-selected="true">🔤 Alphabétique</button>' +
       '<button type="button" class="phi-all-mode-tab" data-mode="time" role="tab" aria-selected="false">🕐 Temporelle</button>' +
       '</div>' +
@@ -167,12 +190,6 @@
       '<input class="phi-all-input" type="search" autocomplete="off" spellcheck="false" placeholder="Rechercher…" aria-label="Rechercher dans la liste complète">' +
       '<button class="phi-search-clear" aria-label="Effacer" hidden>✕</button>' +
       '</div>' +
-      '<div class="phi-all-filter-row phi-all-primary-row">' +
-      '<span class="phi-all-filter-lbl">Type</span>' +
-      '<div class="phi-all-primary-btns">' +
-      '<button type="button" class="phi-all-btn phi-all-primary-btn" data-primary="philosophes">Philosophes</button>' +
-      '<button type="button" class="phi-all-btn phi-all-primary-btn" data-primary="courants">Courants</button>' +
-      '</div></div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Époque</span>' +
       '<select class="phi-all-select" id="' + uid + '-era-sel">' +
@@ -203,23 +220,38 @@
       '<button class="phi-alpha-btn phi-alpha-btn--active" data-letter="" hidden></button>' +
       ALPHABET.map(function (l) { return '<button class="phi-alpha-btn" data-letter="' + l + '">' + l + '</button>'; }).join('') +
       '</div></div>' +
-      '<div class="phi-all-filter-row phi-all-color-row"><div class="phi-all-colors">' +
-      COLOR_FILTERS.map(function (c) {
-        return '<span class="phi-color-item">' +
-          '<button class="phi-color-btn" data-color="' + c.v + '" title="' + c.fr + '" aria-label="' + c.fr + '" style="background:' + c.grad + '"></button>' +
-          '<span class="phi-color-item-lbl">' + c.fr + '</span></span>';
-      }).join('') +
-      '</div></div>' +
+      '<div class="phi-all-filter-row phi-all-color-row"><div class="phi-cur-trads">' +
+          PHILO_COLOR_GROUPS.map(function (g) {
+            return '<div class="phi-cur-trad phi-philo-group" style="--trad-color:' + g.accent + '">' +
+              '<span class="phi-philo-group-title">' + g.fr + '</span>' +
+              '<div class="phi-cur-subera-row">' +
+              g.items.map(function (v) {
+                var c = colorDef(v);
+                return '<button type="button" class="phi-cur-subera-btn phi-color-pill" data-color="' + pillValue(c.v) + '">' +
+                  '<span class="phi-color-dot" style="background:' + c.grad + '" aria-hidden="true"></span>' + c.fr + '</button>';
+              }).join('') +
+              '</div>' +
+              g.items.filter(function (v) { return VIRTUAL_FRISE_LINKS[v]; }).map(function (v) {
+                return '<a class="phi-philo-frise-link" data-for="' + pillValue(v) + '" href="' + VIRTUAL_FRISE_LINKS[v].href + '" hidden>' + VIRTUAL_FRISE_LINKS[v].fr + ' →</a>';
+              }).join('') +
+              '</div>';
+          }).join('') +
+          '</div></div>' +
       '<div class="phi-all-filter-row phi-all-cur-color-row">' +
       '<span class="phi-all-filter-lbl phi-cur-color-lbl">Tradition</span>' +
-      '<div class="phi-all-colors">' +
+      '<div class="phi-cur-trads">' +
       COURANT_COLOR_FILTERS.map(function (c) {
-        return '<span class="phi-color-item">' +
+        return '<div class="phi-cur-trad" data-trad="' + c.v + '" style="--trad-color:' + c.grad + '">' +
+          '<span class="phi-color-item">' +
           '<button class="phi-cur-color-btn" data-cur-color="' + c.v + '" title="' + c.fr + '" aria-label="' + c.fr + '" style="background:' + c.grad + '"></button>' +
-          '<span class="phi-color-item-lbl">' + c.fr + '</span></span>';
+          '<span class="phi-color-item-lbl">' + c.fr + '</span></span>' +
+          '<div class="phi-cur-subera-row">' +
+          COURANT_SUBERAS[c.v].map(function (s) { return '<button class="phi-cur-subera-btn" data-subera="' + s.v + '">' + s.fr + '</button>'; }).join('') +
+          '</div>' +
+          '<div class="phi-cur-branch-row" hidden></div>' +
+          '</div>';
       }).join('') +
-      '</div><div class="phi-cur-subera-row" hidden></div>' +
-      '<div class="phi-cur-branch-row" hidden></div></div>' +
+      '</div></div>' +
       '<div class="phi-all-count" id="' + uid + '-count"></div>' +
       '<ul class="phi-all-list" id="' + uid + '-list"></ul>' +
       '<button class="phi-all-more" id="' + uid + '-more" hidden>Afficher plus…</button>' +
@@ -233,13 +265,11 @@
     var moreBtn = container.querySelector('#' + uid + '-more');
     var topBtn = container.querySelector('#' + uid + '-top');
     var alphaBtns = container.querySelectorAll('.phi-alpha-btn');
-    var colorBtns = container.querySelectorAll('.phi-color-btn');
+    var colorBtns = container.querySelectorAll('[data-color]');
     var colorRow = container.querySelector('.phi-all-color-row');
     var curColorBtns = container.querySelectorAll('.phi-cur-color-btn');
     var curColorRow = container.querySelector('.phi-all-cur-color-row');
-    var curSuberaRow = container.querySelector('.phi-cur-subera-row');
-    var curBranchRow = container.querySelector('.phi-cur-branch-row');
-    var primaryBtns = container.querySelectorAll('.phi-all-primary-btn');
+    var primaryBtns = container.querySelectorAll('[data-primary]');
     var eraSel = container.querySelector('#' + uid + '-era-sel');
     var natSel = container.querySelector('#' + uid + '-nat-sel');
     var natRow = container.querySelector('.phi-all-nat-row');
@@ -248,7 +278,7 @@
     var curRow = container.querySelector('.phi-all-cur-row');
     var yearFromSel = container.querySelector('#' + uid + '-year-from');
     var yearToSel = container.querySelector('#' + uid + '-year-to');
-    var modeTabs = container.querySelectorAll('.phi-all-mode-tab');
+    var modeTabs = container.querySelectorAll('[data-mode]');
     var alphaRow = container.querySelector('.phi-all-alpha-row');
 
     var _mode = 'alpha';
@@ -405,8 +435,16 @@
       _filters.typex = val;
     }
 
+    function markPrimary(primary) {
+      primaryBtns.forEach(function (b) {
+        var active = b.dataset.primary === primary;
+        b.classList.toggle('phi-all-mode-tab--active', active);
+        b.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+    }
+
     function setPrimary(primary) {
-      primaryBtns.forEach(function (b) { b.classList.toggle('phi-all-btn--active', b.dataset.primary === primary); });
+      markPrimary(primary);
       populateSubType(primary);
       updateCompatibility();
       populateSelects();
@@ -460,56 +498,58 @@
 
     function setColorFilter(c) {
       _filters.color = c;
-      colorBtns.forEach(function (b) { b.classList.remove('phi-color-btn--active'); });
-      if (c) { var a = container.querySelector('.phi-color-btn[data-color="' + c + '"]'); if (a) a.classList.add('phi-color-btn--active'); }
+      colorBtns.forEach(function (b) {
+        b.classList.toggle('phi-cur-subera-btn--active', b.dataset.color === c);
+      });
+      container.querySelectorAll('.phi-philo-frise-link').forEach(function (a) { a.hidden = a.dataset.for !== c; });
+      container.querySelectorAll('.phi-philo-group').forEach(function (col) {
+        var own = !!c && !!col.querySelector('[data-color="' + c + '"]');
+        col.classList.toggle('phi-cur-trad--active', own);
+        col.classList.toggle('phi-cur-trad--dim', !!c && !own);
+      });
     }
     colorBtns.forEach(function (btn) { btn.addEventListener('click', function () { setColorFilter(_filters.color === btn.dataset.color ? '' : btn.dataset.color); refresh(); }); });
 
-    function renderCurSuberas(colorVal) {
-      if (!curSuberaRow) return;
-      _filters.curSubera = '';
-      var defs = COURANT_SUBERAS[colorVal];
-      if (!defs) { curSuberaRow.hidden = true; curSuberaRow.innerHTML = ''; return; }
-      curSuberaRow.innerHTML = defs.map(function (s) { return '<button class="phi-cur-subera-btn" data-subera="' + s.v + '">' + s.fr + '</button>'; }).join('');
-      curSuberaRow.hidden = false;
-      curSuberaRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var v = btn.dataset.subera;
-          var isActive = _filters.curSubera === v;
-          curSuberaRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (b) { b.classList.remove('phi-cur-subera-btn--active'); });
-          _filters.curSubera = isActive ? '' : v;
-          if (!isActive) btn.classList.add('phi-cur-subera-btn--active');
-          refresh();
-        });
-      });
-    }
-    function renderCurBranchGroups(colorVal) {
-      if (!curBranchRow) return;
-      _filters.curBranchGroup = '';
-      var srcMap = { 'courant-occ': 'occidental', 'courant-ori': 'oriental' };
-      var src = srcMap[colorVal];
-      var groups = src ? (_meta.courantBranchGroups || []).filter(function (g) { return g.source === src; }) : [];
-      if (!groups.length) { curBranchRow.hidden = true; curBranchRow.innerHTML = ''; return; }
-      curBranchRow.innerHTML = groups.map(function (g) { return '<button class="phi-cur-subera-btn" data-branch-group="' + g.slug + '">' + g.label + '</button>'; }).join('');
-      curBranchRow.hidden = false;
-      curBranchRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var v = btn.dataset.branchGroup;
-          var isActive = _filters.curBranchGroup === v;
-          curBranchRow.querySelectorAll('.phi-cur-subera-btn').forEach(function (b) { b.classList.remove('phi-cur-subera-btn--active'); });
-          _filters.curBranchGroup = isActive ? '' : v;
-          if (!isActive) btn.classList.add('phi-cur-subera-btn--active');
-          refresh();
-        });
+    function syncCurActive() {
+      curColorBtns.forEach(function (b) { b.classList.toggle('phi-cur-color-btn--active', b.dataset.curColor === _filters.curColor); });
+      container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
+        var own = col.dataset.trad === _filters.curColor;
+        col.classList.toggle('phi-cur-trad--active', own);
+        col.classList.toggle('phi-cur-trad--dim', !!_filters.curColor && !own);
+        col.querySelectorAll('[data-subera]').forEach(function (b) { b.classList.toggle('phi-cur-subera-btn--active', own && b.dataset.subera === _filters.curSubera); });
+        col.querySelectorAll('[data-branch-group]').forEach(function (b) { b.classList.toggle('phi-cur-subera-btn--active', own && b.dataset.branchGroup === _filters.curBranchGroup); });
       });
     }
     function setCurColorFilter(c) {
       _filters.curColor = c;
-      curColorBtns.forEach(function (b) { b.classList.remove('phi-cur-color-btn--active'); });
-      if (c) { var a = container.querySelector('.phi-cur-color-btn[data-cur-color="' + c + '"]'); if (a) a.classList.add('phi-cur-color-btn--active'); }
-      renderCurSuberas(c);
-      renderCurBranchGroups(c);
+      _filters.curSubera = '';
+      _filters.curBranchGroup = '';
+      syncCurActive();
     }
+    function toggleCurSub(trad, key, value) {
+      if (_filters.curColor !== trad) setCurColorFilter(trad);
+      _filters[key] = _filters[key] === value ? '' : value;
+      syncCurActive();
+      refresh();
+    }
+    function renderCurBranchGroups() {
+      var srcMap = { 'courant-occ': 'occidental', 'courant-ori': 'oriental' };
+      container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
+        var row = col.querySelector('.phi-cur-branch-row');
+        var groups = (_meta.courantBranchGroups || []).filter(function (g) { return g.source === srcMap[col.dataset.trad]; });
+        row.innerHTML = groups.map(function (g) { return '<button class="phi-cur-subera-btn" data-branch-group="' + g.slug + '">' + g.label + '</button>'; }).join('');
+        row.hidden = !groups.length;
+        row.querySelectorAll('[data-branch-group]').forEach(function (btn) {
+          btn.addEventListener('click', function () { toggleCurSub(col.dataset.trad, 'curBranchGroup', btn.dataset.branchGroup); });
+        });
+      });
+      syncCurActive();
+    }
+    container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
+      col.querySelectorAll('[data-subera]').forEach(function (btn) {
+        btn.addEventListener('click', function () { toggleCurSub(col.dataset.trad, 'curSubera', btn.dataset.subera); });
+      });
+    });
     curColorBtns.forEach(function (btn) { btn.addEventListener('click', function () { setCurColorFilter(_filters.curColor === btn.dataset.curColor ? '' : btn.dataset.curColor); refresh(); }); });
 
     function syncAlpha(q) {
@@ -544,7 +584,7 @@
       topBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
     }
 
-    primaryBtns.forEach(function (b) { b.classList.toggle('phi-all-btn--active', b.dataset.primary === 'philosophes'); });
+    markPrimary('philosophes');
     populateSubType('philosophes');
 
     listEl.innerHTML = '<li class="phi-search-empty">Chargement…</li>';
@@ -553,6 +593,7 @@
       .then(function (data) {
         _index = data.index || [];
         _meta = data._meta || _meta;
+        renderCurBranchGroups();
         populateSelects();
         updateCompatibility();
         refresh();

@@ -78,6 +78,92 @@ import SeoHead from '../components/SeoHead.astro';
     }
     .list-page .phi-all-count { color: #d4a843; }
 
+    .list-page .phi-all-type-tabs .phi-all-mode-tab {
+      padding: 0.75rem 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .list-page .phi-all-type-tabs .phi-all-mode-tab--active {
+      box-shadow: inset 0 -3px 0 #8b3a0f, 0 0 14px rgba(212, 168, 67, 0.35);
+    }
+    .list-page .phi-all-bar {
+      margin-bottom: 0.5rem;
+    }
+
+    .list-page .phi-cur-trads {
+      flex-basis: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+    .list-page .phi-cur-trad {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid rgba(180, 130, 20, 0.3);
+      border-left: 4px solid var(--trad-color);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.18);
+      transition: opacity 0.2s, border-color 0.2s;
+    }
+    .list-page .phi-cur-trad .phi-color-item {
+      flex-direction: row;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .list-page .phi-cur-trad .phi-color-item-lbl { font-size: 0.8rem; }
+    .list-page .phi-cur-trad .phi-cur-subera-row,
+    .list-page .phi-cur-trad .phi-cur-branch-row { width: 100%; align-content: flex-start; align-items: center; }
+    .list-page .phi-cur-trad [hidden] { display: none; }
+    .list-page .phi-cur-trad--active {
+      border-color: rgba(212, 168, 67, 0.7);
+      border-left-color: var(--trad-color);
+      background: rgba(180, 130, 20, 0.12);
+    }
+    .list-page .phi-cur-trad--dim { opacity: 0.55; }
+    .list-page .phi-cur-trad--dim:hover { opacity: 0.85; }
+    @media (max-width: 640px) {
+      .list-page .phi-cur-trads { grid-template-columns: 1fr; }
+    }
+
+    .list-page .phi-all-color-row .phi-cur-trads { margin-top: 0; }
+    .list-page .phi-philo-group-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #d4a843;
+    }
+    .list-page .phi-philo-frise-link {
+      margin-top: 0.6rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: #f0dca0;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(212, 168, 67, 0.5);
+    }
+    .list-page .phi-philo-frise-link:hover { color: #fff3cf; border-bottom-color: #d4a843; }
+    .list-page .phi-color-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .list-page .phi-color-dot {
+      width: 0.9rem;
+      height: 0.9rem;
+      border-radius: 50%;
+      border: 1px solid rgba(30, 18, 8, 0.45);
+      flex-shrink: 0;
+    }
+    @media (max-width: 480px) {
+      .list-page .phi-all-type-tabs .phi-all-mode-tab { font-size: 0.8rem; padding: 0.65rem 0.5rem; }
+    }
+
     /* Même bug que .phi-all-btn ci-dessus : les boutons de sous-filtre
        courant (sous-époque "Actuel/Moderne/Antique" et groupes
        thématiques "Politique & Éthique"…) utilisent un texte rust sur
