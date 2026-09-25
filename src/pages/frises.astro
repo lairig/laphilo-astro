@@ -60,20 +60,14 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
     }
     .drawer-intro-sep + .frises-section-title { margin-top: 2.2rem; }
 
-    .definition-page .acc-list .frise-hub { padding: 1.1rem 1.4rem 1.3rem; }
-    .frise-hub-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1rem;
-    }
     .frise-hub-text {
-      margin: 0.5rem 0 0.9rem;
+      margin: 0.2rem 0 0.9rem;
       font-size: 0.95rem;
       line-height: 1.6;
       color: var(--ink-light, #5c3d1e);
     }
     .frise-hub-links {
+      margin-bottom: 1.1rem;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 0.6rem;
@@ -166,11 +160,13 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
       <div class="acc-list">
         {group.items.map((it) => (
           it.links ? (
-          <div class="acc-item frise-hub">
-            <div class="frise-hub-head">
+          <div class="acc-item">
+            <button class="acc-toggle" aria-expanded="false" type="button">
               <span class="acc-name" set:html={it.name} />
               <span class="acc-date">{it.tag}</span>
-            </div>
+              <span class="acc-chevron" aria-hidden="true">▶</span>
+            </button>
+            <div class="acc-content">
             <p class="frise-hub-text" set:html={it.text} />
             <div class="frise-hub-links">
               {it.links.map((link, li) => (
@@ -180,6 +176,7 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
                   <span class="frise-hub-link-arrow" aria-hidden="true">→</span>
                 </a>
               ))}
+            </div>
             </div>
           </div>
           ) : (
