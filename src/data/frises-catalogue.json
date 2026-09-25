@@ -29,7 +29,7 @@
       ]
     },
     {
-      "label": "Les Philosophes",
+      "label": "Les Philosophes Contemporains",
       "items": [
         {
           "name": "Philosophes Contemporains Français",
@@ -42,7 +42,12 @@
           "tag": "1926 → 2026",
           "text": "Frise des philosophes contemporains non français encore en activité en 2026. <br> Des États-Unis à l'Allemagne, de Corée du Sud à l'Italie, retrouvez les grandes figures mondiales de la philosophie actuelle : Slavoj Žižek, Peter Singer, Martha Nussbaum, Byung-Chul Han et bien d'autres.",
           "href": "/philosophes/frise/contemporains-monde/"
-        },
+        }
+      ]
+    },
+    {
+      "label": "Les Philosophes Modernes",
+      "items": [
         {
           "name": "Philosophes Modernes Français",
           "tag": "1770 → 1960",
@@ -72,7 +77,12 @@
           "tag": "1755 → 1950",
           "text": "Frise rassemblant les philosophes occidentaux de la modernité, actifs entre 1755 et 1950, en excluant les traditions française, allemande, américaine et russe. Elle met en valeur des penseurs d'autres aires européennes, comme les philosophes écossais, britanniques, italiens, espagnols, danois ou néerlandais, afin de montrer la diversité des courants de cette période.",
           "href": "/philosophes/frise/modernes/"
-        },
+        }
+      ]
+    },
+    {
+      "label": "Les Philosophes Anciens",
+      "items": [
         {
           "name": "Philosophes Renaissance &amp; Lumières",
           "tag": "1460 → 1760",
