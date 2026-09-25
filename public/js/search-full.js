@@ -11,12 +11,7 @@
   var _meta = { nats: [], doms: [], doms_cur: [], curs: [] };
 
   var COLOR_FILTERS = [
-    { v: 'live', fr: 'Vivants', grad: '#f0b400' },
-    { v: 'medieval', fr: 'Médiévaux', grad: '#e06414' },
-    { v: 'greco', fr: 'Gréco-romains', grad: '#d21e1e' },
     { v: 'oriental', fr: 'Orientaux', grad: '#1e8c3c' },
-    { v: 'renaissance', fr: 'Renaissance', grad: '#1464d2' },
-    { v: 'moderne', fr: 'Modernes', grad: 'linear-gradient(180deg,#f0b400 50%,#e8508c 50%)' },
     { v: 'france', fr: 'Français', grad: 'linear-gradient(180deg,#d21e1e 50%,#1464d2 50%)' },
     { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f0b400 50%,#d21e1e 50%)' },
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(180deg,#f7f4ea 50%,#1464d2 50%)' },
@@ -24,7 +19,6 @@
     { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par époque', accent: '#d4a843', items: ['greco', 'medieval', 'renaissance', 'moderne', 'live'] },
     { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'britannique', 'americain', 'russe', 'oriental'] },
   ];
   var TRADITION_NATS = { france: 'Française', allemand: 'Allemande', americain: 'Américaine', russe: 'Russe', britannique: 'Britannique' };
@@ -134,7 +128,6 @@
 
   function matchesColorFilter(p, color) {
     if (!color) return true;
-    if (color === 'live') return !!p.live;
     if (color.indexOf('nat:') === 0) return p.nat === color.slice(4);
     if (color === 'oriental' && p.isOriental) return true;
     return p.colorFilter === color;
