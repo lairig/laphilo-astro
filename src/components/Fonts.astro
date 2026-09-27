@@ -1,0 +1,31 @@
+---
+/* Polices hébergées sur laphilo.fr (fichiers dans public/fonts/).
+   Les @font-face sont intégrés dans la page : pas de requête bloquante vers
+   Google, et l'adresse IP des visiteurs n'est pas transmise à un tiers.
+   Préchargement des deux fichiers utilisés sur toutes les pages.
+
+   `faces` limite les styles déclarés (ex. 'EB Garamond 400 italic'), pour
+   garder le rendu qu'avait la page avec son ancien lien Google Fonts : un
+   style non déclaré est remplacé par le plus proche disponible. */
+import fontsCss from '../styles/fonts.css?raw';
+
+interface Props {
+  faces?: string[];
+}
+const { faces } = Astro.props;
+
+const blocks = fontsCss.match(/\/\* [a-z-]+ \*\/\s*@font-face\s*{[^}]*}/g) ?? [];
+const css = faces
+  ? blocks
+      .filter((b) => {
+        const family = b.match(/font-family: '([^']+)'/)?.[1];
+        const weight = b.match(/font-weight: (\d+)/)?.[1];
+        const italic = /font-style: italic/.test(b);
+        return faces.includes(`${family} ${weight}${italic ? ' italic' : ''}`);
+      })
+      .join('\n')
+  : fontsCss;
+---
+<link rel="preload" href="/fonts/eb-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin />
+<style is:inline set:html={css}></style>

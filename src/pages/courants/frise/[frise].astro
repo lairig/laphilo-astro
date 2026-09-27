@@ -1,5 +1,6 @@
 ---
 import Favicons from '../../../components/Favicons.astro';
+import Fonts from '../../../components/Fonts.astro';
 import GoatCounter from '../../../components/GoatCounter.astro';
 import SeoHead from '../../../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
@@ -89,9 +90,7 @@ const jsonLd = [
   <meta name="description" content={`${label} — ${descriptionText}`} />
   <SeoHead title={title} description={`${label} — ${descriptionText}`} path={path} jsonLd={jsonLd} />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,500;1,400&display=swap" rel="stylesheet" />
+  <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles-f.css" />
 </head>
 <body>
