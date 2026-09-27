@@ -605,9 +605,12 @@
     updateCompatibility(); /* masque tout de suite les filtres « courants » : pas de saut au chargement */
 
     listEl.innerHTML = '<li class="phi-search-empty">Chargement…</li>';
-    fetch('/data/search-full-index.json')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
+    /* On attend aussi les polices : si elles arrivent après la liste, les
+       filtres grandissent de quelques pixels et poussent 1000 lignes. */
+    var fontsReady = (document.fonts && document.fonts.ready) || Promise.resolve();
+    Promise.all([fetch('/data/search-full-index.json').then(function (r) { return r.json(); }), fontsReady])
+      .then(function (res) {
+        var data = res[0];
         _index = data.index || [];
         _meta = data._meta || _meta;
         renderCurBranchGroups();
