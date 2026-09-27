@@ -56,6 +56,9 @@ const { label, count, indexItems } = Astro.props;
 const cfg = philosopheFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9 };
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
+/* Pas de « Philosophes médiévaux — Philosophes médiévaux (…) » : le libellé
+   n'est ajouté que si le texte ne commence pas déjà par lui. */
+const metaDescription = descriptionText.toLowerCase().startsWith(label.toLowerCase()) ? descriptionText : `${label} — ${descriptionText}`;
 const seoTitles: Record<string, string> = {
   'france-contemporains': 'Philosophes français actuels et contemporains : frise chronologique',
   'contemporains-monde': 'Philosophes actuels et contemporains du monde : frise chronologique',
@@ -69,14 +72,14 @@ const seoTitles: Record<string, string> = {
   'africains-toutes-epoques': 'Philosophes africains de toutes les époques : frise chronologique',
   'hispaniques-toutes-epoques': 'Philosophes hispaniques de toutes les époques : frise chronologique',
 };
-const title = `${seoTitles[frise as string] ?? label} — La Philo`;
+const title = `${seoTitles[frise as string] ?? label} | LaPhilo.fr`;
 const path = `/philosophes/frise/${frise}/`;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 1, name: 'LaPhilo.fr', item: new URL('/', Astro.site).toString() },
       { '@type': 'ListItem', position: 2, name: 'Toutes les frises', item: new URL('/frises/', Astro.site).toString() },
       { '@type': 'ListItem', position: 3, name: label, item: new URL(path, Astro.site).toString() },
     ],
@@ -98,8 +101,8 @@ const jsonLd = [
   <Favicons />
   <GoatCounter />
   <title>{title}</title>
-  <meta name="description" content={`${label} — ${descriptionText}`} />
-  <SeoHead title={title} description={`${label} — ${descriptionText}`} path={path} jsonLd={jsonLd} />
+  <meta name="description" content={metaDescription} />
+  <SeoHead title={title} description={metaDescription} path={path} jsonLd={jsonLd} />
 
   <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <!-- Données de la frise demandées dès le début, en parallèle du script. -->

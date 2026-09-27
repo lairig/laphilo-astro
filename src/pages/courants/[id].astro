@@ -9,6 +9,7 @@ import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
 import { markerColor, eraLabel } from '../../lib/era';
+import { courantSeo } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
@@ -67,15 +68,16 @@ const c = entry.data;
 
 const eraBadge = { color: markerColor(indexInFrise), label: eraLabel(c.year) };
 
-const title = `${c.name} — La Philo`;
-const description = c.description || c.display_date;
+const seo = courantSeo(c, philosopheLinks.map((l) => l.label));
+const title = seo.title;
+const description = seo.description;
 const path = `/courants/${entry.id}/`;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'La Philo', item: new URL('/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 1, name: 'LaPhilo.fr', item: new URL('/', Astro.site).toString() },
       { '@type': 'ListItem', position: 2, name: c.frise_label, item: new URL(`/courants/frise/${c.frise_source}/`, Astro.site).toString() },
       { '@type': 'ListItem', position: 3, name: c.name, item: new URL(path, Astro.site).toString() },
     ],
@@ -84,7 +86,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'DefinedTerm',
     name: c.name,
-    description,
+    description: c.description || description,
     url: new URL(path, Astro.site).toString(),
     inDefinedTermSet: new URL('/histoire-des-courants/', Astro.site).toString(),
   },
