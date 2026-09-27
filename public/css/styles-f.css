@@ -244,3 +244,5 @@ a.cross-link-badge:hover{background:rgba(180,130,20,.24);border-color:rgba(180,1
 .fbf-btn--active{background:#d4a843;border-color:#d4a843;color:#160d05;font-weight:700}
 .fbf-btn--active:hover{background:#e8c870;border-color:#e8c870;color:#160d05}
 @media (orientation:landscape) and (max-height:500px){.frise-branch-filters{display:none}}
+/* Mobile : texte aligné à gauche, le justifié creusait de grands blancs entre les mots sur les écrans étroits. */
+@media (max-width:768px){.slide-body p,.drawer-wiki-full p{text-align:left}}
