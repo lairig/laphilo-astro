@@ -207,6 +207,22 @@
     });
     DATA_ALL = DATA.slice();
 
+    /* ── ?g=slug : ouvrir directement sur un onglet thématique (lien depuis la
+       recherche filtrée), si le courant demandé (?p=) en fait partie ── */
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const groupe = params.get('g');
+      if (!groupe) return;
+      const tab = [...document.querySelectorAll('.fbf-btn[data-group]')].find(b => b.dataset.group === groupe);
+      if (!tab) return;
+      const branches = JSON.parse(tab.dataset.branches || '[]');
+      const filtre = DATA_ALL.filter(p => (p.branches || []).some(b => branches.indexOf(b) !== -1));
+      const nom = (params.get('p') || '').toLowerCase().trim();
+      if (!filtre.length || (nom && !filtre.some(p => p.name.toLowerCase().includes(nom)))) return;
+      DATA = filtre;
+      document.querySelectorAll('.fbf-btn').forEach(b => b.classList.toggle('fbf-btn--active', b === tab));
+    })();
+
     setProgress(85, _isEN ? 'Building the timeline…' : 'Construction de la frise…');
     initSlideDelegation();
     buildNav();

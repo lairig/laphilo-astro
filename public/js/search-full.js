@@ -399,6 +399,8 @@
           : (p.t ? '<img src="' + p.t + '" alt="" class="phi-result-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
             : '<span class="phi-result-thumb phi-result-thumb--ph"></span>');
         var href = p.u + '?p=' + encodeURIComponent(p.n);
+        /* Courant filtré par thème : la frise s'ouvre sur l'onglet correspondant */
+        if (p.y === 'courant' && _filters.curBranchGroup) href += '&g=' + encodeURIComponent(_filters.curBranchGroup);
         var descRow = p.desc ? '<span class="phi-card-desc">' + p.desc + '</span>' : '';
 
         if (isCourantItem) {

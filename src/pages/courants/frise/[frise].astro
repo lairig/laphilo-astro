@@ -127,7 +127,7 @@ const jsonLd = [
     <div class="frise-branch-filters" id="friseBranchFilters" role="group" aria-label="Filtrer par thème">
       <button type="button" class="fbf-btn fbf-btn--active" data-branches="[]">Tout</button>
       {courantBranchGroups.filter((group) => group.source === frise).map((group) => (
-        <button type="button" class="fbf-btn" data-branches={JSON.stringify(group.branches)}>{group.shortLabel}</button>
+        <button type="button" class="fbf-btn" data-group={group.slug} data-branches={JSON.stringify(group.branches)}>{group.shortLabel}</button>
       ))}
     </div>
   )}
