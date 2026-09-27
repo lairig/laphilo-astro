@@ -49,4 +49,8 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes hispaniques — toutes époques',
     match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'].includes(p.nationalite ?? ''),
   },
+  'grecs-byzantins-toutes-epoques': {
+    label: 'Philosophes grecs et byzantins — toutes époques',
+    match: (p) => ['Grecque', 'Byzantine'].includes(p.nationalite ?? ''),
+  },
 };

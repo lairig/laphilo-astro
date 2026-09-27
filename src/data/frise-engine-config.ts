@@ -26,6 +26,7 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'arabo-persans-toutes-epoques': { defaultIndex: 13, scale_factor: 8 },
   'africains-toutes-epoques': { defaultIndex: 4, scale_factor: 15 },
   'hispaniques-toutes-epoques': { defaultIndex: 5, scale_factor: 8 },
+  'grecs-byzantins-toutes-epoques': { defaultIndex: 24, scale_factor: 4 },
   allemands: { defaultIndex: 20, scale_factor: 10 },
   americains: { defaultIndex: 18, scale_factor: 15 },
   russes: { defaultIndex: 40, scale_factor: 15 },

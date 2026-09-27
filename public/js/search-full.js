@@ -21,9 +21,10 @@
     { v: 'arabo-persan', fr: 'Arabo-persans', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
     { v: 'africain', fr: 'Africains', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
     { v: 'hispanique', fr: 'Hispaniques', grad: 'linear-gradient(180deg,#c60b1e 50%,#ffc400 50%)' },
+    { v: 'grec', fr: 'Grecs & Byzantins', grad: 'linear-gradient(180deg,#0d5eaf 50%,#f7f4ea 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
@@ -35,6 +36,7 @@
     'arabo-persan': { nats: ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'] },
     'africain': { nats: ['Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'] },
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'] },
+    'grec': { nats: ['Grecque', 'Byzantine'] },
   };
   function pillValue(v) {
     return TRADITION_RULES[v] ? 'trad:' + v : v;
@@ -49,6 +51,7 @@
     'arabo-persan': { href: '/philosophes/frise/arabo-persans-toutes-epoques/', fr: "Voir la frise des philosophes du monde arabo-persan" },
     'africain': { href: '/philosophes/frise/africains-toutes-epoques/', fr: "Voir la frise des philosophes africains" },
     'hispanique': { href: '/philosophes/frise/hispaniques-toutes-epoques/', fr: "Voir la frise des philosophes hispaniques" },
+    'grec': { href: '/philosophes/frise/grecs-byzantins-toutes-epoques/', fr: "Voir la frise des philosophes grecs et byzantins" },
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
