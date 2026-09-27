@@ -608,7 +608,11 @@
     /* On attend aussi les polices : si elles arrivent après la liste, les
        filtres grandissent de quelques pixels et poussent 1000 lignes. */
     var fontsReady = (document.fonts && document.fonts.ready) || Promise.resolve();
+    /* …puis on laisse passer une image : la page est redessinée avec les
+       polices avant l'insertion de la liste, et non dans la même image. */
+    var nextFrame = function (v) { return new Promise(function (ok) { requestAnimationFrame(function () { requestAnimationFrame(function () { ok(v); }); }); }); };
     Promise.all([fetch('/data/search-full-index.json').then(function (r) { return r.json(); }), fontsReady])
+      .then(nextFrame)
       .then(function (res) {
         var data = res[0];
         _index = data.index || [];
