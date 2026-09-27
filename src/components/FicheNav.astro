@@ -9,13 +9,12 @@ interface Props {
   basePath: string;
   prev?: NavItem;
   next?: NavItem;
-  current: number;
-  total: number;
+  dates: string;
   listHref: string;
   listLabel: string;
 }
 
-const { basePath, prev, next, current, total, listHref, listLabel } = Astro.props;
+const { basePath, prev, next, dates, listHref, listLabel } = Astro.props;
 ---
 
 <div class="mobile-header" style="display:flex">
@@ -26,7 +25,7 @@ const { basePath, prev, next, current, total, listHref, listLabel } = Astro.prop
   )}
   <a class="mh-center" href={listHref} title={listLabel}>
     <div class="mh-name">{listLabel}</div>
-    <div class="mh-dates">{current} / {total}</div>
+    <div class="mh-dates">{dates}</div>
   </a>
   {next ? (
     <a class="mh-btn next" href={`${basePath}/${next.id}/`} aria-label="Suivant">&#8250;</a>
@@ -38,4 +37,6 @@ const { basePath, prev, next, current, total, listHref, listLabel } = Astro.prop
 <style>
   .mh-btn { text-decoration: none; }
   .mh-center { text-decoration: none; cursor: pointer; }
+  /* Dates de la fiche, un peu plus grandes que dans la barre des frises. */
+  .mh-dates { font-size: clamp(.82rem, 1.6vw, .95rem); margin-top: .15rem; }
 </style>

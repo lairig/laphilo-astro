@@ -8,6 +8,7 @@ import FicheNav from '../../components/FicheNav.astro';
 import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
+import { lifeSpan } from '../../lib/dates';
 import { markerColor, eraLabel } from '../../lib/era';
 import { courantSeo, plainText } from '../../lib/seo';
 
@@ -55,15 +56,13 @@ export async function getStaticPaths() {
         indexInFrise: index,
         prev: index > 0 ? siblings[index - 1] : undefined,
         next: index < siblings.length - 1 ? siblings[index + 1] : undefined,
-        position: index + 1,
-        total: siblings.length,
         philosopheLinks,
       },
     };
   });
 }
 
-const { entry, indexInFrise, prev, next, position, total, philosopheLinks } = Astro.props;
+const { entry, indexInFrise, prev, next, philosopheLinks } = Astro.props;
 const c = entry.data;
 
 const eraBadge = { color: markerColor(indexInFrise), label: eraLabel(c.year) };
@@ -72,6 +71,8 @@ const seo = courantSeo(c, philosopheLinks.map((l) => l.label));
 const title = seo.title;
 const description = seo.description;
 const path = `/courants/${entry.id}/`;
+/* La frise s'ouvre directement sur cette fiche. */
+const friseHref = `/courants/frise/${c.frise_source}/?p=${encodeURIComponent(c.name)}`;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -109,16 +110,15 @@ const jsonLd = [
 </head>
 <body>
 
-<FicheHeader title={c.name} listHref={`/courants/frise/${c.frise_source}/`} />
+<FicheHeader title={c.name} listHref={friseHref} />
 
 <div class="frise-body">
   <FicheNav
     basePath="/courants"
     prev={prev ? { id: prev.id, name: prev.data.name, display_date: prev.data.display_date } : undefined}
     next={next ? { id: next.id, name: next.data.name, display_date: next.data.display_date } : undefined}
-    current={position}
-    total={total}
-    listHref={`/courants/frise/${c.frise_source}/`}
+    dates={lifeSpan(c.year, c.end_year)}
+    listHref={friseHref}
     listLabel={c.frise_label}
   />
   <div class="slide-area">

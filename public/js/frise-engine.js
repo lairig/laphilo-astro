@@ -222,8 +222,10 @@
       const params = new URLSearchParams(window.location.search);
       const nom    = params.get('p');
       if (nom) {
-        const idx = DATA.findIndex(d =>
-          d.name.toLowerCase().includes(nom.toLowerCase()));
+        /* Nom exact d'abord : sinon ?p=Théisme ouvrait « Polythéisme ». */
+        const cible = nom.toLowerCase().trim();
+        let idx = DATA.findIndex(d => d.name.toLowerCase().trim() === cible);
+        if (idx < 0) idx = DATA.findIndex(d => d.name.toLowerCase().includes(cible));
         goTo(idx >= 0 ? idx : CFG.defaultIndex);
         _initialized = true;
         setProgress(100, _isEN ? 'Ready' : 'Prêt');

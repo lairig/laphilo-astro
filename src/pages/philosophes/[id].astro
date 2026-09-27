@@ -8,6 +8,7 @@ import FicheNav from '../../components/FicheNav.astro';
 import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
+import { lifeSpan } from '../../lib/dates';
 import { philosopheSeo, plainText } from '../../lib/seo';
 
 export async function getStaticPaths() {
@@ -42,21 +43,21 @@ export async function getStaticPaths() {
         entry,
         prev: index > 0 ? siblings[index - 1] : undefined,
         next: index < siblings.length - 1 ? siblings[index + 1] : undefined,
-        position: index + 1,
-        total: siblings.length,
         courantLinks,
       },
     };
   });
 }
 
-const { entry, prev, next, position, total, courantLinks } = Astro.props;
+const { entry, prev, next, courantLinks } = Astro.props;
 const p = entry.data;
 
 const seo = philosopheSeo(p);
 const title = seo.title;
 const description = seo.description;
 const path = `/philosophes/${entry.id}/`;
+/* La frise s'ouvre directement sur cette fiche. */
+const friseHref = `/philosophes/frise/${p.frise_source}/?p=${encodeURIComponent(p.name)}`;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -98,16 +99,15 @@ const jsonLd = [
 </head>
 <body>
 
-<FicheHeader title={p.name} listHref={`/philosophes/frise/${p.frise_source}/`} />
+<FicheHeader title={p.name} listHref={friseHref} />
 
 <div class="frise-body">
   <FicheNav
     basePath="/philosophes"
     prev={prev ? { id: prev.id, name: prev.data.name, display_date: prev.data.display_date } : undefined}
     next={next ? { id: next.id, name: next.data.name, display_date: next.data.display_date } : undefined}
-    current={position}
-    total={total}
-    listHref={`/philosophes/frise/${p.frise_source}/`}
+    dates={lifeSpan(p.year, p.end_year)}
+    listHref={friseHref}
     listLabel={p.frise_label}
   />
   <div class="slide-area">
