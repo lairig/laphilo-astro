@@ -10,7 +10,7 @@
   ) + 1;
   if (String(dayOfYear) === wrap.getAttribute('data-day')) return;
 
-  fetch('/data/alaune/' + dayOfYear + '.html')
+  fetch('/data/alaune/' + dayOfYear + '.txt')
     .then(function (r) { return r.ok ? r.text() : ''; })
     .then(function (html) { if (html) wrap.innerHTML = html; })
     .catch(function () {});

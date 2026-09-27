@@ -1,6 +1,6 @@
 /* Bloc « À la une aujourd'hui » de la page d'accueil.
    Le même HTML est rendu au build dans index.astro (jour du build) et en
-   fragments /data/alaune/<jour>.html que home-alaune.js charge les autres
+   fragments /data/alaune/<jour>.txt que home-alaune.js charge les autres
    jours : pas de saut de mise en page, pas de gros index à télécharger. */
 import { getCollection } from 'astro:content';
 
