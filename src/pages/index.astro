@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
@@ -55,6 +56,7 @@ const jsonLd = [
 
 <header class="site-header">
   <div class="sitemap-switcher">
+    <BackButton />
     <a href="/plan-du-site/" class="sitemap-btn" aria-label="Voir le plan du site">
       <span class="sitemap-flag" aria-hidden="true">🗺</span>
       <span class="sitemap-text">Plan du site</span>

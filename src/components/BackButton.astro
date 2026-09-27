@@ -1,0 +1,27 @@
+---
+/* Bouton « Retour » de l'en-tête (à côté de « Plan du site » ou « Accueil ») :
+   revient à la page précédente. Affiché seulement quand on arrive d'une
+   autre page du site, pour ne jamais renvoyer vers Google ou hors du site. */
+---
+<button type="button" class="sitemap-btn sitemap-back" aria-label="Revenir à la page précédente" hidden>
+  <span class="sitemap-flag" aria-hidden="true">←</span>
+  <span class="sitemap-text">Retour</span>
+</button>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.sitemap-back');
+  let fromSite = false;
+  try {
+    fromSite = !!document.referrer && new URL(document.referrer).origin === location.origin;
+  } catch {}
+  if (btn && fromSite && history.length > 1) {
+    btn.hidden = false;
+    btn.addEventListener('click', () => history.back());
+  }
+</script>
+
+<style>
+  /* Séparation avec le bouton voisin dans le même cadre */
+  .sitemap-back { border-right: 1px solid rgba(200, 150, 42, .35); }
+  .sitemap-back[hidden] { display: none; }
+</style>
