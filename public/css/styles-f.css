@@ -246,3 +246,6 @@ a.cross-link-badge:hover{background:rgba(180,130,20,.24);border-color:rgba(180,1
 @media (orientation:landscape) and (max-height:500px){.frise-branch-filters{display:none}}
 /* Mobile : texte aligné à gauche, le justifié creusait de grands blancs entre les mots sur les écrans étroits. */
 @media (max-width:768px){.slide-body p,.drawer-wiki-full p{text-align:left}}
+/* Paysage mobile : toute la colonne de texte défile (texte, lecteur audio, courants),
+   au lieu du texte seul avec le lecteur et les courants figés en bas. */
+@media (max-width:900px) and (orientation:landscape),(orientation:landscape) and (max-height:500px){.slide-text{overflow-y:auto}.slide-text-inner{flex:none;overflow:visible}}
