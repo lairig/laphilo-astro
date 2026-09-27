@@ -72,6 +72,9 @@ Disallow: /
 User-agent: CCBot
 Disallow: /
 
+User-agent: ClaudeBot
+Disallow: /
+
 User-agent: anthropic-ai
 Disallow: /
 
@@ -84,11 +87,20 @@ Disallow: /
 User-agent: Google-Extended
 Disallow: /
 
+User-agent: Meta-ExternalAgent
+Disallow: /
+
 # ── Bots IA — recherche & citation (autorisés : citent et renvoient du trafic) ──
-User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+Disallow: /data/
+
+User-agent: Claude-User
 Disallow: /data/
 
 User-agent: PerplexityBot
+Disallow: /data/
+
+User-agent: Perplexity-User
 Disallow: /data/
 
 User-agent: OAI-SearchBot
