@@ -9,12 +9,13 @@ interface Props {
   basePath: string;
   prev?: NavItem;
   next?: NavItem;
-  dates: string;
+  /* Lignes sous le nom de la frise : « Dates : … », « Nationalité : … » */
+  infos: string[];
   listHref: string;
   listLabel: string;
 }
 
-const { basePath, prev, next, dates, listHref, listLabel } = Astro.props;
+const { basePath, prev, next, infos, listHref, listLabel } = Astro.props;
 ---
 
 <div class="mobile-header" style="display:flex">
@@ -25,7 +26,7 @@ const { basePath, prev, next, dates, listHref, listLabel } = Astro.props;
   )}
   <a class="mh-center" href={listHref} title={listLabel}>
     <div class="mh-name">{listLabel}</div>
-    <div class="mh-dates">{dates}</div>
+    {infos.map((line) => <div class="mh-dates">{line}</div>)}
   </a>
   {next ? (
     <a class="mh-btn next" href={`${basePath}/${next.id}/`} aria-label="Suivant">&#8250;</a>

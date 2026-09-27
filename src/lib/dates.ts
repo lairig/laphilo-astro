@@ -3,6 +3,11 @@
 
 const bc = (y: number) => `${-y} av. J.-C.`;
 
+/** « Dates : 1724 – 1804 », ou « Date : 1967 » quand il n'y a qu'une année. */
+export function datesLine(year: number, endYear?: number): string {
+  return `${endYear === undefined ? 'Date' : 'Dates'} : ${lifeSpan(year, endYear)}`;
+}
+
 /** 1724 – 1804 · 240 – 182 av. J.-C. · 4 av. J.-C. – 65 · 1967 · 290 av. J.-C. */
 export function lifeSpan(year: number, endYear?: number): string {
   if (endYear === undefined) return year < 0 ? bc(year) : `${year}`;
