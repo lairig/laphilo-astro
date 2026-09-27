@@ -1,0 +1,34 @@
+# En-têtes HTTP appliqués par Cloudflare Pages.
+# Les pages HTML gardent le comportement par défaut (revalidation à chaque visite).
+
+# Vignettes et photos des philosophes : rarement modifiées.
+# 7 jours de cache navigateur, puis mise à jour en arrière-plan pendant 30 jours.
+/pho/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+/photo/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+# Icônes et bannière de partage.
+/favicon.ico
+  Cache-Control: public, max-age=2592000
+
+/favicon.svg
+  Cache-Control: public, max-age=2592000
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=2592000
+
+/icon-*
+  Cache-Control: public, max-age=2592000
+
+/og-banner.webp
+  Cache-Control: public, max-age=2592000
+
+# CSS et JS ne sont pas versionnés (même nom après modification) :
+# cache court pour qu'une mise à jour soit visible rapidement.
+/css/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+/js/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
