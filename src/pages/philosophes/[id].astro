@@ -106,7 +106,7 @@ const jsonLd = [
     basePath="/philosophes"
     prev={prev ? { id: prev.id, name: prev.data.name, display_date: prev.data.display_date } : undefined}
     next={next ? { id: next.id, name: next.data.name, display_date: next.data.display_date } : undefined}
-    dates={lifeSpan(p.year, p.end_year)}
+    dates={[lifeSpan(p.year, p.end_year), p.nationalite].filter(Boolean).join(' · ')}
     listHref={friseHref}
     listLabel={p.frise_label}
   />
