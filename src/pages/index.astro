@@ -3,9 +3,12 @@ import Favicons from '../components/Favicons.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import { getCollection } from 'astro:content';
+import { getAlaunePools, alauneHtml, dayOfYear } from '../lib/alaune';
 
 const philosophes = await getCollection('philosophes');
 const courants = await getCollection('courants');
+const buildDay = dayOfYear(new Date());
+const alaune = alauneHtml(await getAlaunePools(), buildDay);
 
 const title = `${philosophes.length} philosophes, ${courants.length} courants de pensée : LaPhilo.fr`;
 const description = `${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`;
@@ -67,7 +70,7 @@ const jsonLd = [
 
 <div class="timeline-section timeline-section--top">
   <p class="timeline-section-title">✦ Explorer la philosophie ✦</p>
-  <p class="timeline-section-subtitle" id="js-stats-fr"></p>
+  <p class="timeline-section-subtitle" id="js-stats-fr">✦ <span class="stats-num">{courants.length}</span> courants de pensée ✦ <span class="stats-num">{philosophes.length}</span> philosophes</p>
 
   <nav class="entry-guide" aria-label="Par où commencer ?">
     <div class="entry-guide-items">
@@ -96,7 +99,7 @@ const jsonLd = [
   </nav>
 </div>
 
-<div class="alaune-wrap" id="alaune-wrap"></div>
+<div class="alaune-wrap" id="alaune-wrap" data-day={buildDay} set:html={alaune}></div>
 
 <div class="alaune-sep" aria-hidden="true"><span class="alaune-sep-mark">✦</span></div>
 

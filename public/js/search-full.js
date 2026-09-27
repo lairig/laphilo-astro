@@ -602,6 +602,7 @@
 
     markPrimary('philosophes');
     populateSubType('philosophes');
+    updateCompatibility(); /* masque tout de suite les filtres « courants » : pas de saut au chargement */
 
     listEl.innerHTML = '<li class="phi-search-empty">Chargement…</li>';
     fetch('/data/search-full-index.json')

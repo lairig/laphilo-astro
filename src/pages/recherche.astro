@@ -25,6 +25,12 @@ import SeoHead from '../components/SeoHead.astro';
   <link rel="stylesheet" href="/css/styles-f.css" />
   <link rel="stylesheet" href="/css/list-page.css" />
   <style is:global>
+    /* La recherche est construite en JS : on réserve la place dès le départ
+       pour que le pied de page ne remonte pas puis redescende au chargement. */
+    #phi-all-mount { min-height: 100vh; }
+    /* Compteur vide pendant le chargement : il garde la hauteur d'une ligne
+       pour ne pas pousser la liste quand « N résultats » s'affiche. */
+    .phi-all-count:empty::before { content: '\00a0'; }
     /* Plusieurs règles .phi-* de styles.css supposent le fond parchemin clair
        du vrai drawer laphilo.fr (.drawer{background:linear-gradient(...#f9f2d8...)}) ;
        cette page affiche la recherche en pleine largeur sur le fond sombre du
