@@ -62,6 +62,17 @@ def to_str(v):
     return str(v).strip()
 
 
+def wrap_dd(html):
+    """Les textes utilisent <dd> seul pour indenter des lignes de liste. Un <dd>
+    hors d'une liste de définitions (<dl> avec <dt>) est invalide pour
+    l'accessibilité : on le remplace par un bloc <div class="slide-dd">, qui
+    s'affiche pareil (styles-f.css remet les marges des <dd> à zéro)."""
+    if '<dd' not in html.lower() or '<dl' in html.lower():
+        return html
+    html = re.sub(r'<dd\b([^>]*)>', r'<div class="slide-dd"\1>', html, flags=re.I)
+    return re.sub(r'</dd>', '</div>', html, flags=re.I)
+
+
 def to_int(v):
     if v is None:
         return None
@@ -172,7 +183,7 @@ def lire_xlsx(nom_fichier):
             'end_year': end_year if end_year is not None else to_str(row[C['end_year']]),
             'display_date': to_str(row[C['display_date']]),
             'name': name,
-            'text': to_str(row[C['text']]),
+            'text': wrap_dd(to_str(row[C['text']])),
             'yt_id': to_str(row[C['yt_id']]),
             'media_credit': to_str(row[C['media_credit']]),
             'thumbnail': url_relative(row[C['thumbnail']]),

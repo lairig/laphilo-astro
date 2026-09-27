@@ -208,7 +208,7 @@
       '</div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Époque</span>' +
-      '<select class="phi-all-select" id="' + uid + '-era-sel">' +
+      '<select class="phi-all-select" aria-label="Époque" id="' + uid + '-era-sel">' +
       '<option value="">— Toutes époques —</option>' +
       '<option value="actuels">Actuels</option>' +
       '<option value="antiquite">Antiquité</option>' +
@@ -218,13 +218,13 @@
       '</select></div>' +
       '<div class="phi-all-filter-row phi-all-nat-row">' +
       '<span class="phi-all-filter-lbl">Nationalité</span>' +
-      '<select class="phi-all-select" id="' + uid + '-nat-sel"><option value="">— Toutes origines —</option></select></div>' +
+      '<select class="phi-all-select" aria-label="Nationalité" id="' + uid + '-nat-sel"><option value="">— Toutes origines —</option></select></div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Branche</span>' +
-      '<select class="phi-all-select" id="' + uid + '-dom-sel"><option value="">— Toutes branches —</option></select></div>' +
+      '<select class="phi-all-select" aria-label="Branche" id="' + uid + '-dom-sel"><option value="">— Toutes branches —</option></select></div>' +
       '<div class="phi-all-filter-row phi-all-cur-row">' +
       '<span class="phi-all-filter-lbl">Courant</span>' +
-      '<select class="phi-all-select" id="' + uid + '-cur-sel"><option value="">— Tous courants —</option></select></div>' +
+      '<select class="phi-all-select" aria-label="Courant" id="' + uid + '-cur-sel"><option value="">— Tous courants —</option></select></div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Période</span>' +
       '<div class="phi-all-year-wrap">' +

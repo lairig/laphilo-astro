@@ -429,7 +429,7 @@
         /* Portrait circulaire + nom tronqué */
         m.style.cssText = `left:${x}px; top:${topY}px;`;
         m.innerHTML = `
-          <img class="nav-thumb" ${p.thumbnail ? `src="${p.thumbnail}"` : ''} alt="${p.name}"
+          <img class="nav-thumb" ${p.thumbnail ? `src="${p.thumbnail}"` : ''} alt=""
                loading="lazy" onerror="this.style.opacity='.3'">
           <div class="nav-name">${shortName(p.name)}</div>
           <div class="nav-tick" style="top:${THUMB_H}px; height:${filH}px;"></div>`;
