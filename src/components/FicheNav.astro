@@ -28,7 +28,7 @@ const nextHref = next ? `${basePath}/${next.id}/` : undefined;
   )}
   <a class="mh-center" href={listHref} title={listLabel}>
     <div class="mh-name">{listLabel}</div>
-    {infos.map((line) => <div class="mh-dates">{line}</div>)}
+    <div class="mh-infos">{infos.map((line) => <div class="mh-dates">{line}</div>)}</div>
   </a>
   {next ? (
     <a class="mh-btn next" href={nextHref} aria-label="Suivant">&#8250;</a>
@@ -101,6 +101,11 @@ const nextHref = next ? `${basePath}/${next.id}/` : undefined;
   .mh-center { text-decoration: none; cursor: pointer; }
   /* Dates de la fiche, un peu plus grandes que dans la barre des frises. */
   .mh-dates { font-size: clamp(.82rem, 1.6vw, .95rem); margin-top: .15rem; }
+
+  /* Mobile en paysage : peu de hauteur, dates et nationalité sur une seule ligne */
+  @media (max-width: 900px) and (orientation: landscape), (orientation: landscape) and (max-height: 500px) {
+    .mh-infos { display: flex; justify-content: center; flex-wrap: wrap; column-gap: 2.5rem; }
+  }
 
   .fiche-side-arrow { display: none; }
 
