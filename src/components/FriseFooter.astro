@@ -1,0 +1,45 @@
+---
+/* Pied de page des frises et des fiches : devise, liens de navigation, copyright */
+---
+<footer class="frise-footer">
+  <p class="ff-tagline footer-tagline">Sans la musique, la vie serait une erreur ♪</p>
+  <div class="ff-bottom">
+    <nav class="ff-links" aria-label="Navigation du site">
+      <a href="/">⌂ Accueil</a>
+      <span aria-hidden="true">·</span>
+      <a href="/frises/">Toutes les frises</a>
+      <span aria-hidden="true">·</span>
+      <a href="/plan-du-site/">Plan du site</a>
+    </nav>
+    <p class="ff-copy">© 2026 – laphilo.fr – Tous droits réservés</p>
+  </div>
+</footer>
+
+<style>
+  /* Liens et copyright sur une même ligne (retour à la ligne sur mobile) :
+     le pied de page des frises ne grandit pas sur ordinateur */
+  .ff-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem 1.4rem;
+  }
+  .ff-links {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-family: 'Cinzel', serif;
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(212, 168, 67, .55);
+  }
+  .ff-links a {
+    color: var(--gold-light, #d4a843);
+    text-decoration: none;
+    opacity: .85;
+    transition: opacity .2s;
+  }
+  .ff-links a:hover { opacity: 1; text-decoration: underline; }
+</style>

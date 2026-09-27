@@ -1,5 +1,6 @@
 ---
 import Favicons from '../components/Favicons.astro';
+import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
@@ -36,6 +37,13 @@ const comprendre = [
 <main class="sitemap-wrap">
 
   <header class="sitemap-hero site-header">
+    <div class="sitemap-switcher">
+      <BackButton />
+      <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+        <span class="sitemap-flag" aria-hidden="true">⌂</span>
+        <span class="sitemap-text">Accueil</span>
+      </a>
+    </div>
     <span class="header-ornament" aria-hidden="true">✦ ✦ ✦</span>
     <h1 class="site-title">Plan du site</h1>
     <p class="site-subtitle">La Philo · 2026</p>

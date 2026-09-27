@@ -1,4 +1,6 @@
 ---
+import BackButton from './BackButton.astro';
+
 interface Props {
   title: string;
   listHref: string;
@@ -9,7 +11,10 @@ const { title, listHref } = Astro.props;
 
 <header class="frise-header">
   <div class="frise-header-actions">
-    <a href="/" class="fha-btn fha-home" aria-label="Accueil"><span class="fha-ico" aria-hidden="true">⌂</span> <span class="fha-lbl">Accueil</span></a>
+    <div class="fha-left">
+      <BackButton variant="fha" />
+      <a href="/" class="fha-btn fha-home" aria-label="Accueil"><span class="fha-ico" aria-hidden="true">⌂</span> <span class="fha-lbl">Accueil</span></a>
+    </div>
     <div class="fha-right">
       <a href={listHref} class="fha-btn" aria-label="Frise complète"><span class="fha-ico" aria-hidden="true">&#9776;</span> <span class="fha-lbl">Frise complète</span></a>
       <a href="/recherche/" class="fha-btn" aria-label="Recherche"><span class="fha-ico" aria-hidden="true">&#128269;</span> <span class="fha-lbl">Recherche</span></a>
@@ -22,19 +27,7 @@ const { title, listHref } = Astro.props;
 <style>
   /* De l'air entre les boutons et le nom de la fiche. */
   .frise-header-actions { margin-bottom: 1.6rem; }
-
-  /* Mobile : styles-f.css ne garde que les symboles ; sur les fiches, on
-     affiche aussi le mot, sous le symbole, pour que les boutons soient clairs. */
   @media (max-width: 640px) {
     .frise-header-actions { margin-bottom: 1.3rem; }
-    .fha-btn {
-      flex-direction: column;
-      gap: .15rem;
-      padding: .3rem .55rem;
-      min-width: 3.4rem;
-      line-height: 1.1;
-    }
-    .fha-btn .fha-ico { display: block; font-size: .95rem; }
-    .fha-btn .fha-lbl { display: block; font-size: .52rem; letter-spacing: .06em; }
   }
 </style>

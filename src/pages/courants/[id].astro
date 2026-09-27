@@ -8,6 +8,7 @@ import FicheNav from '../../components/FicheNav.astro';
 import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
+import FriseFooter from '../../components/FriseFooter.astro';
 import { datesLine } from '../../lib/dates';
 import { markerColor, eraLabel } from '../../lib/era';
 import { courantSeo, plainText } from '../../lib/seo';
@@ -138,10 +139,7 @@ const jsonLd = [
   </div>
 </div>
 
-<footer class="frise-footer">
-  <p class="ff-tagline footer-tagline">Sans la musique, la vie serait une erreur ♪</p>
-  <p class="ff-copy">© 2026 – laphilo.fr – Tous droits réservés</p>
-</footer>
+<FriseFooter />
 
 <!-- Vidéo, podcast et liens du texte (panneau latéral), comme dans les frises. -->
 <script src="/js/slide-media.js" defer data-init="fiche"></script>

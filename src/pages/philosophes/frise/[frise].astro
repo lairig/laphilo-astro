@@ -3,6 +3,8 @@ import Favicons from '../../../components/Favicons.astro';
 import Fonts from '../../../components/Fonts.astro';
 import GoatCounter from '../../../components/GoatCounter.astro';
 import SeoHead from '../../../components/SeoHead.astro';
+import BackButton from '../../../components/BackButton.astro';
+import FriseFooter from '../../../components/FriseFooter.astro';
 import { plainText } from '../../../lib/seo';
 import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
@@ -120,10 +122,13 @@ const jsonLd = [
 
 <header class="frise-header">
   <div class="frise-header-actions">
-    <a href="/" class="fha-btn fha-home" aria-label="Accueil">⌂ <span>Accueil</span></a>
+    <div class="fha-left">
+      <BackButton variant="fha" />
+      <a href="/" class="fha-btn fha-home" aria-label="Accueil"><span class="fha-ico" aria-hidden="true">⌂</span> <span class="fha-lbl">Accueil</span></a>
+    </div>
     <div class="fha-right">
-      <button id="frise-mini-list-btn" class="fha-btn" type="button" aria-label="Liste">&#9776; <span>Liste</span></button>
-      <a href="/recherche/" class="fha-btn" aria-label="Recherche">&#128269; <span>Recherche</span></a>
+      <button id="frise-mini-list-btn" class="fha-btn" type="button" aria-label="Liste"><span class="fha-ico" aria-hidden="true">&#9776;</span> <span class="fha-lbl">Liste</span></button>
+      <a href="/recherche/" class="fha-btn" aria-label="Recherche"><span class="fha-ico" aria-hidden="true">&#128269;</span> <span class="fha-lbl">Recherche</span></a>
     </div>
   </div>
   <h1>{label}</h1>
@@ -173,10 +178,7 @@ const jsonLd = [
   </div>
 </div>
 
-<footer class="frise-footer">
-  <p class="ff-tagline footer-tagline">Sans la musique, la vie serait une erreur ♪</p>
-  <p class="ff-copy">© 2026 – laphilo.fr – Tous droits réservés</p>
-</footer>
+<FriseFooter />
 
 <script define:vars={{ frise, cfg }}>
   window.FRISE_CONFIG = {
