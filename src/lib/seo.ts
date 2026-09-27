@@ -1,5 +1,5 @@
 /* Titres et descriptions des pages pour les moteurs de recherche.
-   Les données (xlsx) écrivent les noms de famille en capitales (« Immanuel
+   Les données (xlsx) écrivent les noms de famille en capitales (« Emmanuel
    KANT ») et les dates sous des formes variées : on produit ici une version
    propre pour Google, sans toucher à l'affichage des pages. */
 
@@ -21,7 +21,7 @@ const ROMAN = /^[IVXLC]+$/;
 
 const capitalize = (w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
 
-/** « Immanuel KANT » → « Immanuel Kant », « Nicolas D'AUTRECOURT » → « Nicolas d'Autrecourt ». */
+/** « Emmanuel KANT » → « Emmanuel Kant », « Nicolas D'AUTRECOURT » → « Nicolas d'Autrecourt ». */
 export function prettyName(name: string): string {
   const words = name.trim().split(/\s+/);
   return words
