@@ -705,9 +705,11 @@
       /* ── Extraction des balises <audio> du texte ── */
       const audioBlocks = [];
       const textWithoutAudio = p.text.replace(/<audio[\s\S]*?<\/audio>/gi, match => {
-        const tmp = document.createElement('div');
+        /* <template> : contenu inerte, le navigateur ne télécharge pas le mp3
+           (un <div> détaché lance le chargement du fichier audio). */
+        const tmp = document.createElement('template');
         tmp.innerHTML = match;
-        const audioEl = tmp.querySelector('audio');
+        const audioEl = tmp.content.querySelector('audio');
         const src     = audioEl?.querySelector('source')?.getAttribute('src') || '';
         const title   = audioEl?.getAttribute('title') || (_isEN ? 'Listen to the podcast' : 'Écouter le podcast');
         if (src) audioBlocks.push({ src, title });
