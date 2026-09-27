@@ -102,6 +102,8 @@ const jsonLd = [
   <SeoHead title={title} description={`${label} — ${descriptionText}`} path={path} jsonLd={jsonLd} />
 
   <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 500', 'EB Garamond 400 italic']} />
+  <!-- Données de la frise demandées dès le début, en parallèle du script. -->
+  <link rel="preload" href={`/philosophes/frise/${frise}.json`} as="fetch" crossorigin="anonymous" />
   <link rel="stylesheet" href="/css/styles-f.css" />
 </head>
 <body>
