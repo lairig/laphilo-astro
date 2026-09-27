@@ -1,6 +1,20 @@
 # En-têtes HTTP appliqués par Cloudflare Pages.
 # Les pages HTML gardent le comportement par défaut (revalidation à chaque visite).
 
+# En-têtes de sécurité, pour tout le site.
+# - HSTS : le navigateur n'utilise plus que https pendant 1 an.
+# - nosniff : le navigateur respecte le type annoncé des fichiers.
+# - Referrer-Policy : les sites externes ne voient que « laphilo.fr », pas la page d'origine.
+# - X-Frame-Options : le site ne peut pas être affiché dans une iframe d'un autre site.
+# - Permissions-Policy : caméra, micro, géolocalisation, etc. désactivés
+#   (les lecteurs YouTube et Spotify n'en ont pas besoin).
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+
 # Vignettes et photos des philosophes : rarement modifiées.
 # 7 jours de cache navigateur, puis mise à jour en arrière-plan pendant 30 jours.
 /pho/*
