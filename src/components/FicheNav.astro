@@ -16,11 +16,13 @@ interface Props {
 }
 
 const { basePath, prev, next, infos, listHref, listLabel } = Astro.props;
+const prevHref = prev ? `${basePath}/${prev.id}/` : undefined;
+const nextHref = next ? `${basePath}/${next.id}/` : undefined;
 ---
 
 <div class="mobile-header" style="display:flex">
   {prev ? (
-    <a class="mh-btn prev" href={`${basePath}/${prev.id}/`} aria-label="Précédent">&#8249;</a>
+    <a class="mh-btn prev" href={prevHref} aria-label="Précédent">&#8249;</a>
   ) : (
     <button class="mh-btn prev" disabled aria-label="Précédent">&#8249;</button>
   )}
@@ -29,15 +31,119 @@ const { basePath, prev, next, infos, listHref, listLabel } = Astro.props;
     {infos.map((line) => <div class="mh-dates">{line}</div>)}
   </a>
   {next ? (
-    <a class="mh-btn next" href={`${basePath}/${next.id}/`} aria-label="Suivant">&#8250;</a>
+    <a class="mh-btn next" href={nextHref} aria-label="Suivant">&#8250;</a>
   ) : (
     <button class="mh-btn next" disabled aria-label="Suivant">&#8250;</button>
   )}
 </div>
+
+{/* Ordinateur : grandes flèches sur les côtés, à mi-hauteur de l'écran */}
+{prev && <a class="fiche-side-arrow prev" href={prevHref} aria-label={`Fiche précédente : ${prev.name}`} title={prev.name}>&#8249;</a>}
+{next && <a class="fiche-side-arrow next" href={nextHref} aria-label={`Fiche suivante : ${next.name}`} title={next.name}>&#8250;</a>}
+
+{/* Fiches voisines préchargées : le passage de l'une à l'autre est immédiat */}
+{prevHref && <link rel="prefetch" href={prevHref} />}
+{nextHref && <link rel="prefetch" href={nextHref} />}
+
+<script>
+  /* Passer à la fiche voisine : glissement du doigt (mobile) ou touches ← → */
+  /* Les flèches latérales passent directement sous <body> : l'animation
+     d'entrée de .frise-body fausserait leur position fixe à mi-écran. */
+  document.querySelectorAll('.fiche-side-arrow').forEach((a) => document.body.appendChild(a));
+
+  const prev = document.querySelector<HTMLAnchorElement>('a.mh-btn.prev');
+  const next = document.querySelector<HTMLAnchorElement>('a.mh-btn.next');
+
+  function go(link: HTMLAnchorElement | null, dir: 1 | -1) {
+    if (!link) return;
+    const area = document.querySelector<HTMLElement>('.slide-area');
+    if (area) {
+      area.style.transition = 'transform .18s ease-in, opacity .18s ease-in';
+      area.style.transform = `translateX(${dir * -40}px)`;
+      area.style.opacity = '0';
+    }
+    setTimeout(() => { window.location.href = link.href; }, 150);
+  }
+
+  /* Ne pas réagir dans le panneau latéral, le lecteur audio ou un champ */
+  const ignored = (t: EventTarget | null) =>
+    t instanceof Element && !!t.closest('.link-drawer, .audio-player-bar, input, textarea, select');
+
+  let x0 = 0, y0 = 0, t0 = 0, tracking = false;
+  document.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    /* Pas depuis les bords : le navigateur y gère déjà le retour arrière */
+    tracking = e.touches.length === 1 && !ignored(e.target)
+      && t.clientX > 24 && t.clientX < window.innerWidth - 24;
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    /* Geste franc et horizontal : sinon c'est un défilement de la page */
+    if (Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.5 || Date.now() - t0 > 800) return;
+    if (dx < 0) go(next, 1); else go(prev, -1);
+  }, { passive: true });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || ignored(e.target)) return;
+    if (document.querySelector('.link-drawer.open')) return;
+    if (e.key === 'ArrowRight') go(next, 1);
+    if (e.key === 'ArrowLeft') go(prev, -1);
+  });
+</script>
 
 <style>
   .mh-btn { text-decoration: none; }
   .mh-center { text-decoration: none; cursor: pointer; }
   /* Dates de la fiche, un peu plus grandes que dans la barre des frises. */
   .mh-dates { font-size: clamp(.82rem, 1.6vw, .95rem); margin-top: .15rem; }
+
+  .fiche-side-arrow { display: none; }
+
+  /* Écran tactile : le glissement horizontal change de fiche, pas de page
+     dans l'historique du navigateur */
+  @media (pointer: coarse) {
+    :global(html), :global(body) { overscroll-behavior-x: none; }
+  }
+
+  /* Ordinateur (souris) : flèches fixes sur les bords, à mi-hauteur */
+  @media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+    .fiche-side-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 42px;
+      height: 72px;
+      font-size: 2.4rem;
+      line-height: 1;
+      color: var(--gold-light, #d4a843);
+      text-decoration: none;
+      background: rgba(22, 13, 5, .6);
+      border: 1px solid rgba(180, 130, 20, .45);
+      border-radius: 6px;
+      opacity: .7;
+      transition: opacity .2s, background .2s, border-color .2s;
+    }
+    .fiche-side-arrow:hover {
+      opacity: 1;
+      background: rgba(180, 130, 20, .18);
+      border-color: var(--gold, #b8860b);
+    }
+    .fiche-side-arrow.prev { left: 8px; }
+    .fiche-side-arrow.next { right: 8px; }
+
+    /* Place pour les flèches de part et d'autre de la fiche */
+    :global(.slide-area) { padding: 0 58px; }
+
+    /* Masquées quand le panneau latéral est ouvert (il couvre la gauche) */
+    :global(body:has(.link-drawer.open)) .fiche-side-arrow { display: none; }
+  }
 </style>
