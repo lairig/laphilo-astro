@@ -61,9 +61,22 @@ export function clip(text: string, max: number): string {
   return cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:–—-]+$/, '') + '…';
 }
 
+/** Texte brut : les xlsx contiennent parfois « &amp; » ou des balises (<em>),
+    qui seraient sinon ré-échappés et affichés tels quels dans Google. */
+export function plainText(text: string): string {
+  return text
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
+}
+
 /** Première lettre en majuscule, espaces normalisés, point final. */
 export function sentence(text: string): string {
-  const t = text.replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').trim();
+  const t = plainText(text).replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').trim();
   if (!t) return '';
   const s = t.charAt(0).toUpperCase() + t.slice(1);
   return /[.!?…]$/.test(s) ? s : `${s}.`;

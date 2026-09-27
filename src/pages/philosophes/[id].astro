@@ -8,7 +8,7 @@ import FicheNav from '../../components/FicheNav.astro';
 import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
-import { philosopheSeo } from '../../lib/seo';
+import { philosopheSeo, plainText } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
@@ -71,7 +71,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: seo.name,
-    description: p.description || description,
+    description: p.description ? plainText(p.description) : description,
     ...(p.year > 0 ? { birthDate: String(p.year) } : {}),
     ...(p.end_year && p.end_year > 0 ? { deathDate: String(p.end_year) } : {}),
     url: new URL(path, Astro.site).toString(),

@@ -9,7 +9,7 @@ import FicheHeader from '../../components/FicheHeader.astro';
 import CrossLinks from '../../components/CrossLinks.astro';
 import SeoHead from '../../components/SeoHead.astro';
 import { markerColor, eraLabel } from '../../lib/era';
-import { courantSeo } from '../../lib/seo';
+import { courantSeo, plainText } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
@@ -86,7 +86,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'DefinedTerm',
     name: c.name,
-    description: c.description || description,
+    description: c.description ? plainText(c.description) : description,
     url: new URL(path, Astro.site).toString(),
     inDefinedTermSet: new URL('/histoire-des-courants/', Astro.site).toString(),
   },
