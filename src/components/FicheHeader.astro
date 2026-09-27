@@ -20,9 +20,13 @@ const { title, listHref } = Astro.props;
 </header>
 
 <style>
+  /* De l'air entre les boutons et le nom de la fiche. */
+  .frise-header-actions { margin-bottom: 1.6rem; }
+
   /* Mobile : styles-f.css ne garde que les symboles ; sur les fiches, on
      affiche aussi le mot, sous le symbole, pour que les boutons soient clairs. */
   @media (max-width: 640px) {
+    .frise-header-actions { margin-bottom: 1.3rem; }
     .fha-btn {
       flex-direction: column;
       gap: .15rem;
