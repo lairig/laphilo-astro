@@ -9,12 +9,28 @@ const { title, listHref } = Astro.props;
 
 <header class="frise-header">
   <div class="frise-header-actions">
-    <a href="/" class="fha-btn fha-home" aria-label="Accueil">⌂ <span>Accueil</span></a>
+    <a href="/" class="fha-btn fha-home" aria-label="Accueil"><span class="fha-ico" aria-hidden="true">⌂</span> <span class="fha-lbl">Accueil</span></a>
     <div class="fha-right">
-      <a href={listHref} class="fha-btn" aria-label="Liste">&#9776; <span>Liste</span></a>
-      <a href="/recherche/" class="fha-btn" aria-label="Recherche">&#128269; <span>Recherche</span></a>
+      <a href={listHref} class="fha-btn" aria-label="Frise complète"><span class="fha-ico" aria-hidden="true">&#9776;</span> <span class="fha-lbl">Frise complète</span></a>
+      <a href="/recherche/" class="fha-btn" aria-label="Recherche"><span class="fha-ico" aria-hidden="true">&#128269;</span> <span class="fha-lbl">Recherche</span></a>
     </div>
   </div>
   <h1>{title}</h1>
   <div class="header-rule"></div>
 </header>
+
+<style>
+  /* Mobile : styles-f.css ne garde que les symboles ; sur les fiches, on
+     affiche aussi le mot, sous le symbole, pour que les boutons soient clairs. */
+  @media (max-width: 640px) {
+    .fha-btn {
+      flex-direction: column;
+      gap: .15rem;
+      padding: .3rem .55rem;
+      min-width: 3.4rem;
+      line-height: 1.1;
+    }
+    .fha-btn .fha-ico { display: block; font-size: .95rem; }
+    .fha-btn .fha-lbl { display: block; font-size: .52rem; letter-spacing: .06em; }
+  }
+</style>
