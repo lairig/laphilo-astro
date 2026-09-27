@@ -144,16 +144,42 @@ import SeoHead from '../components/SeoHead.astro';
       text-transform: uppercase;
       color: #d4a843;
     }
+    /* Lien vers la frise de la tradition choisie : bouton doré bien visible */
     .list-page .phi-philo-frise-link {
-      margin-top: 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      align-self: flex-start;
+      margin-top: 0.9rem;
+      padding: 0.7rem 1.3rem;
       font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      color: #f0dca0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1e1208;
       text-decoration: none;
-      border-bottom: 1px solid rgba(212, 168, 67, 0.5);
+      background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%);
+      border: 1px solid #e8c870;
+      border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(180, 130, 20, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      animation: phi-frise-link-in 0.35s ease-out;
     }
-    .list-page .phi-philo-frise-link:hover { color: #fff3cf; border-bottom-color: #d4a843; }
+    .list-page .phi-philo-frise-link::before { content: '◈'; font-size: 1.05rem; }
+    .list-page .phi-philo-frise-link[hidden] { display: none; }
+    .list-page .phi-philo-frise-link:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+      box-shadow: 0 6px 22px rgba(180, 130, 20, 0.55);
+    }
+    @keyframes phi-frise-link-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (max-width: 640px) {
+      .list-page .phi-philo-frise-link { align-self: stretch; justify-content: center; text-align: center; font-size: 0.72rem; }
+    }
     .list-page .phi-color-pill {
       display: inline-flex;
       align-items: center;
