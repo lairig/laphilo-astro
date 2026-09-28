@@ -10,7 +10,7 @@ import catalogue from '../data/frises-catalogue.json';
    Les frises viennent du catalogue de /frises/ : une frise ajoutée au
    catalogue apparaît ici automatiquement. */
 type Link = { label: string; href: string; note?: string };
-type Block = { id: string; title: string; short: string; links: Link[] };
+type Block = { id: string; title: string; links: Link[] };
 
 const groups: any[] = catalogue.groups;
 const byLabel = (label: string) => groups.find((g) => g.label === label)?.items ?? [];
@@ -34,7 +34,6 @@ const blocks: Block[] = [
   {
     id: 'decouvrir',
     title: 'Découvrir',
-    short: 'Découvrir',
     links: [
       { label: 'Accueil', href: '/' },
       { label: 'Recherche (philosophes, courants, frises)', href: '/recherche/' },
@@ -42,27 +41,19 @@ const blocks: Block[] = [
       { label: 'Histoire des philosophes', href: '/histoire-des-philosophes/' },
       { label: 'Histoire des courants', href: '/histoire-des-courants/' },
       { label: 'Toutes les frises (présentées)', href: '/frises/' },
-    ],
-  },
-  { id: 'courants', title: 'Frises des courants de pensée', short: 'Courants', links: courants },
-  {
-    id: 'epoques',
-    title: 'Frises des philosophes par époque',
-    short: 'Philosophes par époque',
-    links: [...anciensChrono, ...byLabel('Modernes'), ...byLabel('Contemporains')].map(frise),
-  },
-  { id: 'origines', title: 'Frises des philosophes par origine (toutes époques)', short: 'Philosophes par origine', links: byLabel('Par Nationalité').map(frise) },
-  {
-    id: 'site',
-    title: 'Le site',
-    short: 'Le site',
-    links: [
       { label: 'Pourquoi ce site ?', href: '/pourquoi/' },
       { label: 'Musique Lairig', href: '/lairig/' },
       { label: 'Ressources utilisées', href: '/ressources/' },
       { label: 'Échanges & contact', href: '/echanges/' },
     ],
   },
+  {
+    id: 'epoques',
+    title: 'Frises des philosophes par époque',
+    links: [...anciensChrono, ...byLabel('Modernes'), ...byLabel('Contemporains')].map(frise),
+  },
+  { id: 'origines', title: 'Frises des philosophes par origine (toutes époques)', links: byLabel('Par Nationalité').map(frise) },
+  { id: 'courants', title: 'Frises des courants de pensée', links: courants },
 ];
 const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site.";
 ---
@@ -81,21 +72,7 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
     .pds { max-width: 1100px; margin: 0 auto; padding: 0 1rem 3rem; }
-    .pds-hero { padding-bottom: 1.2rem; }
-
-    /* Sommaire : saut direct vers une rubrique */
-    .pds-toc {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
-      margin: 0 0 2rem; padding: 0; list-style: none;
-    }
-    .pds-toc a {
-      display: inline-block; padding: .45rem .9rem;
-      font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 600; letter-spacing: .05em;
-      color: #f7ecce; text-decoration: none;
-      border: 1px solid rgba(212, 168, 67, .5); border-radius: 4px;
-      background: rgba(30, 18, 8, .7);
-    }
-    .pds-toc a:hover, .pds-toc a:focus-visible { background: rgba(180, 130, 20, .25); border-color: #d4a843; }
+    .pds-hero { padding-bottom: 1.6rem; }
 
     /* Rubriques : colonnes sur grand écran, une seule sur mobile */
     .pds-grid {
@@ -130,8 +107,6 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
     .pds-hint { margin: 1.6rem 0 0; text-align: center; font-family: 'EB Garamond', serif; font-size: .95rem; font-style: italic; color: #c9a96e; }
 
     @media (max-width: 480px) {
-      .pds-toc { gap: .35rem; margin-bottom: 1.4rem; }
-      .pds-toc a { padding: .35rem .6rem; font-size: .7rem; }
       .pds-grid { grid-template-columns: 1fr; }
       .pds-block { padding: .8rem .9rem .9rem; }
     }
@@ -154,12 +129,6 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
     <h1 class="site-title">Plan du site</h1>
     <div class="header-rule" aria-hidden="true"></div>
   </header>
-
-  <nav aria-label="Rubriques du plan du site">
-    <ul class="pds-toc">
-      {blocks.map((b) => <li><a href={`#${b.id}`}>{b.short}</a></li>)}
-    </ul>
-  </nav>
 
   <div class="pds-grid">
     {blocks.map((b) => (
