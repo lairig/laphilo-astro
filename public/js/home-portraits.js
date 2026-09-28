@@ -1,5 +1,13 @@
-/* ── Portraits philosophes flottants ─────────────────────── */
+/* ── Portraits philosophes flottants ─────────────────────────
+   Accueil et pages de liste (définition, frises, histoires, plan du site).
+   Pas sur les fiches ni les frises (contenu pleine largeur), ni sur mobile
+   ou tablette : il faut un grand écran avec souris pour qu'ils tiennent
+   dans les marges sans masquer le contenu. */
 (function () {
+
+  var WIDE = window.matchMedia('(min-width: 1100px) and (hover: hover) and (pointer: fine)');
+  /* Écran tactile (mobile, tablette) : rien du tout, pas même les minuteries */
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
   var PHILOSOPHERS = [
     { name:"Socrate",    dates:"~ −470 / −399", img:"/pho/socrate-mini.webp" },
@@ -88,19 +96,53 @@
     return p;
   }
 
+  /* Le rectangle touche-t-il du contenu ? On sonde une grille de points :
+     tout élément plus étroit que la page (colonne, carte, texte…) compte comme
+     contenu ; html, body et les bandeaux pleine largeur n'en sont pas. */
+  function hitsContent(x, y) {
+    var W = window.innerWidth;
+    for (var i = 0; i <= 3; i++) {
+      for (var j = 0; j <= 3; j++) {
+        var els = document.elementsFromPoint(x + CFG.w * i / 3, y + CFG.h * j / 3);
+        for (var k = 0; k < els.length; k++) {
+          var e = els[k];
+          if (e === document.body || e === document.documentElement) continue;
+          if (e.getBoundingClientRect().width < W * .9) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /* Ne pas empiéter sur un portrait déjà affiché */
+  function hitsPortrait(x, y) {
+    for (var i = 0; i < active.length; i++) {
+      var r = active[i].getBoundingClientRect();
+      if (x < r.right + 10 && x + CFG.w > r.left - 10 &&
+          y < r.bottom + 30 && y + CFG.h > r.top - 30) return true;
+    }
+    return false;
+  }
+
+  /* Position libre sur un côté, ou null s'il n'y a pas la place */
   function randomPos() {
     var W = window.innerWidth, H = window.innerHeight;
-    var side = Math.random() < .5 ? 'left' : 'right';
-    var x = side === 'left' ? CFG.sideMargin : W - CFG.w - CFG.sideMargin;
-    var y = 130 + Math.random() * (H - 130 - CFG.h - 80);
-    return { x: x, y: y };
+    for (var t = 0; t < 10; t++) {
+      var side = Math.random() < .5 ? 'left' : 'right';
+      var x = side === 'left' ? CFG.sideMargin : W - CFG.w - CFG.sideMargin;
+      var y = 130 + Math.random() * (H - 130 - CFG.h - 80);
+      if (!hitsPortrait(x, y) && !hitsContent(x, y)) return { x: x, y: y };
+    }
+    return null;
   }
 
   function spawn() {
+    if (!WIDE.matches || document.hidden) return;
     if (active.length >= CFG.maxVisible) return;
 
-    var philo = next();
     var pos   = randomPos();
+    if (!pos) return;
+    var philo = next();
     var drift = Math.random() < .5 ? 'drift-up' : 'drift-down';
 
     var el = document.createElement('div');
