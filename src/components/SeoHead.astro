@@ -16,6 +16,21 @@ const ogImage = new URL('/og-banner.webp', Astro.site).toString();
 <meta name="author" content="LaPhilo.fr" />
 <meta name="theme-color" content="#2b1d0e" />
 <script src="/js/media-exclusive.js" defer></script>
+{/* Les frises s'ouvrent dans un nouvel onglet, sauf depuis une frise
+    (passer d'une frise à l'autre reste dans le même onglet). Réglé au clic :
+    couvre aussi les liens créés en JavaScript (résultats de recherche). */}
+<script is:inline>
+  (function () {
+    var FRISE = /^\/(philosophes|courants)\/frise\//;
+    if (FRISE.test(location.pathname)) return;
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || a.target || a.origin !== location.origin || !FRISE.test(a.pathname)) return;
+      a.target = '_blank';
+      a.rel = (a.rel ? a.rel + ' ' : '') + 'noopener';
+    }, true);
+  })();
+</script>
 
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="LaPhilo.fr" />
