@@ -53,4 +53,13 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes grecs et byzantins — toutes époques',
     match: (p) => ['Grecque', 'Byzantine'].includes(p.nationalite ?? ''),
   },
+  /* Sous-continent indien : Iqbal (Pakistan) et Coomaraswamy (Sri Lanka) sont nés dans l'Inde britannique */
+  'indiens-toutes-epoques': {
+    label: "Philosophes de l'Inde — toutes époques",
+    match: (p) => ['Indienne', 'Pakistanaise', 'Sri-lankaise'].includes(p.nationalite ?? ''),
+  },
+  'chinois-toutes-epoques': {
+    label: 'Philosophes chinois — toutes époques',
+    match: (p) => (p.nationalite ?? '') === 'Chinoise',
+  },
 };

@@ -22,9 +22,11 @@
     { v: 'africain', fr: 'Africains', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
     { v: 'hispanique', fr: 'Hispaniques', grad: 'linear-gradient(180deg,#c60b1e 50%,#ffc400 50%)' },
     { v: 'grec', fr: 'Grecs & Byzantins', grad: 'linear-gradient(180deg,#0d5eaf 50%,#f7f4ea 50%)' },
+    { v: 'indien', fr: 'Indiens', grad: 'linear-gradient(180deg,#ff9933 33%,#f7f4ea 33% 66%,#138808 66%)' },
+    { v: 'chinois', fr: 'Chinois', grad: 'linear-gradient(135deg,#ffde00 22%,#de2910 22%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'indien', 'chinois', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
@@ -34,9 +36,11 @@
     britannique: { nats: ['Britannique'] },
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
     'arabo-persan': { nats: ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'] },
-    'africain': { nats: ['Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'] },
+    'africain': { nats: ['Égyptienne', 'Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'] },
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'] },
     'grec': { nats: ['Grecque', 'Byzantine'] },
+    'indien': { nats: ['Indienne', 'Pakistanaise', 'Sri-lankaise'] },
+    'chinois': { nats: ['Chinoise'] },
   };
   function pillValue(v) {
     return TRADITION_RULES[v] ? 'trad:' + v : v;
@@ -52,6 +56,8 @@
     'africain': { href: '/philosophes/frise/africains-toutes-epoques/', fr: "Voir la frise des philosophes africains" },
     'hispanique': { href: '/philosophes/frise/hispaniques-toutes-epoques/', fr: "Voir la frise des philosophes hispaniques" },
     'grec': { href: '/philosophes/frise/grecs-byzantins-toutes-epoques/', fr: "Voir la frise des philosophes grecs et byzantins" },
+    'indien': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes indiens" },
+    'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: "Voir la frise des philosophes chinois" },
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
