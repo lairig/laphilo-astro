@@ -12,9 +12,9 @@
 
   var COLOR_FILTERS = [
     { v: 'oriental', fr: 'Orientaux', grad: '#1e8c3c' },
-    { v: 'france', fr: 'Français', grad: 'linear-gradient(180deg,#d21e1e 50%,#1464d2 50%)' },
-    { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f0b400 50%,#d21e1e 50%)' },
-    { v: 'americain', fr: 'Américains', grad: 'linear-gradient(180deg,#f7f4ea 50%,#1464d2 50%)' },
+    { v: 'france', fr: 'Français', grad: 'linear-gradient(90deg,#0055a4 33.3%,#f7f4ea 33.3% 66.6%,#ef4135 66.6%)' },
+    { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f7f4ea 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%)' },
+    { v: 'americain', fr: 'Américains', grad: 'linear-gradient(#3c3b6e,#3c3b6e) 0 0/50% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 15.4%,#f7f4ea 15.4% 30.8%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
     { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
     { v: 'germanophone', fr: 'Germanophones', grad: 'linear-gradient(180deg,#0a0a0a 33%,#d21e1e 33% 66%,#f0b400 66%)' },
@@ -27,7 +27,7 @@
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'indien', 'chinois', 'juif', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'grec', 'indien', 'chinois', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
