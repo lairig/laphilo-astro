@@ -733,12 +733,12 @@
 .entry-guide{margin:0 0 2.8rem;text-align:center}
 .entry-guide-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:.9rem}
 .entry-guide-items{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
-.entry-guide-btn{display:flex;align-items:center;gap:.65rem;padding:.7rem 1.1rem;background:rgba(180,130,20,.06);border:1px solid rgba(180,130,20,.28);border-radius:4px;cursor:pointer;text-align:left;transition:background .2s,border-color .2s,transform .2s;min-width:160px;flex:1;max-width:220px}
-.entry-guide-btn:hover{background:rgba(180,130,20,.14);border-color:rgba(180,130,20,.6);transform:translateY(-2px)}
-.entry-guide-icon{font-size:1.25rem;color:var(--gold-light);flex-shrink:0;line-height:1;opacity:.85}
+.entry-guide-btn{display:flex;align-items:center;gap:.8rem;padding:.95rem 1.3rem;background:rgba(30,18,8,.72);border:1px solid rgba(212,168,67,.55);border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.35);cursor:pointer;text-align:left;text-decoration:none;color:var(--parch-light);transition:background .2s,border-color .2s,transform .2s;min-width:160px;flex:1;max-width:260px}
+.entry-guide-btn:hover,.entry-guide-btn:focus-visible{background:rgba(70,45,15,.85);border-color:var(--gold-light);transform:translateY(-2px);text-decoration:none}.entry-guide-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px}
+.entry-guide-icon{font-size:1.5rem;color:var(--gold-light);flex-shrink:0;line-height:1;width:1.6rem;text-align:center}
 .entry-guide-text{display:flex;flex-direction:column;gap:.18rem}
-.entry-guide-text strong{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--parch-light);display:block}
-.entry-guide-text span{font-family:'EB Garamond',serif;font-size:.82rem;color:var(--parch-dark);font-style:italic}
+.entry-guide-text strong{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff4dc;display:block}
+.entry-guide-text span{font-family:'EB Garamond',serif;font-size:1rem;line-height:1.25;color:var(--parch-mid);font-style:italic}
 @media(max-width:580px){
   .entry-guide-items{flex-direction:column;align-items:stretch}
   .entry-guide-btn{max-width:100%}
