@@ -21,6 +21,7 @@ pnpm-debug.log*
 scripts/gsc-credentials.json
 scripts/seo-history.json
 scripts/rapports-seo/
+rapports-seo/
 
 # macOS-specific files
 .DS_Store
