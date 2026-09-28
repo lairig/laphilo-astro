@@ -718,7 +718,7 @@
 .faq-link-row{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;margin-top:.9rem;padding:.55rem .9rem;background:rgba(180,130,20,.1);border:1px solid rgba(180,130,20,.28);border-radius:3px;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.06em;color:var(--gold-light)}
 .faq-link-row::before{content:'→';flex-shrink:0;color:var(--gold-light)}
 .faq-link{color:#c05a20;text-decoration:none;border-bottom:1px solid rgba(192,90,32,.6);padding-bottom:1px;font-weight:600;transition:color .2s,border-color .2s}
-.faq-link:hover{color:#e06820;border-bottom-color:#e06820}
+.faq-link:hover{color:#e06820;border-bottom-color:#e06820}.faq-name-link{color:var(--gold-light);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:rgba(212,168,67,.6);transition:color .2s,text-decoration-color .2s}.faq-name-link:hover,.faq-name-link:focus-visible{color:#fff4dc;text-decoration-color:#fff4dc}
 
 /* ── Focus clavier sur les nœuds de la timeline (tabindex="0") ── */
 .tl-node:focus-visible .tl-card{outline:none;box-shadow:0 0 0 3px rgba(180,130,20,.5),4px 4px 0 rgba(120,80,20,.28),0 12px 36px rgba(10,5,2,.5)}
