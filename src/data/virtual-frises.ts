@@ -43,7 +43,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'africains-toutes-epoques': {
     label: 'Philosophes africains — toutes époques',
-    match: (p) => ['Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'].includes(p.nationalite ?? ''),
+    match: (p) => ['Égyptienne', 'Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'].includes(p.nationalite ?? ''),
   },
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
