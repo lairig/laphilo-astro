@@ -795,7 +795,7 @@
     window.SlideMedia.closeDrawer(true);
 
     /* Couper tout média en cours (audio France Culture + vidéos YouTube) avant de changer de fiche */
-    if (window.AudioManager) window.AudioManager.stopAll();
+    if (window.LaphiloMedia) window.LaphiloMedia.stopAll();
 
     current = index;
     /* Suggérer le morceau Lairig correspondant à l'ère du philosophe */

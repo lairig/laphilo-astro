@@ -34,15 +34,9 @@
       const lazy = e.target.closest('.yt-lazy');
       if (!lazy || lazy.classList.contains('loaded')) return;
       const ifr = lazy.querySelector('iframe');
-      ifr.src = `https://www.youtube-nocookie.com/embed/${lazy.dataset.ytid}?autoplay=1&rel=0&modestbranding=1`;
+      ifr.src = `https://www.youtube-nocookie.com/embed/${lazy.dataset.ytid}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
       lazy.classList.add('loaded');
-      /* Arrêter France Culture si actif */
-      document.querySelectorAll('.audio-player-bar').forEach(bar => {
-        const a = bar.querySelector('audio');
-        if (a) { a.pause(); a.src = ''; }
-        bar.remove();
-      });
-      if (window.AudioManager) window.AudioManager.onSiteYouTubeStart();
+      /* La coupure des autres médias est gérée par media-exclusive.js */
     });
 
     /* Bouton 🎧 → lecteur audio */
@@ -62,7 +56,7 @@
     container.addEventListener('click', e => {
       const link = e.target.closest('.cross-link-badge');
       if (!link || !link.href) return;
-      if (window.AudioManager) window.AudioManager.stopAll();
+      if (window.LaphiloMedia) window.LaphiloMedia.stopAll();
     });
   }
 
@@ -142,15 +136,11 @@
   /* immediate : vider tout de suite (changement de fiche) plutôt qu'après l'animation */
   function closeDrawer(immediate) {
     if (!_drawerEl) return;
-    const wasOpen = _drawerEl.classList.contains('open');
     _drawerEl.classList.remove('open');
 
     /* Stopper l'audio et les iframes (YouTube + externe) */
     const audio = _drawerContent.querySelector('audio');
     if (audio) { audio.pause(); audio.src = ''; }
-    if (wasOpen && _drawerContent.querySelector('iframe') && window.AudioManager) {
-      window.AudioManager.onSiteYouTubeStop();
-    }
     _drawerContent.querySelectorAll('iframe').forEach(f => { f.src = ''; });
 
     if (immediate) { _drawerContent.innerHTML = ''; return; }
@@ -298,12 +288,11 @@
     _drawerContent.innerHTML = `
       <div class="drawer-yt-wrap">
         <iframe
-          src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1"
+          src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
           title="${label || 'Vidéo YouTube'}"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen">
         </iframe>
       </div>`;
-    if (window.AudioManager) window.AudioManager.onSiteYouTubeStart();
   }
 
   /* ── Lien externe autorisé : iframe pleine zone ── */
@@ -380,8 +369,7 @@
       if (a) { a.pause(); a.src = ''; }
       bar.remove();
     });
-    /* Arrêter les vidéos YouTube du site */
-    document.querySelectorAll('.link-drawer iframe, .yt-lazy iframe, .youtube-container iframe, .drawer-yt-wrap iframe').forEach(f => { f.src = ''; });
+    /* Les vidéos en cours sont mises en pause par media-exclusive.js au démarrage de l'audio */
 
     const slideText = slide && slide.querySelector('.slide-text');
     if (!slideText) return;
@@ -412,9 +400,9 @@
     const closeBtn = bar.querySelector('.audio-player-close');
 
     playBtn.addEventListener('click', () => { if (audio.paused) audio.play(); else audio.pause(); });
-    audio.addEventListener('play',  () => { playBtn.innerHTML = SVG_PAUSE; if (window.AudioManager) window.AudioManager.onFranceCultureStart(); });
+    audio.addEventListener('play',  () => { playBtn.innerHTML = SVG_PAUSE; });
     audio.addEventListener('pause', () => { playBtn.innerHTML = SVG_PLAY; });
-    audio.addEventListener('ended', () => { playBtn.innerHTML = SVG_PLAY; fill.style.width = '0%'; if (window.AudioManager) window.AudioManager.onFranceCultureEnd(); });
+    audio.addEventListener('ended', () => { playBtn.innerHTML = SVG_PLAY; fill.style.width = '0%'; });
     audio.addEventListener('timeupdate', () => {
       if (!audio.duration) return;
       fill.style.width = (audio.currentTime / audio.duration * 100) + '%';

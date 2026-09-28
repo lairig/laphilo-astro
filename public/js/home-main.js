@@ -16,7 +16,7 @@
     playBtn.addEventListener('click', function () {
       var id = container.dataset.id;
       var iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&enablejsapi=1';
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
       var img = container.querySelector('img');
       iframe.title = img ? img.alt : 'Vidéo YouTube';

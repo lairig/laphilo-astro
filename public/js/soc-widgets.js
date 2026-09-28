@@ -6,7 +6,7 @@
     wrap.style.cursor = 'pointer';
     wrap.addEventListener('click', function () {
       var iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&rel=0';
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&enablejsapi=1&rel=0';
       iframe.allow = 'autoplay; encrypted-media';
       iframe.allowFullscreen = true;
       iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
@@ -16,25 +16,32 @@
   });
 
   /* Boutons Spotify (data-lrg-tid) */
+  function closeSpotify() {
+    document.querySelectorAll('.lrg-embed').forEach(function (w) {
+      w.innerHTML = '';
+      w.style.display = 'none';
+    });
+    document.querySelectorAll('.soc-btn-listen-label').forEach(function (l) {
+      l.textContent = '▶ Écouter';
+    });
+  }
+  /* Un autre média démarre (vidéo, audio) → fermer le lecteur Spotify */
+  document.addEventListener('laphilo:media-start', function (e) {
+    var el = e.detail && e.detail.el;
+    if (!el || !el.closest || !el.closest('.lrg-embed')) closeSpotify();
+  });
   document.querySelectorAll('[data-lrg-tid]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var wrap = btn.closest('.soc-track-row').nextElementSibling;
       if (wrap.querySelector('iframe')) {
-        wrap.innerHTML = '';
-        wrap.style.display = 'none';
-        btn.querySelector('.soc-btn-listen-label').textContent = '▶ Écouter';
+        closeSpotify();
         return;
       }
-      document.querySelectorAll('.lrg-embed').forEach(function (w) {
-        w.innerHTML = '';
-        w.style.display = 'none';
-      });
-      document.querySelectorAll('.soc-btn-listen-label').forEach(function (l) {
-        l.textContent = '▶ Écouter';
-      });
+      closeSpotify();
       wrap.innerHTML = '<iframe style="border-radius:8px;border:none;width:100%;margin-top:6px" height="80" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy" src="https://open.spotify.com/embed/track/' + btn.dataset.lrgTid + '?utm_source=generator&theme=0&autoplay=1"></iframe>';
       wrap.style.display = 'block';
       btn.querySelector('.soc-btn-listen-label').textContent = '■ Stop';
+      if (window.LaphiloMedia) window.LaphiloMedia.start(wrap.querySelector('iframe'));
     });
   });
 
