@@ -4,11 +4,67 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
-const comprendre = [
-  { icon: '❓', title: 'C’est quoi la philosophie ?', desc: 'Définition et les 7 grandes branches de la philosophie.', href: '/definition/' },
-  { icon: '📖', title: 'Histoire des philosophes', desc: 'Des présocratiques aux penseurs contemporains, par grandes périodes.', href: '/histoire-des-philosophes/' },
-  { icon: '🕮', title: 'Histoire des courants', desc: "Les grands courants de pensée à travers l'histoire.", href: '/histoire-des-courants/' },
+import catalogue from '../data/frises-catalogue.json';
+
+/* Plan du site : index compact de liens, pensé pour un accès rapide.
+   Les frises viennent du catalogue de /frises/ : une frise ajoutée au
+   catalogue apparaît ici automatiquement. */
+type Link = { label: string; href: string; note?: string };
+type Block = { id: string; title: string; short: string; links: Link[] };
+
+const groups: any[] = catalogue.groups;
+const byLabel = (label: string) => groups.find((g) => g.label === label)?.items ?? [];
+/* « -650 av. J.-C. » → « 650 av. J.-C. » */
+const period = (tag?: string) => (tag && tag !== 'Toutes époques' ? tag.replace(/-(\d+ av)/g, '$1') : undefined);
+const shortName = (name: string) =>
+  name.replace(/^Tous les Philosophes (du |des )?/, '').replace(/^Philosophes /, '');
+
+const courants: Link[] = byLabel('Les Courants de Pensée').flatMap((it: any) =>
+  it.links.map((l: any) => ({
+    label: l.label === 'Frise complète' ? `${it.name.replace(/^La /, '')} — frise complète` : `${it.name.replace(/^La /, '')} — ${l.label}`,
+    href: l.href,
+  })),
+);
+const frise = (it: any): Link => ({ label: shortName(it.name), href: it.href, note: period(it.tag) });
+/* Anciens dans l'ordre chronologique (le catalogue les range du plus récent au plus ancien) ; Orientaux en dernier */
+const anciens = byLabel('Anciens');
+const anciensChrono = [...anciens.filter((it: any) => !/Orientaux/.test(it.name)).reverse(), ...anciens.filter((it: any) => /Orientaux/.test(it.name))];
+
+const blocks: Block[] = [
+  {
+    id: 'decouvrir',
+    title: 'Découvrir',
+    short: 'Découvrir',
+    links: [
+      { label: 'Accueil', href: '/' },
+      { label: 'Recherche (philosophes, courants, frises)', href: '/recherche/' },
+      { label: 'C’est quoi la philosophie ?', href: '/definition/' },
+      { label: 'Histoire des philosophes', href: '/histoire-des-philosophes/' },
+      { label: 'Histoire des courants', href: '/histoire-des-courants/' },
+      { label: 'Toutes les frises (présentées)', href: '/frises/' },
+    ],
+  },
+  { id: 'courants', title: 'Frises des courants de pensée', short: 'Courants', links: courants },
+  {
+    id: 'epoques',
+    title: 'Frises des philosophes par époque',
+    short: 'Philosophes par époque',
+    links: [...anciensChrono, ...byLabel('Modernes'), ...byLabel('Contemporains')].map(frise),
+  },
+  { id: 'origines', title: 'Frises des philosophes par origine (toutes époques)', short: 'Philosophes par origine', links: byLabel('Par Nationalité').map(frise) },
+  {
+    id: 'site',
+    title: 'Le site',
+    short: 'Le site',
+    links: [
+      { label: 'Pourquoi ce site ?', href: '/pourquoi/' },
+      { label: 'Musique Lairig', href: '/lairig/' },
+      { label: 'Ressources utilisées', href: '/ressources/' },
+      { label: 'Échanges & contact', href: '/echanges/' },
+    ],
+  },
 ];
+const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site.";
 ---
 
 <html lang="fr">
@@ -18,25 +74,76 @@ const comprendre = [
   <Favicons />
   <GoatCounter />
   <title>Plan du site | LaPhilo.fr</title>
-  <meta name="description" content="Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site." />
-  <SeoHead
-    title="Plan du site | LaPhilo.fr"
-    description="Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site."
-    path="/plan-du-site/"
-  />
+  <meta name="description" content={description} />
+  <SeoHead title="Plan du site | LaPhilo.fr" description={description} path="/plan-du-site/" />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css" />
-  <link rel="stylesheet" href="/css/plan-du-site.css" />
+  <style>
+    .pds { max-width: 1100px; margin: 0 auto; padding: 0 1rem 3rem; }
+    .pds-hero { padding-bottom: 1.2rem; }
+
+    /* Sommaire : saut direct vers une rubrique */
+    .pds-toc {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
+      margin: 0 0 2rem; padding: 0; list-style: none;
+    }
+    .pds-toc a {
+      display: inline-block; padding: .45rem .9rem;
+      font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 600; letter-spacing: .05em;
+      color: #f7ecce; text-decoration: none;
+      border: 1px solid rgba(212, 168, 67, .5); border-radius: 4px;
+      background: rgba(30, 18, 8, .7);
+    }
+    .pds-toc a:hover, .pds-toc a:focus-visible { background: rgba(180, 130, 20, .25); border-color: #d4a843; }
+
+    /* Rubriques : colonnes sur grand écran, une seule sur mobile */
+    .pds-grid {
+      display: grid; gap: 1.2rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      align-items: start;
+    }
+    .pds-block {
+      padding: 1rem 1.2rem 1.1rem;
+      background: rgba(30, 18, 8, .75);
+      border: 1px solid rgba(212, 168, 67, .35);
+      border-radius: 6px;
+      scroll-margin-top: 1rem;
+    }
+    .pds-block h2 {
+      margin: 0 0 .6rem; padding-bottom: .45rem;
+      font-family: 'Cinzel', serif; font-size: .9rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #d4a843;
+      border-bottom: 1px solid rgba(212, 168, 67, .3);
+    }
+    .pds-block ul { margin: 0; padding: 0; list-style: none; }
+    .pds-block li + li { border-top: 1px solid rgba(212, 168, 67, .1); }
+    .pds-block a {
+      display: flex; justify-content: space-between; align-items: baseline; gap: .8rem;
+      padding: .42rem .2rem;
+      font-family: 'EB Garamond', serif; font-size: 1.08rem; line-height: 1.3;
+      color: #f7ecce; text-decoration: none;
+    }
+    .pds-block a:hover, .pds-block a:focus-visible { color: #fff; background: rgba(180, 130, 20, .15); outline: none; }
+    .pds-block a:hover .pds-label { text-decoration: underline; text-underline-offset: 3px; }
+    .pds-note { flex-shrink: 0; font-size: .85rem; font-style: italic; color: #c9a96e; white-space: nowrap; }
+    .pds-hint { margin: 1.6rem 0 0; text-align: center; font-family: 'EB Garamond', serif; font-size: .95rem; font-style: italic; color: #c9a96e; }
+
+    @media (max-width: 480px) {
+      .pds-toc { gap: .35rem; margin-bottom: 1.4rem; }
+      .pds-toc a { padding: .35rem .6rem; font-size: .7rem; }
+      .pds-grid { grid-template-columns: 1fr; }
+      .pds-block { padding: .8rem .9rem .9rem; }
+    }
+  </style>
 </head>
 <body>
 
 <a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
 
-<main class="sitemap-wrap">
+<main class="pds">
 
-  <header class="sitemap-hero site-header">
+  <header class="site-header pds-hero">
     <div class="sitemap-switcher">
       <BackButton />
       <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
@@ -44,230 +151,35 @@ const comprendre = [
         <span class="sitemap-text">Accueil</span>
       </a>
     </div>
-    <span class="header-ornament" aria-hidden="true">✦ ✦ ✦</span>
     <h1 class="site-title">Plan du site</h1>
-    <p class="site-subtitle">La Philo · 2026</p>
     <div class="header-rule" aria-hidden="true"></div>
-    <p class="sitemap-hero-desc">Toutes les pages de la ressource actualisée en 2026 — frises chronologiques interactives des philosophes et des courants de pensée, de l'Antiquité au XXI<sup>e</sup> siècle.</p>
   </header>
 
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">⌂</span><span class="sitemap-sep-label">Page principale</span><span class="sitemap-sep-line"></span></div>
-  <a href="/" class="sm-home-btn" aria-label="Retourner à l'accueil La Philo">
-    <span class="sm-home-icon">⌂</span>
-    <div class="sm-home-body">
-      <p class="sm-home-label">Retour à l'accueil</p>
-      <p class="sm-home-title">La Philo</p>
-      <p class="sm-home-desc">Page d'entrée du site : frises, philosophes et courants de pensée.</p>
-    </div>
-    <span class="sm-home-arrow">→</span>
-  </a>
+  <nav aria-label="Rubriques du plan du site">
+    <ul class="pds-toc">
+      {blocks.map((b) => <li><a href={`#${b.id}`}>{b.short}</a></li>)}
+    </ul>
+  </nav>
 
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">📜</span><span class="sitemap-sep-label">Frises des Courants de Pensée</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <div class="sitemap-card sitemap-card--courant sitemap-card--multi">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">📜</span><span class="sitemap-card-title">Courants de Pensée Occidentaux</span></div>
-      <p class="sitemap-card-desc">Des présocratiques au wokisme — chronologie interactive des grands courants philosophiques de la tradition occidentale, en entier ou par thème.</p>
-      <div class="sitemap-card-links">
-        <a href="/courants/frise/occidental/">Frise complète →</a>
-        <a href="/courants/frise/occidental--metaphysique-theologie/">Métaphysique &amp; Théologie →</a>
-        <a href="/courants/frise/occidental--politique-ethique/">Politique &amp; Éthique →</a>
-        <a href="/courants/frise/occidental--connaissance-sciences/">Connaissance &amp; Sciences →</a>
-      </div>
-    </div>
-    <div class="sitemap-card sitemap-card--courant sitemap-card--multi">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🕯️</span><span class="sitemap-card-title">Courants de Pensée Orientaux</span></div>
-      <p class="sitemap-card-desc">Du védisme au néo-confucianisme — chronologie des grandes traditions philosophiques d'Asie, du Moyen-Orient et d'Afrique, en entier ou par thème.</p>
-      <div class="sitemap-card-links">
-        <a href="/courants/frise/oriental/">Frise complète →</a>
-        <a href="/courants/frise/oriental--theologie-spiritualite/">Théologie &amp; Spiritualité →</a>
-        <a href="/courants/frise/oriental--politique-metaphysique/">Politique &amp; Métaphysique →</a>
-        <a href="/courants/frise/oriental--logique-ethique-sciences/">Logique, Éthique &amp; Sciences →</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">🌿</span><span class="sitemap-sep-label">Frises des Philosophes Actuels</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/philosophes/frise/france-contemporains/" class="sitemap-card sitemap-card--actuels">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🇫🇷</span><span class="sitemap-card-title">Penseurs Français Actuels</span></div>
-      <p class="sitemap-card-desc">De Pierre Magnard à Marylin Maeso — philosophes français en activité au XXI<sup>e</sup> siècle.</p>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/contemporains-monde/" class="sitemap-card sitemap-card--actuels">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🌍</span><span class="sitemap-card-title">Autres Penseurs Actuels</span></div>
-      <p class="sitemap-card-desc">De Slavoj Žižek à Byung-Chul Han — philosophes du monde entier actifs aujourd'hui.</p>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">🧭</span><span class="sitemap-sep-label">Frises des Philosophes par Nationalité</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/philosophes/frise/francais-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">⚜️</span><span class="sitemap-card-title">Tous les Philosophes Français</span></div>
-      <p class="sitemap-card-desc">D'Abélard à Descartes, de Rousseau à Sartre et Foucault — 291 penseurs français du Moyen Âge à aujourd'hui.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/allemands-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🦅</span><span class="sitemap-card-title">Tous les Philosophes Allemands</span></div>
-      <p class="sitemap-card-desc">De Hildegarde de Bingen à Kant, Hegel, Nietzsche et Heidegger — la pensée allemande du Moyen Âge à aujourd'hui.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/americains-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">💫</span><span class="sitemap-card-title">Tous les Philosophes Américains</span></div>
-      <p class="sitemap-card-desc">D'Emerson et Thoreau à James, Dewey et Rawls — la pensée américaine jusqu'aux penseurs d'aujourd'hui.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/britanniques-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">👑</span><span class="sitemap-card-title">Tous les Philosophes Britanniques</span></div>
-      <p class="sitemap-card-desc">D'Ockham à Hobbes, Locke, Hume, Mill et Russell — la pensée britannique de l'Antiquité tardive à aujourd'hui.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/germanophones-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🎼</span><span class="sitemap-card-title">Philosophes Germanophones</span></div>
-      <p class="sitemap-card-desc">De Maître Eckhart à Kant, Freud, Wittgenstein et Popper — la pensée de langue allemande : Allemagne, Autriche, Suisse.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/arabo-persans-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🌙</span><span class="sitemap-card-title">Monde Arabo-Persan</span></div>
-      <p class="sitemap-card-desc">D'Al-Kindi à Avicenne, Averroès et Ibn Khaldoun — la philosophie du monde arabe et persan.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/africains-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🌍</span><span class="sitemap-card-title">Philosophes Africains</span></div>
-      <p class="sitemap-card-desc">De l'Égypte ancienne et Zera Yacob à Senghor, Cheikh Anta Diop et Achille Mbembe — la philosophie africaine.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/hispaniques-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">☀️</span><span class="sitemap-card-title">Philosophes Hispaniques</span></div>
-      <p class="sitemap-card-desc">D'Isidore de Séville à Suárez et Ortega y Gasset — la pensée hispanique et latino-américaine.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/grecs-byzantins-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🏺</span><span class="sitemap-card-title">Philosophes Grecs &amp; Byzantins</span></div>
-      <p class="sitemap-card-desc">De Thalès, Socrate et Aristote aux penseurs de Byzance et à Castoriadis — l'héritage grec.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/russes-toutes-epoques/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🪆</span><span class="sitemap-card-title">Tous les Philosophes Russes</span></div>
-      <p class="sitemap-card-desc">De Lomonossov à Dostoïevski, Tolstoï, Soloviev et Berdiaev — la pensée russe des Lumières à aujourd'hui.</p>
-      <span class="sitemap-card-period">Toutes époques</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">📚</span><span class="sitemap-sep-label">Frises des Philosophes Modernes</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/philosophes/frise/france/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">⚜️</span><span class="sitemap-card-title">Philosophes Français</span></div>
-      <p class="sitemap-card-desc">De Charles Fourier à Merleau-Ponty — positivisme, existentialisme, structuralisme et French Theory.</p>
-      <span class="sitemap-card-period">XVIII<sup>e</sup>–XX<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/allemands/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🦅</span><span class="sitemap-card-title">Philosophes Allemands</span></div>
-      <p class="sitemap-card-desc">De Fichte à Habermas — idéalisme, phénoménologie, herméneutique et philosophie critique.</p>
-      <span class="sitemap-card-period">XVIII<sup>e</sup>–XX<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/americains/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">💫</span><span class="sitemap-card-title">Philosophes Américains</span></div>
-      <p class="sitemap-card-desc">De Thoreau et Emerson à Richard Rorty — transcendantalisme, pragmatisme et philosophie analytique.</p>
-      <span class="sitemap-card-period">XVII<sup>e</sup>–XX<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/russes/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🪆</span><span class="sitemap-card-title">Philosophes Russes &amp; Europe de l'Est</span></div>
-      <p class="sitemap-card-desc">De Mikhaïl Lomonossov aux postmodernes russes — slavophiles, nihilistes, cosmistes et existentialistes.</p>
-      <span class="sitemap-card-period">XVIII<sup>e</sup>–XX<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/modernes/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🌐</span><span class="sitemap-card-title">Autres Philosophes Occidentaux</span></div>
-      <p class="sitemap-card-desc">Penseurs écossais, britanniques, italiens, espagnols, danois et néerlandais de la modernité.</p>
-      <span class="sitemap-card-period">XVIII<sup>e</sup>–XX<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">🏛</span><span class="sitemap-sep-label">Frises des Philosophes Occidentaux Anciens</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/philosophes/frise/renaissance-lumieres/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">💡</span><span class="sitemap-card-title">Renaissance &amp; Lumières</span></div>
-      <p class="sitemap-card-desc">D'Érasme à Locke — humanisme, rationalisme et philosophie des Lumières.</p>
-      <span class="sitemap-card-period">XV<sup>e</sup>–XVIII<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/medievaux/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">✝️</span><span class="sitemap-card-title">Philosophes Médiévaux</span></div>
-      <p class="sitemap-card-desc">De Boèce à Thomas d'Aquin — scolastique, mysticisme et raison chrétienne médiévale.</p>
-      <span class="sitemap-card-period">Moyen Âge · V<sup>e</sup>–XV<sup>e</sup> s.</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-    <a href="/philosophes/frise/greco-romains/" class="sitemap-card">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🏛</span><span class="sitemap-card-title">Philosophes Gréco-Romains</span></div>
-      <p class="sitemap-card-desc">De Thalès de Milet à Augustin d'Hippone — présocratiques, classiques, hellénistes et stoïciens romains.</p>
-      <span class="sitemap-card-period">Antiquité</span>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">☯️</span><span class="sitemap-sep-label">Frise des Philosophes non occidentaux</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/philosophes/frise/orientaux/" class="sitemap-card sitemap-card--orient">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">☯️</span><span class="sitemap-card-title">Philosophes Orientaux</span></div>
-      <p class="sitemap-card-desc">De Confucius à Al-Farabi — pensées indienne, chinoise, japonaise, islamique, africaine et amérindienne.</p>
-      <span class="sitemap-card-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">✦</span><span class="sitemap-sep-label">Comprendre la philosophie</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    {comprendre.map((it) => (
-      <a href={it.href} class="sitemap-card sitemap-card--drawer">
-        <div class="sitemap-card-head"><span class="sitemap-card-icon">{it.icon}</span><span class="sitemap-card-title">{it.title}</span></div>
-        <p class="sitemap-card-desc">{it.desc}</p>
-        <span class="sitemap-card-arrow">Ouvrir →</span>
-      </a>
+  <div class="pds-grid">
+    {blocks.map((b) => (
+      <section class="pds-block" id={b.id}>
+        <h2>{b.title}</h2>
+        <ul>
+          {b.links.map((l) => (
+            <li>
+              <a href={l.href}>
+                <span class="pds-label" set:html={l.label} />
+                {l.note && <span class="pds-note">{l.note}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
     ))}
   </div>
 
-  <div class="sitemap-sep"><span class="sitemap-sep-line"></span><span class="sitemap-sep-icon">✦</span><span class="sitemap-sep-label">Ressources · Infos</span><span class="sitemap-sep-line"></span></div>
-  <div class="sitemap-grid">
-    <a href="/recherche/" class="sitemap-card sitemap-card--search">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">🔍</span><span class="sitemap-card-title">Recherche</span></div>
-      <p class="sitemap-card-desc">Recherche par nom, filtres par époque et par type.</p>
-      <span class="sitemap-card-arrow">Ouvrir →</span>
-    </a>
-    <a href="/lairig/" class="sitemap-card sitemap-card--drawer">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">♪</span><span class="sitemap-card-title">Lairig Music</span></div>
-      <p class="sitemap-card-desc">Musique ambient instrumentale composée pour accompagner la lecture et la réflexion philosophique.</p>
-      <span class="sitemap-card-arrow">Ouvrir →</span>
-    </a>
-    <a href="/ressources/" class="sitemap-card sitemap-card--drawer">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">📚</span><span class="sitemap-card-title">Ressources Utilisées</span></div>
-      <p class="sitemap-card-desc">Chaînes YouTube · Persée · Encyclopédies · Sources et outils ayant contribué aux frises.</p>
-      <span class="sitemap-card-arrow">Ouvrir →</span>
-    </a>
-    <a href="/pourquoi/" class="sitemap-card sitemap-card--drawer">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">☞</span><span class="sitemap-card-title">Pourquoi ce site&nbsp;? · Lairig</span></div>
-      <p class="sitemap-card-desc">Le créateur, la genèse du projet et la musique Lairig qui accompagne les frises.</p>
-      <span class="sitemap-card-arrow">Ouvrir →</span>
-    </a>
-    <a href="/echanges/" class="sitemap-card sitemap-card--drawer sitemap-card--full">
-      <div class="sitemap-card-head"><span class="sitemap-card-icon">💬</span><span class="sitemap-card-title">Échanges &amp; Contact</span></div>
-      <p class="sitemap-card-desc">Une question, une suggestion, une erreur à signaler&nbsp;? Écrivez directement via le formulaire, ou participez au lieu d'échanges ouvert à tous.</p>
-      <span class="sitemap-card-arrow">Ouvrir →</span>
-    </a>
-  </div>
+  <p class="pds-hint">Les frises s’ouvrent dans un nouvel onglet.</p>
 
 </main>
 
