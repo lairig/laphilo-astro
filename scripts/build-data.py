@@ -7,7 +7,16 @@ Usage : python scripts/build-data.py   (depuis la racine laphilo-astro)
 Colonnes attendues en ligne 3 de chaque xlsx :
   Annee_naissance | Annee_deces | Dates_affichage | Nom | Texte_HTML
   YouTube_ID | Credit_media | Thumbnail_URL | Image_media | Actif
-  (+ Nationalite | Branche | Courant | Description | Figures_cles selon le fichier)
+  (+ Nationalite | Branche | Courant | Description | Figures_cles | Traditions
+   selon le fichier)
+
+Traditions : étiquettes transversales, indépendantes de la nationalité, séparées
+par « ; » (ex. « juive »). Elles alimentent les frises qui regroupent des fiches
+de plusieurs fichiers (ex. /philosophes/frise/pensee-juive-toutes-epoques/).
+
+À la fin, des vérifications signalent les erreurs de saisie probables (dates
+affichées qui ne correspondent pas aux années, doublons, nationalité
+manquante, courant inconnu) : rien n'est bloqué, c'est une liste à relire.
 """
 
 import json
@@ -153,6 +162,7 @@ def lire_xlsx(nom_fichier):
         'courant':      cols.get('courant'),
         'description':  cols.get('description'),
         'figures_cles': cols.get('figures_cles'),
+        'traditions':   cols.get('traditions'),
     }
 
     entrees = []
@@ -226,6 +236,14 @@ def lire_xlsx(nom_fichier):
                 if figures:
                     entry['figures_cles'] = figures
 
+        if C['traditions'] is not None:
+            v = to_str(row[C['traditions']]) if C['traditions'] < len(row) else ''
+            if v:
+                traditions = [t.strip().lower() for t in v.split(';') if t.strip()]
+                if traditions:
+                    entry['traditions'] = traditions
+
+        entry['_fichier'] = nom_fichier
         entrees.append(entry)
 
     print(f'  OK  {nom_fichier} : {len(entrees)} entrées ({ignorees} ignorées)')
@@ -257,11 +275,47 @@ def construire(fichiers_map, dest_name):
 
     os.makedirs(DATA_DIR, exist_ok=True)
     dest_path = os.path.join(DATA_DIR, dest_name)
+    propres = [{k: v for k, v in e.items() if k != '_fichier'} for e in toutes]
     with open(dest_path, 'w', encoding='utf-8') as f:
-        json.dump(toutes, f, ensure_ascii=False)
+        json.dump(propres, f, ensure_ascii=False)
+    DERNIERES[dest_name] = toutes
 
     print(f'\n  -> {dest_name} : {len(toutes)} entrées écrites dans {dest_path}\n')
     return len(toutes)
+
+
+DERNIERES = {}
+
+
+def nombres(s):
+    return [int(n) for n in re.findall(r'\d+', s)]
+
+
+def verifier(philosophes, courants):
+    """Liste les erreurs de saisie probables. Ne modifie rien."""
+    alertes = []
+    noms_courants = {c['name'] for c in courants}
+    vus = {}
+    for p in philosophes:
+        ou = f"{p['_fichier']}.xlsx"
+        nom = p['name']
+        # Dates affichées cohérentes avec les colonnes d'années
+        nums = nombres(p['display_date'])
+        if nums and nums[0] != abs(p['year']):
+            alertes.append(f"{nom} ({ou}) : date affichée « {p['display_date']} » mais année de naissance {p['year']}")
+        elif isinstance(p['end_year'], int) and len(nums) >= 2 and nums[-1] != abs(p['end_year']):
+            alertes.append(f"{nom} ({ou}) : date affichée « {p['display_date']} » mais année de décès {p['end_year']}")
+        # Même personne dans deux fichiers
+        cle = slugify(nom)
+        if cle in vus:
+            alertes.append(f"{nom} : présent dans {vus[cle]}.xlsx et dans {ou} (doublon)")
+        vus.setdefault(cle, p['_fichier'])
+        if not p.get('nationalite'):
+            alertes.append(f"{nom} ({ou}) : nationalité manquante")
+        for c in p.get('courants', []):
+            if c not in noms_courants:
+                alertes.append(f"{nom} ({ou}) : courant « {c} » introuvable dans les fichiers de courants")
+    return alertes
 
 
 if __name__ == '__main__':
@@ -277,3 +331,13 @@ if __name__ == '__main__':
     print('=' * 50)
     print(f'  Total : {n_phi} philosophes, {n_cur} courants de pensée')
     print('=' * 50)
+
+    alertes = verifier(DERNIERES.get('philosophes.json', []), DERNIERES.get('courants.json', []))
+    traditions = sorted({t for p in DERNIERES.get('philosophes.json', []) for t in p.get('traditions', [])})
+    if traditions:
+        print()
+        print(f"  Traditions utilisées : {', '.join(traditions)}")
+    print()
+    print(f'=== Vérifications : {len(alertes)} point(s) à relire ===')
+    for a in alertes:
+        print(f'  - {a}')

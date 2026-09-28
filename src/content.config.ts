@@ -21,6 +21,7 @@ const philosophes = defineCollection({
     nationalite: z.string().optional(),
     branches: z.array(z.string()).optional(),
     courants: z.array(z.string()).optional(),
+    traditions: z.array(z.string()).optional(),
     description: z.string().optional(),
     frise_source: z.string(),
     frise_label: z.string(),

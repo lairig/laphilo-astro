@@ -4,6 +4,7 @@
 interface PhilosopheData {
   name: string;
   nationalite?: string;
+  traditions?: string[];
   frise_source: string;
 }
 
@@ -61,5 +62,10 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'chinois-toutes-epoques': {
     label: 'Philosophes chinois — toutes époques',
     match: (p) => (p.nationalite ?? '') === 'Chinoise',
+  },
+  /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
+  'pensee-juive-toutes-epoques': {
+    label: 'Philosophes juifs — toutes époques',
+    match: (p) => (p.traditions ?? []).includes('juive'),
   },
 };

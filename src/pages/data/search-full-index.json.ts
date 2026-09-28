@@ -37,6 +37,7 @@ export const GET: APIRoute = async () => {
       u: `/philosophes/frise/${p.frise_source}/`,
       t: p.thumbnail || '',
       nat: p.nationalite || '',
+      trad: p.traditions || [],
       dom: p.branches || [],
       cur: p.courants || [],
       desc: p.description || '',
