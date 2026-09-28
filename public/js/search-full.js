@@ -24,7 +24,7 @@
     { v: 'grec', fr: 'Grecs & Byzantins', grad: 'linear-gradient(180deg,#0d5eaf 50%,#f7f4ea 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'allemand', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'grec', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
@@ -472,6 +472,24 @@
       refresh();
     }
     primaryBtns.forEach(function (btn) { btn.addEventListener('click', function () { setPrimary(btn.dataset.primary); }); });
+
+    /* Onglet « Frises » : menu d'accès direct aux frises (gabarit dans recherche.astro) */
+    var friseTpl = document.getElementById('frise-menu-tpl');
+    var typeTabs = container.querySelector('.phi-all-type-tabs');
+    if (friseTpl && typeTabs) {
+      typeTabs.appendChild(friseTpl.content.cloneNode(true));
+      var friseMenu = typeTabs.querySelector('.phi-frise-menu');
+      document.addEventListener('click', function (e) {
+        if (friseMenu.open && !friseMenu.contains(e.target)) friseMenu.open = false;
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && friseMenu.open) { friseMenu.open = false; friseMenu.querySelector('summary').focus(); }
+      });
+      /* Frise ouverte dans un nouvel onglet : refermer le menu ici */
+      friseMenu.addEventListener('click', function (e) {
+        if (e.target.closest('a')) friseMenu.open = false;
+      });
+    }
 
     if (eraSel) eraSel.addEventListener('change', function () { _filters.era = eraSel.value; updateCompatibility(); refresh(); });
     if (natSel) natSel.addEventListener('change', function () { _filters.nat = natSel.value; updateCompatibility(); refresh(); });

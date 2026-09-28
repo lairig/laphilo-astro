@@ -4,6 +4,21 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import catalogue from '../data/frises-catalogue.json';
+
+/* Menu « Frises » : toutes les frises du catalogue (page /frises/), groupées */
+type Entry = { label: string; href: string };
+const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map((g: any) => ({
+  title: g.label,
+  entries: g.items.flatMap((it: any): Entry[] =>
+    it.links
+      ? it.links.map((l: any) => ({
+          label: l.label === 'Frise complète' ? `${it.name} — frise complète` : `${it.name} — ${l.label}`,
+          href: l.href,
+        }))
+      : [{ label: it.name, href: it.href }],
+  ),
+}));
 ---
 
 <html lang="fr">
@@ -232,6 +247,58 @@ import SeoHead from '../components/SeoHead.astro';
        Accueil est en position absolute au même endroit que sur les pages
        .site-header : sans marge supplémentaire, il chevauche le titre
        "Recherche" en dessous de 480px. */
+    /* Onglet « Frises » : menu déroulant d'accès direct aux frises
+       (gabarit #frise-menu-tpl, inséré par search-full.js à côté des
+       onglets Philosophes / Courants). Les liens s'ouvrent dans un nouvel onglet. */
+    .list-page .phi-frise-menu { flex: 1; position: relative; display: flex; }
+    .list-page .phi-frise-menu > summary { flex: 1; list-style: none; text-align: center; white-space: nowrap; }
+    .list-page .phi-frise-menu > summary::-webkit-details-marker { display: none; }
+    .list-page .phi-frise-menu > summary::after { content: ' ▾'; }
+    .list-page .phi-frise-menu[open] > summary::after { content: ' ▴'; }
+    .list-page .phi-frise-menu[open] > summary {
+      background: linear-gradient(160deg, #e0c07a 0%, #c9a052 100%);
+      color: #1e1208;
+    }
+    .list-page .phi-frise-menu-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 60;
+      width: min(360px, calc(100vw - 32px));
+      max-height: min(70vh, 560px);
+      overflow-y: auto;
+      padding: 0.4rem 0 0.6rem;
+      background: #1f1208;
+      border: 1px solid rgba(212, 168, 67, 0.55);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .list-page .phi-frise-menu-title {
+      margin: 0.7rem 1rem 0.3rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #d4a843;
+    }
+    .list-page .phi-frise-menu-panel a {
+      display: block;
+      padding: 0.45rem 1rem;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      line-height: 1.3;
+      color: #f7ecce;
+      text-decoration: none;
+    }
+    .list-page .phi-frise-menu-panel a:hover,
+    .list-page .phi-frise-menu-panel a:focus-visible {
+      background: rgba(180, 130, 20, 0.2);
+      color: #fff4dc;
+      outline: none;
+    }
+    .list-page .phi-frise-menu-panel a::after { content: ' ↗'; color: #d4a843; font-size: 0.85em; }
+
     .frise-header { padding-top: 3rem; }
     @media (max-width: 480px) {
       .frise-header { padding-top: 2.6rem; }
@@ -254,6 +321,19 @@ import SeoHead from '../components/SeoHead.astro';
 
 <main class="list-page">
   <div id="phi-all-mount"></div>
+  <template id="frise-menu-tpl">
+    <details class="phi-frise-menu">
+      <summary class="phi-all-mode-tab">◈ Frises</summary>
+      <div class="phi-frise-menu-panel" aria-label="Ouvrir une frise dans un nouvel onglet">
+        {friseGroups.map((g) => (
+          <>
+            <p class="phi-frise-menu-title" set:html={g.title} />
+            {g.entries.map((e) => <a href={e.href} target="_blank" rel="noopener" set:html={e.label} />)}
+          </>
+        ))}
+      </div>
+    </details>
+  </template>
 </main>
 
 <footer class="site-footer">
