@@ -56,6 +56,19 @@ avant) :
 python scripts/build-data.py
 ```
 
+## Corriger quelques cellules sans ouvrir Excel
+
+`scripts/xlsx_cellules.py` modifie des cellules précises d'un xlsx sans
+réécrire le classeur : la mise en forme reste intacte. Fermer le fichier dans
+Excel avant, puis depuis la racine `laphilo-astro` :
+
+```
+python scripts/xlsx_cellules.py data/frise-philosophes-orientaux.xlsx D34="HILLEL Hazaken" A76=1139
+```
+
+Une copie de sauvegarde `.bak` est créée à côté du fichier (ignorée par git).
+Relancer ensuite `build-data.py` ou `update-site.bat` comme d'habitude.
+
 ## Notes
 
 - Un même nom peut apparaître dans les données ; le script détecte les
