@@ -241,6 +241,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       ))}
     </div>
   </details>
+  <div id="marge-bulle" aria-hidden="true"></div>
 
   <script is:inline define:vars={{ GROUPES }}>
   (() => {
@@ -465,17 +466,42 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       brancherCarte(bulle);
       bulle.hidden = false;
       bulleOuverte = true;
+      // Ni la place dessous ni dessus : on fait défiler la page juste ce qu'il faut (autant que possible)
+      const el = couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
+      bulle.style.maxHeight = '';
+      const r = el && el.getBoundingClientRect(), h = bulle.offsetHeight;
+      const manque = r && h > r.top - 14 ? r.bottom + 6 + h - (innerHeight - 8) : 0;
+      const reste = document.documentElement.scrollHeight - innerHeight - scrollY;
+      // Bas de page atteint : un espace temporaire permet de défiler assez
+      if (manque > reste) margeBulle.style.height = manque - reste + 'px';
+      const dy = manque;
       positionnerBulle();
+      if (dy > 0) {
+        gelJusqua = Date.now() + 900; // le nom glisse sous la souris : ne pas fermer pendant le défilement
+        scrollBy({ top: dy, behavior: 'smooth' });
+      }
     }
-    function fermerBulle() { clearTimeout(minuterie); bulle.hidden = true; bulleOuverte = false; }
-    function fermerBientot() { clearTimeout(minuterie); minuterie = setTimeout(fermerBulle, 300); }
+    let gelJusqua = 0;
+    const margeBulle = $('marge-bulle');
+    function fermerBulle() { clearTimeout(minuterie); bulle.hidden = true; bulleOuverte = false; margeBulle.style.height = '0'; }
+    function fermerBientot() {
+      clearTimeout(minuterie);
+      if (Date.now() < gelJusqua) return;
+      minuterie = setTimeout(fermerBulle, 300);
+    }
     function positionnerBulle() {
       const el = choisi && couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
       const r = el && el.getBoundingClientRect();
       const sr = scroller.getBoundingClientRect();
       if (!r || r.right < sr.left || r.left > sr.right || r.bottom < 0 || r.top > innerHeight) { fermerBulle(); return; }
+      bulle.style.maxHeight = '';
       const h = bulle.offsetHeight, w = bulle.offsetWidth;
-      const top = r.bottom + 6 + h <= innerHeight - 8 || r.top - 6 - h < 8 ? r.bottom + 6 : r.top - 6 - h;
+      const bas = innerHeight - r.bottom - 14, haut = r.top - 14;
+      // Sous le nom si la bulle y tient, sinon au-dessus ; sinon du côté le plus spacieux, hauteur limitée
+      const dessous = h <= bas || (h > haut && bas >= haut);
+      if (h > bas && h > haut) bulle.style.maxHeight = Math.max(160, dessous ? bas : haut) + 'px';
+      const hr = bulle.offsetHeight;
+      const top = dessous ? r.bottom + 6 : r.top - 6 - hr;
       bulle.style.top = Math.max(8, top) + 'px';
       bulle.style.left = Math.min(Math.max(8, r.left), innerWidth - w - 8) + 'px';
     }
