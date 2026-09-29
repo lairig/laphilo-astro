@@ -119,9 +119,11 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .item.choisi .vie { height: 6px; opacity: 1; box-shadow: 0 0 8px var(--c); }
     #bande { position: absolute; top: 44px; bottom: 0; background: rgba(212,168,67,.08); border-left: 1px solid rgba(212,168,67,.55);
       border-right: 1px solid rgba(212,168,67,.55); pointer-events: none; display: none; z-index: 0; }
-    #curseur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dotted rgba(247,236,206,.4); pointer-events: none; display: none; z-index: 4; }
-    #curseur span { position: absolute; top: 46px; left: 4px; font-size: .8rem; background: var(--panel); color: var(--gold);
-      padding: 0 .35rem; border-radius: 3px; white-space: nowrap; }
+    #curseur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dotted rgba(247,236,206,.4); pointer-events: none; display: none; z-index: 6; }
+    /* Année suivie par la souris : juste au-dessus et à droite du pointeur */
+    #curseur span { position: absolute; top: 46px; left: 8px; font-size: .85rem; background: var(--panel); color: var(--gold);
+      padding: .05rem .4rem; border: 1px solid rgba(212,168,67,.45); border-radius: 3px; white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,.6); }
 
     #panneau { max-width: 1100px; margin: 0 auto 2rem; padding: 0 16px; display: none; }
     #panneau.ouvert { display: block; }
@@ -591,6 +593,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         curseur.style.display = 'block';
         curseur.style.left = px + 'px';
         curseur.firstChild.textContent = an(Math.round(px / k + Y0));
+        curseur.firstChild.style.top = Math.max(0, e.clientY - monde.getBoundingClientRect().top - 30) + 'px';
       } else curseur.style.display = 'none';
     });
     window.addEventListener('pointerup', () => {
