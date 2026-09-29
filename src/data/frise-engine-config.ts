@@ -27,6 +27,7 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'africains-toutes-epoques': { defaultIndex: 12, scale_factor: 15 },
   'hispaniques-toutes-epoques': { defaultIndex: 5, scale_factor: 8 },
   'proche-orient-ancien-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
+  'femmes-toutes-epoques': { defaultIndex: 20, scale_factor: 8 },
   'grecs-byzantins-toutes-epoques': { defaultIndex: 24, scale_factor: 4 },
   'indiens-toutes-epoques': { defaultIndex: 9, scale_factor: 8 },
   'chinois-toutes-epoques': { defaultIndex: 1, scale_factor: 8 },

@@ -214,6 +214,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       <button class="btn" id="zmoins" aria-label="Dézoomer">−</button>
       <button class="btn" id="zplus" aria-label="Zoomer">+</button>
     </div>
+    <button class="btn" id="femmes" type="button" aria-pressed="false">♀ Femmes uniquement</button>
   </div>
   <p class="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
 
@@ -280,6 +281,13 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
 
     let DATA = [], parId = {}, parGroupe = {};
     let actifs = DEFAUT.slice(), k = 0.4, choisi = null, periode = null;
+    /* « Femmes uniquement » : tag « femme » de la colonne Traditions */
+    let femmes = false;
+    const estFemme = (d) => d.t.split(';').includes('femme');
+    const membres = (gid) => (femmes ? (parGroupe[gid] || []).filter(estFemme) : parGroupe[gid] || []);
+    function majCompteurs() {
+      GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${membres(g.id).length})`; });
+    }
 
     const x = (y) => (y - Y0) * k;
     const an = (y) => (y < 0 ? `${-y} av. J.-C.` : String(y));
@@ -297,6 +305,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (periode) u.searchParams.set('periode', periode);
       const def = periode ? PERIODES.find((p) => p.id === periode).g : DEFAUT;
       if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
+      if (femmes) u.searchParams.set('femmes', '1');
       if (choisi) u.searchParams.set('p', choisi);
       history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
     }
@@ -380,7 +389,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       dessinerAxe();
       couloirs.innerHTML = '';
       for (const gid of actifs) {
-        const items = parGroupe[gid] || [];
+        const items = membres(gid);
         const places = placer(items);
         const c = document.createElement('div');
         c.className = 'couloir';
@@ -441,7 +450,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const g = G[s.g];
       const aussi = s.t.split(';').filter((t) => G[t] && t !== s.g).map((t) => G[t].label);
       const autres = GROUPES.filter((x) => x.id !== s.g).map((x) => ({
-        g: x, liste: (parGroupe[x.id] || []).filter((d) => d.y < s.e && d.e > s.y).sort((a, b) => b.s - a.s),
+        g: x, liste: membres(x.id).filter((d) => d.y < s.e && d.e > s.y).sort((a, b) => b.s - a.s),
       })).filter((b) => b.liste.length);
       return `<div class="carte" style="--c:${g.color}">
         <div class="carte-tete">${s.th ? `<img src="${esc(s.th)}" alt="" width="64" height="64" loading="lazy">` : ''}
@@ -573,6 +582,12 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const el = e.target.closest('.item');
       if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); choisir(el.dataset.id, false); }
     });
+    $('femmes').onclick = () => {
+      femmes = !femmes;
+      $('femmes').setAttribute('aria-pressed', femmes);
+      if (femmes && choisi && !estFemme(parId[choisi])) { choisi = null; fermerBulle(); }
+      majCompteurs(); dessiner(); majUrl();
+    };
     document.querySelectorAll('[data-seul]').forEach((b) => (b.onclick = () => {
       periode = null; setActifs([b.dataset.seul]); choisi = null; dessiner(); majUrl();
       scroller.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -636,7 +651,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
           .filter((d) => G[d.g]);
         parId = Object.fromEntries(DATA.map((d) => [d.id, d]));
         for (const d of DATA) (parGroupe[d.g] ||= []).push(d);
-        GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${(parGroupe[g.id] || []).length})`; });
+        femmes = new URLSearchParams(location.search).get('femmes') === '1';
+        $('femmes').setAttribute('aria-pressed', femmes);
+        majCompteurs();
         $('chargement').remove();
         monde.hidden = false;
         largeur = scroller.clientWidth;

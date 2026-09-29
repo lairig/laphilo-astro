@@ -51,6 +51,11 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes hispaniques — toutes époques',
     match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'].includes(p.nationalite ?? ''),
   },
+  /* Colonne « Traditions » des xlsx (valeur « femme ») */
+  'femmes-toutes-epoques': {
+    label: 'Philosophes femmes — toutes époques',
+    match: (p) => (p.traditions ?? []).includes('femme'),
+  },
   /* Colonne « Groupe » des xlsx : Égypte, Mésopotamie, Perse antiques, sagesse biblique */
   'proche-orient-ancien-toutes-epoques': {
     label: 'Philosophes du Proche-Orient ancien — toutes époques',
