@@ -156,6 +156,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .traditions > summary h2::after { content: ' ▸'; color: var(--gold); }
     .traditions[open] > summary h2::after { content: ' ▾'; }
     .traditions > summary:hover h2 { color: var(--gold); }
+    .trad-intro { text-align: center; color: var(--parch-dim); font-size: 1.05rem; font-style: italic; margin: 0 auto 1rem; max-width: 760px; }
     .trad-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
     .trad { background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 6px; padding: .9rem 1rem; }
     .trad h3 { font-family: 'Cinzel', serif; font-size: .9rem; color: var(--c); letter-spacing: .05em; }
@@ -224,6 +225,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
 
   <details class="traditions">
     <summary><h2>Les grandes traditions et leurs grandes figures</h2></summary>
+    <p class="trad-intro">Que pensait-on en Chine au temps de Platon ? Qui étaient les contemporains d'Averroès en Inde ou au Japon ?</p>
     <div class="trad-grille">
       {parGroupe.map((g) => (
         <article class="trad" data-g={g.id} style={`--c:${g.color}`}>
