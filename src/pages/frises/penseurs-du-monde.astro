@@ -98,7 +98,12 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .couloir-titre .masques { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .85rem; color: var(--parch-dim); font-style: italic; }
     .pistes { position: relative; }
     .item { position: absolute; height: calc(var(--row) - 4px); display: flex; align-items: flex-end; cursor: pointer; white-space: nowrap; }
-    .item .vie { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--c); opacity: .8; }
+    /* Repère de naissance ; la barre de vie n'apparaît qu'au survol et à la sélection */
+    .item::before { content: ''; position: absolute; left: 0; bottom: 0; width: 9px; height: 4px; border-radius: 2px; background: var(--c); }
+    .item .vie { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--c); opacity: 0;
+      pointer-events: none; transition: opacity .15s; }
+    .item:hover, .item:focus-visible, .item.choisi { z-index: 5; }
+    .item:hover .vie, .item:focus-visible .vie { opacity: .9; }
     .portraits .item { height: 32px; }
     .portraits .item .nom { display: inline-flex; align-items: center; gap: 5px; }
     .item .mini { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--c);
@@ -233,7 +238,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
 
   <script is:inline define:vars={{ GROUPES }}>
   (() => {
-    const Y0 = -3000, Y1 = 2030, ROWS = 6, KMAX = 14;
+    const Y0 = -3000, Y1 = 2030, KMAX = 60;
     let ROW = 22; // hauteur d'une piste : 36 quand les portraits sont affichés
     const PERIODES = [
       { id: 'tout', label: 'Tout', de: -3000, a: 2030, g: ['orient-ancien', 'occident', 'islam-juif', 'inde', 'asie-est'] },
@@ -324,9 +329,13 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       fonds.innerHTML = EPOQUES.map(([a, b], i) => `<div class="fond ${i % 2 ? 'pair' : ''}" style="left:${x(a)}px;width:${x(b) - x(a)}px"></div>`).join('');
     }
 
-    /* Les plus importants d'abord, chacun dans la première piste libre */
-    /* Le philosophe choisi garde sa place ; il ne passe en tête que s'il
+    /* Chaque philosophe n'occupe que la place de son nom, posé à sa naissance
+       (sa barre de vie ne s'affiche qu'au survol et à la sélection).
+       Les plus importants d'abord, chacun dans la première piste libre ;
+       plus on zoome, plus un couloir peut compter de pistes.
+       Le philosophe choisi garde sa place ; il ne passe en tête que s'il
        aurait été masqué faute de place (choisi depuis les contemporains). */
+    const maxPistes = () => (k < 1.5 ? 6 : k < 6 ? 10 : k < 20 ? 16 : 40);
     function placer(items) {
       const places = placerDans(items, null);
       if (choisi && items.some((d) => d.id === choisi) && !places.some(([d]) => d.id === choisi)) return placerDans(items, choisi);
@@ -334,10 +343,10 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     }
     function placerDans(items, prioritaire) {
       const tri = items.slice().sort((a, b) => (b.id === prioritaire) - (a.id === prioritaire) || b.s - a.s || a.y - b.y);
-      const pistes = Array.from({ length: ROWS }, () => []);
+      const pistes = Array.from({ length: maxPistes() }, () => []);
       const places = [];
       for (const d of tri) {
-        const g = x(d.y), dr = g + Math.max((d.e - d.y) * k, largeurNom(d.n) + (avecPortraits && d.th ? L_PORTRAIT : 0)) + 6;
+        const g = x(d.y), dr = g + largeurNom(d.n) + (avecPortraits && d.th ? L_PORTRAIT : 0) + 6;
         const r = pistes.findIndex((p) => p.every(([a, b]) => dr <= a || g >= b));
         if (r < 0) continue;
         pistes[r].push([g, dr]);
@@ -358,14 +367,16 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         const c = document.createElement('div');
         c.className = 'couloir';
         c.style.setProperty('--c', G[gid].color);
-        const masques = items.length - places.length;
-        c.innerHTML = `<div class="couloir-titre">${esc(G[gid].label)}${masques ? ` <span class="masques">· ${masques} masqués, zoomez</span>` : ''}</div>`;
+        const vus = new Set(places.map(([d]) => d.id));
+        c.masques = items.filter((d) => !vus.has(d.id)).map((d) => d.y);
+        c.innerHTML = `<div class="couloir-titre">${esc(G[gid].label)} <span class="masques"></span></div>`;
         const p = document.createElement('div');
         p.className = 'pistes';
-        p.style.height = ROWS * ROW + 6 + 'px';
+        const nPistes = Math.max(1, ...places.map(([, r]) => r + 1));
+        p.style.height = nPistes * ROW + 6 + 'px';
         p.innerHTML = places.map(([d, r]) => {
           const w = Math.max((d.e - d.y) * k, 3);
-          return `<div class="item${d.s >= 3000 ? ' top' : ''}" tabindex="0" role="button" data-id="${esc(d.id)}" style="left:${x(d.y)}px;top:${r * ROW}px;width:${w}px" title="${esc(d.n)} (${esc(d.d)})">`
+          return `<div class="item${d.s >= 3000 ? ' top' : ''}" tabindex="0" role="button" data-id="${esc(d.id)}" style="left:${x(d.y)}px;top:${r * ROW}px" title="${esc(d.n)} (${esc(d.d)})">`
             + `<span class="vie" style="width:${w}px"></span><span class="nom">`
             + (avecPortraits && d.th ? `<img class="mini" src="${esc(d.th)}" alt="" width="26" height="26" loading="lazy" decoding="async">` : '')
             + `${esc(d.n)}</span></div>`;
@@ -373,8 +384,24 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         c.append(p);
         couloirs.append(c);
       }
+      compterMasques();
       appliquerSelection();
     }
+
+    /* « N masqués » : seulement les philosophes de la période à l'écran */
+    function compterMasques() {
+      const de = scroller.scrollLeft / k + Y0, a = (scroller.scrollLeft + scroller.clientWidth) / k + Y0;
+      couloirs.querySelectorAll('.couloir').forEach((c) => {
+        const n = c.masques.filter((y) => y >= de && y <= a).length;
+        c.querySelector('.masques').textContent = n ? `· ${n} masqué${n > 1 ? 's' : ''} ici, zoomez` : '';
+      });
+    }
+    let compteEnAttente = false;
+    scroller.addEventListener('scroll', () => {
+      if (compteEnAttente || !DATA.length) return;
+      compteEnAttente = true;
+      requestAnimationFrame(() => { compteEnAttente = false; compterMasques(); });
+    });
 
     function appliquerSelection() {
       document.body.classList.toggle('selection', !!choisi);
