@@ -1,0 +1,479 @@
+---
+/* La Frise des pensées du monde : les grandes traditions philosophiques en
+   couloirs parallèles sur un même axe du temps. Données chargées à part
+   (/data/frise-monde.json) ; la page contient en dur les grandes figures de
+   chaque tradition (lisibles sans JavaScript et par les moteurs). */
+import { getCollection } from 'astro:content';
+import Favicons from '../../components/Favicons.astro';
+import BackButton from '../../components/BackButton.astro';
+import Fonts from '../../components/Fonts.astro';
+import GoatCounter from '../../components/GoatCounter.astro';
+import SeoHead from '../../components/SeoHead.astro';
+import { groupesMonde } from '../../data/groupes-monde';
+
+const philosophes = await getCollection('philosophes');
+const parGroupe = groupesMonde
+  .map((g) => {
+    const membres = philosophes.filter((p) => p.data.groupe === g.id);
+    const figures = membres
+      .filter((p) => (p.data.importance ?? 1) >= 3)
+      .sort((a, b) => a.data.year - b.data.year)
+      .map((p) => ({ id: p.id, name: p.data.name, date: p.data.display_date }));
+    return { ...g, n: membres.length, figures };
+  })
+  .filter((g) => g.n > 0);
+
+const GROUPES = parGroupe.map(({ id, label, court, color }) => ({ id, label, court, color }));
+
+const title = 'La Frise des pensées du monde | LaPhilo.fr';
+const description = "Les grandes traditions philosophiques côte à côte sur un même axe du temps : Occident, monde islamique et juif, Inde, Asie de l'Est, pensées du Sud, pensée russe, Proche-Orient ancien. Qui pensait quoi, et où, à la même époque ?";
+---
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/frises/monde/" />
+  <Fonts />
+  <link rel="preload" href="/data/frise-monde.json" as="fetch" crossorigin />
+  <style is:global>
+    :root {
+      --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce;
+      --parch-dim: #c9b48a; --gold: #d4a843; --row: 22px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg) radial-gradient(ellipse 70% 50% at 15% 8%, #3a1c08 0%, transparent 60%) no-repeat;
+      color: var(--parch); font-family: 'EB Garamond', Georgia, serif; min-height: 100vh; }
+    a { color: var(--gold); }
+
+    .fm-header { position: relative; text-align: center; padding: 3.2rem 16px .8rem; }
+    .sitemap-switcher { position: absolute; top: 14px; right: 16px; display: flex; border: 2px solid rgba(200,150,42,.35);
+      border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+    .sitemap-btn { display: flex; align-items: center; gap: .35rem; padding: .32rem .65rem; background: rgba(30,18,8,.85); border: none;
+      cursor: pointer; font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(247,236,206,.92); text-decoration: none; }
+    .sitemap-btn:hover { background: rgba(60,36,12,.94); color: var(--gold); }
+    .sitemap-btn[hidden] { display: none; }
+    .sitemap-flag { font-size: .88rem; line-height: 1; }
+    h1 { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: clamp(1.35rem, 3.6vw, 2.2rem); letter-spacing: .05em;
+      line-height: 1.2; text-shadow: 0 2px 18px rgba(180,130,20,.45); }
+    .fm-sous-titre { font-family: 'Cinzel', serif; font-size: clamp(.66rem, 1.4vw, .8rem); letter-spacing: .2em; text-transform: uppercase;
+      color: var(--parch-dim); margin-top: .7rem; }
+    .fm-intro { max-width: 760px; margin: 1rem auto 0; padding: 0 16px; text-align: center; font-size: 1.08rem; line-height: 1.5; color: var(--parch-dim); }
+
+    .barre { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: center; padding: .6rem 16px; }
+    .groupes, .periodes, .zoom { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; justify-content: center; }
+    .chip { font-family: inherit; font-size: .95rem; cursor: pointer; border-radius: 999px; padding: .2rem .7rem .2rem .45rem;
+      border: 1px solid var(--line); background: transparent; color: var(--parch-dim); display: inline-flex; align-items: center; gap: .4rem; }
+    .chip .pastille { width: .7rem; height: .7rem; border-radius: 50%; background: var(--c); opacity: .35; }
+    .chip small { opacity: .75; }
+    .chip[aria-pressed="true"] { color: var(--parch); border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .chip[aria-pressed="true"] .pastille { opacity: 1; }
+    .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold);
+      background: rgba(212,168,67,.06); border: 1px solid var(--line); border-radius: 4px; padding: .3rem .6rem; }
+    .btn:hover, .chip:hover { border-color: var(--gold); }
+    .btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(212,168,67,.16); }
+    .zoom .btn { font-size: 1rem; padding: .1rem .6rem; font-family: inherit; }
+    .aide { text-align: center; color: var(--parch-dim); font-size: .92rem; padding: 0 16px .5rem; }
+
+    #scroller { overflow-x: auto; overflow-y: hidden; position: relative; margin: 0 0 1rem; border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line); cursor: grab; min-height: 200px; }
+    #scroller.drag { cursor: grabbing; user-select: none; }
+    #chargement { padding: 3rem 16px; text-align: center; color: var(--parch-dim); font-style: italic; }
+    #monde { position: relative; }
+    .axe { position: relative; height: 44px; border-bottom: 1px solid var(--line); background: rgba(22,13,5,.92); z-index: 3; }
+    .epoque { position: absolute; top: 0; height: 18px; font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--gold); padding: 3px 6px; white-space: nowrap; overflow: hidden; border-left: 1px solid var(--line); }
+    .tick { position: absolute; top: 20px; height: 24px; border-left: 1px solid rgba(212,168,67,.35); font-size: .82rem;
+      color: var(--parch-dim); padding-left: 4px; white-space: nowrap; }
+    .fond { position: absolute; top: 44px; bottom: 0; }
+    .fond.pair { background: rgba(247,236,206,.025); }
+    .couloir { position: relative; border-bottom: 1px solid var(--line); }
+    .couloir-titre { position: sticky; left: 0; z-index: 2; display: inline-flex; align-items: center; gap: .45rem; margin: 6px 0 2px;
+      padding: .1rem .7rem .1rem .6rem; font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .08em; color: var(--c);
+      background: linear-gradient(90deg, rgba(22,13,5,.95) 70%, transparent); border-left: 3px solid var(--c); }
+    .couloir-titre .masques { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .85rem; color: var(--parch-dim); font-style: italic; }
+    .pistes { position: relative; }
+    .item { position: absolute; height: calc(var(--row) - 4px); display: flex; align-items: flex-end; cursor: pointer; white-space: nowrap; }
+    .item .vie { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--c); opacity: .8; }
+    .item .nom { position: relative; font-size: .86rem; line-height: 1; padding: 0 2px 5px 1px; color: var(--parch);
+      text-shadow: 0 1px 2px #000, 0 0 3px #000; }
+    .item.top .nom { font-weight: 600; }
+    .item:hover .nom, .item:focus-visible .nom { color: var(--c); }
+    .item:focus-visible { outline: 1px dashed var(--c); }
+    body.selection .item { opacity: .22; }
+    body.selection .item.contemp, body.selection .item.choisi { opacity: 1; }
+    .item.choisi .nom { color: var(--c); font-weight: 700; }
+    .item.choisi .vie { height: 6px; opacity: 1; box-shadow: 0 0 8px var(--c); }
+    #bande { position: absolute; top: 44px; bottom: 0; background: rgba(212,168,67,.08); border-left: 1px solid rgba(212,168,67,.55);
+      border-right: 1px solid rgba(212,168,67,.55); pointer-events: none; display: none; z-index: 0; }
+    #curseur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dotted rgba(247,236,206,.4); pointer-events: none; display: none; z-index: 4; }
+    #curseur span { position: absolute; top: 46px; left: 4px; font-size: .8rem; background: var(--panel); color: var(--gold);
+      padding: 0 .35rem; border-radius: 3px; white-space: nowrap; }
+
+    #panneau { max-width: 1100px; margin: 0 auto 2rem; padding: 0 16px; display: none; }
+    #panneau.ouvert { display: block; }
+    .carte { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.1rem; }
+    .carte-tete { display: flex; gap: 1rem; align-items: center; }
+    .carte-tete img { width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 2px solid var(--c); flex-shrink: 0; }
+    .carte-tete h2 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--c); }
+    .carte-tete p { color: var(--parch-dim); }
+    .carte-actions { margin-left: auto; align-self: flex-start; display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .contemps-titre { font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold);
+      margin-top: 1.1rem; }
+    .contemps { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .8rem 1.2rem; margin-top: .6rem; }
+    .contemps h3 { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .1em; color: var(--c); border-bottom: 1px solid var(--line);
+      padding-bottom: .2rem; margin-bottom: .3rem; text-transform: uppercase; }
+    .contemps ul { list-style: none; }
+    .contemps li button { font: inherit; background: none; border: 0; color: var(--parch); cursor: pointer; text-align: left; padding: .05rem 0; }
+    .contemps li button:hover { color: var(--c); text-decoration: underline; }
+    .contemps li small { color: var(--parch-dim); }
+    .vide { color: var(--parch-dim); font-style: italic; }
+
+    .traditions { max-width: 1100px; margin: 1rem auto 3rem; padding: 0 16px; }
+    .traditions > h2 { font-family: 'Cinzel Decorative', serif; color: var(--gold); text-align: center; font-size: clamp(1rem, 2.4vw, 1.3rem);
+      letter-spacing: .06em; margin: 1.5rem 0 1rem; }
+    .trad-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .trad { background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 6px; padding: .9rem 1rem; }
+    .trad h3 { font-family: 'Cinzel', serif; font-size: .9rem; color: var(--c); letter-spacing: .05em; }
+    .trad h3 small { font-family: 'EB Garamond', serif; color: var(--parch-dim); letter-spacing: 0; font-size: .9rem; }
+    .trad p { color: var(--parch-dim); margin: .35rem 0 .5rem; line-height: 1.4; }
+    .trad ul { list-style: none; display: flex; flex-wrap: wrap; gap: .15rem .7rem; font-size: .95rem; }
+    .trad li a { color: var(--parch); text-decoration: none; }
+    .trad li a:hover { color: var(--c); text-decoration: underline; }
+    .trad-voir { margin-top: .6rem; }
+
+    @media (max-width: 640px) {
+      .fm-header { padding-top: 3.4rem; }
+      .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
+      .carte-tete { flex-wrap: wrap; }
+      .carte-actions { margin-left: 0; justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="fm-header">
+    <div class="sitemap-switcher">
+      <BackButton />
+      <a href="/frises/" class="sitemap-btn"><span class="sitemap-flag" aria-hidden="true">≡</span><span class="sitemap-text">Frises</span></a>
+      <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil"><span class="sitemap-flag" aria-hidden="true">⌂</span><span class="sitemap-text">Accueil</span></a>
+    </div>
+    <h1>La Frise des pensées du monde</h1>
+    <p class="fm-sous-titre">Les grandes traditions philosophiques côte à côte</p>
+    <p class="fm-intro">Que pensait-on en Chine au temps de Platon ? Qui étaient les contemporains d'Averroès en Inde ou au Japon ?
+      Chaque couloir suit une grande tradition sur le même axe du temps : cliquez un philosophe pour voir qui pensait, au même moment, ailleurs dans le monde.</p>
+  </header>
+
+  <div class="barre"><div class="groupes" id="groupes"></div></div>
+  <div class="barre">
+    <div class="periodes" id="periodes"></div>
+    <div class="zoom">
+      <button class="btn" id="zmoins" aria-label="Dézoomer">−</button>
+      <button class="btn" id="zplus" aria-label="Zoomer">+</button>
+    </div>
+  </div>
+  <p class="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
+
+  <div id="scroller">
+    <p id="chargement">Chargement de la frise…</p>
+    <div id="monde" hidden>
+      <div class="axe" id="axe"></div>
+      <div id="fonds"></div>
+      <div id="bande"></div>
+      <div id="couloirs"></div>
+      <div id="curseur"><span></span></div>
+    </div>
+  </div>
+
+  <section id="panneau" aria-live="polite"></section>
+
+  <section class="traditions" aria-labelledby="trad-titre">
+    <h2 id="trad-titre">Les grandes traditions</h2>
+    <div class="trad-grille">
+      {parGroupe.map((g) => (
+        <article class="trad" style={`--c:${g.color}`}>
+          <h3>{g.label} <small>· {g.n} philosophes</small></h3>
+          <p>{g.description}</p>
+          {g.figures.length > 0 && (
+            <ul>
+              {g.figures.map((f) => (
+                <li><a href={`/philosophes/${f.id}/`} title={f.date}>{f.name}</a></li>
+              ))}
+            </ul>
+          )}
+          <button class="btn trad-voir" type="button" data-seul={g.id}>Voir ce couloir</button>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ GROUPES }}>
+  (() => {
+    const Y0 = -3000, Y1 = 2030, ROWS = 6, ROW = 22, KMAX = 14;
+    const PERIODES = [
+      { id: 'tout', label: 'Tout', de: -3000, a: 2030, g: ['orient-ancien', 'occident', 'islam-juif', 'inde', 'asie-est'] },
+      { id: 'origines', label: 'Aux origines', de: -2900, a: -400, g: ['orient-ancien', 'occident', 'inde', 'asie-est'] },
+      { id: 'age-axial', label: 'Âge axial', de: -650, a: -150, g: ['occident', 'inde', 'asie-est'] },
+      { id: 'age-d-or-islamique', label: "Âge d'or islamique", de: 750, a: 1300, g: ['occident', 'islam-juif', 'asie-est'] },
+      { id: 'fin-du-moyen-age', label: 'Fin du Moyen Âge', de: 1100, a: 1650, g: ['occident', 'islam-juif', 'asie-est'] },
+      { id: 'xixe-siecle', label: 'XIXᵉ siècle', de: 1780, a: 1950, g: ['occident', 'russe', 'inde'] },
+      { id: 'contemporains', label: 'Contemporains', de: 1900, a: 2030, g: ['occident', 'sud', 'asie-est'] },
+    ];
+    const DEFAUT = ['occident', 'islam-juif', 'asie-est'];
+    const EPOQUES = [[-3000, -800, 'Haute Antiquité'], [-800, 476, 'Antiquité'], [476, 1453, 'Moyen Âge'], [1453, 1600, 'Renaissance'],
+      [1600, 1789, 'Âge classique'], [1789, 1900, 'XIXᵉ siècle'], [1900, 2030, 'XXᵉ – XXIᵉ']];
+
+    const $ = (id) => document.getElementById(id);
+    const scroller = $('scroller'), monde = $('monde'), axe = $('axe'), fonds = $('fonds'), couloirs = $('couloirs');
+    const bande = $('bande'), curseur = $('curseur'), panneau = $('panneau'), zoneGroupes = $('groupes'), zonePeriodes = $('periodes');
+    const ids = GROUPES.map((g) => g.id);
+    const G = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+    let DATA = [], parId = {}, parGroupe = {};
+    let actifs = DEFAUT.slice(), k = 0.4, choisi = null, periode = null;
+
+    const x = (y) => (y - Y0) * k;
+    const an = (y) => (y < 0 ? `${-y} av. J.-C.` : String(y));
+    const mesure = document.createElement('canvas').getContext('2d');
+    const largeurNom = (n) => { mesure.font = '600 14px "EB Garamond", Georgia, serif'; return mesure.measureText(n).width + 8; };
+
+    /* ── Adresse partageable : ?g=…&periode=…&p=… ── */
+    function majUrl() {
+      const u = new URL(location.href);
+      u.search = '';
+      if (periode) u.searchParams.set('periode', periode);
+      const def = periode ? PERIODES.find((p) => p.id === periode).g : DEFAUT;
+      if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
+      if (choisi) u.searchParams.set('p', choisi);
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    }
+
+    /* ── Boutons ── */
+    function majChips() {
+      zoneGroupes.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', actifs.includes(b.dataset.g)));
+      zonePeriodes.querySelectorAll('.btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.p === periode));
+    }
+    function setActifs(liste) { actifs = ids.filter((id) => liste.includes(id)); majChips(); }
+
+    GROUPES.forEach((g) => {
+      const b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.dataset.g = g.id;
+      b.style.setProperty('--c', g.color);
+      b.innerHTML = `<span class="pastille"></span>${esc(g.court)} <small id="n-${g.id}"></small>`;
+      b.title = g.label;
+      b.onclick = () => {
+        setActifs(actifs.includes(g.id) ? actifs.filter((a) => a !== g.id) : [...actifs, g.id]);
+        dessiner(); majUrl();
+      };
+      zoneGroupes.append(b);
+    });
+    PERIODES.forEach((p) => {
+      const b = document.createElement('button');
+      b.className = 'btn'; b.type = 'button'; b.dataset.p = p.id; b.textContent = p.label;
+      b.onclick = () => allerPeriode(p.id);
+      zonePeriodes.append(b);
+    });
+
+    function allerPeriode(id) {
+      const p = PERIODES.find((q) => q.id === id);
+      if (!p) return;
+      periode = id;
+      setActifs(p.g);
+      zoomer(scroller.clientWidth / (p.a - p.de), (p.de + p.a) / 2);
+      majUrl();
+    }
+
+    /* ── Dessin ── */
+    function dessinerAxe() {
+      monde.style.width = x(Y1) + 'px';
+      let h = '';
+      EPOQUES.forEach(([a, b, l]) => { h += `<div class="epoque" style="left:${x(a)}px;width:${x(b) - x(a)}px">${l}</div>`; });
+      const pas = [5, 10, 25, 50, 100, 250, 500, 1000].find((p) => p * k >= 70) || 1000;
+      for (let y = Math.ceil(Y0 / pas) * pas; y <= Y1; y += pas) h += `<div class="tick" style="left:${x(y)}px">${an(y)}</div>`;
+      axe.innerHTML = h;
+      fonds.innerHTML = EPOQUES.map(([a, b], i) => `<div class="fond ${i % 2 ? 'pair' : ''}" style="left:${x(a)}px;width:${x(b) - x(a)}px"></div>`).join('');
+    }
+
+    /* Les plus importants d'abord, chacun dans la première piste libre */
+    function placer(items) {
+      const tri = items.slice().sort((a, b) => (b.id === choisi) - (a.id === choisi) || b.s - a.s || a.y - b.y);
+      const pistes = Array.from({ length: ROWS }, () => []);
+      const places = [];
+      for (const d of tri) {
+        const g = x(d.y), dr = g + Math.max((d.e - d.y) * k, largeurNom(d.n)) + 6;
+        const r = pistes.findIndex((p) => p.every(([a, b]) => dr <= a || g >= b));
+        if (r < 0) continue;
+        pistes[r].push([g, dr]);
+        places.push([d, r]);
+      }
+      return places;
+    }
+
+    function dessiner() {
+      dessinerAxe();
+      couloirs.innerHTML = '';
+      for (const gid of actifs) {
+        const items = parGroupe[gid] || [];
+        const places = placer(items);
+        const c = document.createElement('div');
+        c.className = 'couloir';
+        c.style.setProperty('--c', G[gid].color);
+        const masques = items.length - places.length;
+        c.innerHTML = `<div class="couloir-titre">${esc(G[gid].label)}${masques ? ` <span class="masques">· ${masques} masqués, zoomez</span>` : ''}</div>`;
+        const p = document.createElement('div');
+        p.className = 'pistes';
+        p.style.height = ROWS * ROW + 6 + 'px';
+        p.innerHTML = places.map(([d, r]) => {
+          const w = Math.max((d.e - d.y) * k, 3);
+          return `<div class="item${d.s >= 3000 ? ' top' : ''}" tabindex="0" role="button" data-id="${esc(d.id)}" style="left:${x(d.y)}px;top:${r * ROW}px;width:${w}px" title="${esc(d.n)} (${esc(d.d)})">`
+            + `<span class="vie" style="width:${w}px"></span><span class="nom">${esc(d.n)}</span></div>`;
+        }).join('');
+        c.append(p);
+        couloirs.append(c);
+      }
+      appliquerSelection();
+    }
+
+    function appliquerSelection() {
+      document.body.classList.toggle('selection', !!choisi);
+      if (!choisi) { bande.style.display = 'none'; panneau.classList.remove('ouvert'); return; }
+      const s = parId[choisi];
+      bande.style.display = 'block';
+      bande.style.left = x(s.y) + 'px';
+      bande.style.width = Math.max((s.e - s.y) * k, 2) + 'px';
+      couloirs.querySelectorAll('.item').forEach((el) => {
+        const d = parId[el.dataset.id];
+        el.classList.toggle('choisi', d.id === choisi);
+        el.classList.toggle('contemp', d.id !== choisi && d.y < s.e && d.e > s.y);
+      });
+      remplirPanneau(s);
+    }
+
+    function remplirPanneau(s) {
+      const g = G[s.g];
+      const aussi = s.t.split(';').filter((t) => G[t] && t !== s.g).map((t) => G[t].label);
+      const autres = GROUPES.filter((x) => x.id !== s.g).map((x) => ({
+        g: x, liste: (parGroupe[x.id] || []).filter((d) => d.y < s.e && d.e > s.y).sort((a, b) => b.s - a.s),
+      })).filter((b) => b.liste.length);
+      panneau.innerHTML = `<div class="carte" style="--c:${g.color}">
+        <div class="carte-tete">${s.th ? `<img src="${esc(s.th)}" alt="" width="64" height="64" loading="lazy">` : ''}
+          <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}${aussi.length ? ' · aussi : ' + esc(aussi.join(', ')) : ''}</p>
+          <p>${esc(s.x)}</p></div>
+          <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
+          <button class="btn" type="button" id="fermer">Fermer</button></div></div>
+        <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
+        <div class="contemps">${autres.length ? autres.map(({ g, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${liste.length}</h3><ul>`
+          + liste.slice(0, 7).map((d) => `<li><button type="button" data-id="${esc(d.id)}">${esc(d.n)}</button> <small>${esc(d.d)}</small></li>`).join('')
+          + (liste.length > 7 ? `<li><small>et ${liste.length - 7} autres</small></li>` : '') + '</ul></div>').join('')
+          : '<p class="vide">Aucun contemporain dans les autres traditions sur le site.</p>'}</div></div>`;
+      panneau.classList.add('ouvert');
+      $('fermer').onclick = () => { choisi = null; appliquerSelection(); majUrl(); };
+      panneau.querySelectorAll('.contemps button').forEach((b) => (b.onclick = () => choisir(b.dataset.id, true)));
+    }
+
+    function choisir(id, centrer) {
+      const d = parId[id];
+      if (!d) return;
+      choisi = id;
+      if (!actifs.includes(d.g)) setActifs([...actifs, d.g]);
+      dessiner();
+      if (centrer) scroller.scrollTo({ left: x((d.y + d.e) / 2) - scroller.clientWidth / 2, behavior: 'smooth' });
+      majUrl();
+    }
+
+    couloirs.addEventListener('click', (e) => {
+      const el = e.target.closest('.item');
+      if (el && !bouge) choisir(el.dataset.id, false);
+    });
+    couloirs.addEventListener('keydown', (e) => {
+      const el = e.target.closest('.item');
+      if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); choisir(el.dataset.id, false); }
+    });
+    document.querySelectorAll('[data-seul]').forEach((b) => (b.onclick = () => {
+      periode = null; setActifs([b.dataset.seul]); choisi = null; dessiner(); majUrl();
+      scroller.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+
+    /* ── Zoom ── */
+    const kMin = () => scroller.clientWidth / (Y1 - Y0);
+    function zoomer(nouveau, yCentre) {
+      const yc = yCentre ?? (scroller.scrollLeft + scroller.clientWidth / 2) / k + Y0;
+      k = Math.min(KMAX, Math.max(kMin(), nouveau));
+      dessiner();
+      scroller.scrollLeft = x(yc) - scroller.clientWidth / 2;
+    }
+    $('zplus').onclick = () => zoomer(k * 1.6);
+    $('zmoins').onclick = () => zoomer(k / 1.6);
+    scroller.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey || !DATA.length) return;
+      e.preventDefault();
+      const r = scroller.getBoundingClientRect(), avant = e.clientX - r.left;
+      const y = (scroller.scrollLeft + avant) / k + Y0;
+      k = Math.min(KMAX, Math.max(kMin(), k * (e.deltaY < 0 ? 1.25 : 0.8)));
+      dessiner();
+      scroller.scrollLeft = x(y) - avant;
+    }, { passive: false });
+
+    /* ── Glisser à la souris, curseur d'année ── */
+    let depart = null, bouge = false;
+    scroller.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') { depart = { x: e.clientX, s: scroller.scrollLeft }; bouge = false; }
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (depart) {
+        const dx = e.clientX - depart.x;
+        if (Math.abs(dx) > 4) { bouge = true; scroller.classList.add('drag'); }
+        if (bouge) scroller.scrollLeft = depart.s - dx;
+      }
+      if (!DATA.length || e.pointerType !== 'mouse') return;
+      const r = scroller.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        const px = scroller.scrollLeft + e.clientX - r.left;
+        curseur.style.display = 'block';
+        curseur.style.left = px + 'px';
+        curseur.firstChild.textContent = an(Math.round(px / k + Y0));
+      } else curseur.style.display = 'none';
+    });
+    window.addEventListener('pointerup', () => {
+      depart = null; scroller.classList.remove('drag');
+      setTimeout(() => (bouge = false), 0);
+    });
+    let largeur = 0;
+    addEventListener('resize', () => {
+      if (DATA.length && scroller.clientWidth !== largeur) { largeur = scroller.clientWidth; zoomer(k); }
+    });
+
+    /* ── Chargement ── */
+    fetch('/data/frise-monde.json')
+      .then((r) => r.json())
+      .then((lignes) => {
+        DATA = lignes.map(([id, n, y, e, d, g, s, th, xd, t]) => ({ id, n, y, e, d, g, s, th, x: xd, t }))
+          .filter((d) => G[d.g]);
+        parId = Object.fromEntries(DATA.map((d) => [d.id, d]));
+        for (const d of DATA) (parGroupe[d.g] ||= []).push(d);
+        GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${(parGroupe[g.id] || []).length})`; });
+        $('chargement').remove();
+        monde.hidden = false;
+        largeur = scroller.clientWidth;
+
+        const q = new URLSearchParams(location.search);
+        const p = q.get('p'), per = q.get('periode'), g = q.get('g');
+        if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        else zoomer(scroller.clientWidth / (2030 + 800), 615);
+        if (g) setActifs(g.split(','));
+        if (p && parId[p]) {
+          const d = parId[p];
+          if (!per) { k = Math.min(KMAX, scroller.clientWidth / Math.max(d.e - d.y + 400, 200)); }
+          choisir(p, true);
+        } else dessiner();
+        majChips();
+      })
+      .catch(() => { $('chargement').textContent = 'La frise n’a pas pu être chargée. Rechargez la page.'; });
+  })();
+  </script>
+</body>
+</html>
