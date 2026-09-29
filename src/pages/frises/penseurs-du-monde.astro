@@ -291,7 +291,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       { id: 'xixe-siecle', label: 'XIXᵉ siècle', de: 1780, a: 1950, g: ['occident', 'russe', 'inde'] },
       { id: 'contemporains', label: 'Contemporains', de: 1900, a: 2030, g: ['occident', 'sud', 'asie-est'] },
     ];
-    const DEFAUT = ['occident', 'islam-juif', 'asie-est'];
+    const DEFAUT = ['occident', 'inde', 'asie-est']; // les traditions de l'Antiquité, vue d'ouverture
     const EPOQUES = [[-3000, -800, 'Haute Antiquité'], [-800, 476, 'Antiquité'], [476, 1453, 'Moyen Âge'], [1453, 1600, 'Renaissance'],
       [1600, 1789, 'Âge classique'], [1789, 1900, 'XIXᵉ siècle'], [1900, 2030, 'XXᵉ – XXIᵉ']];
 
@@ -714,10 +714,10 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         const q = new URLSearchParams(location.search);
         const p = q.get('p'), per = q.get('periode'), g = q.get('g');
         if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
-        // Vue de départ : tout de -800 à nos jours sur ordinateur ; sur petit écran, 600 ans
-        // de l'Antiquité (on fait ensuite glisser la frise vers les époques suivantes)
+        // Vue de départ : l'Antiquité, 1 000 ans sur ordinateur (portraits affichés), 600 ans sur
+        // petit écran ; on fait ensuite glisser la frise vers les époques suivantes
         else if (scroller.clientWidth < 700) zoomer(scroller.clientWidth / 600, -350);
-        else zoomer(scroller.clientWidth / (2030 + 800), 615);
+        else zoomer(scroller.clientWidth / 1000, -150);
         if (g) setActifs(g.split(','));
         if (p && parId[p]) {
           const d = parId[p];
