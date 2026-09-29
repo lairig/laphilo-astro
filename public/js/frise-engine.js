@@ -815,7 +815,8 @@
 
     const track = document.getElementById('navTrack');
     const wrap  = document.getElementById('navWrap');
-    if (!track || !wrap) return;
+    /* Redimensionnement (rotation du téléphone) avant la fin du chargement : rien à centrer */
+    if (!track || !wrap || !DATA[current]) return;
 
     /* Centrage : l'année active vient au milieu de la zone visible */
     const centerX = yearToX(DATA[current].year);
