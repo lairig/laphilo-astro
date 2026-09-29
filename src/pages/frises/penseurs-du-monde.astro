@@ -325,8 +325,15 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     }
 
     /* Les plus importants d'abord, chacun dans la première piste libre */
+    /* Le philosophe choisi garde sa place ; il ne passe en tête que s'il
+       aurait été masqué faute de place (choisi depuis les contemporains). */
     function placer(items) {
-      const tri = items.slice().sort((a, b) => (b.id === choisi) - (a.id === choisi) || b.s - a.s || a.y - b.y);
+      const places = placerDans(items, null);
+      if (choisi && items.some((d) => d.id === choisi) && !places.some(([d]) => d.id === choisi)) return placerDans(items, choisi);
+      return places;
+    }
+    function placerDans(items, prioritaire) {
+      const tri = items.slice().sort((a, b) => (b.id === prioritaire) - (a.id === prioritaire) || b.s - a.s || a.y - b.y);
       const pistes = Array.from({ length: ROWS }, () => []);
       const places = [];
       for (const d of tri) {
