@@ -6,6 +6,7 @@
 import { getCollection } from 'astro:content';
 import Favicons from '../../components/Favicons.astro';
 import BackButton from '../../components/BackButton.astro';
+import FriseFooter from '../../components/FriseFooter.astro';
 import Fonts from '../../components/Fonts.astro';
 import GoatCounter from '../../components/GoatCounter.astro';
 import SeoHead from '../../components/SeoHead.astro';
@@ -156,6 +157,11 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .traditions > summary h2::after { content: ' ▸'; color: var(--gold); }
     .traditions[open] > summary h2::after { content: ' ▾'; }
     .traditions > summary:hover h2 { color: var(--gold); }
+    /* Pied de page commun des frises (FriseFooter) : styles repris de styles-f.css et styles.css */
+    .frise-footer { display: flex; flex-direction: column; align-items: center; gap: .55rem; padding: 1rem 16px 1.2rem;
+      border-top: 1px solid rgba(180,130,20,.18); background: rgba(0,0,0,.18); }
+    .footer-tagline { font-family: 'EB Garamond', serif; font-style: italic; font-size: .92rem; color: #c8962a; letter-spacing: .03em; }
+    .ff-copy { font-family: 'EB Garamond', serif; font-style: italic; font-size: .72rem; color: #e8c870; text-align: center; opacity: .65; }
     .trad-intro { text-align: center; color: var(--parch-dim); font-size: 1.05rem; font-style: italic; margin: 0 auto 1rem; max-width: 760px; }
     .trad-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
     .trad { background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 6px; padding: .9rem 1rem; }
@@ -243,6 +249,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       ))}
     </div>
   </details>
+  <FriseFooter />
   <div id="marge-bulle" aria-hidden="true"></div>
 
   <script is:inline define:vars={{ GROUPES }}>
