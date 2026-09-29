@@ -43,9 +43,10 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes du monde arabo-persan — toutes époques',
     match: (p) => ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'].includes(p.nationalite ?? ''),
   },
-  'africains-toutes-epoques': {
-    label: 'Philosophes africains — toutes époques',
-    match: (p) => ['Égyptienne', 'Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'].includes(p.nationalite ?? ''),
+  /* Colonne « Groupe » : Afrique, Amérique latine, Caraïbes, Amériques indigènes (remplace « Africains ») */
+  'pensees-du-sud-toutes-epoques': {
+    label: 'Pensées du Sud et de la décolonisation — toutes époques',
+    match: (p) => p.groupe === 'sud',
   },
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
@@ -65,10 +66,10 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes grecs et byzantins — toutes époques',
     match: (p) => ['Grecque', 'Byzantine'].includes(p.nationalite ?? ''),
   },
-  /* Sous-continent indien : Iqbal (Pakistan) et Coomaraswamy (Sri Lanka) sont nés dans l'Inde britannique */
-  'indiens-toutes-epoques': {
-    label: "Philosophes de l'Inde — toutes époques",
-    match: (p) => ['Indienne', 'Pakistanaise', 'Sri-lankaise'].includes(p.nationalite ?? ''),
+  /* Colonne « Groupe » : Inde, Tibet, Sri Lanka, Asie du Sud-Est continentale (remplace « Indiens ») */
+  'inde-bouddhisme-toutes-epoques': {
+    label: "Philosophes de l'Inde et du monde bouddhiste — toutes époques",
+    match: (p) => p.groupe === 'inde',
   },
   /* Colonne « Groupe » : Chine, Japon, Corée, Vietnam (remplace l'ancienne frise des Chinois) */
   'asie-est-toutes-epoques': {

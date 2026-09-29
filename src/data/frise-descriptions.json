@@ -14,7 +14,6 @@
   "renaissance-lumieres": "La Renaissance & les Lumières (1500 à 1780) : Descartes, Montesquieu, Machiavel, Voltaire, Pascal.",
   "germanophones-toutes-epoques": "Tous les philosophes de langue allemande (Allemagne, Autriche, Suisse alémanique) : Eckhart, Kant, Hegel, Nietzsche, Freud, Wittgenstein, Popper, Jung.",
   "arabo-persans-toutes-epoques": "Les philosophes du monde arabe et persan, de l'Antiquité tardive à aujourd'hui : Al-Kindi, Al-Farabi, Avicenne, Al-Ghazali, Averroès, Ibn Khaldoun, Molla Sadra.",
-  "africains-toutes-epoques": "Les philosophes d'Afrique, de l'Égypte ancienne à aujourd'hui : Imhotep, Plotin, Zera Yacob, Anton Wilhelm Amo, Senghor, Cheikh Anta Diop, Hountondji, Mbembe.",
   "hispaniques-toutes-epoques": "Les philosophes du monde hispanique et lusophone : Isidore de Séville, Raymond Lulle, Suárez, Gracián, Ortega y Gasset, Santayana.",
   "britanniques-toutes-epoques": "Tous les philosophes britanniques, de l'Antiquité tardive à aujourd'hui : Pélage, Ockham, Bacon, Hobbes, Locke, Hume, Mill, Russell.",
   "russes-toutes-epoques": "Tous les philosophes russes, des Lumières à aujourd'hui : Lomonossov, Bakounine, Dostoïevski, Tolstoï, Soloviev, Berdiaev.",
@@ -28,9 +27,10 @@
   "occidental--politique-ethique": "Le pouvoir et la vie bonne : cités grecques, contrat social, libéralisme, socialisme, éthiques contemporaines…",
   "occidental--connaissance-sciences": "Ce que l'on peut savoir : logique antique, empirisme, rationalisme, positivisme, philosophie des sciences et de l'esprit…",
   "femmes-toutes-epoques": "Toutes les philosophes femmes du site, de l'Antiquité à aujourd'hui : Enheduanna, Hypatie, Hildegarde de Bingen, Émilie du Châtelet, Simone de Beauvoir, Hannah Arendt, Simone Weil, Judith Butler.",
-  "proche-orient-ancien-toutes-epoques":"Les premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : Imhotep, Ptahhotep, Gilgamesh, Amenhotep, Hermès Trismégiste, Mani, Mazdak.",
-  "grecs-byzantins-toutes-epoques":"Tous les philosophes grecs et byzantins, des présocratiques à aujourd'hui : Thalès, Héraclite, Socrate, Platon, Aristote, Épicure, Proclus, Pléthon, Castoriadis.",
-  "indiens-toutes-epoques": "Les philosophes de l'Inde, des sages védiques à aujourd'hui : Yajnavalkya, le Bouddha, Nagarjuna, Shankara, Tagore, Gandhi, Ambedkar, Amartya Sen.",
+  "proche-orient-ancien-toutes-epoques": "Les premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : Imhotep, Ptahhotep, Gilgamesh, Amenhotep, Hermès Trismégiste, Mani, Mazdak.",
+  "grecs-byzantins-toutes-epoques": "Tous les philosophes grecs et byzantins, des présocratiques à aujourd'hui : Thalès, Héraclite, Socrate, Platon, Aristote, Épicure, Proclus, Pléthon, Castoriadis.",
   "asie-est-toutes-epoques": "Les philosophes de Chine, du Japon, de Corée et du Vietnam : Confucius, Lao-tseu, Mencius, Zhu Xi, Wang Yangming, Dōgen, Nishida, Tran Duc Thao, Byung-Chul Han.",
-  "pensee-juive-toutes-epoques": "Les philosophes juifs de toutes nationalités, des sages du Talmud à aujourd'hui : Hillel, Maïmonide, Spinoza, Mendelssohn, Bergson, Freud, Buber, Arendt, Levinas, Derrida."
+  "pensee-juive-toutes-epoques": "Les philosophes juifs de toutes nationalités, des sages du Talmud à aujourd'hui : Hillel, Maïmonide, Spinoza, Mendelssohn, Bergson, Freud, Buber, Arendt, Levinas, Derrida.",
+  "pensees-du-sud-toutes-epoques": "Les pensées d'Afrique, d'Amérique latine, des Caraïbes et des Amériques indigènes : Nezahualcoyotl, Zera Yacob, Anton Wilhelm Amo, Senghor, Césaire, Fanon, Cheikh Anta Diop, Dussel, Mbembe.",
+  "inde-bouddhisme-toutes-epoques": "Les philosophes de l'Inde et du monde bouddhiste, des sages védiques à aujourd'hui : Yajnavalkya, le Bouddha, Nagarjuna, Shankara, Tsongkhapa, Tagore, Gandhi, Ambedkar."
 }

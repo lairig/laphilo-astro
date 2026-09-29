@@ -231,10 +231,10 @@
       "label": "Par grande tradition",
       "items": [
         {
-          "name": "Tous les Philosophes Indiens",
+          "name": "Tous les Philosophes de l'Inde &amp; du Monde Bouddhiste",
           "tag": "-1900 av. J.-C. → 2026",
-          "text": "Frise des philosophes de l'Inde, toutes époques confondues : des sages des Upanishads (Yajnavalkya, Maitreyi, Gargi) au Bouddha et Mahavira, de Nagarjuna et Shankara à Kabir, puis Tagore, Gandhi, Ambedkar, Krishnamurti et Amartya Sen.",
-          "href": "/philosophes/frise/indiens-toutes-epoques/"
+          "text": "Frise des philosophes de l'Inde et du monde bouddhiste : des sages des Upanishads (Yajnavalkya, Maitreyi, Gargi) au Bouddha et Mahavira, de Nagarjuna et Shankara au Tibétain Tsongkhapa, jusqu'à Tagore, Gandhi, Ambedkar et Krishnamurti.",
+          "href": "/philosophes/frise/inde-bouddhisme-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes d'Asie de l'Est",
@@ -255,10 +255,10 @@
           "href": "/philosophes/frise/arabo-persans-toutes-epoques/"
         },
         {
-          "name": "Tous les Philosophes Africains",
-          "tag": "-2720 av. J.-C. → 2026",
-          "text": "Frise des philosophes africains : des sages de l'Égypte ancienne (Imhotep, Ptahhotep) et des néoplatoniciens d'Alexandrie à Zera Yacob et Anton Wilhelm Amo à Senghor, Nkrumah et Cheikh Anta Diop, jusqu'à Hountondji, Appiah, Diagne, Mbembe et Sarr.",
-          "href": "/philosophes/frise/africains-toutes-epoques/"
+          "name": "Toutes les Pensées du Sud &amp; de la Décolonisation",
+          "tag": "947 → 2026",
+          "text": "Frise des pensées d'Afrique, d'Amérique latine, des Caraïbes et des Amériques indigènes : de Quetzalcoatl et Nezahualcoyotl à Zera Yacob et Anton Wilhelm Amo, de Senghor, Césaire et Fanon à Cheikh Anta Diop, Mariátegui, Dussel et Achille Mbembe.",
+          "href": "/philosophes/frise/pensees-du-sud-toutes-epoques/"
         }
       ]
     },
