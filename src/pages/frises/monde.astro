@@ -150,6 +150,19 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .trad li a { color: var(--parch); text-decoration: none; }
     .trad li a:hover { color: var(--c); text-decoration: underline; }
     .trad-voir { margin-top: .6rem; }
+    /* Grand écran : Proche-Orient ancien et pensée russe (cartes courtes)
+       empilés dans la 1re colonne, pour tenir sur deux rangées */
+    @media (min-width: 960px) {
+      .trad-grille { grid-template-columns: repeat(3, 1fr);
+        grid-template-areas: "orient-ancien occident islam-juif" "russe occident islam-juif" "inde asie-est sud"; }
+      .trad[data-g="orient-ancien"] { grid-area: orient-ancien; }
+      .trad[data-g="russe"] { grid-area: russe; }
+      .trad[data-g="occident"] { grid-area: occident; }
+      .trad[data-g="islam-juif"] { grid-area: islam-juif; }
+      .trad[data-g="inde"] { grid-area: inde; }
+      .trad[data-g="asie-est"] { grid-area: asie-est; }
+      .trad[data-g="sud"] { grid-area: sud; }
+    }
 
     @media (max-width: 640px) {
       .fm-header { padding-top: 3.4rem; }
@@ -199,7 +212,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     <summary><h2>Les grandes traditions et leurs grandes figures</h2></summary>
     <div class="trad-grille">
       {parGroupe.map((g) => (
-        <article class="trad" style={`--c:${g.color}`}>
+        <article class="trad" data-g={g.id} style={`--c:${g.color}`}>
           <h3>{g.label} <small>· {g.n} philosophes</small></h3>
           <p>{g.description}</p>
           {g.figures.length > 0 && (
