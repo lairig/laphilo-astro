@@ -17,7 +17,7 @@ const byLabel = (label: string) => groups.find((g) => g.label === label)?.items 
 /* « -650 av. J.-C. » → « 650 av. J.-C. » */
 const period = (tag?: string) => (tag && tag !== 'Toutes époques' ? tag.replace(/-(\d+ av)/g, '$1') : undefined);
 const shortName = (name: string) =>
-  name.replace(/^Tous les Philosophes (du |des )?/, '').replace(/^Philosophes /, '');
+  name.replace(/^Tous les Philosophes (du |des )?/, '').replace(/^Philosophes (du |des )?/, '');
 
 const courants: Link[] = byLabel('Les Courants de Pensée').flatMap((it: any) =>
   it.links.map((l: any) => ({

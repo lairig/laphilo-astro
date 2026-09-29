@@ -96,6 +96,12 @@
       "label": "Anciens",
       "items": [
         {
+          "name": "Philosophes du Proche-Orient ancien",
+          "tag": "-2720 av. J.-C. → 524",
+          "text": "Frise des premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : d'Imhotep et Ptahhotep à Gilgamesh et Amenhotep, jusqu'à Hermès Trismégiste, Mani et Mazdak.",
+          "href": "/philosophes/frise/proche-orient-ancien-toutes-epoques/"
+        },
+        {
           "name": "Philosophes Gréco-Romains",
           "tag": "-650 av. J.-C. → 500",
           "text": "De Thalès de Milet à Augustin d'Hippone, les fondateurs de la pensée occidentale ont posé les questions qui traverseront toute l'histoire de la philosophie : qu'est-ce que l'être ? Peut-on connaître la vérité ? Comment vivre bien ? La Grèce antique donna naissance à Socrate, Platon, Aristote — trois piliers dont l'ombre porte encore sur notre siècle.",
@@ -224,12 +230,6 @@
     {
       "label": "Par grande tradition",
       "items": [
-        {
-          "name": "Tous les Philosophes du Proche-Orient ancien",
-          "tag": "-2720 av. J.-C. → 524",
-          "text": "Frise des premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : d'Imhotep et Ptahhotep à Gilgamesh et Amenhotep, jusqu'à Hermès Trismégiste, Mani et Mazdak.",
-          "href": "/philosophes/frise/proche-orient-ancien-toutes-epoques/"
-        },
         {
           "name": "Tous les Philosophes Indiens",
           "tag": "-1900 av. J.-C. → 2026",
