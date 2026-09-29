@@ -70,9 +70,10 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: "Philosophes de l'Inde — toutes époques",
     match: (p) => ['Indienne', 'Pakistanaise', 'Sri-lankaise'].includes(p.nationalite ?? ''),
   },
-  'chinois-toutes-epoques': {
-    label: 'Philosophes chinois — toutes époques',
-    match: (p) => (p.nationalite ?? '') === 'Chinoise',
+  /* Colonne « Groupe » : Chine, Japon, Corée, Vietnam (remplace l'ancienne frise des Chinois) */
+  'asie-est-toutes-epoques': {
+    label: "Philosophes d'Asie de l'Est — toutes époques",
+    match: (p) => p.groupe === 'asie-est',
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {

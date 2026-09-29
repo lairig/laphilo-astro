@@ -237,10 +237,10 @@
           "href": "/philosophes/frise/indiens-toutes-epoques/"
         },
         {
-          "name": "Tous les Philosophes Chinois",
-          "tag": "-570 av. J.-C. → 1695",
-          "text": "Frise des philosophes chinois : Lao-tseu, Confucius, Mozi, Mencius et Tchouang-tseu, puis Han Fei, Wang Chong et Xuanzang, jusqu'au néoconfucianisme de Zhu Xi et Wang Yangming.",
-          "href": "/philosophes/frise/chinois-toutes-epoques/"
+          "name": "Tous les Philosophes d'Asie de l'Est",
+          "tag": "-570 av. J.-C. → 2026",
+          "text": "Frise des philosophes de Chine, du Japon, de Corée et du Vietnam : Lao-tseu, Confucius, Mencius et Tchouang-tseu, Zhu Xi et Wang Yangming, le zen de Dōgen, l'école de Kyōto de Nishida, jusqu'à Tran Duc Thao et Byung-Chul Han.",
+          "href": "/philosophes/frise/asie-est-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes Juifs",
@@ -259,12 +259,6 @@
           "tag": "-2720 av. J.-C. → 2026",
           "text": "Frise des philosophes africains : des sages de l'Égypte ancienne (Imhotep, Ptahhotep) et des néoplatoniciens d'Alexandrie à Zera Yacob et Anton Wilhelm Amo à Senghor, Nkrumah et Cheikh Anta Diop, jusqu'à Hountondji, Appiah, Diagne, Mbembe et Sarr.",
           "href": "/philosophes/frise/africains-toutes-epoques/"
-        },
-        {
-          "name": "Philosophes Orientaux &amp; Africains",
-          "tag": "-2720 av. J.-C. → 2010",
-          "text": "A toutes les époques, des penseurs comme Confucius, Lao-Tseu, Nagarjuna, Al-Farabi, Ibn Rushd, Avicenne et bien d'autres ont bâti des systèmes de pensée aussi rigoureux et profonds que leurs homologues occidentaux. Cette frise vous invite à un voyage à travers l'Asie, le Moyen-Orient et l'Afrique pour découvrir des philosophies longtemps méconnues en Europe.",
-          "href": "/philosophes/frise/orientaux/"
         }
       ]
     },

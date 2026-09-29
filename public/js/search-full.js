@@ -25,11 +25,11 @@
     { v: 'orient-ancien', fr: 'Proche-Orient ancien', grad: 'linear-gradient(180deg,#c9a227 50%,#1d4e89 50%)' },
     { v: 'grec', fr: 'Grecs & Byzantins', grad: 'linear-gradient(180deg,#0d5eaf 50%,#f7f4ea 50%)' },
     { v: 'indien', fr: 'Indiens', grad: 'linear-gradient(180deg,#ff9933 33%,#f7f4ea 33% 66%,#138808 66%)' },
-    { v: 'chinois', fr: 'Chinois', grad: 'linear-gradient(135deg,#ffde00 22%,#de2910 22%)' },
+    { v: 'asie-est', fr: "Asie de l'Est", grad: 'linear-gradient(135deg,#de2910 50%,#f7f4ea 50%)' },
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'femme', 'orient-ancien', 'grec', 'indien', 'chinois', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'femme', 'orient-ancien', 'grec', 'indien', 'asie-est', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
@@ -43,7 +43,7 @@
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'] },
     'grec': { nats: ['Grecque', 'Byzantine'] },
     'indien': { nats: ['Indienne', 'Pakistanaise', 'Sri-lankaise'] },
-    'chinois': { nats: ['Chinoise'] },
+    'asie-est': { groupe: 'asie-est' },
     /* Pas une nationalité : colonne « Traditions » des xlsx */
     'juif': { trad: 'juive' },
     'femme': { trad: 'femme' },
@@ -65,7 +65,7 @@
     'hispanique': { href: '/philosophes/frise/hispaniques-toutes-epoques/', fr: "Voir la frise des philosophes hispaniques" },
     'grec': { href: '/philosophes/frise/grecs-byzantins-toutes-epoques/', fr: "Voir la frise des philosophes grecs et byzantins" },
     'indien': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes indiens" },
-    'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: "Voir la frise des philosophes chinois" },
+    'asie-est': { href: '/philosophes/frise/asie-est-toutes-epoques/', fr: "Voir la frise des philosophes d'Asie de l'Est" },
     'juif': { href: '/philosophes/frise/pensee-juive-toutes-epoques/', fr: "Voir la frise des philosophes juifs" },
     'femme': { href: '/philosophes/frise/femmes-toutes-epoques/', fr: "Voir la frise des philosophes femmes" },
     'orient-ancien': { href: '/philosophes/frise/proche-orient-ancien-toutes-epoques/', fr: "Voir la frise du Proche-Orient ancien" },
