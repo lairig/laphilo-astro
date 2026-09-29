@@ -2,6 +2,44 @@
   "intro": "<p style=\"font-size:.88rem;line-height:1.8;color:var(--ink-light);margin-bottom:1.4rem;\">Explorez l'ensemble des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité, par époque, et grands courants de pensée de l'Égypte ancienne au XXIe siècle. Ces frises vous permettent de visualiser d'un seul coup d'œil la continuité et les ruptures de la pensée humaine, de découvrir les contemporains qui ne se sont pas connus, et de relier les idées à leur contexte historique. Un outil pédagogique unique pour étudiants, enseignants et curieux de philosophie.</p>",
   "groups": [
     {
+      "section": "La Frise des Penseurs du Monde",
+      "label": "La Frise des Penseurs du Monde",
+      "items": [
+        {
+          "name": "La Frise des Penseurs du Monde",
+          "tag": "-2720 av. J.-C. → 2026",
+          "text": "Toutes les grandes traditions philosophiques côte à côte sur un même axe du temps : Occident, monde islamique et juif, Inde, Asie de l'Est, pensées du Sud, pensée russe, Proche-Orient ancien. Cliquez un philosophe pour découvrir qui pensait, à la même époque, ailleurs dans le monde.",
+          "links": [
+            {
+              "label": "Vue d'ensemble",
+              "href": "/frises/penseurs-du-monde/",
+              "desc": "L'Antiquité à l'ouverture, puis faites glisser la frise jusqu'à nos jours."
+            },
+            {
+              "label": "Âge axial",
+              "href": "/frises/penseurs-du-monde/?periode=age-axial",
+              "desc": "Socrate, le Bouddha et Confucius, contemporains."
+            },
+            {
+              "label": "Âge d'or islamique",
+              "href": "/frises/penseurs-du-monde/?periode=age-d-or-islamique",
+              "desc": "Avicenne, Averroès, Maïmonide face à la scolastique et à Zhu Xi."
+            },
+            {
+              "label": "XIXᵉ siècle",
+              "href": "/frises/penseurs-du-monde/?periode=xixe-siecle",
+              "desc": "L'Occident, la pensée russe et la renaissance indienne."
+            },
+            {
+              "label": "Femmes uniquement",
+              "href": "/frises/penseurs-du-monde/?femmes=1",
+              "desc": "Les philosophes femmes de toutes les traditions."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "section": "Les Courants de Pensée",
       "label": "Les Courants de Pensée",
       "items": [
@@ -10,10 +48,22 @@
           "tag": "Toutes époques",
           "text": "Des présocratiques au wokisme, les courants de la pensée philosophique occidentale : parcourez la frise complète, ou l'une des trois frises thématiques plus courtes.",
           "links": [
-            { "label": "Frise complète", "href": "/courants/frise/occidental/" },
-            { "label": "Métaphysique &amp; Théologie", "href": "/courants/frise/occidental--metaphysique-theologie/" },
-            { "label": "Politique &amp; Éthique", "href": "/courants/frise/occidental--politique-ethique/" },
-            { "label": "Connaissance &amp; Sciences", "href": "/courants/frise/occidental--connaissance-sciences/" }
+            {
+              "label": "Frise complète",
+              "href": "/courants/frise/occidental/"
+            },
+            {
+              "label": "Métaphysique &amp; Théologie",
+              "href": "/courants/frise/occidental--metaphysique-theologie/"
+            },
+            {
+              "label": "Politique &amp; Éthique",
+              "href": "/courants/frise/occidental--politique-ethique/"
+            },
+            {
+              "label": "Connaissance &amp; Sciences",
+              "href": "/courants/frise/occidental--connaissance-sciences/"
+            }
           ]
         },
         {
@@ -21,29 +71,47 @@
           "tag": "Toutes époques",
           "text": "Confucianisme, taoïsme, soufisme, Ubuntu… les courants de la pensée philosophique orientale : parcourez la frise complète, ou l'une des trois frises thématiques plus courtes.",
           "links": [
-            { "label": "Frise complète", "href": "/courants/frise/oriental/" },
-            { "label": "Théologie &amp; Spiritualité", "href": "/courants/frise/oriental--theologie-spiritualite/" },
-            { "label": "Politique &amp; Métaphysique", "href": "/courants/frise/oriental--politique-metaphysique/" },
-            { "label": "Logique, Éthique &amp; Sciences", "href": "/courants/frise/oriental--logique-ethique-sciences/" }
+            {
+              "label": "Frise complète",
+              "href": "/courants/frise/oriental/"
+            },
+            {
+              "label": "Théologie &amp; Spiritualité",
+              "href": "/courants/frise/oriental--theologie-spiritualite/"
+            },
+            {
+              "label": "Politique &amp; Métaphysique",
+              "href": "/courants/frise/oriental--politique-metaphysique/"
+            },
+            {
+              "label": "Logique, Éthique &amp; Sciences",
+              "href": "/courants/frise/oriental--logique-ethique-sciences/"
+            }
           ]
         }
       ]
     },
     {
-      "section": "Les Philosophes",
-      "label": "Contemporains",
+      "section": "Les Philosophes par époque",
+      "label": "Anciens",
       "items": [
         {
-          "name": "Philosophes Contemporains Français",
-          "tag": "1930 → 2026",
-          "text": "Frise des philosophes contemporains français encore en activité en 2026.<br> De Pierre Magnard à Marylin Maeso, en passant par Michel Onfray, Sandra Laugier ou Frédéric Worms, découvrez ses penseurs qui font la philosophie française d'aujourd'hui.",
-          "href": "/philosophes/frise/france-contemporains/"
+          "name": "Philosophes Gréco-Romains",
+          "tag": "-650 av. J.-C. → 500",
+          "text": "De Thalès de Milet à Augustin d'Hippone, les fondateurs de la pensée occidentale ont posé les questions qui traverseront toute l'histoire de la philosophie : qu'est-ce que l'être ? Peut-on connaître la vérité ? Comment vivre bien ? La Grèce antique donna naissance à Socrate, Platon, Aristote — trois piliers dont l'ombre porte encore sur notre siècle.",
+          "href": "/philosophes/frise/greco-romains/"
         },
         {
-          "name": "Autres Philosophes Contemporains",
-          "tag": "1926 → 2026",
-          "text": "Frise des philosophes contemporains non français encore en activité en 2026. <br> Des États-Unis à l'Allemagne, de Corée du Sud à l'Italie, retrouvez les grandes figures mondiales de la philosophie actuelle : Slavoj Žižek, Peter Singer, Martha Nussbaum, Byung-Chul Han et bien d'autres.",
-          "href": "/philosophes/frise/contemporains-monde/"
+          "name": "Philosophes Médiévaux",
+          "tag": "500 → 1460",
+          "text": "Frise qui met en avant des figures comme Boèce, Augustin, Jean Scot Érigène, Anselme de Canterbury, Abélard ou Thomas d'Aquin, qui ont articulé foi chrétienne et raisonnement philosophique dans l'Empire romain puis en Europe médiévale. En suivant leur ordre chronologique, la frise permet de visualiser l'évolution progressive de la pensée occidentale, de la fin de l'Antiquité jusqu'aux prémices de la Renaissance.",
+          "href": "/philosophes/frise/medievaux/"
+        },
+        {
+          "name": "Philosophes Renaissance &amp; Lumières",
+          "tag": "1460 → 1760",
+          "text": "Frise qui met en lumière des penseurs comme Érasme, Montaigne, Descartes, Hobbes ou Locke, qui ont repensé la raison, la foi, la politique et les droits de l'individu. En suivant leur ordre chronologique, la frise permet de visualiser l'émergence de la modernité philosophique en Europe occidentale.",
+          "href": "/philosophes/frise/renaissance-lumieres/"
         }
       ]
     },
@@ -83,36 +151,25 @@
       ]
     },
     {
-      "label": "Anciens",
+      "label": "Contemporains",
       "items": [
         {
-          "name": "Philosophes Renaissance &amp; Lumières",
-          "tag": "1460 → 1760",
-          "text": "Frise qui met en lumière des penseurs comme Érasme, Montaigne, Descartes, Hobbes ou Locke, qui ont repensé la raison, la foi, la politique et les droits de l'individu. En suivant leur ordre chronologique, la frise permet de visualiser l'émergence de la modernité philosophique en Europe occidentale.",
-          "href": "/philosophes/frise/renaissance-lumieres/"
+          "name": "Philosophes Contemporains Français",
+          "tag": "1930 → 2026",
+          "text": "Frise des philosophes contemporains français encore en activité en 2026.<br> De Pierre Magnard à Marylin Maeso, en passant par Michel Onfray, Sandra Laugier ou Frédéric Worms, découvrez ses penseurs qui font la philosophie française d'aujourd'hui.",
+          "href": "/philosophes/frise/france-contemporains/"
         },
         {
-          "name": "Philosophes Médiévaux",
-          "tag": "500 → 1460",
-          "text": "Frise qui met en avant des figures comme Boèce, Augustin, Jean Scot Érigène, Anselme de Canterbury, Abélard ou Thomas d'Aquin, qui ont articulé foi chrétienne et raisonnement philosophique dans l'Empire romain puis en Europe médiévale. En suivant leur ordre chronologique, la frise permet de visualiser l'évolution progressive de la pensée occidentale, de la fin de l'Antiquité jusqu'aux prémices de la Renaissance.",
-          "href": "/philosophes/frise/medievaux/"
-        },
-        {
-          "name": "Philosophes Gréco-Romains",
-          "tag": "-650 av. J.-C. → 500",
-          "text": "De Thalès de Milet à Augustin d'Hippone, les fondateurs de la pensée occidentale ont posé les questions qui traverseront toute l'histoire de la philosophie : qu'est-ce que l'être ? Peut-on connaître la vérité ? Comment vivre bien ? La Grèce antique donna naissance à Socrate, Platon, Aristote — trois piliers dont l'ombre porte encore sur notre siècle.",
-          "href": "/philosophes/frise/greco-romains/"
-        },
-        {
-          "name": "Philosophes Orientaux",
-          "tag": "-2720 av. J.-C. → 2010",
-          "text": "A toutes les époques, des penseurs comme Confucius, Lao-Tseu, Nagarjuna, Al-Farabi, Ibn Rushd, Avicenne et bien d'autres ont bâti des systèmes de pensée aussi rigoureux et profonds que leurs homologues occidentaux. Cette frise vous invite à un voyage à travers l'Asie, le Moyen-Orient et l'Afrique pour découvrir des philosophies longtemps méconnues en Europe.",
-          "href": "/philosophes/frise/orientaux/"
+          "name": "Autres Philosophes Contemporains",
+          "tag": "1926 → 2026",
+          "text": "Frise des philosophes contemporains non français encore en activité en 2026. <br> Des États-Unis à l'Allemagne, de Corée du Sud à l'Italie, retrouvez les grandes figures mondiales de la philosophie actuelle : Slavoj Žižek, Peter Singer, Martha Nussbaum, Byung-Chul Han et bien d'autres.",
+          "href": "/philosophes/frise/contemporains-monde/"
         }
       ]
     },
     {
-      "label": "Par Nationalité",
+      "section": "Les Philosophes par origine — toutes époques",
+      "label": "Par pays",
       "items": [
         {
           "name": "Tous les Philosophes Français",
@@ -127,16 +184,10 @@
           "href": "/philosophes/frise/allemands-toutes-epoques/"
         },
         {
-          "name": "Tous les Philosophes Américains",
-          "tag": "1648 → 2026",
-          "text": "Frise de tous les philosophes américains, toutes époques confondues : d'Emerson et Thoreau au pragmatisme de James et Dewey, jusqu'à Rawls, Nussbaum et aux penseurs d'aujourd'hui.",
-          "href": "/philosophes/frise/americains-toutes-epoques/"
-        },
-        {
-          "name": "Tous les Philosophes Russes",
-          "tag": "1711 → 2026",
-          "text": "Frise de tous les philosophes russes, toutes époques confondues : de Lomonossov à Bakounine, Dostoïevski, Tolstoï, Soloviev, Berdiaev et aux penseurs contemporains.",
-          "href": "/philosophes/frise/russes-toutes-epoques/"
+          "name": "Tous les Philosophes Germanophones",
+          "tag": "1098 → 2026",
+          "text": "Frise de tous les philosophes de langue allemande — Allemagne, Autriche et Suisse alémanique : de Hildegarde de Bingen et Maître Eckhart à Kant, Hegel, Nietzsche, Freud, Wittgenstein, Popper et Jung.",
+          "href": "/philosophes/frise/germanophones-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes Britanniques",
@@ -145,22 +196,10 @@
           "href": "/philosophes/frise/britanniques-toutes-epoques/"
         },
         {
-          "name": "Tous les Philosophes Germanophones",
-          "tag": "1098 → 2026",
-          "text": "Frise de tous les philosophes de langue allemande — Allemagne, Autriche et Suisse alémanique : de Hildegarde de Bingen et Maître Eckhart à Kant, Hegel, Nietzsche, Freud, Wittgenstein, Popper et Jung.",
-          "href": "/philosophes/frise/germanophones-toutes-epoques/"
-        },
-        {
-          "name": "Tous les Philosophes du Monde Arabo-Persan",
-          "tag": "216 → 2026",
-          "text": "Frise des philosophes du monde arabe et persan : de Mani et Jamblique aux grands penseurs de l'âge d'or islamique — Al-Kindi, Al-Farabi, Avicenne, Al-Ghazali, Averroès, Ibn Arabî, Ibn Khaldoun — jusqu'à Molla Sadra et Al-Jabri.",
-          "href": "/philosophes/frise/arabo-persans-toutes-epoques/"
-        },
-        {
-          "name": "Tous les Philosophes Africains",
-          "tag": "-2720 av. J.-C. → 2026",
-          "text": "Frise des philosophes africains : des sages de l'Égypte ancienne (Imhotep, Ptahhotep) et des néoplatoniciens d'Alexandrie à Zera Yacob et Anton Wilhelm Amo à Senghor, Nkrumah et Cheikh Anta Diop, jusqu'à Hountondji, Appiah, Diagne, Mbembe et Sarr.",
-          "href": "/philosophes/frise/africains-toutes-epoques/"
+          "name": "Tous les Philosophes Américains",
+          "tag": "1648 → 2026",
+          "text": "Frise de tous les philosophes américains, toutes époques confondues : d'Emerson et Thoreau au pragmatisme de James et Dewey, jusqu'à Rawls, Nussbaum et aux penseurs d'aujourd'hui.",
+          "href": "/philosophes/frise/americains-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes Hispaniques",
@@ -169,22 +208,27 @@
           "href": "/philosophes/frise/hispaniques-toutes-epoques/"
         },
         {
-          "name": "Toutes les Philosophes Femmes",
-          "tag": "-2285 av. J.-C. → 2026",
-          "text": "Frise des philosophes femmes de toutes époques et de tous les pays : d'Enheduanna, Théano, Diotime et Hipparchia à Hypatie, Ban Zhao et Hildegarde de Bingen, d'Élisabeth de Bohême et Émilie du Châtelet à Simone de Beauvoir, Hannah Arendt, Simone Weil, Angela Davis et Judith Butler.",
-          "href": "/philosophes/frise/femmes-toutes-epoques/"
-        },
-        {
-          "name": "Tous les Philosophes du Proche-Orient ancien",
-          "tag": "-2720 av. J.-C. → 524",
-          "text": "Frise des premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : d'Imhotep et Ptahhotep à Gilgamesh et Amenhotep, jusqu'à Hermès Trismégiste, Mani et Mazdak.",
-          "href": "/philosophes/frise/proche-orient-ancien-toutes-epoques/"
+          "name": "Tous les Philosophes Russes",
+          "tag": "1711 → 2026",
+          "text": "Frise de tous les philosophes russes, toutes époques confondues : de Lomonossov à Bakounine, Dostoïevski, Tolstoï, Soloviev, Berdiaev et aux penseurs contemporains.",
+          "href": "/philosophes/frise/russes-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes Grecs & Byzantins",
           "tag": "-640 av. J.-C. → 1997",
           "text": "Frise de tous les philosophes grecs et byzantins, toutes époques confondues : des présocratiques Thalès et Héraclite à Socrate, Platon, Aristote et Épicure, jusqu'aux néoplatoniciens, aux penseurs de Byzance (Maxime le Confesseur, Palamas, Pléthon) et à Castoriadis.",
           "href": "/philosophes/frise/grecs-byzantins-toutes-epoques/"
+        }
+      ]
+    },
+    {
+      "label": "Par grande tradition",
+      "items": [
+        {
+          "name": "Tous les Philosophes du Proche-Orient ancien",
+          "tag": "-2720 av. J.-C. → 524",
+          "text": "Frise des premières sagesses écrites de l'Égypte, de la Mésopotamie et de la Perse antiques : d'Imhotep et Ptahhotep à Gilgamesh et Amenhotep, jusqu'à Hermès Trismégiste, Mani et Mazdak.",
+          "href": "/philosophes/frise/proche-orient-ancien-toutes-epoques/"
         },
         {
           "name": "Tous les Philosophes Indiens",
@@ -203,6 +247,35 @@
           "tag": "-70 av. J.-C. → 2026",
           "text": "Frise des philosophes juifs de toutes nationalités et de toutes époques : de Hillel, Philon et Maïmonide à Spinoza et Mendelssohn, de Bergson, Freud, Husserl, Buber et Wittgenstein à Arendt, Levinas, Derrida, Nozick et Judith Butler.",
           "href": "/philosophes/frise/pensee-juive-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes du Monde Arabo-Persan",
+          "tag": "216 → 2026",
+          "text": "Frise des philosophes du monde arabe et persan : de Mani et Jamblique aux grands penseurs de l'âge d'or islamique — Al-Kindi, Al-Farabi, Avicenne, Al-Ghazali, Averroès, Ibn Arabî, Ibn Khaldoun — jusqu'à Molla Sadra et Al-Jabri.",
+          "href": "/philosophes/frise/arabo-persans-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Africains",
+          "tag": "-2720 av. J.-C. → 2026",
+          "text": "Frise des philosophes africains : des sages de l'Égypte ancienne (Imhotep, Ptahhotep) et des néoplatoniciens d'Alexandrie à Zera Yacob et Anton Wilhelm Amo à Senghor, Nkrumah et Cheikh Anta Diop, jusqu'à Hountondji, Appiah, Diagne, Mbembe et Sarr.",
+          "href": "/philosophes/frise/africains-toutes-epoques/"
+        },
+        {
+          "name": "Philosophes Orientaux &amp; Africains",
+          "tag": "-2720 av. J.-C. → 2010",
+          "text": "A toutes les époques, des penseurs comme Confucius, Lao-Tseu, Nagarjuna, Al-Farabi, Ibn Rushd, Avicenne et bien d'autres ont bâti des systèmes de pensée aussi rigoureux et profonds que leurs homologues occidentaux. Cette frise vous invite à un voyage à travers l'Asie, le Moyen-Orient et l'Afrique pour découvrir des philosophies longtemps méconnues en Europe.",
+          "href": "/philosophes/frise/orientaux/"
+        }
+      ]
+    },
+    {
+      "label": "Par thème",
+      "items": [
+        {
+          "name": "Toutes les Philosophes Femmes",
+          "tag": "-2285 av. J.-C. → 2026",
+          "text": "Frise des philosophes femmes de toutes époques et de tous les pays : d'Enheduanna, Théano, Diotime et Hipparchia à Hypatie, Ban Zhao et Hildegarde de Bingen, d'Élisabeth de Bohême et Émilie du Châtelet à Simone de Beauvoir, Hannah Arendt, Simone Weil, Angela Davis et Judith Butler.",
+          "href": "/philosophes/frise/femmes-toutes-epoques/"
         }
       ]
     }

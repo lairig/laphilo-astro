@@ -17,7 +17,7 @@ const { intro, groups } = data as {
       tag: string;
       text: string;
       href?: string;
-      links?: { label: string; href: string }[];
+      links?: { label: string; href: string; desc?: string }[];
     }[];
   }[];
 };
@@ -148,7 +148,7 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
   {groups.map((group, gi) => (
     <>
       {group.section && <h2 class="frises-section-title">{group.section}</h2>}
-      {gi > 0 && (
+      {gi > 0 && group.label !== group.section && (
         <div class="definition-section-sep" aria-hidden="true">
           <span class="drawer-intro-sep-line"></span>
           <span class="drawer-intro-sep-ornament">{group.label}</span>
@@ -173,7 +173,7 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
               {it.links.map((link, li) => (
                 <a href={link.href} class:list={['frise-hub-link', { 'frise-hub-link--main': li === 0 }]}>
                   <span class="frise-hub-link-title" set:html={link.label} />
-                  <span class="frise-hub-link-desc" set:html={linkDescription(link.href)} />
+                  <span class="frise-hub-link-desc" set:html={link.desc ?? linkDescription(link.href)} />
                   <span class="frise-hub-link-arrow" aria-hidden="true">→</span>
                 </a>
               ))}

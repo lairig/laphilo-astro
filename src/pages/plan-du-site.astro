@@ -26,9 +26,10 @@ const courants: Link[] = byLabel('Les Courants de Pensée').flatMap((it: any) =>
   })),
 );
 const frise = (it: any): Link => ({ label: shortName(it.name), href: it.href, note: period(it.tag) });
-/* Anciens dans l'ordre chronologique (le catalogue les range du plus récent au plus ancien) ; Orientaux en dernier */
-const anciens = byLabel('Anciens');
-const anciensChrono = [...anciens.filter((it: any) => !/Orientaux/.test(it.name)).reverse(), ...anciens.filter((it: any) => /Orientaux/.test(it.name))];
+/* Liens directs de la Frise des penseurs du monde (vue d'ensemble, périodes, femmes) */
+const monde: Link[] = byLabel('La Frise des Penseurs du Monde').flatMap((it: any) =>
+  it.links.map((l: any) => ({ label: l.label === "Vue d'ensemble" ? 'Frise des penseurs du monde' : `Penseurs du monde — ${l.label}`, href: l.href })),
+);
 
 const blocks: Block[] = [
   {
@@ -47,12 +48,17 @@ const blocks: Block[] = [
       { label: 'Échanges & contact', href: '/echanges/' },
     ],
   },
+  { id: 'monde', title: 'La Frise des penseurs du monde', links: monde },
   {
     id: 'epoques',
     title: 'Frises des philosophes par époque',
-    links: [...anciensChrono, ...byLabel('Modernes'), ...byLabel('Contemporains')].map(frise),
+    links: [...byLabel('Anciens'), ...byLabel('Modernes'), ...byLabel('Contemporains')].map(frise),
   },
-  { id: 'origines', title: 'Frises des philosophes par origine ou tradition (toutes époques)', links: byLabel('Par Nationalité').map(frise) },
+  {
+    id: 'origines',
+    title: 'Frises des philosophes par origine ou tradition (toutes époques)',
+    links: [...byLabel('Par pays'), ...byLabel('Par grande tradition'), ...byLabel('Par thème')].map(frise),
+  },
   { id: 'courants', title: 'Frises des courants de pensée', links: courants },
 ];
 const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site.";
