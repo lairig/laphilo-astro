@@ -70,8 +70,9 @@ CELL_RE = re.compile(r'<c r="([A-Z]+)(\d+)"([^>]*?)(?:/>|>.*?</c>)', re.S)
 def set_cells(path, values, style_from=None):
     """values : {'D34': 'texte', 'A76': 1139, 'B2': None (vide la cellule)}.
     style_from : {'N3': 'M3'} donne à une nouvelle cellule le style d'une voisine.
-    La ligne doit déjà exister dans la feuille (c'est le cas des lignes déjà
-    utilisées ou mises en forme)."""
+    Une ligne absente de la feuille est créée avec les attributs (hauteur,
+    style) de la ligne existante qui la précède ; la zone utilisée déclarée
+    (<dimension>) est agrandie si besoin."""
     tmp = path + '.tmp'
     with zipfile.ZipFile(path) as zi:
         sheet = first_sheet_path(zi)
@@ -84,10 +85,11 @@ def set_cells(path, values, style_from=None):
         for ref, v in values.items():
             c, r = split_ref(ref)
             by_row.setdefault(r, {})[c] = v
-        for r, cells in by_row.items():
+        for r, cells in sorted(by_row.items()):
             rm = re.search(r'<row [^>]*r="%d"[^>]*?(?:/>|>(.*?)</row>)' % r, xml, re.S)
             if not rm:
-                raise ValueError(f'Ligne {r} absente de {path}')
+                xml = _creer_ligne(xml, r)
+                rm = re.search(r'<row [^>]*r="%d"[^>]*?(?:/>|>(.*?)</row>)' % r, xml, re.S)
             inner = rm.group(1) or ''
             existing = {m.group(1): m.group(0) for m in CELL_RE.finditer(inner)}
             for c, v in cells.items():
@@ -98,6 +100,7 @@ def set_cells(path, values, style_from=None):
             head = re.match(r'<row [^>]*?(?=/?>)', rm.group(0)).group(0)
             head = re.sub(r'\s+spans="[^"]*"', '', head)
             xml = xml[:rm.start()] + head + '>' + new_inner + '</row>' + xml[rm.end():]
+        xml = _agrandir_dimension(xml, values)
         with zipfile.ZipFile(tmp, 'w') as zo:
             for it in zi.infolist():
                 data = zi.read(it.filename)
@@ -105,6 +108,39 @@ def set_cells(path, values, style_from=None):
                     data = xml.encode('utf-8')
                 zo.writestr(it, data)
     shutil.move(tmp, path)
+
+
+ROW_RE = re.compile(r'<row [^>]*?r="(\d+)"[^>]*?(?:/>|>.*?</row>)', re.S)
+
+
+def _creer_ligne(xml, r):
+    """Insère une ligne vide r à sa place, avec les attributs de la ligne précédente."""
+    lignes = [(int(m.group(1)), m) for m in ROW_RE.finditer(xml)]
+    avant = [m for n, m in lignes if n < r]
+    apres = [m for n, m in lignes if n > r]
+    attrs = ''
+    if avant:
+        head = re.match(r'<row ([^>]*?)/?>', avant[-1].group(0)).group(1)
+        attrs = re.sub(r'\s*\b(r|spans)="[^"]*"', '', head).strip()
+    neuf = f'<row r="{r}"' + (f' {attrs}' if attrs else '') + '></row>'
+    if apres:
+        i = apres[0].start()
+    else:
+        i = xml.index('</sheetData>')
+    return xml[:i] + neuf + xml[i:]
+
+
+def _agrandir_dimension(xml, values):
+    m = re.search(r'<dimension ref="([A-Z]+)(\d+):([A-Z]+)(\d+)"', xml)
+    if not m:
+        return xml
+    c1, r1, c2, r2 = m.group(1), int(m.group(2)), m.group(3), int(m.group(4))
+    for ref in values:
+        c, r = split_ref(ref)
+        if col_num(c) > col_num(c2):
+            c2 = c
+        r2 = max(r2, r)
+    return xml[:m.start()] + f'<dimension ref="{c1}{r1}:{c2}{r2}"' + xml[m.end():]
 
 
 def _valeur(s):
