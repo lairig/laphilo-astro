@@ -1,4 +1,4 @@
-// Grandes traditions de la Frise des pensées du monde (colonne « Groupe » des
+// Grandes traditions de la Frise des penseurs du monde (colonne « Groupe » des
 // xlsx ; mêmes codes que GROUPES dans scripts/build-data.py).
 
 export interface GroupeMonde {

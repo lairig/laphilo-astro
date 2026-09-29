@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 
-/* Données de la Frise des pensées du monde (/frises/monde/).
+/* Données de la Frise des penseurs du monde (/frises/penseurs-du-monde/).
    Une ligne par philosophe : [id, nom, naissance, fin, dates affichées,
    groupe, priorité, vignette, description, tags].
    Priorité = importance (colonne des xlsx) × 1000 + nombre d'autres fiches

@@ -1,7 +1,7 @@
 ---
-/* La Frise des pensées du monde : les grandes traditions philosophiques en
+/* La Frise des penseurs du monde : les grandes traditions philosophiques en
    couloirs parallèles sur un même axe du temps. Données chargées à part
-   (/data/frise-monde.json) ; la page contient en dur les grandes figures de
+   (/data/frise-penseurs-monde.json) ; la page contient en dur les grandes figures de
    chaque tradition (lisibles sans JavaScript et par les moteurs). */
 import { getCollection } from 'astro:content';
 import Favicons from '../../components/Favicons.astro';
@@ -25,7 +25,7 @@ const parGroupe = groupesMonde
 
 const GROUPES = parGroupe.map(({ id, label, court, color }) => ({ id, label, court, color }));
 
-const title = 'La Frise des pensées du monde | LaPhilo.fr';
+const title = 'La Frise des penseurs du monde | LaPhilo.fr';
 const description = "Les grandes traditions philosophiques côte à côte sur un même axe du temps : Occident, monde islamique et juif, Inde, Asie de l'Est, pensées du Sud, pensée russe, Proche-Orient ancien. Qui pensait quoi, et où, à la même époque ?";
 ---
 <html lang="fr">
@@ -36,9 +36,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
   <GoatCounter />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <SeoHead title={title} description={description} path="/frises/monde/" />
+  <SeoHead title={title} description={description} path="/frises/penseurs-du-monde/" />
   <Fonts />
-  <link rel="preload" href="/data/frise-monde.json" as="fetch" crossorigin />
+  <link rel="preload" href="/data/frise-penseurs-monde.json" as="fetch" crossorigin />
   <style is:global>
     :root {
       --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce;
@@ -179,7 +179,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       <a href="/frises/" class="sitemap-btn"><span class="sitemap-flag" aria-hidden="true">≡</span><span class="sitemap-text">Frises</span></a>
       <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil"><span class="sitemap-flag" aria-hidden="true">⌂</span><span class="sitemap-text">Accueil</span></a>
     </div>
-    <h1>La Frise des pensées du monde</h1>
+    <h1>La Frise des penseurs du monde</h1>
     <p class="fm-sous-titre">Les grandes traditions philosophiques côte à côte</p>
     <p class="fm-intro">Que pensait-on en Chine au temps de Platon ? Qui étaient les contemporains d'Averroès en Inde ou au Japon ?</p>
   </header>
@@ -465,7 +465,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     });
 
     /* ── Chargement ── */
-    fetch('/data/frise-monde.json')
+    fetch('/data/frise-penseurs-monde.json')
       .then((r) => r.json())
       .then((lignes) => {
         DATA = lignes.map(([id, n, y, e, d, g, s, th, xd, t]) => ({ id, n, y, e, d, g, s, th, x: xd, t }))
