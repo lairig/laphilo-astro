@@ -141,6 +141,11 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .contemps li button:hover { color: var(--c); text-decoration: underline; }
     .contemps li small { color: var(--parch-dim); }
     .vide { color: var(--parch-dim); font-style: italic; }
+    /* Bulle du philosophe choisi (ordinateur) */
+    #bulle { position: fixed; z-index: 50; width: min(620px, calc(100vw - 16px)); max-height: 70vh; overflow: auto;
+      border-radius: 8px; box-shadow: 0 10px 34px rgba(0,0,0,.7), 0 0 0 1px rgba(212,168,67,.25); }
+    #bulle .carte { border-color: rgba(212,168,67,.35); }
+    #bulle .contemps { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 
     .traditions { max-width: 1100px; margin: 1rem auto 3rem; padding: 0 16px; }
     .traditions > summary { list-style: none; cursor: pointer; text-align: center; margin: 1rem 0; }
@@ -215,6 +220,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
   </div>
 
   <section id="panneau" aria-live="polite"></section>
+  <div id="bulle" role="dialog" aria-live="polite" hidden></div>
 
   <details class="traditions">
     <summary><h2>Les grandes traditions et leurs grandes figures</h2></summary>
@@ -415,40 +421,96 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         el.classList.toggle('choisi', d.id === choisi);
         el.classList.toggle('contemp', d.id !== choisi && d.y < s.e && d.e > s.y);
       });
-      remplirPanneau(s);
+      if (PC) { if (bulleOuverte) positionnerBulle(); } else remplirPanneau(s);
     }
 
-    function remplirPanneau(s) {
+    /* Contenu du cartouche : bulle sous le nom sur ordinateur, bas de page sur mobile */
+    function carteHtml(s) {
       const g = G[s.g];
       const aussi = s.t.split(';').filter((t) => G[t] && t !== s.g).map((t) => G[t].label);
       const autres = GROUPES.filter((x) => x.id !== s.g).map((x) => ({
         g: x, liste: (parGroupe[x.id] || []).filter((d) => d.y < s.e && d.e > s.y).sort((a, b) => b.s - a.s),
       })).filter((b) => b.liste.length);
-      panneau.innerHTML = `<div class="carte" style="--c:${g.color}">
+      return `<div class="carte" style="--c:${g.color}">
         <div class="carte-tete">${s.th ? `<img src="${esc(s.th)}" alt="" width="64" height="64" loading="lazy">` : ''}
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}${aussi.length ? ' · aussi : ' + esc(aussi.join(', ')) : ''}</p>
           <p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
-          <button class="btn" type="button" id="fermer">Fermer</button></div></div>
+          <button class="btn fermer-carte" type="button">Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${autres.length ? autres.map(({ g, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${liste.length}</h3><ul>`
           + liste.slice(0, 7).map((d) => `<li><button type="button" data-id="${esc(d.id)}">${esc(d.n)}</button> <small>${esc(d.d)}</small></li>`).join('')
           + (liste.length > 7 ? `<li><small>et ${liste.length - 7} autres</small></li>` : '') + '</ul></div>').join('')
           : '<p class="vide">Aucun contemporain dans les autres traditions sur le site.</p>'}</div></div>`;
-      panneau.classList.add('ouvert');
-      $('fermer').onclick = () => { choisi = null; appliquerSelection(); majUrl(); };
-      panneau.querySelectorAll('.contemps button').forEach((b) => (b.onclick = () => choisir(b.dataset.id, true)));
     }
+    function brancherCarte(zone) {
+      zone.querySelector('.fermer-carte').onclick = deselectionner;
+      zone.querySelectorAll('.contemps button').forEach((b) => (b.onclick = () => choisir(b.dataset.id, true)));
+    }
+    function deselectionner() { choisi = null; fermerBulle(); appliquerSelection(); majUrl(); }
+
+    function remplirPanneau(s) {
+      panneau.innerHTML = carteHtml(s);
+      panneau.classList.add('ouvert');
+      brancherCarte(panneau);
+    }
+
+    /* ── Bulle (ordinateur) : s'ouvre au clic sous le nom, se ferme quand la
+       souris quitte le nom et la bulle ; la sélection (bande, contemporains) reste ── */
+    const bulle = $('bulle');
+    let bulleOuverte = false, minuterie = null;
+    function ouvrirBulle() {
+      if (!choisi) return;
+      bulle.innerHTML = carteHtml(parId[choisi]);
+      brancherCarte(bulle);
+      bulle.hidden = false;
+      bulleOuverte = true;
+      positionnerBulle();
+    }
+    function fermerBulle() { clearTimeout(minuterie); bulle.hidden = true; bulleOuverte = false; }
+    function fermerBientot() { clearTimeout(minuterie); minuterie = setTimeout(fermerBulle, 300); }
+    function positionnerBulle() {
+      const el = choisi && couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
+      const r = el && el.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      if (!r || r.right < sr.left || r.left > sr.right || r.bottom < 0 || r.top > innerHeight) { fermerBulle(); return; }
+      const h = bulle.offsetHeight, w = bulle.offsetWidth;
+      const top = r.bottom + 6 + h <= innerHeight - 8 || r.top - 6 - h < 8 ? r.bottom + 6 : r.top - 6 - h;
+      bulle.style.top = Math.max(8, top) + 'px';
+      bulle.style.left = Math.min(Math.max(8, r.left), innerWidth - w - 8) + 'px';
+    }
+    bulle.addEventListener('mouseenter', () => clearTimeout(minuterie));
+    bulle.addEventListener('mouseleave', fermerBientot);
+    couloirs.addEventListener('mouseover', (e) => { if (bulleOuverte && e.target.closest('.item.choisi')) clearTimeout(minuterie); });
+    couloirs.addEventListener('mouseout', (e) => {
+      const el = e.target.closest('.item.choisi');
+      if (bulleOuverte && el && !el.contains(e.relatedTarget) && !bulle.contains(e.relatedTarget)) fermerBientot();
+    });
+    let suiviEnAttente = false;
+    const suivre = () => {
+      if (!bulleOuverte || suiviEnAttente) return;
+      suiviEnAttente = true;
+      requestAnimationFrame(() => { suiviEnAttente = false; if (bulleOuverte) positionnerBulle(); });
+    };
+    scroller.addEventListener('scroll', suivre);
+    addEventListener('scroll', suivre, { passive: true });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && choisi) deselectionner(); });
 
     function choisir(id, centrer, defiler = true) {
       const d = parId[id];
       if (!d) return;
       choisi = id;
       if (!actifs.includes(d.g)) setActifs([...actifs, d.g]);
+      fermerBulle();
       dessiner();
       if (centrer) scroller.scrollTo({ left: x((d.y + d.e) / 2) - scroller.clientWidth / 2, behavior: 'smooth' });
-      // Fiche du philosophe hors de l'écran (beaucoup de couloirs ouverts) : on descend jusqu'à elle
-      if (defiler && panneau.getBoundingClientRect().bottom > innerHeight) panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (PC) {
+        // La bulle s'ouvre une fois le défilement vers le philosophe terminé
+        if (centrer) setTimeout(() => { if (choisi === id) ouvrirBulle(); }, 550); else ouvrirBulle();
+      } else if (defiler && panneau.getBoundingClientRect().bottom > innerHeight) {
+        // Mobile : cartouche en bas de page, on descend jusqu'à lui s'il est hors de l'écran
+        panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
       majUrl();
     }
 
