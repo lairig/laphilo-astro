@@ -16,10 +16,12 @@
     { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f7f4ea 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%)' },
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(#3c3b6e,#3c3b6e) 0 0/50% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 15.4%,#f7f4ea 15.4% 30.8%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
-    { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
+    { v: 'britannique', fr: 'Britanniques & Commonwealth', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
     { v: 'germanophone', fr: 'Germanophones', grad: 'linear-gradient(180deg,#0a0a0a 33%,#d21e1e 33% 66%,#f0b400 66%)' },
-    { v: 'arabo-persan', fr: 'Arabo-persans', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
+    { v: 'arabo-persan', fr: 'Monde islamique', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
     { v: 'africain', fr: 'Pensées du Sud', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
+    { v: 'italien', fr: 'Italiens & Romains', grad: 'linear-gradient(90deg,#009246 33.3%,#f7f4ea 33.3% 66.6%,#ce2b37 66.6%)' },
+    { v: 'europe-nord-centrale', fr: 'Europe du Nord & centrale', grad: 'linear-gradient(180deg,#21468b 50%,#f7f4ea 50%)' },
     { v: 'hispanique', fr: 'Hispaniques', grad: 'linear-gradient(180deg,#c60b1e 50%,#ffc400 50%)' },
     { v: 'femme', fr: 'Femmes', grad: 'linear-gradient(180deg,#8e44ad 50%,#f7f4ea 50%)' },
     { v: 'orient-ancien', fr: 'Proche-Orient ancien', grad: 'linear-gradient(180deg,#c9a227 50%,#1d4e89 50%)' },
@@ -29,21 +31,23 @@
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'femme', 'orient-ancien', 'grec', 'indien', 'asie-est', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'italien', 'europe-nord-centrale', 'hispanique', 'russe', 'juif', 'femme', 'orient-ancien', 'grec', 'indien', 'asie-est', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
-    france: { nats: ['Française'] },
+    france: { ou: [{ nats: ['Française'] }, { noms: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] }] },
     allemand: { nats: ['Allemande'] },
     americain: { nats: ['Américaine'] },
     russe: { nats: ['Russe'] },
-    britannique: { nats: ['Britannique'] },
+    britannique: { ou: [{ nats: ['Britannique', 'Canadienne', 'Australienne', 'Irlandaise', 'Néo-zélandaise'] }, { nats: ['Sud-Africaine'], groupe: 'occident' }] },
+    italien: { nats: ['Italienne', 'Romaine'] },
+    'europe-nord-centrale': { nats: ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne'] },
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
-    'arabo-persan': { nats: ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'] },
-    'africain': { groupe: 'sud' }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
+    'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
+    'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'] },
-    'grec': { nats: ['Grecque', 'Byzantine'] },
-    'indien': { groupe: 'inde' }, /* Inde et monde bouddhiste */
-    'asie-est': { groupe: 'asie-est' },
+    'grec': { ou: [{ nats: ['Grecque', 'Byzantine', 'Arménienne'] }, { nats: ['Égyptienne', 'Syrienne'], groupe: 'occident' }] },
+    'indien': { ou: [{ groupe: 'inde' }, { trad: 'inde' }] }, /* Inde et monde bouddhiste */
+    'asie-est': { ou: [{ groupe: 'asie-est' }, { trad: 'asie-est' }] },
     /* Pas une nationalité : colonne « Traditions » des xlsx */
     'juif': { trad: 'juive' },
     'femme': { trad: 'femme' },
@@ -60,7 +64,9 @@
     russe: { href: '/philosophes/frise/russes-toutes-epoques/', fr: 'Voir la frise de tous les philosophes russes' },
     britannique: { href: '/philosophes/frise/britanniques-toutes-epoques/', fr: 'Voir la frise de tous les philosophes britanniques' },
     'germanophone': { href: '/philosophes/frise/germanophones-toutes-epoques/', fr: "Voir la frise des philosophes germanophones" },
-    'arabo-persan': { href: '/philosophes/frise/arabo-persans-toutes-epoques/', fr: "Voir la frise des philosophes du monde arabo-persan" },
+    'arabo-persan': { href: '/philosophes/frise/monde-islamique-toutes-epoques/', fr: "Voir la frise des philosophes du monde islamique" },
+    italien: { href: '/philosophes/frise/italiens-toutes-epoques/', fr: "Voir la frise des philosophes italiens et romains" },
+    'europe-nord-centrale': { href: '/philosophes/frise/europe-nord-centrale-toutes-epoques/', fr: "Voir la frise des philosophes d'Europe du Nord et centrale" },
     'africain': { href: '/philosophes/frise/pensees-du-sud-toutes-epoques/', fr: "Voir la frise des pensées du Sud" },
     'hispanique': { href: '/philosophes/frise/hispaniques-toutes-epoques/', fr: "Voir la frise des philosophes hispaniques" },
     'grec': { href: '/philosophes/frise/grecs-byzantins-toutes-epoques/', fr: "Voir la frise des philosophes grecs et byzantins" },
@@ -164,13 +170,24 @@
     }).join('') + '</span>';
   }
 
+  /* Règle d'une pastille « Par tradition » : toutes les conditions présentes doivent être vraies ;
+     « ou » = au moins une des sous-règles (mêmes règles que src/data/virtual-frises.ts) */
+  function regleTradition(p, r) {
+    if (r.ou) return r.ou.some(function (x) { return regleTradition(p, x); });
+    var trad = p.trad || [];
+    if (r.trad && trad.indexOf(r.trad) === -1) return false;
+    if (r.sansTrad && trad.indexOf(r.sansTrad) !== -1) return false;
+    if (r.groupe && p.grp !== r.groupe) return false;
+    if (r.nats && r.nats.indexOf(p.nat) === -1) return false;
+    if (r.noms && r.noms.indexOf(p.n) === -1) return false;
+    if (r.exclude && r.exclude.indexOf(p.n) !== -1) return false;
+    return true;
+  }
+
   function matchesColorFilter(p, color) {
     if (!color) return true;
     if (color.indexOf('trad:') === 0) {
-      var rule = TRADITION_RULES[color.slice(5)];
-      if (rule.trad) return (p.trad || []).indexOf(rule.trad) !== -1;
-      if (rule.groupe) return p.grp === rule.groupe;
-      return rule.nats.indexOf(p.nat) !== -1 && (!rule.exclude || rule.exclude.indexOf(p.n) === -1);
+      return regleTradition(p, TRADITION_RULES[color.slice(5)]);
     }
     if (color === 'oriental' && p.isOriental) return true;
     return p.colorFilter === color;

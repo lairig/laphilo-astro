@@ -17,7 +17,8 @@ export interface VirtualFrise {
 export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'francais-toutes-epoques': {
     label: 'Philosophes français — toutes époques',
-    match: (p) => p.nationalite === 'Française',
+    /* + les Suisses francophones (exclus des germanophones) */
+    match: (p) => p.nationalite === 'Française' || ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'].includes(p.name),
   },
   'allemands-toutes-epoques': {
     label: 'Philosophes allemands — toutes époques',
@@ -32,21 +33,32 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     match: (p) => p.nationalite === 'Russe',
   },
   'britanniques-toutes-epoques': {
-    label: 'Philosophes britanniques — toutes époques',
-    match: (p) => p.nationalite === 'Britannique',
+    label: 'Philosophes britanniques et du Commonwealth — toutes époques',
+    match: (p) => ['Britannique', 'Canadienne', 'Australienne', 'Irlandaise', 'Néo-zélandaise'].includes(p.nationalite ?? '')
+      || (p.nationalite === 'Sud-Africaine' && p.groupe === 'occident'),
+  },
+  'italiens-toutes-epoques': {
+    label: 'Philosophes italiens et romains — toutes époques',
+    match: (p) => ['Italienne', 'Romaine'].includes(p.nationalite ?? ''),
+  },
+  /* Benelux, Scandinavie, Europe centrale */
+  'europe-nord-centrale-toutes-epoques': {
+    label: "Philosophes d'Europe du Nord et centrale — toutes époques",
+    match: (p) => ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne'].includes(p.nationalite ?? ''),
   },
   'germanophones-toutes-epoques': {
     label: 'Philosophes germanophones — toutes époques',
     match: (p) => ['Allemande', 'Autrichienne', 'Suisse'].includes(p.nationalite ?? '') && !['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'].includes(p.name),
   },
-  'arabo-persans-toutes-epoques': {
-    label: 'Philosophes du monde arabo-persan — toutes époques',
-    match: (p) => ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'].includes(p.nationalite ?? ''),
+  /* Colonne « Groupe » (islam-juif), sans les penseurs juifs qui ont leur propre frise ; remplace « arabo-persans » */
+  'monde-islamique-toutes-epoques': {
+    label: 'Philosophes du monde islamique — toutes époques',
+    match: (p) => p.groupe === 'islam-juif' && !(p.traditions ?? []).includes('juive'),
   },
   /* Colonne « Groupe » : Afrique, Amérique latine, Caraïbes, Amériques indigènes (remplace « Africains ») */
   'pensees-du-sud-toutes-epoques': {
     label: 'Pensées du Sud et de la décolonisation — toutes époques',
-    match: (p) => p.groupe === 'sud',
+    match: (p) => p.groupe === 'sud' || (p.traditions ?? []).includes('sud'),
   },
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
@@ -64,17 +76,19 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'grecs-byzantins-toutes-epoques': {
     label: 'Philosophes grecs et byzantins — toutes époques',
-    match: (p) => ['Grecque', 'Byzantine'].includes(p.nationalite ?? ''),
+    /* + Arméniens, et néoplatoniciens d'Égypte et de Syrie qui écrivaient en grec (groupe occident) */
+    match: (p) => ['Grecque', 'Byzantine', 'Arménienne'].includes(p.nationalite ?? '')
+      || (['Égyptienne', 'Syrienne'].includes(p.nationalite ?? '') && p.groupe === 'occident'),
   },
   /* Colonne « Groupe » : Inde, Tibet, Sri Lanka, Asie du Sud-Est continentale (remplace « Indiens ») */
   'inde-bouddhisme-toutes-epoques': {
     label: "Philosophes de l'Inde et du monde bouddhiste — toutes époques",
-    match: (p) => p.groupe === 'inde',
+    match: (p) => p.groupe === 'inde' || (p.traditions ?? []).includes('inde'),
   },
   /* Colonne « Groupe » : Chine, Japon, Corée, Vietnam (remplace l'ancienne frise des Chinois) */
   'asie-est-toutes-epoques': {
     label: "Philosophes d'Asie de l'Est — toutes époques",
-    match: (p) => p.groupe === 'asie-est',
+    match: (p) => p.groupe === 'asie-est' || (p.traditions ?? []).includes('asie-est'),
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {

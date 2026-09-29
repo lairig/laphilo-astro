@@ -13,9 +13,8 @@
   "orientaux": "Penseurs d'orient, de l'Égypte ancienne au XX<sup>e</sup> siècle : Jamblique, Alcuin, Avicenne, Averroès, Towa.",
   "renaissance-lumieres": "La Renaissance & les Lumières (1500 à 1780) : Descartes, Montesquieu, Machiavel, Voltaire, Pascal.",
   "germanophones-toutes-epoques": "Tous les philosophes de langue allemande (Allemagne, Autriche, Suisse alémanique) : Eckhart, Kant, Hegel, Nietzsche, Freud, Wittgenstein, Popper, Jung.",
-  "arabo-persans-toutes-epoques": "Les philosophes du monde arabe et persan, de l'Antiquité tardive à aujourd'hui : Al-Kindi, Al-Farabi, Avicenne, Al-Ghazali, Averroès, Ibn Khaldoun, Molla Sadra.",
   "hispaniques-toutes-epoques": "Les philosophes du monde hispanique et lusophone : Isidore de Séville, Raymond Lulle, Suárez, Gracián, Ortega y Gasset, Santayana.",
-  "britanniques-toutes-epoques": "Tous les philosophes britanniques, de l'Antiquité tardive à aujourd'hui : Pélage, Ockham, Bacon, Hobbes, Locke, Hume, Mill, Russell.",
+  "britanniques-toutes-epoques": "Tous les philosophes britanniques, de l'Antiquité tardive à aujourd'hui : Pélage, Ockham, Bacon, Hobbes, Locke, Hume, Mill, Russell, ainsi que les penseurs du Canada et d'Australie.",
   "russes-toutes-epoques": "Tous les philosophes russes, des Lumières à aujourd'hui : Lomonossov, Bakounine, Dostoïevski, Tolstoï, Soloviev, Berdiaev.",
   "russes": "De Lomonossov au postmodernisme russe : slavophiles, nihilistes, cosmistes, existentialistes, anarchistes.",
   "occidental": "De la Grèce antique à nos jours : présocratiques, stoïcisme, platonisme, existentialisme, phénoménologie…",
@@ -32,5 +31,8 @@
   "asie-est-toutes-epoques": "Les philosophes de Chine, du Japon, de Corée et du Vietnam : Confucius, Lao-tseu, Mencius, Zhu Xi, Wang Yangming, Dōgen, Nishida, Tran Duc Thao, Byung-Chul Han.",
   "pensee-juive-toutes-epoques": "Les philosophes juifs de toutes nationalités, des sages du Talmud à aujourd'hui : Hillel, Maïmonide, Spinoza, Mendelssohn, Bergson, Freud, Buber, Arendt, Levinas, Derrida.",
   "pensees-du-sud-toutes-epoques": "Les pensées d'Afrique, d'Amérique latine, des Caraïbes et des Amériques indigènes : Nezahualcoyotl, Zera Yacob, Anton Wilhelm Amo, Senghor, Césaire, Fanon, Cheikh Anta Diop, Dussel, Mbembe.",
-  "inde-bouddhisme-toutes-epoques": "Les philosophes de l'Inde et du monde bouddhiste, des sages védiques à aujourd'hui : Yajnavalkya, le Bouddha, Nagarjuna, Shankara, Tsongkhapa, Tagore, Gandhi, Ambedkar."
+  "inde-bouddhisme-toutes-epoques": "Les philosophes de l'Inde et du monde bouddhiste, des sages védiques à aujourd'hui : Yajnavalkya, le Bouddha, Nagarjuna, Shankara, Tsongkhapa, Tagore, Gandhi, Ambedkar.",
+  "monde-islamique-toutes-epoques": "Les philosophes du monde islamique : al-Kindi, al-Farabi, Avicenne, al-Ghazali, Averroès, Ibn Arabi, Ibn Khaldoun, Mulla Sadra, Iqbal, al-Jabri.",
+  "italiens-toutes-epoques": "Les philosophes italiens et romains, de Cicéron à aujourd'hui : Lucrèce, Sénèque, Marc Aurèle, Augustin, Boèce, Thomas d'Aquin, Pic de la Mirandole, Machiavel, Vico, Agamben.",
+  "europe-nord-centrale-toutes-epoques": "Les philosophes de Belgique, des Pays-Bas, de Scandinavie et d'Europe centrale : Siger de Brabant, Jan Hus, Érasme, Comenius, Grotius, Swedenborg, Kierkegaard, Masaryk, Cioran, Žižek."
 }
