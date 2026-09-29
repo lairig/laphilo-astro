@@ -16,7 +16,7 @@
     { v: 'russe', fr: 'Russes', grad: 'linear-gradient(180deg,#f7f4ea 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%)' },
     { v: 'americain', fr: 'Américains', grad: 'linear-gradient(#3c3b6e,#3c3b6e) 0 0/50% 54% no-repeat,repeating-linear-gradient(180deg,#b22234 0 15.4%,#f7f4ea 15.4% 30.8%)' },
     { v: 'allemand', fr: 'Allemands', grad: 'linear-gradient(180deg,#d0d0d0 50%,#0a0a0a 50%)' },
-    { v: 'britannique', fr: 'Britanniques & Commonwealth', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
+    { v: 'britannique', fr: 'Britanniques', grad: 'linear-gradient(180deg,#012169 50%,#c8102e 50%)' },
     { v: 'germanophone', fr: 'Germanophones', grad: 'linear-gradient(180deg,#0a0a0a 33%,#d21e1e 33% 66%,#f0b400 66%)' },
     { v: 'arabo-persan', fr: 'Monde islamique', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
     { v: 'africain', fr: 'Pensées du Sud', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
@@ -31,7 +31,12 @@
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'italien', 'europe-nord-centrale', 'hispanique', 'russe', 'juif', 'femme', 'orient-ancien', 'grec', 'indien', 'asie-est', 'oriental', 'arabo-persan', 'africain'] },
+    /* Même découpage que la page /frises/ : pays, grandes traditions, thème */
+    { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
+      { fr: 'Pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec'] },
+      { fr: 'Grandes traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
+      { fr: 'Thème', items: ['femme'] },
+    ] },
   ];
   var TRADITION_RULES = {
     france: { ou: [{ nats: ['Française'] }, { noms: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] }] },
@@ -277,16 +282,20 @@
       '</div></div>' +
       '<div class="phi-all-filter-row phi-all-color-row"><div class="phi-cur-trads">' +
           PHILO_COLOR_GROUPS.map(function (g) {
+            var tous = [].concat.apply([], g.lignes.map(function (l) { return l.items; }));
             return '<div class="phi-cur-trad phi-philo-group" style="--trad-color:' + g.accent + '">' +
               '<span class="phi-philo-group-title">' + g.fr + '</span>' +
-              '<div class="phi-cur-subera-row">' +
-              g.items.map(function (v) {
-                var c = colorDef(v);
-                return '<button type="button" class="phi-cur-subera-btn phi-color-pill" data-color="' + pillValue(c.v) + '">' +
-                  '<span class="phi-color-dot" style="background:' + c.grad + '" aria-hidden="true"></span>' + c.fr + '</button>';
+              g.lignes.map(function (l) {
+                return '<div class="phi-philo-ligne"><span class="phi-philo-ligne-lbl">' + l.fr + '</span>' +
+                  '<div class="phi-cur-subera-row">' +
+                  l.items.map(function (v) {
+                    var c = colorDef(v);
+                    return '<button type="button" class="phi-cur-subera-btn phi-color-pill" data-color="' + pillValue(c.v) + '">' +
+                      '<span class="phi-color-dot" style="background:' + c.grad + '" aria-hidden="true"></span>' + c.fr + '</button>';
+                  }).join('') +
+                  '</div></div>';
               }).join('') +
-              '</div>' +
-              g.items.filter(function (v) { return VIRTUAL_FRISE_LINKS[v]; }).map(function (v) {
+              tous.filter(function (v) { return VIRTUAL_FRISE_LINKS[v]; }).map(function (v) {
                 return '<a class="phi-philo-frise-link" data-for="' + pillValue(v) + '" href="' + VIRTUAL_FRISE_LINKS[v].href + '" hidden>' + VIRTUAL_FRISE_LINKS[v].fr + ' →</a>';
               }).join('') +
               '</div>';

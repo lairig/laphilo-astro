@@ -159,6 +159,22 @@ const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map(
       text-transform: uppercase;
       color: #d4a843;
     }
+    /* Sous-lignes du cartouche « Par tradition » : Pays / Grandes traditions / Thème */
+    .list-page .phi-philo-ligne { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.6rem; width: 100%; }
+    .list-page .phi-philo-ligne + .phi-philo-ligne { margin-top: 0.35rem; }
+    .list-page .phi-philo-ligne-lbl {
+      flex: 0 0 8.5rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(212, 168, 67, 0.75);
+    }
+    .list-page .phi-philo-ligne .phi-cur-subera-row { flex: 1 1 0; min-width: 0; }
+    @media (max-width: 640px) {
+      .list-page .phi-philo-ligne-lbl { flex-basis: 100%; }
+      .list-page .phi-philo-ligne + .phi-philo-ligne { margin-top: 0.9rem; }
+    }
     /* Lien vers la frise de la tradition choisie : bouton doré bien visible */
     .list-page .phi-philo-frise-link {
       display: inline-flex;
