@@ -189,10 +189,33 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     }
 
     @media (max-width: 640px) {
-      .fm-header { padding-top: 3.4rem; }
+      .fm-header { padding: 3.2rem 16px .4rem; }
+      .fm-sous-titre { margin-top: .4rem; }
       .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
       .carte-tete { flex-wrap: wrap; }
       .carte-actions { margin-left: 0; justify-content: flex-start; }
+      /* Traditions et périodes : une seule ligne qui défile horizontalement */
+      .barre { padding: .3rem 0; gap: .4rem; }
+      .groupes, .periodes { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; width: 100%;
+        padding: 0 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .groupes::-webkit-scrollbar, .periodes::-webkit-scrollbar { display: none; }
+      .chip, .periodes .btn { flex-shrink: 0; white-space: nowrap; }
+      .chip { font-size: .9rem; }
+      .aide { font-size: .85rem; padding-bottom: .3rem; }
+      .contemps { grid-template-columns: 1fr 1fr; gap: .6rem .9rem; }
+      .contemps li button, .contemps li small { font-size: .92rem; }
+    }
+    /* Écrans tactiles : cartouche du philosophe choisi en panneau qui monte du bas de l'écran */
+    @media (hover: none), (max-width: 640px) {
+      #panneau { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 0; z-index: 60; max-height: 58vh;
+        overflow-y: auto; transform: translateY(105%); transition: transform .25s ease; display: block; }
+      #panneau.ouvert { transform: none; }
+      #panneau .carte { border-radius: 14px 14px 0 0; border-bottom: 0; padding-top: 1.3rem; box-shadow: 0 -8px 30px rgba(0,0,0,.7); }
+      #panneau .carte::before { content: ''; position: absolute; top: 7px; left: 50%; width: 40px; height: 4px; margin-left: -20px;
+        border-radius: 2px; background: rgba(212,168,67,.4); }
+      #panneau .carte { position: relative; }
+      #panneau .carte-tete img { width: 52px; height: 52px; }
+      #scroller { touch-action: pan-x pan-y; } /* le pincement zoome la frise, pas la page */
     }
   </style>
 </head>
@@ -216,7 +239,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     </div>
     <button class="btn" id="femmes" type="button" aria-pressed="false">♀ Femmes uniquement</button>
   </div>
-  <p class="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
+  <p class="aide" id="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
 
   <div id="scroller">
     <p id="chargement">Chargement de la frise…</p>
@@ -295,6 +318,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     const largeurNom = (n) => { mesure.font = '600 14px "EB Garamond", Georgia, serif'; return mesure.measureText(n).width + 8; };
     /* Portraits miniatures : ordinateur (souris) et zoom suffisant seulement */
     const PC = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!PC) $('aide').textContent = 'Faites glisser la frise, pincez-la ou utilisez + et − pour zoomer. Touchez un nom pour voir ses contemporains.';
     const K_PORTRAITS = 1.2, L_PORTRAIT = 31;
     let avecPortraits = false; // recalculé à chaque dessin
 
@@ -567,9 +591,12 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (PC) {
         // La bulle s'ouvre une fois le défilement vers le philosophe terminé
         if (centrer) apresDefilement(() => { if (choisi === id) ouvrirBulle(); }); else ouvrirBulle();
-      } else if (defiler && panneau.getBoundingClientRect().bottom > innerHeight) {
-        // Mobile : cartouche en bas de page, on descend jusqu'à lui s'il est hors de l'écran
-        panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else if (defiler) {
+        // Tactile : le cartouche monte du bas de l'écran ; on garde le nom choisi visible au-dessus
+        const el = couloirs.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+        const r = el && el.getBoundingClientRect();
+        const libre = innerHeight - panneau.offsetHeight - 12;
+        if (r && (r.bottom > libre || r.top < 8)) scrollBy({ top: r.top - Math.max(60, libre * 0.35), behavior: 'smooth' });
       }
       majUrl();
     }
@@ -612,6 +639,32 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       dessiner();
       scroller.scrollLeft = x(y) - avant;
     }, { passive: false });
+
+    /* Pincement à deux doigts (tactile) : zoom autour du point entre les doigts.
+       Redessin limité à un toutes les 60 ms pendant le geste, puis un dernier à la fin. */
+    let pince = null, dernierDessin = 0, pinceFin = null;
+    const ecart = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    scroller.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 2 || !DATA.length) return;
+      const r = scroller.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+      pince = { d0: ecart(e.touches), k0: k, cx, y: (scroller.scrollLeft + cx) / k + Y0 };
+    }, { passive: true });
+    scroller.addEventListener('touchmove', (e) => {
+      if (!pince || e.touches.length !== 2) return;
+      e.preventDefault();
+      const nk = Math.min(KMAX, Math.max(kMin(), pince.k0 * ecart(e.touches) / pince.d0));
+      const p = pince;
+      const appliquer = () => { pinceFin = null; k = nk; dessiner(); scroller.scrollLeft = x(p.y) - p.cx; dernierDessin = performance.now(); };
+      clearTimeout(pinceFin && pinceFin.t);
+      if (performance.now() - dernierDessin > 60) appliquer();
+      else pinceFin = { f: appliquer, t: setTimeout(appliquer, 70) };
+    }, { passive: false });
+    scroller.addEventListener('touchend', (e) => {
+      if (e.touches.length >= 2) return;
+      pince = null;
+      if (pinceFin) { clearTimeout(pinceFin.t); pinceFin.f(); }
+    });
 
     /* ── Glisser à la souris, curseur d'année ── */
     let depart = null, bouge = false;
@@ -661,6 +714,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         const q = new URLSearchParams(location.search);
         const p = q.get('p'), per = q.get('periode'), g = q.get('g');
         if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        // Vue de départ : tout de -800 à nos jours sur ordinateur ; sur petit écran, 600 ans
+        // de l'Antiquité (on fait ensuite glisser la frise vers les époques suivantes)
+        else if (scroller.clientWidth < 700) zoomer(scroller.clientWidth / 600, -350);
         else zoomer(scroller.clientWidth / (2030 + 800), 615);
         if (g) setActifs(g.split(','));
         if (p && parId[p]) {
