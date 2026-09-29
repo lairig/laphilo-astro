@@ -99,6 +99,8 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .pistes { position: relative; }
     .item { position: absolute; height: calc(var(--row) - 4px); display: flex; align-items: flex-end; cursor: pointer; white-space: nowrap; }
     .item .vie { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--c); opacity: .8; }
+    .item .mini { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; border: 1px solid var(--c);
+      margin-right: 4px; vertical-align: -4px; background: #2a1a0c; }
     .item .nom { position: relative; font-size: .86rem; line-height: 1; padding: 0 2px 5px 1px; color: var(--parch);
       text-shadow: 0 1px 2px #000, 0 0 3px #000; }
     .item.top .nom { font-weight: 600; }
@@ -257,6 +259,10 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     const an = (y) => (y < 0 ? `${-y} av. J.-C.` : String(y));
     const mesure = document.createElement('canvas').getContext('2d');
     const largeurNom = (n) => { mesure.font = '600 14px "EB Garamond", Georgia, serif'; return mesure.measureText(n).width + 8; };
+    /* Portraits miniatures : ordinateur (souris) et zoom suffisant seulement */
+    const PC = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const K_PORTRAITS = 1.2, L_PORTRAIT = 20;
+    let avecPortraits = false; // recalculé à chaque dessin
 
     /* ── Adresse partageable : ?g=…&periode=…&p=… ── */
     function majUrl() {
@@ -321,7 +327,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const pistes = Array.from({ length: ROWS }, () => []);
       const places = [];
       for (const d of tri) {
-        const g = x(d.y), dr = g + Math.max((d.e - d.y) * k, largeurNom(d.n)) + 6;
+        const g = x(d.y), dr = g + Math.max((d.e - d.y) * k, largeurNom(d.n) + (avecPortraits && d.th ? L_PORTRAIT : 0)) + 6;
         const r = pistes.findIndex((p) => p.every(([a, b]) => dr <= a || g >= b));
         if (r < 0) continue;
         pistes[r].push([g, dr]);
@@ -331,6 +337,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     }
 
     function dessiner() {
+      avecPortraits = PC && k >= K_PORTRAITS;
       dessinerAxe();
       couloirs.innerHTML = '';
       for (const gid of actifs) {
@@ -347,7 +354,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         p.innerHTML = places.map(([d, r]) => {
           const w = Math.max((d.e - d.y) * k, 3);
           return `<div class="item${d.s >= 3000 ? ' top' : ''}" tabindex="0" role="button" data-id="${esc(d.id)}" style="left:${x(d.y)}px;top:${r * ROW}px;width:${w}px" title="${esc(d.n)} (${esc(d.d)})">`
-            + `<span class="vie" style="width:${w}px"></span><span class="nom">${esc(d.n)}</span></div>`;
+            + `<span class="vie" style="width:${w}px"></span><span class="nom">`
+            + (avecPortraits && d.th ? `<img class="mini" src="${esc(d.th)}" alt="" width="16" height="16" loading="lazy" decoding="async">` : '')
+            + `${esc(d.n)}</span></div>`;
         }).join('');
         c.append(p);
         couloirs.append(c);
