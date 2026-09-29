@@ -413,13 +413,15 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       panneau.querySelectorAll('.contemps button').forEach((b) => (b.onclick = () => choisir(b.dataset.id, true)));
     }
 
-    function choisir(id, centrer) {
+    function choisir(id, centrer, defiler = true) {
       const d = parId[id];
       if (!d) return;
       choisi = id;
       if (!actifs.includes(d.g)) setActifs([...actifs, d.g]);
       dessiner();
       if (centrer) scroller.scrollTo({ left: x((d.y + d.e) / 2) - scroller.clientWidth / 2, behavior: 'smooth' });
+      // Fiche du philosophe hors de l'écran (beaucoup de couloirs ouverts) : on descend jusqu'à elle
+      if (defiler && panneau.getBoundingClientRect().bottom > innerHeight) panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       majUrl();
     }
 
@@ -506,7 +508,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         if (p && parId[p]) {
           const d = parId[p];
           if (!per) { k = Math.min(KMAX, scroller.clientWidth / Math.max(d.e - d.y + 400, 200)); }
-          choisir(p, true);
+          choisir(p, true, false);
         } else dessiner();
         majChips();
       })
