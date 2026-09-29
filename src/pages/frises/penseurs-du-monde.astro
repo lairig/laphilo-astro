@@ -113,7 +113,10 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .item.top .nom { font-weight: 600; }
     .item:hover .nom, .item:focus-visible .nom { color: var(--c); }
     .item:focus-visible { outline: 1px dashed var(--c); }
-    body.selection .item { opacity: .22; }
+    /* Hors de la période du philosophe choisi : atténués mais lisibles, pleinement visibles au survol */
+    body.selection .item { opacity: .55; }
+    body.selection .item:not(.contemp):not(.choisi) .mini { filter: grayscale(1); }
+    body.selection .item:hover, body.selection .item:focus-visible { opacity: 1; }
     body.selection .item.contemp, body.selection .item.choisi { opacity: 1; }
     .item.choisi .nom { color: var(--c); font-weight: 700; }
     .item.choisi .vie { height: 6px; opacity: 1; box-shadow: 0 0 8px var(--c); }
