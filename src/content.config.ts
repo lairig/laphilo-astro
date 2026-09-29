@@ -22,6 +22,9 @@ const philosophes = defineCollection({
     branches: z.array(z.string()).optional(),
     courants: z.array(z.string()).optional(),
     traditions: z.array(z.string()).optional(),
+    /* Frise du monde : grand groupe (codes dans GROUPES de build-data.py), importance 2-3 */
+    groupe: z.string().optional(),
+    importance: z.number().optional(),
     description: z.string().optional(),
     frise_source: z.string(),
     frise_label: z.string(),

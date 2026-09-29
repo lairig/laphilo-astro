@@ -38,7 +38,7 @@
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
     'arabo-persan': { nats: ['Arabe', 'Perse', 'Syrienne', 'Marocaine', 'Tunisienne', 'Afghane'] },
     'africain': { nats: ['Égyptienne', 'Camerounaise', 'Ghanéenne', 'Sénégalaise', 'Nigériane', 'Congolaise', 'Béninoise', 'Éthiopienne', 'Sud-Africaine'] },
-    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise'] },
+    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'] },
     'grec': { nats: ['Grecque', 'Byzantine'] },
     'indien': { nats: ['Indienne', 'Pakistanaise', 'Sri-lankaise'] },
     'chinois': { nats: ['Chinoise'] },

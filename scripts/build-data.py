@@ -8,15 +8,22 @@ Colonnes attendues en ligne 3 de chaque xlsx :
   Annee_naissance | Annee_deces | Dates_affichage | Nom | Texte_HTML
   YouTube_ID | Credit_media | Thumbnail_URL | Image_media | Actif
   (+ Nationalite | Branche | Courant | Description | Figures_cles | Traditions
-   selon le fichier)
+   | Groupe | Importance selon le fichier)
+
+Nationalite : dans les fichiers à nationalité imposée (NAT_DEFAUT), une cellule
+remplie l'emporte (ex. les Latino-Américains du fichier américains).
 
 Traditions : étiquettes transversales, indépendantes de la nationalité, séparées
-par « ; » (ex. « juive »). Elles alimentent les frises qui regroupent des fiches
-de plusieurs fichiers (ex. /philosophes/frise/pensee-juive-toutes-epoques/).
+par « ; » (ex. « juive », « russe », « occident »). Elles alimentent les frises
+qui regroupent des fiches de plusieurs fichiers (ex. pensee-juive-toutes-epoques)
+et servent de groupe secondaire pour la frise du monde.
+
+Groupe : grande tradition du philosophe pour la frise du monde (codes dans
+GROUPES ci-dessous). Importance : 3 = incontournable, 2 = important, vide = 1.
 
 À la fin, des vérifications signalent les erreurs de saisie probables (dates
-affichées qui ne correspondent pas aux années, doublons, nationalité
-manquante, courant inconnu) : rien n'est bloqué, c'est une liste à relire.
+affichées qui ne correspondent pas aux années, doublons, nationalité ou groupe
+manquant, groupe ou courant inconnu) : rien n'est bloqué, c'est une liste à relire.
 """
 
 import json
@@ -62,6 +69,18 @@ NAT_DEFAUT = {
     'frise-philosophes-allemands':    'Allemande',
     'frise-philosophes-russes':       'Russe',
     'frise-philosophes-americains':   'Américaine',
+}
+
+# ── Grands groupes de la frise du monde (colonne Groupe des xlsx) ───────────
+GROUPES = {
+    'occident':      "L'Occident",
+    'islam-juif':    'Le monde islamique et juif',
+    'inde':          "L'Inde et le monde bouddhiste du Sud",
+    'asie-est':      "L'Asie de l'Est",
+    'asie-se':       "L'Asie du Sud-Est insulaire",
+    'sud':           'Les pensées du Sud et de la décolonisation',
+    'russe':         'La pensée russe',
+    'orient-ancien': 'Le Proche-Orient ancien',
 }
 
 
@@ -163,6 +182,8 @@ def lire_xlsx(nom_fichier):
         'description':  cols.get('description'),
         'figures_cles': cols.get('figures_cles'),
         'traditions':   cols.get('traditions'),
+        'groupe':       cols.get('groupe'),
+        'importance':   cols.get('importance'),
     }
 
     entrees = []
@@ -205,7 +226,7 @@ def lire_xlsx(nom_fichier):
         else:
             v = ''
         nat_fixe = NAT_DEFAUT.get(nom_fichier, '')
-        if nat_fixe:
+        if nat_fixe and not v:
             v = nat_fixe
         if v:
             entry['nationalite'] = v
@@ -242,6 +263,16 @@ def lire_xlsx(nom_fichier):
                 traditions = [t.strip().lower() for t in v.split(';') if t.strip()]
                 if traditions:
                     entry['traditions'] = traditions
+
+        if C['groupe'] is not None:
+            v = to_str(row[C['groupe']]) if C['groupe'] < len(row) else ''
+            if v:
+                entry['groupe'] = v.strip().lower()
+
+        if C['importance'] is not None:
+            v = to_int(row[C['importance']]) if C['importance'] < len(row) else None
+            if v in (2, 3):
+                entry['importance'] = v
 
         entry['_fichier'] = nom_fichier
         entrees.append(entry)
@@ -312,6 +343,10 @@ def verifier(philosophes, courants):
         vus.setdefault(cle, p['_fichier'])
         if not p.get('nationalite'):
             alertes.append(f"{nom} ({ou}) : nationalité manquante")
+        if not p.get('groupe'):
+            alertes.append(f"{nom} ({ou}) : groupe manquant")
+        elif p['groupe'] not in GROUPES:
+            alertes.append(f"{nom} ({ou}) : groupe « {p['groupe']} » inconnu (codes : {', '.join(GROUPES)})")
         for c in p.get('courants', []):
             if c not in noms_courants:
                 alertes.append(f"{nom} ({ou}) : courant « {c} » introuvable dans les fichiers de courants")
