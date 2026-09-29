@@ -134,8 +134,13 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .vide { color: var(--parch-dim); font-style: italic; }
 
     .traditions { max-width: 1100px; margin: 1rem auto 3rem; padding: 0 16px; }
-    .traditions > h2 { font-family: 'Cinzel Decorative', serif; color: var(--gold); text-align: center; font-size: clamp(1rem, 2.4vw, 1.3rem);
-      letter-spacing: .06em; margin: 1.5rem 0 1rem; }
+    .traditions > summary { list-style: none; cursor: pointer; text-align: center; margin: 1rem 0; }
+    .traditions > summary::-webkit-details-marker { display: none; }
+    .traditions > summary h2 { display: inline; font-family: 'Cinzel', serif; font-weight: 400; color: var(--parch-dim);
+      font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; }
+    .traditions > summary h2::after { content: ' ▸'; color: var(--gold); }
+    .traditions[open] > summary h2::after { content: ' ▾'; }
+    .traditions > summary:hover h2 { color: var(--gold); }
     .trad-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
     .trad { background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 6px; padding: .9rem 1rem; }
     .trad h3 { font-family: 'Cinzel', serif; font-size: .9rem; color: var(--c); letter-spacing: .05em; }
@@ -190,8 +195,8 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
 
   <section id="panneau" aria-live="polite"></section>
 
-  <section class="traditions" aria-labelledby="trad-titre">
-    <h2 id="trad-titre">Les grandes traditions</h2>
+  <details class="traditions">
+    <summary><h2>Les grandes traditions et leurs grandes figures</h2></summary>
     <div class="trad-grille">
       {parGroupe.map((g) => (
         <article class="trad" style={`--c:${g.color}`}>
@@ -208,7 +213,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         </article>
       ))}
     </div>
-  </section>
+  </details>
 
   <script is:inline define:vars={{ GROUPES }}>
   (() => {
