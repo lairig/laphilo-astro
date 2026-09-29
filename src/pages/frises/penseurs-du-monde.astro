@@ -471,6 +471,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       // Ni la place dessous ni dessus : on fait défiler la page juste ce qu'il faut (autant que possible)
       const el = couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
       bulle.style.maxHeight = '';
+      // Nom hors de l'écran (couloir plus bas ou plus haut) : on l'amène au tiers de l'écran
+      const r0 = el && el.getBoundingClientRect();
+      if (r0 && (r0.top < 8 || r0.bottom > innerHeight - 8)) scrollBy({ top: r0.top - innerHeight / 3, behavior: 'instant' });
       const r = el && el.getBoundingClientRect(), h = bulle.offsetHeight;
       const manque = r && h > r.top - 14 ? r.bottom + 6 + h - (innerHeight - 8) : 0;
       const reste = document.documentElement.scrollHeight - innerHeight - scrollY;
@@ -524,6 +527,17 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     addEventListener('scroll', suivre, { passive: true });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && choisi) deselectionner(); });
 
+    /* Attend que le défilement horizontal de la frise soit immobile (max. 2 s) */
+    function apresDefilement(cb) {
+      let avant = -1, stable = 0, essais = 0;
+      const t = setInterval(() => {
+        const s = scroller.scrollLeft;
+        stable = s === avant ? stable + 1 : 0;
+        avant = s;
+        if (stable >= 2 || ++essais > 20) { clearInterval(t); cb(); }
+      }, 100);
+    }
+
     function choisir(id, centrer, defiler = true) {
       const d = parId[id];
       if (!d) return;
@@ -534,7 +548,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (centrer) scroller.scrollTo({ left: x((d.y + d.e) / 2) - scroller.clientWidth / 2, behavior: 'smooth' });
       if (PC) {
         // La bulle s'ouvre une fois le défilement vers le philosophe terminé
-        if (centrer) setTimeout(() => { if (choisi === id) ouvrirBulle(); }, 550); else ouvrirBulle();
+        if (centrer) apresDefilement(() => { if (choisi === id) ouvrirBulle(); }); else ouvrirBulle();
       } else if (defiler && panneau.getBoundingClientRect().bottom > innerHeight) {
         // Mobile : cartouche en bas de page, on descend jusqu'à lui s'il est hors de l'écran
         panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
