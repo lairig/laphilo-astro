@@ -111,6 +111,20 @@ const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map(
     .list-page .phi-all-bar {
       margin-bottom: 0.5rem;
     }
+    /* Zone de saisie + bouton « Femmes uniquement » sur une ligne */
+    .list-page .phi-all-bar-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.7rem; margin-bottom: 0.5rem; }
+    .list-page .phi-all-bar-row .phi-all-bar { flex: 1 1 260px; margin-bottom: 0; }
+    .list-page .phi-femmes-btn {
+      font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+      padding: 0.5rem 0.9rem; border-radius: 20px; cursor: pointer; color: #3d2410;
+      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%); border: 1px solid rgba(139, 58, 15, 0.4);
+      transition: background 0.2s, color 0.2s;
+    }
+    .list-page .phi-femmes-btn:hover { border-color: #8b3a0f; }
+    .list-page .phi-femmes-btn[aria-pressed="true"] {
+      background: linear-gradient(160deg, #e6c56a 0%, #b8860b 100%); color: #1e1208; border-color: #8b3a0f; font-weight: 700;
+    }
+    .list-page .phi-femmes-btn[hidden] { display: none; }
 
     .list-page .phi-cur-trads {
       flex-basis: 100%;

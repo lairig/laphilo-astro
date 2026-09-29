@@ -35,7 +35,6 @@
     { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
       { fr: 'Pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec'] },
       { fr: 'Grandes traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
-      { fr: 'Thème', items: ['femme'] },
     ] },
   ];
   var TRADITION_RULES = {
@@ -245,10 +244,14 @@
       '<button type="button" class="phi-all-mode-tab phi-all-mode-tab--active" data-mode="alpha" role="tab" aria-selected="true">🔤 Alphabétique</button>' +
       '<button type="button" class="phi-all-mode-tab" data-mode="time" role="tab" aria-selected="false">🕐 Temporelle</button>' +
       '</div>' +
+      '<div class="phi-all-bar-row">' +
       '<div class="phi-all-bar">' +
       '<span class="phi-search-icon" aria-hidden="true">🔍</span>' +
       '<input class="phi-all-input" type="search" autocomplete="off" spellcheck="false" placeholder="Rechercher…" aria-label="Rechercher dans la liste complète">' +
       '<button class="phi-search-clear" aria-label="Effacer" hidden>✕</button>' +
+      '</div>' +
+      /* Même filtre que sur la Frise des penseurs du monde (tag « femme ») */
+      '<button type="button" class="phi-femmes-btn" aria-pressed="false">♀ Femmes uniquement</button>' +
       '</div>' +
       '<div class="phi-all-filter-row">' +
       '<span class="phi-all-filter-lbl">Époque</span>' +
@@ -324,6 +327,7 @@
 
     var input = container.querySelector('.phi-all-input');
     var clearBtn = container.querySelector('.phi-search-clear');
+    var femmesBtn = container.querySelector('.phi-femmes-btn');
     var countEl = container.querySelector('#' + uid + '-count');
     var listEl = container.querySelector('#' + uid + '-list');
     var moreBtn = container.querySelector('#' + uid + '-more');
@@ -346,7 +350,7 @@
     var alphaRow = container.querySelector('.phi-all-alpha-row');
 
     var _mode = 'alpha';
-    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curSubera: '', curBranchGroup: '', yearFrom: null, yearTo: null };
+    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curSubera: '', curBranchGroup: '', yearFrom: null, yearTo: null, femmes: false };
     var _query = '';
     var _page = 1;
     var _debounce = null;
@@ -367,6 +371,7 @@
       if (_filters.dom && (!p.dom || p.dom.indexOf(_filters.dom) === -1)) return false;
       if (_filters.cur && (!p.cur || p.cur.indexOf(_filters.cur) === -1)) return false;
       if (_filters.color && !matchesColorFilter(p, _filters.color)) return false;
+      if (_filters.femmes && (isCourant || (p.trad || []).indexOf('femme') === -1)) return false;
       if (_filters.curColor && !matchesCourantColorFilter(p, _filters.curColor)) return false;
       if (_filters.curColor && _filters.curSubera) {
         var defs = COURANT_SUBERAS[_filters.curColor] || [];
@@ -418,7 +423,9 @@
       var q = stripAccents(_query.trim().toLowerCase());
       _filtered = _index.filter(function (p) {
         if (!applyFilter(p)) return false;
-        if (_mode === 'alpha' && _filters.letter) {
+        /* La lettre ne filtre que sans texte saisi : sinon « simone » (lettre S)
+           écartait Simone de Beauvoir et Simone Weil */
+        if (_mode === 'alpha' && _filters.letter && !q) {
           var fl = stripAccents(familyName(p.n))[0].toUpperCase();
           if (fl !== _filters.letter) return false;
         }
@@ -491,6 +498,10 @@
       if (natRow) natRow.hidden = isCourant;
       if (curRow) curRow.hidden = isCourant;
       if (colorRow) { colorRow.classList.toggle('phi-all-color-row--hidden', isCourant); if (isCourant && _filters.color) setColorFilter(''); }
+      if (femmesBtn) {
+        femmesBtn.hidden = isCourant;
+        if (isCourant && _filters.femmes) { _filters.femmes = false; femmesBtn.setAttribute('aria-pressed', 'false'); }
+      }
       if (curColorRow) { curColorRow.classList.toggle('phi-all-color-row--hidden', !isCourant); if (!isCourant && _filters.curColor) setCurColorFilter(''); }
       curColorRow.classList.toggle('phi-all-cur-color-row--emphasis', isCourant);
     }
@@ -652,6 +663,11 @@
       syncAlpha(stripAccents(familyName(_query.trim())).toLowerCase().replace(/[^a-z]/g, ''));
       clearTimeout(_debounce);
       _debounce = setTimeout(refresh, 120);
+    });
+    femmesBtn.addEventListener('click', function () {
+      _filters.femmes = !_filters.femmes;
+      femmesBtn.setAttribute('aria-pressed', String(_filters.femmes));
+      refresh();
     });
     clearBtn.addEventListener('click', function () {
       input.value = ''; _query = ''; clearBtn.hidden = true;
