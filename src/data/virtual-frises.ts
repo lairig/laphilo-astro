@@ -5,6 +5,7 @@ interface PhilosopheData {
   name: string;
   nationalite?: string;
   traditions?: string[];
+  groupe?: string;
   frise_source: string;
 }
 
@@ -49,6 +50,11 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
     match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'].includes(p.nationalite ?? ''),
+  },
+  /* Colonne « Groupe » des xlsx : Égypte, Mésopotamie, Perse antiques, sagesse biblique */
+  'proche-orient-ancien-toutes-epoques': {
+    label: 'Philosophes du Proche-Orient ancien — toutes époques',
+    match: (p) => p.groupe === 'orient-ancien',
   },
   'grecs-byzantins-toutes-epoques': {
     label: 'Philosophes grecs et byzantins — toutes époques',

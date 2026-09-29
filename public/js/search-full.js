@@ -21,13 +21,14 @@
     { v: 'arabo-persan', fr: 'Arabo-persans', grad: 'linear-gradient(180deg,#239f40 50%,#f7f4ea 50%)' },
     { v: 'africain', fr: 'Africains', grad: 'linear-gradient(180deg,#e06414 50%,#1e8c3c 50%)' },
     { v: 'hispanique', fr: 'Hispaniques', grad: 'linear-gradient(180deg,#c60b1e 50%,#ffc400 50%)' },
+    { v: 'orient-ancien', fr: 'Proche-Orient ancien', grad: 'linear-gradient(180deg,#c9a227 50%,#1d4e89 50%)' },
     { v: 'grec', fr: 'Grecs & Byzantins', grad: 'linear-gradient(180deg,#0d5eaf 50%,#f7f4ea 50%)' },
     { v: 'indien', fr: 'Indiens', grad: 'linear-gradient(180deg,#ff9933 33%,#f7f4ea 33% 66%,#138808 66%)' },
     { v: 'chinois', fr: 'Chinois', grad: 'linear-gradient(135deg,#ffde00 22%,#de2910 22%)' },
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
   ];
   var PHILO_COLOR_GROUPS = [
-    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'grec', 'indien', 'chinois', 'oriental', 'arabo-persan', 'africain'] },
+    { fr: 'Par tradition', accent: '#8b3a0f', items: ['france', 'germanophone', 'britannique', 'americain', 'hispanique', 'russe', 'juif', 'orient-ancien', 'grec', 'indien', 'chinois', 'oriental', 'arabo-persan', 'africain'] },
   ];
   var TRADITION_RULES = {
     france: { nats: ['Française'] },
@@ -44,6 +45,8 @@
     'chinois': { nats: ['Chinoise'] },
     /* Pas une nationalité : colonne « Traditions » des xlsx */
     'juif': { trad: 'juive' },
+    /* Colonne « Groupe » des xlsx (grande tradition de la Frise des penseurs du monde) */
+    'orient-ancien': { groupe: 'orient-ancien' },
   };
   function pillValue(v) {
     return TRADITION_RULES[v] ? 'trad:' + v : v;
@@ -62,6 +65,7 @@
     'indien': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes indiens" },
     'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: "Voir la frise des philosophes chinois" },
     'juif': { href: '/philosophes/frise/pensee-juive-toutes-epoques/', fr: "Voir la frise des philosophes juifs" },
+    'orient-ancien': { href: '/philosophes/frise/proche-orient-ancien-toutes-epoques/', fr: "Voir la frise du Proche-Orient ancien" },
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
@@ -162,6 +166,7 @@
     if (color.indexOf('trad:') === 0) {
       var rule = TRADITION_RULES[color.slice(5)];
       if (rule.trad) return (p.trad || []).indexOf(rule.trad) !== -1;
+      if (rule.groupe) return p.grp === rule.groupe;
       return rule.nats.indexOf(p.nat) !== -1 && (!rule.exclude || rule.exclude.indexOf(p.n) === -1);
     }
     if (color === 'oriental' && p.isOriental) return true;
