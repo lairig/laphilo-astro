@@ -166,7 +166,7 @@
 }
 
 /* Cartouche de la Frise des penseurs du monde, sous « À la une » */
-.monde-accueil-wrap { max-width: 860px; margin: 2.4rem auto 2rem; padding: 0 1.5rem; }
+.monde-accueil-wrap { max-width: 860px; margin: 1.8rem auto 2rem; padding: 0 1.5rem; }
 .monde-accueil {
   display: flex;
   flex-direction: column;
