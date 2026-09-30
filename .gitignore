@@ -6,6 +6,9 @@ dist/
 # dependencies
 node_modules/
 
+# fichiers de travail de wrangler (déploiement Cloudflare)
+.wrangler/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

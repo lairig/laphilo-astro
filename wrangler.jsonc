@@ -1,0 +1,18 @@
+// Déploiement Cloudflare (Workers Builds, déclenché à chaque push sur main).
+// Site 100 % statique : Cloudflare lance `npm run build` (le même build qu'en
+// local, sous Node) puis publie le dossier dist tel quel, avec ses fichiers
+// _redirects et _headers. Sans ce fichier, Cloudflare reconfigurait le projet à
+// chaque build (adaptateur @astrojs/cloudflare, rendu dans workerd), et le build
+// en ligne pouvait échouer alors que le build local passait.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "laphilo-astro",
+  "compatibility_date": "2026-09-30",
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
