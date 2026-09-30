@@ -8,7 +8,7 @@ Colonnes attendues en ligne 3 de chaque xlsx :
   Annee_naissance | Annee_deces | Dates_affichage | Nom | Texte_HTML
   YouTube_ID | Credit_media | Thumbnail_URL | Image_media | Actif
   (+ Nationalite | Branche | Courant | Description | Figures_cles | Traditions
-   | Groupe | Importance selon le fichier)
+   | Groupe | Importance | Thèmes selon le fichier)
 
 Nationalite : dans les fichiers à nationalité imposée (NAT_DEFAUT), une cellule
 remplie l'emporte (ex. les Latino-Américains du fichier américains).
@@ -20,6 +20,10 @@ et servent de groupe secondaire pour la frise du monde.
 
 Groupe : grande tradition du philosophe pour la frise du monde (codes dans
 GROUPES ci-dessous). Importance : 3 = incontournable, 2 = important, vide = 1.
+
+Thèmes : sujets de travail des philosophes vivants (codes dans THEMES
+ci-dessous, séparés par « ; »), dans les deux fichiers d'actifs. Ils alimentent
+les frises « vivants-… » et les pastilles « Sujet de travail » de la recherche.
 
 À la fin, des vérifications signalent les erreurs de saisie probables (dates
 affichées qui ne correspondent pas aux années, doublons, nationalité ou groupe
@@ -82,6 +86,20 @@ GROUPES = {
     'russe':         'La pensée russe',
     'orient-ancien': 'Le Proche-Orient ancien',
 }
+
+# ── Sujets de travail des philosophes vivants (colonne Thèmes des deux xlsx
+#    d'actifs, codes séparés par « ; ») ; libellés dans src/data/themes-vivants.ts
+THEMES = {
+    'esprit-ia':   'Esprit, cerveau & IA',
+    'ecologie':    'Écologie & vivant',
+    'justice':     'Justice & démocratie',
+    'genre':       'Féminisme & genre',
+    'decolonial':  'Décolonisation & pensées du Sud',
+    'sens':        'Sens & spiritualité',
+    'reel':        'Réel & connaissance',
+    'continental': 'Héritiers de la pensée continentale',
+}
+FICHIERS_VIVANTS = ('frise-philosophes-france-actif', 'frise-philosophes-autre-actif')
 
 
 def to_str(v):
@@ -184,6 +202,7 @@ def lire_xlsx(nom_fichier):
         'traditions':   cols.get('traditions'),
         'groupe':       cols.get('groupe'),
         'importance':   cols.get('importance'),
+        'themes':       cols.get('themes'),
     }
 
     entrees = []
@@ -274,6 +293,13 @@ def lire_xlsx(nom_fichier):
             if v in (2, 3):
                 entry['importance'] = v
 
+        if C['themes'] is not None:
+            v = to_str(row[C['themes']]) if C['themes'] < len(row) else ''
+            if v:
+                themes = [t.strip().lower() for t in v.split(';') if t.strip()]
+                if themes:
+                    entry['themes'] = themes
+
         entry['_fichier'] = nom_fichier
         entrees.append(entry)
 
@@ -350,6 +376,11 @@ def verifier(philosophes, courants):
         for c in p.get('courants', []):
             if c not in noms_courants:
                 alertes.append(f"{nom} ({ou}) : courant « {c} » introuvable dans les fichiers de courants")
+        for t in p.get('themes', []):
+            if t not in THEMES:
+                alertes.append(f"{nom} ({ou}) : thème « {t} » inconnu (codes : {', '.join(THEMES)})")
+        if p['_fichier'] in FICHIERS_VIVANTS and not p.get('themes'):
+            alertes.append(f"{nom} ({ou}) : thème manquant (colonne Thèmes)")
     return alertes
 
 

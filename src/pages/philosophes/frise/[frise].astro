@@ -10,6 +10,7 @@ import { getCollection } from 'astro:content';
 import { philosopheFriseConfig } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
 import { virtualPhilosopheFrises } from '../../../data/virtual-frises';
+import { themesVivants, friseDuTheme } from '../../../data/themes-vivants';
 
 export async function getStaticPaths() {
   const philosophes = await getCollection('philosophes');
@@ -82,6 +83,7 @@ const seoTitles: Record<string, string> = {
   'inde-bouddhisme-toutes-epoques': "Philosophes de l'Inde et du monde bouddhiste de toutes les époques : frise chronologique",
   'asie-est-toutes-epoques': "Philosophes d'Asie de l'Est (Chine, Japon, Corée, Vietnam) de toutes les époques : frise chronologique",
   'pensee-juive-toutes-epoques': 'Philosophes juifs de toutes les époques : frise chronologique',
+  ...Object.fromEntries(themesVivants.map((t) => [friseDuTheme(t.code), t.seoTitle])),
 };
 const title = `${seoTitles[frise as string] ?? label} | LaPhilo.fr`;
 const path = `/philosophes/frise/${frise}/`;

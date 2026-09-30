@@ -39,6 +39,7 @@ export const GET: APIRoute = async () => {
       nat: p.nationalite || '',
       trad: p.traditions || [],
       grp: p.groupe || '',
+      th: p.themes || [],
       dom: p.branches || [],
       cur: p.courants || [],
       desc: p.description || '',

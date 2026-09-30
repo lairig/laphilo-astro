@@ -174,6 +174,59 @@
       ]
     },
     {
+      "label": "Vivants par sujet de travail",
+      "items": [
+        {
+          "name": "Philosophes vivants : Esprit, cerveau &amp; IA",
+          "tag": "en activité",
+          "text": "Qu'est-ce que la conscience ? Une machine peut-elle penser ? Que fait le numérique à nos vies ? <br> De Thomas Nagel et Douglas Hofstadter à Paul et Patricia Churchland, David Chalmers, Thomas Metzinger, Luciano Floridi, Nick Bostrom et Éric Sadin.",
+          "href": "/philosophes/frise/vivants-esprit-ia/"
+        },
+        {
+          "name": "Philosophes vivants : Écologie &amp; vivant",
+          "tag": "en activité",
+          "text": "Quelle place pour l'homme dans la nature, quels devoirs envers les animaux et la Terre ? <br> De Peter Singer et Philippe Descola à Donna Haraway, Isabelle Stengers, Vandana Shiva, Vinciane Despret, Corine Pelluchon et Baptiste Morizot.",
+          "href": "/philosophes/frise/vivants-ecologie/"
+        },
+        {
+          "name": "Philosophes vivants : Justice &amp; démocratie",
+          "tag": "en activité",
+          "text": "Qu'est-ce qu'une société juste ? Comment vivre ensemble, reconnaître chacun, critiquer le présent ? <br> D'Amartya Sen, Charles Taylor, Alain Badiou et Jacques Rancière à Martha Nussbaum, Axel Honneth, Michael Sandel, Slavoj Žižek, Hartmut Rosa et Cynthia Fleury.",
+          "href": "/philosophes/frise/vivants-justice/"
+        },
+        {
+          "name": "Philosophes vivants : Féminisme &amp; genre",
+          "tag": "en activité",
+          "text": "Que font le sexe et le genre à nos vies, à la morale et à la politique ? <br> De Luce Irigaray, Carol Gilligan, Julia Kristeva et Angela Davis à Nancy Fraser, Judith Butler, Elsa Dorlin, Kate Manne et Amia Srinivasan.",
+          "href": "/philosophes/frise/vivants-genre/"
+        },
+        {
+          "name": "Philosophes vivants : Décolonisation &amp; pensées du Sud",
+          "tag": "en activité",
+          "text": "Penser depuis l'Afrique, les Caraïbes et l'Amérique latine, après la colonisation. <br> D'Achille Mbembe et Souleymane Bachir Diagne à Cornel West, Kwame Anthony Appiah, Lewis Gordon, Felwine Sarr, Nadia Yala Kisukidi et Norman Ajari.",
+          "href": "/philosophes/frise/vivants-decolonial/"
+        },
+        {
+          "name": "Philosophes vivants : Sens &amp; spiritualité",
+          "tag": "en activité",
+          "text": "Dieu, la foi, la sagesse et le sens de l'existence dans un monde sécularisé. <br> De Charles Taylor, Seyyed Hossein Nasr et Richard Swinburne à Jean-Luc Marion, Christian Jambet, André Comte-Sponville, Richard Kearney et Denis Moreau.",
+          "href": "/philosophes/frise/vivants-sens/"
+        },
+        {
+          "name": "Philosophes vivants : Réel &amp; connaissance",
+          "tag": "en activité",
+          "text": "Qu'est-ce qui existe vraiment, et que pouvons-nous en savoir ? Logique, sciences et nouveau réalisme. <br> De Graham Priest, Timothy Williamson et Pascal Engel à Isabelle Stengers, Quentin Meillassoux, Graham Harman, Markus Gabriel et Tristan Garcia.",
+          "href": "/philosophes/frise/vivants-reel/"
+        },
+        {
+          "name": "Philosophes vivants : Héritiers de la pensée continentale",
+          "tag": "en activité",
+          "text": "Phénoménologie, herméneutique, déconstruction : la tradition de Husserl, Heidegger, Foucault et Derrida continuée aujourd'hui. <br> De Pierre Macherey et Giorgio Agamben à Barbara Cassin, François Jullien, Georges Didi-Huberman, Slavoj Žižek, Jean-Luc Marion et Frédéric Worms.",
+          "href": "/philosophes/frise/vivants-continental/"
+        }
+      ]
+    },
+    {
       "section": "Les Philosophes par origine — toutes époques",
       "label": "Par pays",
       "items": [

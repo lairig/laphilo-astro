@@ -17,6 +17,7 @@ const SOUS_TITRES: Record<string, [string, string?]> = {
   Anciens: ['Philosophes anciens', "de l'Antiquité aux Lumières"],
   Modernes: ['Philosophes modernes', 'du XVIIIᵉ au XXᵉ siècle'],
   Contemporains: ['Philosophes contemporains', 'encore en activité'],
+  'Vivants par sujet de travail': ['Philosophes vivants', 'par sujet de travail'],
   'Par pays': ['Par pays ou langue'],
   'Par grande tradition': ['Par grande tradition'],
   'Par thème': ['Par thème'],
@@ -139,61 +140,26 @@ for (const g of catalogue.groups as any[]) {
     .list-page .phi-all-bar {
       margin-bottom: 0.5rem;
     }
-    /* Zone de saisie + bouton « Femmes uniquement » sur une ligne */
-    .list-page .phi-all-bar-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.7rem; margin-bottom: 0.5rem; }
-    .list-page .phi-all-bar-row .phi-all-bar { flex: 1 1 260px; margin-bottom: 0; }
-    .list-page .phi-femmes-btn {
-      font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
-      padding: 0.5rem 0.9rem; border-radius: 20px; cursor: pointer; color: #3d2410;
-      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%); border: 1px solid rgba(139, 58, 15, 0.4);
-      transition: background 0.2s, color 0.2s;
-    }
-    .list-page .phi-femmes-btn:hover { border-color: #8b3a0f; }
-    .list-page .phi-femmes-btn[aria-pressed="true"] {
-      background: linear-gradient(160deg, #e6c56a 0%, #b8860b 100%); color: #1e1208; border-color: #8b3a0f; font-weight: 700;
-    }
-    .list-page .phi-femmes-btn[hidden] { display: none; }
+    .list-page .phi-all-bar-row { display: flex; margin: 0.9rem 0 0.8rem; }
+    .list-page .phi-all-bar-row .phi-all-bar { flex: 1; max-width: none; margin-bottom: 0; }
 
-    .list-page .phi-cur-trads {
-      flex-basis: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin-top: 0.4rem;
-    }
-    .list-page .phi-cur-trad {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 0.7rem 0.8rem;
+    /* Cartouches de filtres (« Filtres », « Philosophes d'aujourd'hui »,
+       « Par tradition ») : un titre, puis des listes déroulantes en grille. */
+    .list-page .phi-box {
+      margin-bottom: 0.7rem;
+      padding: 0.7rem 0.9rem 0.8rem;
       border: 1px solid rgba(180, 130, 20, 0.3);
-      border-left: 4px solid var(--trad-color);
+      border-left: 4px solid #8b3a0f;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.18);
-      transition: opacity 0.2s, border-color 0.2s;
     }
-    .list-page .phi-cur-trad .phi-color-item {
-      flex-direction: row;
-      gap: 0.6rem;
+    .list-page .phi-box[hidden] { display: none; }
+    .list-page .phi-box-title {
+      display: flex;
       align-items: center;
-    }
-    .list-page .phi-cur-trad .phi-color-item-lbl { font-size: 0.8rem; }
-    .list-page .phi-cur-trad .phi-cur-subera-row,
-    .list-page .phi-cur-trad .phi-cur-branch-row { width: 100%; align-content: flex-start; align-items: center; }
-    .list-page .phi-cur-trad [hidden] { display: none; }
-    .list-page .phi-cur-trad--active {
-      border-color: rgba(212, 168, 67, 0.7);
-      border-left-color: var(--trad-color);
-      background: rgba(180, 130, 20, 0.12);
-    }
-    .list-page .phi-cur-trad--dim { opacity: 0.55; }
-    .list-page .phi-cur-trad--dim:hover { opacity: 0.85; }
-    @media (max-width: 640px) {
-      .list-page .phi-cur-trads { grid-template-columns: 1fr; }
-    }
-
-    .list-page .phi-all-color-row .phi-cur-trads { margin-top: 0; grid-template-columns: 1fr; }
-    .list-page .phi-philo-group-title {
+      gap: 0.5rem;
+      cursor: pointer;
+      list-style: none;
       font-family: 'Cinzel', serif;
       font-size: 0.72rem;
       font-weight: 700;
@@ -201,22 +167,141 @@ for (const g of catalogue.groups as any[]) {
       text-transform: uppercase;
       color: #d4a843;
     }
-    /* Sous-lignes du cartouche « Par tradition » : Pays / Grandes traditions / Thème */
-    .list-page .phi-philo-ligne { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.6rem; width: 100%; }
-    .list-page .phi-philo-ligne + .phi-philo-ligne { margin-top: 0.35rem; }
-    .list-page .phi-philo-ligne-lbl {
-      flex: 0 0 8.5rem;
+    .list-page .phi-box-title::-webkit-details-marker { display: none; }
+    .list-page .phi-box-title::after { content: '▾'; margin-left: auto; font-size: 0.9rem; }
+    .list-page .phi-box[open] > .phi-box-title { margin-bottom: 0.55rem; }
+    .list-page .phi-box[open] > .phi-box-title::after { content: '▴'; }
+    .list-page .phi-box-title:focus-visible { outline: 2px solid #d4a843; outline-offset: 3px; border-radius: 3px; }
+    /* Nombre de filtres actifs du cartouche (visible même replié) */
+    .list-page .phi-box-badge {
+      min-width: 1.25rem;
+      padding: 0.05rem 0.3rem;
+      border-radius: 1rem;
+      font-size: 0.66rem;
+      line-height: 1.15rem;
+      letter-spacing: 0;
+      text-align: center;
+      color: #1e1208;
+      background: #d4a843;
+    }
+    .list-page .phi-box-badge[hidden] { display: none; }
+    .list-page .phi-box-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.6rem 0.9rem;
+      align-items: end;
+    }
+    .list-page .phi-field { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+    .list-page .phi-field[hidden] { display: none; }
+    .list-page .phi-field--large { grid-column: span 2; }
+    .list-page .phi-field .phi-all-filter-lbl { min-width: 0; font-size: 0.6rem; }
+    .list-page .phi-field .phi-all-select { width: 100%; min-width: 0; max-width: none; box-sizing: border-box; text-overflow: ellipsis; }
+    .list-page .phi-field .phi-year-input { box-sizing: border-box; }
+    .list-page .phi-field .phi-all-year-wrap { flex-wrap: nowrap; }
+    .list-page .phi-field .phi-year-input { flex: 1 1 0; width: auto; min-width: 0; }
+    .list-page .phi-field .phi-year-sep { color: #d4a843; }
+    .list-page .phi-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 1.9rem;
       font-family: 'Cinzel', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(212, 168, 67, 0.75);
+      color: #f7ecce;
+      cursor: pointer;
     }
-    .list-page .phi-philo-ligne .phi-cur-subera-row { flex: 1 1 0; min-width: 0; }
-    @media (max-width: 640px) {
-      .list-page .phi-philo-ligne-lbl { flex-basis: 100%; }
-      .list-page .phi-philo-ligne + .phi-philo-ligne { margin-top: 0.9rem; }
+    .list-page .phi-check[hidden] { display: none; }
+    .list-page .phi-check input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: #b8860b; cursor: pointer; }
+    .list-page .phi-box .phi-philo-frise-link { margin-top: 0.8rem; }
+    /* Mobile : cartouches repliés au départ (search-full.js), deux colonnes,
+       et des zones tactiles d'au moins 40 px de haut. */
+    @media (max-width: 760px) {
+      .list-page .phi-box { padding: 0.15rem 0.8rem; }
+      .list-page .phi-box[open] { padding-bottom: 0.8rem; }
+      .list-page .phi-box-title { min-height: 2.6rem; }
+      .list-page .phi-box[open] > .phi-box-title { margin-bottom: 0.2rem; }
+      .list-page .phi-box-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 0.7rem; }
+      .list-page .phi-field .phi-all-select,
+      .list-page .phi-field .phi-year-input { min-height: 2.5rem; font-size: 0.7rem; }
+      .list-page .phi-field:not(.phi-field--large) .phi-all-select { font-size: 0.62rem; letter-spacing: 0.01em; padding-left: 0.45rem; padding-right: 1.4rem; }
+      .list-page .phi-check { min-height: 2.5rem; font-size: 0.7rem; }
+      .list-page .phi-check input { width: 1.3rem; height: 1.3rem; }
+      .list-page .phi-box .phi-philo-frise-link { margin-top: 0.7rem; }
     }
+    @media (max-width: 340px) {
+      .list-page .phi-box-grid { grid-template-columns: 1fr; }
+      .list-page .phi-field--large { grid-column: auto; }
+    }
+
+    /* Barre de tri, juste au-dessus de la liste : nombre de résultats à gauche,
+       ordre (alphabétique / temporel) et sens à droite. */
+    .list-page .phi-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem 1rem;
+      margin: 1.1rem 0 0.5rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid rgba(212, 168, 67, 0.3);
+    }
+    .list-page .phi-toolbar-group { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.6rem; }
+    .list-page .phi-toolbar .phi-all-count { padding: 0; text-align: left; font-size: 0.72rem; }
+    .list-page .phi-toolbar .phi-all-filter-lbl { min-width: 0; }
+    .list-page .phi-sort-tabs { display: inline-flex; }
+    .list-page .phi-sort-tab,
+    .list-page .phi-sort-dir,
+    .list-page .phi-reset-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding: 0.32rem 0.7rem;
+      color: #3d2410;
+      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
+      border: 1px solid rgba(139, 58, 15, 0.45);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .list-page .phi-sort-tab:first-child { border-radius: 6px 0 0 6px; }
+    .list-page .phi-sort-tab:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+    .list-page .phi-sort-tab--active {
+      background: linear-gradient(160deg, #e6c56a 0%, #c9a052 100%);
+      color: #1e1208;
+      font-weight: 700;
+      box-shadow: inset 0 -2px 0 #8b3a0f;
+    }
+    .list-page .phi-sort-dir { border-radius: 6px; min-width: 4.2rem; }
+    .list-page .phi-sort-dir::after { content: ' ⇅'; }
+    .list-page .phi-sort-tab:hover,
+    .list-page .phi-sort-dir:hover,
+    .list-page .phi-reset-btn:hover { border-color: #8b3a0f; }
+    .list-page .phi-reset-btn { border-radius: 6px; background: none; color: #d4a843; border-color: rgba(212, 168, 67, 0.5); }
+    .list-page .phi-reset-btn::before { content: '✕ '; }
+    .list-page .phi-reset-btn[hidden] { display: none; }
+    @media (max-width: 760px) {
+      .list-page .phi-toolbar { margin-top: 0.9rem; }
+      .list-page .phi-toolbar-group { width: 100%; }
+      .list-page .phi-toolbar-group:first-child { justify-content: space-between; }
+      .list-page .phi-toolbar .phi-all-filter-lbl { display: none; }
+      .list-page .phi-sort-tabs { flex: 1; }
+      .list-page .phi-sort-tab { flex: 1; }
+      .list-page .phi-sort-tab,
+      .list-page .phi-sort-dir,
+      .list-page .phi-reset-btn { min-height: 2.5rem; font-size: 0.66rem; }
+    }
+    /* Très petits écrans : les trois onglets du haut tiennent sur la largeur */
+    @media (max-width: 360px) {
+      .list-page .phi-all-type-tabs { gap: 0.25rem; }
+      .list-page .phi-all-type-tabs .phi-all-mode-tab { min-width: 0; font-size: 0.66rem; letter-spacing: 0.02em; padding: 0.6rem 0.2rem; }
+      .list-page .phi-frise-menu { min-width: 0; }
+      .list-page .phi-frise-menu > summary { min-width: 0; }
+    }
+
     /* Lien vers la frise de la tradition choisie : bouton doré bien visible */
     .list-page .phi-philo-frise-link {
       display: inline-flex;
@@ -253,40 +338,8 @@ for (const g of catalogue.groups as any[]) {
     @media (max-width: 640px) {
       .list-page .phi-philo-frise-link { align-self: stretch; justify-content: center; text-align: center; font-size: 0.72rem; }
     }
-    .list-page .phi-color-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .list-page .phi-color-dot {
-      width: 0.9rem;
-      height: 0.9rem;
-      border-radius: 50%;
-      border: 1px solid rgba(30, 18, 8, 0.45);
-      flex-shrink: 0;
-    }
     @media (max-width: 480px) {
       .list-page .phi-all-type-tabs .phi-all-mode-tab { font-size: 0.8rem; padding: 0.65rem 0.5rem; }
-    }
-
-    /* Même bug que .phi-all-btn ci-dessus : les boutons de sous-filtre
-       courant (sous-époque "Actuel/Moderne/Antique" et groupes
-       thématiques "Politique & Éthique"…) utilisent un texte rust sur
-       fond quasi transparent, pensé pour le fond parchemin clair du
-       drawer original — illisible sur le fond sombre de cette page. */
-    .list-page .phi-cur-subera-btn {
-      background: linear-gradient(160deg, #f9f2d8 0%, #eddfa0 100%);
-      color: #3d2410;
-      border-color: rgba(61, 36, 16, 0.4);
-    }
-    .list-page .phi-cur-subera-btn:hover {
-      background: linear-gradient(160deg, #f0dca0 0%, #e0c07a 100%);
-      color: #1e1208;
-    }
-    .list-page .phi-cur-subera-btn--active {
-      background: linear-gradient(160deg, #e0c07a 0%, #c9a052 100%);
-      color: #1e1208;
-      border-color: #8b3a0f;
     }
 
     /* Le menu déroulant OUVERT d'un <select> (les <option>) est rendu par le
@@ -453,7 +506,7 @@ for (const g of catalogue.groups as any[]) {
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
-<script src="/js/search-full.js" defer></script>
+<script src="/js/search-full.js?v=20260930c" defer></script>
 
 </body>
 </html>

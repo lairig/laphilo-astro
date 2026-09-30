@@ -1,13 +1,20 @@
 // Frises "virtuelles" : pas de frise_source propre, elles regroupent des fiches
 // de plusieurs frises réelles selon une règle.
 
+import { themesVivants, friseDuTheme } from './themes-vivants';
+
 interface PhilosopheData {
   name: string;
   nationalite?: string;
   traditions?: string[];
+  themes?: string[];
   groupe?: string;
   frise_source: string;
 }
+
+/* Philosophes en activité : les deux frises « contemporains » (même règle que
+   le bouton « Vivants uniquement » de la recherche, champ live de l'index). */
+const vivant = (p: PhilosopheData) => ['france-contemporains', 'contemporains-monde'].includes(p.frise_source);
 
 export interface VirtualFrise {
   label: string;
@@ -95,4 +102,12 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes juifs — toutes époques',
     match: (p) => (p.traditions ?? []).includes('juive'),
   },
+  /* Philosophes vivants, par sujet de travail (colonne « Thèmes » des xlsx
+     d'actifs) ; mêmes règles que les pastilles « Sujet de travail » de la recherche */
+  ...Object.fromEntries(
+    themesVivants.map((t): [string, VirtualFrise] => [
+      friseDuTheme(t.code),
+      { label: `Philosophes vivants — ${t.label}`, match: (p) => vivant(p) && (p.themes ?? []).includes(t.code) },
+    ]),
+  ),
 };

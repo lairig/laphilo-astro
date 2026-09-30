@@ -33,8 +33,8 @@
   var PHILO_COLOR_GROUPS = [
     /* Même découpage que la page /frises/ : pays, grandes traditions, thème */
     { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
-      { fr: 'Pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec'] },
-      { fr: 'Grandes traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
+      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec'] },
+      { fr: 'Grande tradition', vide: 'Toutes les traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
     ] },
   ];
   var TRADITION_RULES = {
@@ -80,24 +80,26 @@
     'femme': { href: '/philosophes/frise/femmes-toutes-epoques/', fr: "Voir la frise des philosophes femmes" },
     'orient-ancien': { href: '/philosophes/frise/proche-orient-ancien-toutes-epoques/', fr: "Voir la frise du Proche-Orient ancien" },
   };
+  /* Sujets de travail des philosophes vivants : mêmes codes que
+     src/data/themes-vivants.ts (champ th de l'index, frise « vivants-<code> ») */
+  var THEMES_VIVANTS = [
+    { v: 'esprit-ia', fr: 'Esprit, cerveau & IA' },
+    { v: 'ecologie', fr: 'Écologie & vivant' },
+    { v: 'justice', fr: 'Justice & démocratie' },
+    { v: 'genre', fr: 'Féminisme & genre' },
+    { v: 'decolonial', fr: 'Décolonisation & pensées du Sud' },
+    { v: 'sens', fr: 'Sens & spiritualité' },
+    { v: 'reel', fr: 'Réel & connaissance' },
+    { v: 'continental', fr: 'Héritiers de la pensée continentale' },
+  ];
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
   }
+  /* source = frise_source des courants (et des sous-frises par thème de _meta.courantBranchGroups) */
   var COURANT_COLOR_FILTERS = [
-    { v: 'courant-occ', fr: 'Occidental', grad: '#0e6882' },
-    { v: 'courant-ori', fr: 'Oriental', grad: '#6e2e9a' },
+    { v: 'courant-occ', fr: 'Pensée occidentale', source: 'occidental' },
+    { v: 'courant-ori', fr: 'Pensée orientale', source: 'oriental' },
   ];
-  var COURANT_SUBERAS = {
-    'courant-occ': [
-      { v: 'actuel', fr: 'Actuel', epoques: ['actuels'] },
-      { v: 'moderne', fr: 'Moderne', epoques: ['renaissance', 'modernes'] },
-      { v: 'antique', fr: 'Antique', epoques: ['antiquite', 'moyenage'] },
-    ],
-    'courant-ori': [
-      { v: 'moderne', fr: 'Moderne', epoques: ['modernes', 'actuels'] },
-      { v: 'ancien', fr: 'Ancien', epoques: ['antiquite', 'moyenage', 'renaissance'] },
-    ],
-  };
   var CUR_FAMILY_LABELS = {
     antiquite: 'Antiquité',
     religieux: 'Religieux',
@@ -234,15 +236,19 @@
       ],
     };
 
+    /* Cartouche de filtres repliable : ouvert sur grand écran, replié sur mobile
+       (une pastille indique alors le nombre de filtres actifs) */
+    var ecranLarge = !window.matchMedia || window.matchMedia('(min-width: 761px)').matches;
+    function cartouche(nom, titre) {
+      return '<details class="phi-box phi-box--' + nom + '" data-box="' + nom + '"' + (ecranLarge ? ' open' : '') + '>' +
+        '<summary class="phi-box-title"><span>' + titre + '</span><span class="phi-box-badge" hidden></span></summary>';
+    }
+
     container.innerHTML =
       '<div class="phi-all">' +
       '<div class="phi-all-mode-tabs phi-all-type-tabs" role="tablist" aria-label="Type de recherche">' +
       '<button type="button" class="phi-all-mode-tab" data-primary="philosophes" role="tab" aria-selected="false">🏛️ Philosophes</button>' +
       '<button type="button" class="phi-all-mode-tab" data-primary="courants" role="tab" aria-selected="false">🌿 Courants</button>' +
-      '</div>' +
-      '<div class="phi-all-mode-tabs" role="tablist" aria-label="Ordre d\'affichage">' +
-      '<button type="button" class="phi-all-mode-tab phi-all-mode-tab--active" data-mode="alpha" role="tab" aria-selected="true">🔤 Alphabétique</button>' +
-      '<button type="button" class="phi-all-mode-tab" data-mode="time" role="tab" aria-selected="false">🕐 Temporelle</button>' +
       '</div>' +
       '<div class="phi-all-bar-row">' +
       '<div class="phi-all-bar">' +
@@ -250,76 +256,98 @@
       '<input class="phi-all-input" type="search" autocomplete="off" spellcheck="false" placeholder="Rechercher…" aria-label="Rechercher dans la liste complète">' +
       '<button class="phi-search-clear" aria-label="Effacer" hidden>✕</button>' +
       '</div>' +
-      /* Même filtre que sur la Frise des penseurs du monde (tag « femme ») */
-      '<button type="button" class="phi-femmes-btn" aria-pressed="false">♀ Femmes uniquement</button>' +
       '</div>' +
-      '<div class="phi-all-filter-row">' +
-      '<span class="phi-all-filter-lbl">Époque</span>' +
-      '<select class="phi-all-select" aria-label="Époque" id="' + uid + '-era-sel">' +
+      /* Cartouche « Filtres » */
+      cartouche('filtres', 'Filtres') +
+      '<div class="phi-box-grid">' +
+      '<label class="phi-field"><span class="phi-all-filter-lbl">Époque</span>' +
+      '<select class="phi-all-select" id="' + uid + '-era-sel">' +
       '<option value="">— Toutes époques —</option>' +
       '<option value="actuels">Actuels</option>' +
       '<option value="antiquite">Antiquité</option>' +
       '<option value="moyenage">Moyen Âge</option>' +
       '<option value="renaissance">Renaissance</option>' +
       '<option value="modernes">Modernes</option>' +
-      '</select></div>' +
-      '<div class="phi-all-filter-row phi-all-nat-row">' +
-      '<span class="phi-all-filter-lbl">Nationalité</span>' +
-      '<select class="phi-all-select" aria-label="Nationalité" id="' + uid + '-nat-sel"><option value="">— Toutes origines —</option></select></div>' +
-      '<div class="phi-all-filter-row">' +
-      '<span class="phi-all-filter-lbl">Branche</span>' +
-      '<select class="phi-all-select" aria-label="Branche" id="' + uid + '-dom-sel"><option value="">— Toutes branches —</option></select></div>' +
-      '<div class="phi-all-filter-row phi-all-cur-row">' +
-      '<span class="phi-all-filter-lbl">Courant</span>' +
-      '<select class="phi-all-select" aria-label="Courant" id="' + uid + '-cur-sel"><option value="">— Tous courants —</option></select></div>' +
-      '<div class="phi-all-filter-row">' +
-      '<span class="phi-all-filter-lbl">Période</span>' +
+      '</select></label>' +
+      '<label class="phi-field phi-all-nat-row"><span class="phi-all-filter-lbl">Nationalité</span>' +
+      '<select class="phi-all-select" id="' + uid + '-nat-sel"><option value="">— Toutes origines —</option></select></label>' +
+      '<label class="phi-field"><span class="phi-all-filter-lbl">Branche</span>' +
+      '<select class="phi-all-select" id="' + uid + '-dom-sel"><option value="">— Toutes branches —</option></select></label>' +
+      '<label class="phi-field phi-all-cur-row"><span class="phi-all-filter-lbl">Courant</span>' +
+      '<select class="phi-all-select" id="' + uid + '-cur-sel"><option value="">— Tous courants —</option></select></label>' +
+      '<div class="phi-field"><span class="phi-all-filter-lbl">Période</span>' +
       '<div class="phi-all-year-wrap">' +
-      '<input class="phi-year-input" id="' + uid + '-year-from" type="number" placeholder="De" min="-700" max="2030" step="1">' +
+      '<input class="phi-year-input" id="' + uid + '-year-from" type="number" placeholder="De" aria-label="Période : de l\'année" min="-700" max="2030" step="1">' +
       '<span class="phi-year-sep">à</span>' +
-      '<input class="phi-year-input" id="' + uid + '-year-to" type="number" placeholder="À" min="-700" max="2030" step="1">' +
+      '<input class="phi-year-input" id="' + uid + '-year-to" type="number" placeholder="À" aria-label="Période : à l\'année" min="-700" max="2030" step="1">' +
       '</div></div>' +
+      /* Même filtre que sur la Frise des penseurs du monde (tag « femme ») */
+      '<label class="phi-check phi-femmes-check"><input type="checkbox" class="phi-femmes-box"><span>♀ Femmes uniquement</span></label>' +
+      '</div></details>' +
+      /* Cartouche « Philosophes d'aujourd'hui » : en activité (champ live de l'index) et sujet de travail (champ th) */
+      cartouche('vivants', 'Philosophes d\'aujourd\'hui') +
+      '<div class="phi-box-grid">' +
+      '<label class="phi-check"><input type="checkbox" class="phi-vivants-box"><span>En activité uniquement</span></label>' +
+      '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Sujet de travail</span>' +
+      '<select class="phi-all-select phi-theme-sel"><option value="">— Tous les sujets —</option>' +
+      THEMES_VIVANTS.map(function (t) { return '<option value="' + t.v + '">' + t.fr.replace(/&/g, '&amp;') + '</option>'; }).join('') +
+      '</select></label>' +
+      '</div>' +
+      THEMES_VIVANTS.map(function (t) {
+        return '<a class="phi-philo-frise-link phi-theme-frise-link" data-theme-for="' + t.v + '" href="/philosophes/frise/vivants-' + t.v + '/" hidden>Voir la frise « ' + t.fr.replace(/&/g, '&amp;') + ' » →</a>';
+      }).join('') +
+      '</details>' +
+      /* Cartouche « Par tradition » : une liste déroulante par ligne (Pays, Grandes traditions) */
+      PHILO_COLOR_GROUPS.map(function (g) {
+        var tous = [].concat.apply([], g.lignes.map(function (l) { return l.items; }));
+        return cartouche('tradition', g.fr) +
+          '<div class="phi-box-grid">' +
+          g.lignes.map(function (l) {
+            return '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">' + l.fr + '</span>' +
+              '<select class="phi-all-select phi-trad-sel"><option value="">— ' + (l.vide || 'Tous') + ' —</option>' +
+              l.items.map(function (v) {
+                var c = colorDef(v);
+                return '<option value="' + pillValue(c.v) + '">' + c.fr.replace(/&/g, '&amp;') + '</option>';
+              }).join('') +
+              '</select></label>';
+          }).join('') +
+          '</div>' +
+          tous.filter(function (v) { return VIRTUAL_FRISE_LINKS[v]; }).map(function (v) {
+            return '<a class="phi-philo-frise-link" data-for="' + pillValue(v) + '" href="' + VIRTUAL_FRISE_LINKS[v].href + '" hidden>' + VIRTUAL_FRISE_LINKS[v].fr + ' →</a>';
+          }).join('') +
+          '</details>';
+      }).join('') +
+      /* Cartouche « Tradition » de l'onglet Courants : tradition, puis thème (sous-frises par branche) */
+      cartouche('courants', 'Tradition') +
+      '<div class="phi-box-grid">' +
+      '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Tradition</span>' +
+      '<select class="phi-all-select phi-curtrad-sel"><option value="">— Toutes les traditions —</option>' +
+      COURANT_COLOR_FILTERS.map(function (c) { return '<option value="' + c.v + '">' + c.fr + '</option>'; }).join('') +
+      '</select></label>' +
+      '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Thème</span>' +
+      '<select class="phi-all-select phi-curtheme-sel" disabled><option value="">— Tous les thèmes —</option></select></label>' +
+      '</div>' +
+      '<a class="phi-philo-frise-link phi-cur-frise-link" href="#" hidden></a>' +
+      '</details>' +
+      /* Barre de tri, juste au-dessus de la liste */
+      '<div class="phi-toolbar">' +
+      '<div class="phi-toolbar-group">' +
+      '<span class="phi-all-count" id="' + uid + '-count"></span>' +
+      '<button type="button" class="phi-reset-btn" hidden>Réinitialiser</button>' +
+      '</div>' +
+      '<div class="phi-toolbar-group">' +
+      '<span class="phi-all-filter-lbl">Tri</span>' +
+      '<div class="phi-sort-tabs" role="group" aria-label="Ordre d\'affichage">' +
+      '<button type="button" class="phi-sort-tab phi-sort-tab--active" data-mode="alpha" aria-pressed="true">Alphabétique</button>' +
+      '<button type="button" class="phi-sort-tab" data-mode="time" aria-pressed="false">Temporelle</button>' +
+      '</div>' +
+      '<button type="button" class="phi-sort-dir" title="Inverser le sens de la liste"></button>' +
+      '</div>' +
+      '</div>' +
       '<div class="phi-all-filter-row phi-all-alpha-row"><div class="phi-all-alpha">' +
       '<button class="phi-alpha-btn phi-alpha-btn--active" data-letter="" hidden></button>' +
       ALPHABET.map(function (l) { return '<button class="phi-alpha-btn" data-letter="' + l + '">' + l + '</button>'; }).join('') +
       '</div></div>' +
-      '<div class="phi-all-filter-row phi-all-color-row"><div class="phi-cur-trads">' +
-          PHILO_COLOR_GROUPS.map(function (g) {
-            var tous = [].concat.apply([], g.lignes.map(function (l) { return l.items; }));
-            return '<div class="phi-cur-trad phi-philo-group" style="--trad-color:' + g.accent + '">' +
-              '<span class="phi-philo-group-title">' + g.fr + '</span>' +
-              g.lignes.map(function (l) {
-                return '<div class="phi-philo-ligne"><span class="phi-philo-ligne-lbl">' + l.fr + '</span>' +
-                  '<div class="phi-cur-subera-row">' +
-                  l.items.map(function (v) {
-                    var c = colorDef(v);
-                    return '<button type="button" class="phi-cur-subera-btn phi-color-pill" data-color="' + pillValue(c.v) + '">' +
-                      '<span class="phi-color-dot" style="background:' + c.grad + '" aria-hidden="true"></span>' + c.fr + '</button>';
-                  }).join('') +
-                  '</div></div>';
-              }).join('') +
-              tous.filter(function (v) { return VIRTUAL_FRISE_LINKS[v]; }).map(function (v) {
-                return '<a class="phi-philo-frise-link" data-for="' + pillValue(v) + '" href="' + VIRTUAL_FRISE_LINKS[v].href + '" hidden>' + VIRTUAL_FRISE_LINKS[v].fr + ' →</a>';
-              }).join('') +
-              '</div>';
-          }).join('') +
-          '</div></div>' +
-      '<div class="phi-all-filter-row phi-all-cur-color-row">' +
-      '<span class="phi-all-filter-lbl phi-cur-color-lbl">Tradition</span>' +
-      '<div class="phi-cur-trads">' +
-      COURANT_COLOR_FILTERS.map(function (c) {
-        return '<div class="phi-cur-trad" data-trad="' + c.v + '" style="--trad-color:' + c.grad + '">' +
-          '<span class="phi-color-item">' +
-          '<button class="phi-cur-color-btn" data-cur-color="' + c.v + '" title="' + c.fr + '" aria-label="' + c.fr + '" style="background:' + c.grad + '"></button>' +
-          '<span class="phi-color-item-lbl">' + c.fr + '</span></span>' +
-          '<div class="phi-cur-subera-row">' +
-          COURANT_SUBERAS[c.v].map(function (s) { return '<button class="phi-cur-subera-btn" data-subera="' + s.v + '">' + s.fr + '</button>'; }).join('') +
-          '</div>' +
-          '<div class="phi-cur-branch-row" hidden></div>' +
-          '</div>';
-      }).join('') +
-      '</div></div>' +
-      '<div class="phi-all-count" id="' + uid + '-count"></div>' +
       '<ul class="phi-all-list" id="' + uid + '-list"></ul>' +
       '<button class="phi-all-more" id="' + uid + '-more" hidden>Afficher plus…</button>' +
       '<button class="phi-all-top" id="' + uid + '-top" aria-label="Retour en haut" hidden>&#8593;</button>' +
@@ -327,16 +355,24 @@
 
     var input = container.querySelector('.phi-all-input');
     var clearBtn = container.querySelector('.phi-search-clear');
-    var femmesBtn = container.querySelector('.phi-femmes-btn');
+    var femmesBox = container.querySelector('.phi-femmes-box');
+    var femmesCheck = container.querySelector('.phi-femmes-check');
+    var vivantsBox = container.querySelector('.phi-vivants-box');
+    var vivantsCartouche = container.querySelector('.phi-box--vivants');
+    var themeSel = container.querySelector('.phi-theme-sel');
+    var tradSels = container.querySelectorAll('.phi-trad-sel');
+    var resetBtn = container.querySelector('.phi-reset-btn');
+    var dirBtn = container.querySelector('.phi-sort-dir');
     var countEl = container.querySelector('#' + uid + '-count');
     var listEl = container.querySelector('#' + uid + '-list');
     var moreBtn = container.querySelector('#' + uid + '-more');
     var topBtn = container.querySelector('#' + uid + '-top');
     var alphaBtns = container.querySelectorAll('.phi-alpha-btn');
-    var colorBtns = container.querySelectorAll('[data-color]');
-    var colorRow = container.querySelector('.phi-all-color-row');
-    var curColorBtns = container.querySelectorAll('.phi-cur-color-btn');
-    var curColorRow = container.querySelector('.phi-all-cur-color-row');
+    var colorRow = container.querySelector('.phi-box--tradition');
+    var curBox = container.querySelector('.phi-box--courants');
+    var curTradSel = container.querySelector('.phi-curtrad-sel');
+    var curThemeSel = container.querySelector('.phi-curtheme-sel');
+    var curFriseLink = container.querySelector('.phi-cur-frise-link');
     var primaryBtns = container.querySelectorAll('[data-primary]');
     var eraSel = container.querySelector('#' + uid + '-era-sel');
     var natSel = container.querySelector('#' + uid + '-nat-sel');
@@ -350,7 +386,8 @@
     var alphaRow = container.querySelector('.phi-all-alpha-row');
 
     var _mode = 'alpha';
-    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curSubera: '', curBranchGroup: '', yearFrom: null, yearTo: null, femmes: false };
+    var _desc = false; /* sens de la liste : Z→A, ou du plus récent au plus ancien */
+    var _filters = { typex: 'phi-all', era: '', nat: '', dom: '', cur: '', letter: '', color: '', curColor: '', curBranchGroup: '', yearFrom: null, yearTo: null, femmes: false, vivants: false, theme: '' };
     var _query = '';
     var _page = 1;
     var _debounce = null;
@@ -372,12 +409,11 @@
       if (_filters.cur && (!p.cur || p.cur.indexOf(_filters.cur) === -1)) return false;
       if (_filters.color && !matchesColorFilter(p, _filters.color)) return false;
       if (_filters.femmes && (isCourant || (p.trad || []).indexOf('femme') === -1)) return false;
-      if (_filters.curColor && !matchesCourantColorFilter(p, _filters.curColor)) return false;
-      if (_filters.curColor && _filters.curSubera) {
-        var defs = COURANT_SUBERAS[_filters.curColor] || [];
-        var def = defs.filter(function (s) { return s.v === _filters.curSubera; })[0];
-        if (def && def.epoques.indexOf(p.epoque) === -1) return false;
+      if (_filters.vivants) {
+        if (isCourant || !p.live) return false;
+        if (_filters.theme && (p.th || []).indexOf(_filters.theme) === -1) return false;
       }
+      if (_filters.curColor && !matchesCourantColorFilter(p, _filters.curColor)) return false;
       if (_filters.curBranchGroup) {
         var groupDef = (_meta.courantBranchGroups || []).filter(function (g) { return g.slug === _filters.curBranchGroup; })[0];
         if (groupDef && (!p.dom || !p.dom.some(function (d) { return groupDef.branches.indexOf(d) !== -1; }))) return false;
@@ -435,6 +471,30 @@
         return fn.indexOf(q) !== -1 || full.indexOf(q) !== -1;
       });
       _filtered.sort(_mode === 'time' ? sortTime : sortName);
+      if (_desc) _filtered.reverse();
+    }
+
+    /* Pastille de chaque cartouche : nombre de filtres actifs (utile quand il est replié) */
+    function majPastilles() {
+      var f = _filters;
+      var n = {
+        filtres: !!f.era + !!f.nat + !!f.dom + !!f.cur + (f.yearFrom !== null || f.yearTo !== null) + f.femmes,
+        vivants: f.vivants + !!f.theme,
+        tradition: +!!f.color,
+        courants: !!f.curColor + !!f.curBranchGroup,
+      };
+      container.querySelectorAll('.phi-box').forEach(function (box) {
+        var badge = box.querySelector('.phi-box-badge');
+        var k = n[box.dataset.box] || 0;
+        badge.hidden = !k;
+        badge.textContent = k;
+      });
+    }
+
+    function filtresActifs() {
+      var f = _filters;
+      return !!(_query || f.era || f.nat || f.dom || f.cur || f.letter || f.color || f.curColor || f.curBranchGroup
+        || f.yearFrom !== null || f.yearTo !== null || f.femmes || f.vivants || f.theme);
     }
 
     function renderItems(items) {
@@ -486,6 +546,8 @@
       listEl.innerHTML = renderItems(visible);
       countEl.textContent = total + ' ' + (total > 1 ? 'résultats' : 'résultat');
       moreBtn.hidden = visible.length >= total;
+      resetBtn.hidden = !filtresActifs();
+      majPastilles();
     }
 
     function refresh() { _page = 1; compute(); render(); }
@@ -497,13 +559,13 @@
       if (curSel) { curSel.disabled = isCourant; if (isCourant) { curSel.value = ''; _filters.cur = ''; } }
       if (natRow) natRow.hidden = isCourant;
       if (curRow) curRow.hidden = isCourant;
-      if (colorRow) { colorRow.classList.toggle('phi-all-color-row--hidden', isCourant); if (isCourant && _filters.color) setColorFilter(''); }
-      if (femmesBtn) {
-        femmesBtn.hidden = isCourant;
-        if (isCourant && _filters.femmes) { _filters.femmes = false; femmesBtn.setAttribute('aria-pressed', 'false'); }
-      }
-      if (curColorRow) { curColorRow.classList.toggle('phi-all-color-row--hidden', !isCourant); if (!isCourant && _filters.curColor) setCurColorFilter(''); }
-      curColorRow.classList.toggle('phi-all-cur-color-row--emphasis', isCourant);
+      if (colorRow) { colorRow.hidden = isCourant; if (isCourant && _filters.color) setColorFilter(''); }
+      femmesCheck.hidden = isCourant;
+      if (isCourant && _filters.femmes) setFemmes(false);
+      vivantsCartouche.hidden = isCourant;
+      if (isCourant && _filters.vivants) setVivants(false);
+      curBox.hidden = !isCourant;
+      if (!isCourant && _filters.curColor) setCurColorFilter('');
     }
 
     function populateSubType(primary, preferredValue) {
@@ -567,13 +629,31 @@
       _mode = mode;
       modeTabs.forEach(function (t) {
         var active = t.dataset.mode === mode;
-        t.classList.toggle('phi-all-mode-tab--active', active);
-        t.setAttribute('aria-selected', active ? 'true' : 'false');
+        t.classList.toggle('phi-sort-tab--active', active);
+        t.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
       if (alphaRow) alphaRow.hidden = mode === 'time';
+      syncDir();
       refresh();
     }
     modeTabs.forEach(function (btn) { btn.addEventListener('click', function () { setMode(btn.dataset.mode); }); });
+
+    /* Bouton de sens : son libellé dit l'ordre en cours, un clic l'inverse */
+    function syncDir() {
+      dirBtn.textContent = _mode === 'time'
+        ? (_desc ? 'Récents → anciens' : 'Anciens → récents')
+        : (_desc ? 'Z → A' : 'A → Z');
+      dirBtn.setAttribute('aria-pressed', String(_desc));
+      /* Les lettres suivent le sens de la liste : A…Z ou Z…A */
+      var alpha = container.querySelector('.phi-all-alpha');
+      Array.prototype.slice.call(alphaBtns)
+        .filter(function (b) { return b.dataset.letter; })
+        .sort(function (a, b) { return (_desc ? -1 : 1) * a.dataset.letter.localeCompare(b.dataset.letter); })
+        .forEach(function (b) { alpha.appendChild(b); });
+      alpha.scrollLeft = 0;
+    }
+    dirBtn.addEventListener('click', function () { _desc = !_desc; syncDir(); refresh(); });
+    syncDir();
 
     alphaBtns.forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -593,59 +673,43 @@
 
     function setColorFilter(c) {
       _filters.color = c;
-      colorBtns.forEach(function (b) {
-        b.classList.toggle('phi-cur-subera-btn--active', b.dataset.color === c);
+      /* Une seule tradition à la fois : l'autre liste revient à « Tous » */
+      tradSels.forEach(function (s) {
+        s.value = c && s.querySelector('option[value="' + c + '"]') ? c : '';
       });
-      container.querySelectorAll('.phi-philo-frise-link').forEach(function (a) { a.hidden = a.dataset.for !== c; });
-      container.querySelectorAll('.phi-philo-group').forEach(function (col) {
-        var own = !!c && !!col.querySelector('[data-color="' + c + '"]');
-        col.classList.toggle('phi-cur-trad--active', own);
-        col.classList.toggle('phi-cur-trad--dim', !!c && !own);
-      });
+      container.querySelectorAll('.phi-philo-frise-link:not(.phi-theme-frise-link)').forEach(function (a) { a.hidden = a.dataset.for !== c; });
     }
-    colorBtns.forEach(function (btn) { btn.addEventListener('click', function () { setColorFilter(_filters.color === btn.dataset.color ? '' : btn.dataset.color); refresh(); }); });
+    tradSels.forEach(function (sel) { sel.addEventListener('change', function () { setColorFilter(sel.value); refresh(); }); });
 
-    function syncCurActive() {
-      curColorBtns.forEach(function (b) { b.classList.toggle('phi-cur-color-btn--active', b.dataset.curColor === _filters.curColor); });
-      container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
-        var own = col.dataset.trad === _filters.curColor;
-        col.classList.toggle('phi-cur-trad--active', own);
-        col.classList.toggle('phi-cur-trad--dim', !!_filters.curColor && !own);
-        col.querySelectorAll('[data-subera]').forEach(function (b) { b.classList.toggle('phi-cur-subera-btn--active', own && b.dataset.subera === _filters.curSubera); });
-        col.querySelectorAll('[data-branch-group]').forEach(function (b) { b.classList.toggle('phi-cur-subera-btn--active', own && b.dataset.branchGroup === _filters.curBranchGroup); });
-      });
+    /* Onglet Courants : une tradition, puis un thème parmi les sous-frises de cette tradition */
+    function traditionCourant() {
+      return COURANT_COLOR_FILTERS.filter(function (c) { return c.v === _filters.curColor; })[0];
+    }
+    function majLienCourant() {
+      var trad = traditionCourant();
+      var groupe = (_meta.courantBranchGroups || []).filter(function (g) { return g.slug === _filters.curBranchGroup; })[0];
+      curFriseLink.hidden = !trad;
+      if (!trad) return;
+      curFriseLink.href = '/courants/frise/' + (groupe ? groupe.slug : trad.source) + '/';
+      curFriseLink.textContent = 'Voir la frise « ' + (groupe ? groupe.label : trad.fr) + ' » →';
     }
     function setCurColorFilter(c) {
       _filters.curColor = c;
-      _filters.curSubera = '';
       _filters.curBranchGroup = '';
-      syncCurActive();
+      curTradSel.value = c;
+      var trad = traditionCourant();
+      var groupes = trad ? (_meta.courantBranchGroups || []).filter(function (g) { return g.source === trad.source; }) : [];
+      curThemeSel.innerHTML = '<option value="">— Tous les thèmes —</option>' +
+        groupes.map(function (g) { return '<option value="' + g.slug + '">' + g.label.replace(/&/g, '&amp;') + '</option>'; }).join('');
+      curThemeSel.disabled = !groupes.length;
+      majLienCourant();
     }
-    function toggleCurSub(trad, key, value) {
-      if (_filters.curColor !== trad) setCurColorFilter(trad);
-      _filters[key] = _filters[key] === value ? '' : value;
-      syncCurActive();
+    curTradSel.addEventListener('change', function () { setCurColorFilter(curTradSel.value); refresh(); });
+    curThemeSel.addEventListener('change', function () {
+      _filters.curBranchGroup = curThemeSel.value;
+      majLienCourant();
       refresh();
-    }
-    function renderCurBranchGroups() {
-      var srcMap = { 'courant-occ': 'occidental', 'courant-ori': 'oriental' };
-      container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
-        var row = col.querySelector('.phi-cur-branch-row');
-        var groups = (_meta.courantBranchGroups || []).filter(function (g) { return g.source === srcMap[col.dataset.trad]; });
-        row.innerHTML = groups.map(function (g) { return '<button class="phi-cur-subera-btn" data-branch-group="' + g.slug + '">' + g.label + '</button>'; }).join('');
-        row.hidden = !groups.length;
-        row.querySelectorAll('[data-branch-group]').forEach(function (btn) {
-          btn.addEventListener('click', function () { toggleCurSub(col.dataset.trad, 'curBranchGroup', btn.dataset.branchGroup); });
-        });
-      });
-      syncCurActive();
-    }
-    container.querySelectorAll('.phi-cur-trad[data-trad]').forEach(function (col) {
-      col.querySelectorAll('[data-subera]').forEach(function (btn) {
-        btn.addEventListener('click', function () { toggleCurSub(col.dataset.trad, 'curSubera', btn.dataset.subera); });
-      });
     });
-    curColorBtns.forEach(function (btn) { btn.addEventListener('click', function () { setCurColorFilter(_filters.curColor === btn.dataset.curColor ? '' : btn.dataset.curColor); refresh(); }); });
 
     function syncAlpha(q) {
       var letter = q ? q[0].toUpperCase() : '';
@@ -664,9 +728,43 @@
       clearTimeout(_debounce);
       _debounce = setTimeout(refresh, 120);
     });
-    femmesBtn.addEventListener('click', function () {
-      _filters.femmes = !_filters.femmes;
-      femmesBtn.setAttribute('aria-pressed', String(_filters.femmes));
+    function setFemmes(on) {
+      _filters.femmes = on;
+      femmesBox.checked = on;
+    }
+    femmesBox.addEventListener('change', function () { setFemmes(femmesBox.checked); refresh(); });
+    function setTheme(v) {
+      _filters.theme = v;
+      themeSel.value = v;
+      container.querySelectorAll('.phi-theme-frise-link').forEach(function (a) { a.hidden = a.dataset.themeFor !== v; });
+    }
+    function setVivants(on) {
+      _filters.vivants = on;
+      vivantsBox.checked = on;
+      if (!on) setTheme('');
+    }
+    vivantsBox.addEventListener('change', function () { setVivants(vivantsBox.checked); refresh(); });
+    /* Choisir un sujet de travail coche « En activité uniquement » : les thèmes ne concernent que les vivants */
+    themeSel.addEventListener('change', function () {
+      var v = themeSel.value;
+      if (v) setVivants(true);
+      setTheme(v);
+      refresh();
+    });
+
+    resetBtn.addEventListener('click', function () {
+      input.value = ''; _query = ''; clearBtn.hidden = true;
+      syncAlpha('');
+      [eraSel, natSel, domSel, curSel].forEach(function (s) { if (s) s.value = ''; });
+      _filters.era = ''; _filters.nat = ''; _filters.dom = ''; _filters.cur = '';
+      if (yearFromSel) yearFromSel.value = '';
+      if (yearToSel) yearToSel.value = '';
+      _filters.yearFrom = null; _filters.yearTo = null;
+      setFemmes(false);
+      setVivants(false);
+      setColorFilter('');
+      setCurColorFilter('');
+      populateSelects();
       refresh();
     });
     clearBtn.addEventListener('click', function () {
@@ -701,7 +799,11 @@
         var data = res[0];
         _index = data.index || [];
         _meta = data._meta || _meta;
-        renderCurBranchGroups();
+        /* Nombre de philosophes en activité par sujet de travail */
+        THEMES_VIVANTS.forEach(function (t) {
+          var n = _index.filter(function (p) { return p.live && (p.th || []).indexOf(t.v) !== -1; }).length;
+          themeSel.querySelector('option[value="' + t.v + '"]').textContent = t.fr + ' (' + n + ')';
+        });
         populateSelects();
         updateCompatibility();
         refresh();
