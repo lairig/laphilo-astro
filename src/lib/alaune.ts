@@ -3,6 +3,7 @@
    fragments /data/alaune/<jour>.txt que home-alaune.js charge les autres
    jours : pas de saut de mise en page, pas de gros index à télécharger. */
 import { getCollection } from 'astro:content';
+import { themesVivants } from '../data/themes-vivants';
 
 interface Entry {
   n: string;
@@ -11,7 +12,12 @@ interface Entry {
   t: string;
   desc: string;
   dom: string;
+  /** Philosophes vivants : libellés de leurs sujets de travail */
+  th?: string[];
 }
+
+const VIVANTS = ['france-contemporains', 'contemporains-monde'];
+const libelleTheme = new Map(themesVivants.map((t) => [t.code, t.label]));
 
 /* Ordre de passage : mélange stable (tri par empreinte du nom), pour que deux
    jours de suite ne montrent pas deux voisins de l'ordre alphabétique. */
@@ -25,17 +31,19 @@ const melange = (a: Entry, b: Entry) => empreinte(a.n) - empreinte(b.n) || (a.n 
 export async function getAlaunePools() {
   const philosophes = await getCollection('philosophes');
   const courants = await getCollection('courants');
-  const phi: Entry[] = philosophes
-    .map(({ data: p }) => ({
-      n: p.name,
-      d: p.display_date,
-      u: `/philosophes/frise/${p.frise_source}/`,
-      t: p.thumbnail || '',
-      desc: p.description || '',
-      dom: '',
-    }))
-    .filter((e) => e.t && e.desc)
-    .sort(melange);
+  const avecFiche = philosophes.filter(({ data: p }) => p.thumbnail && p.description);
+  const versEntry = ({ data: p }: (typeof philosophes)[number]): Entry => ({
+    n: p.name,
+    d: p.display_date,
+    u: `/philosophes/frise/${p.frise_source}/`,
+    t: p.thumbnail || '',
+    desc: p.description || '',
+    dom: '',
+    th: (p.themes || []).map((c) => libelleTheme.get(c) || c),
+  });
+  /* « Philosophe à la une » : les penseurs du passé ; les vivants ont leur propre carte */
+  const phi: Entry[] = avecFiche.filter(({ data: p }) => !VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
+  const viv: Entry[] = avecFiche.filter(({ data: p }) => VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
   const cur: Entry[] = courants
     .map(({ data: c }) => ({
       n: c.name,
@@ -47,7 +55,7 @@ export async function getAlaunePools() {
     }))
     .filter((e) => e.desc)
     .sort(melange);
-  return { phi, cur };
+  return { phi, viv, cur };
 }
 
 /** Jour de l'année (1 à 366), calculé comme dans home-alaune.js. */
@@ -83,10 +91,11 @@ const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').rep
 const friseUrl = (e: Entry) => attr(e.u + '?p=' + encodeURIComponent(e.n));
 
 export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, day: number) {
-  const { phi, cur } = pools;
-  if (!phi.length || !cur.length) return '';
+  const { phi, viv, cur } = pools;
+  if (!phi.length || !cur.length || !viv.length) return '';
   const n = Math.max(0, epochDayFor(day));
   const entry = phi[n % phi.length];
+  const entryViv = viv[n % viv.length];
   const entryCur = cur[n % cur.length];
 
   let domHue = 0;
@@ -105,6 +114,19 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
     `<span class="alaune-name">${titleCase(entry.n)}</span>` +
     `<span class="alaune-dates">${entry.d}</span>` +
     `<span class="alaune-desc">${entry.desc}</span>` +
+    '</div>' +
+    '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
+    '</div>' +
+    '</a>' +
+    `<a class="alaune-card alaune-card--viv" href="${friseUrl(entryViv)}">` +
+    '<span class="alaune-subeyebrow">Philosophe vivant à la une</span>' +
+    '<div class="alaune-inner">' +
+    `<img class="alaune-portrait" src="${attr(entryViv.t)}" alt="${attr(entryViv.n)}" width="72" height="72" loading="lazy">` +
+    '<div class="alaune-text">' +
+    `<span class="alaune-name">${titleCase(entryViv.n)}</span>` +
+    `<span class="alaune-dates"><span class="alaune-live">● En activité</span> · ${entryViv.d}</span>` +
+    (entryViv.th?.length ? `<span class="alaune-themes">${entryViv.th.map((t) => `<span class="alaune-theme">${attr(t)}</span>`).join('')}</span>` : '') +
+    `<span class="alaune-desc">${entryViv.desc}</span>` +
     '</div>' +
     '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
     '</div>' +

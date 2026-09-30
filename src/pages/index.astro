@@ -12,6 +12,17 @@ const courants = await getCollection('courants');
 const buildDay = dayOfYear(new Date());
 const alaune = alauneHtml(await getAlaunePools(), buildDay);
 
+/* Cartouche de la Frise des penseurs du monde, sous « À la une » : un portrait
+   par grande tradition (le plus important de chacune), du plus ancien au plus récent */
+const penseursMonde = philosophes.filter((e) => e.data.groupe);
+const portraitsMonde = Array.from(
+  penseursMonde
+    .filter((e) => e.data.thumbnail)
+    .sort((a, b) => (b.data.importance ?? 1) - (a.data.importance ?? 1) || a.data.year - b.data.year)
+    .reduce((m, e) => (m.has(e.data.groupe) ? m : m.set(e.data.groupe, e)), new Map<string | undefined, (typeof philosophes)[number]>())
+    .values(),
+).sort((a, b) => a.data.year - b.data.year);
+
 const title = `${philosophes.length} philosophes, ${courants.length} courants de pensée : LaPhilo.fr`;
 const description = `${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`;
 const path = '/';
@@ -48,7 +59,7 @@ const jsonLd = [
   <link rel="preconnect" href="https://i.ytimg.com" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/home-extra.css" />
+  <link rel="stylesheet" href="/css/home-extra.css?v=20260930" />
 </head>
 <body>
 
@@ -97,6 +108,21 @@ const jsonLd = [
 </div>
 
 <div class="alaune-wrap" id="alaune-wrap" data-day={buildDay} set:html={alaune}></div>
+
+<div class="monde-accueil-wrap">
+  <a class="monde-accueil" href="/frises/penseurs-du-monde/">
+    <span class="monde-accueil-eyebrow">◈ La frise principale</span>
+    <span class="monde-accueil-title">La Frise des Penseurs du Monde</span>
+    <span class="monde-accueil-meta">{penseursMonde.length} penseurs · toutes les traditions côte à côte · de l'Égypte ancienne à nos jours</span>
+    <span class="monde-accueil-portraits" aria-hidden="true">
+      {portraitsMonde.map((e) => (
+        <img src={e.data.thumbnail} alt="" title={e.data.name} width="48" height="48" loading="lazy" />
+      ))}
+    </span>
+    <span class="monde-accueil-text">Occident, monde islamique et juif, Inde, Asie de l'Est, pensées du Sud, pensée russe, Proche-Orient ancien : cliquez un philosophe pour découvrir qui pensait, à la même époque, ailleurs dans le monde.</span>
+    <span class="monde-accueil-cta">Explorer la frise <span aria-hidden="true">→</span></span>
+  </a>
+</div>
 
 <div class="alaune-sep" aria-hidden="true"><span class="alaune-sep-mark">✦</span></div>
 

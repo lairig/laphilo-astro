@@ -92,6 +92,13 @@
     { v: 'reel', fr: 'Réel & connaissance' },
     { v: 'continental', fr: 'Héritiers de la pensée continentale' },
   ];
+  /* Teinte de fond (r,g,b) des cartes de frises « drapeau » (onglet Frises) ;
+     la bande de gauche reprend le dégradé de COLOR_FILTERS */
+  var TEINTES_FRISES = {
+    britannique: '40,70,160', italien: '0,146,70', 'europe-nord-centrale': '33,70,139', germanophone: '210,30,30',
+    'arabo-persan': '35,159,64', africain: '224,100,20', hispanique: '198,11,30', femme: '142,68,173',
+    'orient-ancien': '201,162,39', grec: '13,94,175', indien: '255,153,51', 'asie-est': '222,41,16', juif: '43,90,168',
+  };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
   }
@@ -234,6 +241,7 @@
         { v: 'courant-occ', lbl: 'Pensée occidentale' },
         { v: 'courant-ori', lbl: 'Pensée orientale / russe' },
       ],
+      frises: [{ v: 'frises', lbl: 'Toutes les frises' }],
     };
 
     /* Cartouche de filtres repliable : ouvert sur grand écran, replié sur mobile
@@ -249,6 +257,7 @@
       '<div class="phi-all-mode-tabs phi-all-type-tabs" role="tablist" aria-label="Type de recherche">' +
       '<button type="button" class="phi-all-mode-tab" data-primary="philosophes" role="tab" aria-selected="false">🏛️ Philosophes</button>' +
       '<button type="button" class="phi-all-mode-tab" data-primary="courants" role="tab" aria-selected="false">🌿 Courants</button>' +
+      '<button type="button" class="phi-all-mode-tab" data-primary="frises" role="tab" aria-selected="false">◈ Frises</button>' +
       '</div>' +
       '<div class="phi-all-bar-row">' +
       '<div class="phi-all-bar">' +
@@ -257,6 +266,28 @@
       '<button class="phi-search-clear" aria-label="Effacer" hidden>✕</button>' +
       '</div>' +
       '</div>' +
+      /* Onglet « Frises » : filtres de la liste des frises (index /data/frises-index.json) */
+      cartouche('frises', 'Filtres') +
+      '<div class="phi-box-grid">' +
+      '<label class="phi-field"><span class="phi-all-filter-lbl">Contenu</span>' +
+      '<select class="phi-all-select phi-fr-contenu">' +
+      '<option value="">— Tout —</option>' +
+      '<option value="philosophes">Philosophes</option>' +
+      '<option value="courants">Courants de pensée</option>' +
+      '</select></label>' +
+      '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Regroupement</span>' +
+      '<select class="phi-all-select phi-fr-regroup">' +
+      '<option value="">— Tous les regroupements —</option>' +
+      '<option value="epoque">Par époque</option>' +
+      '<option value="pays">Par pays ou langue</option>' +
+      '<option value="tradition">Par grande tradition</option>' +
+      '<option value="theme">Par thème (femmes)</option>' +
+      '<option value="vivants">Philosophes vivants, par sujet de travail</option>' +
+      '<option value="courants">Courants de pensée, par thème</option>' +
+      '</select></label>' +
+      '</div></details>' +
+      /* Onglet Frises : la Frise des penseurs du monde, frise principale, toujours visible, sous ses filtres */
+      '<div class="phi-monde-banner" hidden></div>' +
       /* Cartouche « Filtres » */
       cartouche('filtres', 'Filtres') +
       '<div class="phi-box-grid">' +
@@ -335,7 +366,7 @@
       '<span class="phi-all-count" id="' + uid + '-count"></span>' +
       '<button type="button" class="phi-reset-btn" hidden>Réinitialiser</button>' +
       '</div>' +
-      '<div class="phi-toolbar-group">' +
+      '<div class="phi-toolbar-group phi-toolbar-tri">' +
       '<span class="phi-all-filter-lbl">Tri</span>' +
       '<div class="phi-sort-tabs" role="group" aria-label="Ordre d\'affichage">' +
       '<button type="button" class="phi-sort-tab phi-sort-tab--active" data-mode="alpha" aria-pressed="true">Alphabétique</button>' +
@@ -363,6 +394,11 @@
     var tradSels = container.querySelectorAll('.phi-trad-sel');
     var resetBtn = container.querySelector('.phi-reset-btn');
     var dirBtn = container.querySelector('.phi-sort-dir');
+    var filtresBox = container.querySelector('.phi-box--filtres');
+    var frisesBox = container.querySelector('.phi-box--frises');
+    var frContenu = container.querySelector('.phi-fr-contenu');
+    var frRegroup = container.querySelector('.phi-fr-regroup');
+    var mondeBanner = container.querySelector('.phi-monde-banner');
     var countEl = container.querySelector('#' + uid + '-count');
     var listEl = container.querySelector('#' + uid + '-list');
     var moreBtn = container.querySelector('#' + uid + '-more');
@@ -392,6 +428,10 @@
     var _page = 1;
     var _debounce = null;
     var _filtered = [];
+    /* Onglet « Frises » : index chargé au premier clic, et ses propres filtres */
+    var _frises = null;
+    var _fr = { contenu: '', regroup: '' };
+    function estFrises() { return _filters.typex === 'frises'; }
 
     function applyFilter(p) {
       var isCourant = p.y === 'courant';
@@ -455,8 +495,32 @@
     }
     function sortTime(a, b) { return yearOf(a) - yearOf(b) || sortName(a, b); }
 
+    /* Liste des frises : filtres, puis recherche dans le nom, la description et les philosophes contenus */
+    function computeFrises(q) {
+      if (!_frises) return [];
+      var res = [];
+      _frises.forEach(function (f) {
+        if (f.c === 'monde') return;
+        if (_fr.contenu && f.c !== _fr.contenu) return;
+        if (_fr.regroup && f.r !== _fr.regroup) return;
+        /* Philosophes (ou courants) de la frise qui correspondent : cherchés même
+           quand le nom ou la description de la frise correspond déjà */
+        var hits = [];
+        if (q) {
+          hits = f.m.filter(function (m) { return stripAccents(m[0]).toLowerCase().indexOf(q) !== -1; });
+          if (!hits.length && stripAccents((f.n + ' ' + f.desc).toLowerCase()).indexOf(q) === -1) return;
+        }
+        res.push({ f: f, hits: hits });
+      });
+      /* Ordre fixe, sans bouton de tri : les frises des courants d'abord, puis
+         l'ordre de la page « Toutes les frises » (monde, époques, vivants, pays…) */
+      res.sort(function (a, b) { return (a.f.c === 'courants' ? 0 : 1) - (b.f.c === 'courants' ? 0 : 1) || a.f.i - b.f.i; });
+      return res;
+    }
+
     function compute() {
       var q = stripAccents(_query.trim().toLowerCase());
+      if (estFrises()) { _filtered = computeFrises(q); return; }
       _filtered = _index.filter(function (p) {
         if (!applyFilter(p)) return false;
         /* La lettre ne filtre que sans texte saisi : sinon « simone » (lettre S)
@@ -482,6 +546,7 @@
         vivants: f.vivants + !!f.theme,
         tradition: +!!f.color,
         courants: !!f.curColor + !!f.curBranchGroup,
+        frises: !!_fr.contenu + !!_fr.regroup,
       };
       container.querySelectorAll('.phi-box').forEach(function (box) {
         var badge = box.querySelector('.phi-box-badge');
@@ -493,6 +558,7 @@
 
     function filtresActifs() {
       var f = _filters;
+      if (estFrises()) return !!(_query || _fr.contenu || _fr.regroup);
       return !!(_query || f.era || f.nat || f.dom || f.cur || f.letter || f.color || f.curColor || f.curBranchGroup
         || f.yearFrom !== null || f.yearTo !== null || f.femmes || f.vivants || f.theme);
     }
@@ -540,11 +606,79 @@
       }).join('');
     }
 
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+    /* Philosophes de la frise qui correspondent à la recherche (nom complet) */
+    function membresTrouves(f, q) {
+      return q ? f.m.filter(function (m) { return stripAccents(m[0]).toLowerCase().indexOf(q) !== -1; }) : [];
+    }
+    function lienFrise(f, hits) {
+      return hits.length === 1 ? f.u + '?p=' + encodeURIComponent(hits[0][1] || hits[0][0]) : f.u;
+    }
+    function contientHtml(hits) {
+      return '<span class="phi-frise-hit">Contient : ' + hits.slice(0, 3).map(function (h) { return '<strong>' + esc(h[0]) + '</strong>'; }).join(', ') +
+        (hits.length > 3 ? ' et ' + (hits.length - 3) + ' autre' + (hits.length > 4 ? 's' : '') : '') + '</span>';
+    }
+    function renderMonde() {
+      var f = _frises && _frises.filter(function (x) { return x.c === 'monde'; })[0];
+      if (!f) return '';
+      var hits = membresTrouves(f, stripAccents(_query.trim().toLowerCase()));
+      /* Ouverte dans un nouvel onglet : la recherche reste disponible */
+      return '<a class="phi-monde-main" href="' + esc(lienFrise(f, hits)) + '" target="_blank" rel="noopener">' +
+        '<span class="phi-monde-eyebrow">◈ La frise principale</span>' +
+        '<span class="phi-monde-title">' + esc(f.n) + '</span>' +
+        '<span class="phi-monde-meta">' + esc(f.tag) + ' · ' + f.nb + ' penseurs · toutes les traditions côte à côte</span>' +
+        '<span class="phi-monde-portraits" aria-hidden="true">' + f.v.map(function (v) {
+          return '<img src="' + esc(v[1]) + '" alt="" title="' + esc(v[0]) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">';
+        }).join('') + '</span>' +
+        (hits.length ? contientHtml(hits) : '') +
+        '<span class="phi-monde-desc">' + esc(f.desc) + '</span>' +
+        '<span class="phi-monde-cta">Ouvrir la frise →</span>' +
+        '</a>';
+    }
+    function classeCouleur(k) {
+      if (k && k.indexOf('flag:') === 0) {
+        var c = colorDef(k.slice(5));
+        var teinte = TEINTES_FRISES[k.slice(5)];
+        /* Bande verticale : un drapeau à bandes verticales (90deg) est redressé pour que ses trois couleurs se voient */
+        var bande = c ? c.grad.replace('linear-gradient(90deg', 'linear-gradient(180deg') : '';
+        return c && teinte ? { cls: ' phi-frise-card--flag', style: ' style="--band:' + esc(bande) + ';--tint:' + teinte + '"' } : { cls: '', style: '' };
+      }
+      return { cls: k ? ' phi-all-link--' + k : '', style: '' };
+    }
+    function renderFrises(items) {
+      return items.map(function (r) {
+        var f = r.f;
+        /* Un seul philosophe trouvé : la frise s'ouvre directement sur lui */
+        var href = lienFrise(f, r.hits);
+        var coul = classeCouleur(f.k);
+        var thumbs = f.v.length
+          ? '<span class="phi-frise-thumbs" aria-hidden="true">' + f.v.map(function (v) {
+            return '<img src="' + esc(v[1]) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">';
+          }).join('') + '</span>'
+          : '<span class="phi-frise-thumbs phi-frise-thumbs--vide" aria-hidden="true">◈</span>';
+        var unite = f.c === 'courants' ? (f.nb > 1 ? 'courants' : 'courant') : (f.nb > 1 ? 'fiches' : 'fiche');
+        var hitsHtml = r.hits.length ? contientHtml(r.hits) : '';
+        var desc = f.desc.length > 190 ? f.desc.slice(0, 185).replace(/\s+\S*$/, '') + '…' : f.desc;
+        return '<li class="phi-result-item" role="listitem">' +
+          '<a href="' + esc(href) + '" class="phi-all-link phi-frise-card' + coul.cls + '"' + coul.style + '>' + thumbs +
+          '<span class="phi-result-info">' +
+          '<span class="phi-result-name">' + esc(f.n) + '</span>' +
+          '<span class="phi-card-dates-row">' + esc(f.tag) + ' · ' + f.nb + ' ' + unite + '</span>' +
+          hitsHtml +
+          '<span class="phi-card-desc">' + esc(desc) + '</span>' +
+          '</span></a></li>';
+      }).join('');
+    }
+
     function render() {
       var total = _filtered.length;
       var visible = _filtered.slice(0, _page * PAGE_SIZE);
-      listEl.innerHTML = renderItems(visible);
-      countEl.textContent = total + ' ' + (total > 1 ? 'résultats' : 'résultat');
+      listEl.innerHTML = estFrises() ? renderFrises(visible) : renderItems(visible);
+      mondeBanner.hidden = !estFrises() || !_frises;
+      if (!mondeBanner.hidden) mondeBanner.innerHTML = renderMonde();
+      countEl.textContent = estFrises()
+        ? total + ' ' + (total > 1 ? 'frises' : 'frise')
+        : total + ' ' + (total > 1 ? 'résultats' : 'résultat');
       moreBtn.hidden = visible.length >= total;
       resetBtn.hidden = !filtresActifs();
       majPastilles();
@@ -566,6 +700,15 @@
       if (isCourant && _filters.vivants) setVivants(false);
       curBox.hidden = !isCourant;
       if (!isCourant && _filters.curColor) setCurColorFilter('');
+      /* Onglet Frises : seuls son cartouche et la barre de tri restent */
+      var fr = estFrises();
+      frisesBox.hidden = !fr;
+      filtresBox.hidden = fr;
+      if (fr) { vivantsCartouche.hidden = true; colorRow.hidden = true; curBox.hidden = true; }
+      if (alphaRow) alphaRow.hidden = fr || _mode === 'time';
+      input.placeholder = fr ? 'Rechercher une frise ou un philosophe…' : 'Rechercher…';
+      container.querySelector('.phi-toolbar-tri').hidden = fr;
+      container.querySelector('.phi-toolbar').classList.toggle('phi-toolbar--frises', fr);
     }
 
     function populateSubType(primary, preferredValue) {
@@ -588,26 +731,22 @@
       updateCompatibility();
       populateSelects();
       refresh();
+      if (primary === 'frises' && !_frises) {
+        listEl.innerHTML = '<li class="phi-search-empty">Chargement…</li>';
+        fetch('/data/frises-index.json')
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            data.forEach(function (f, i) { f.i = i; }); /* rang dans le catalogue */
+            _frises = data;
+            if (estFrises()) refresh();
+          })
+          .catch(function () { listEl.innerHTML = '<li class="phi-search-empty">Impossible de charger la liste des frises.</li>'; });
+      }
     }
-    primaryBtns.forEach(function (btn) { btn.addEventListener('click', function () { setPrimary(btn.dataset.primary); }); });
 
-    /* Onglet « Frises » : menu d'accès direct aux frises (gabarit dans recherche.astro) */
-    var friseTpl = document.getElementById('frise-menu-tpl');
-    var typeTabs = container.querySelector('.phi-all-type-tabs');
-    if (friseTpl && typeTabs) {
-      typeTabs.appendChild(friseTpl.content.cloneNode(true));
-      var friseMenu = typeTabs.querySelector('.phi-frise-menu');
-      document.addEventListener('click', function (e) {
-        if (friseMenu.open && !friseMenu.contains(e.target)) friseMenu.open = false;
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && friseMenu.open) { friseMenu.open = false; friseMenu.querySelector('summary').focus(); }
-      });
-      /* Frise ouverte dans un nouvel onglet : refermer le menu ici */
-      friseMenu.addEventListener('click', function (e) {
-        if (e.target.closest('a')) friseMenu.open = false;
-      });
-    }
+    frContenu.addEventListener('change', function () { _fr.contenu = frContenu.value; refresh(); });
+    frRegroup.addEventListener('change', function () { _fr.regroup = frRegroup.value; refresh(); });
+    primaryBtns.forEach(function (btn) { btn.addEventListener('click', function () { setPrimary(btn.dataset.primary); }); });
 
     if (eraSel) eraSel.addEventListener('change', function () { _filters.era = eraSel.value; updateCompatibility(); refresh(); });
     if (natSel) natSel.addEventListener('change', function () { _filters.nat = natSel.value; updateCompatibility(); refresh(); });
@@ -632,7 +771,7 @@
         t.classList.toggle('phi-sort-tab--active', active);
         t.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
-      if (alphaRow) alphaRow.hidden = mode === 'time';
+      if (alphaRow) alphaRow.hidden = mode === 'time' || estFrises();
       syncDir();
       refresh();
     }
@@ -764,6 +903,8 @@
       setVivants(false);
       setColorFilter('');
       setCurColorFilter('');
+      frContenu.value = ''; frRegroup.value = '';
+      _fr = { contenu: '', regroup: '' };
       populateSelects();
       refresh();
     });

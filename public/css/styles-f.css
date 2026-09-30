@@ -253,3 +253,6 @@ a.cross-link-badge:hover{background:rgba(180,130,20,.24);border-color:rgba(180,1
    le nom de chaque bouton sous son symbole (au lieu du symbole seul). */
 .fha-left{display:flex;align-items:center;gap:.5rem}
 @media (max-width:640px){.fha-left,.fha-right{gap:.35rem}.fha-btn:has(.fha-lbl){flex-direction:column;gap:.15rem;padding:.3rem .5rem;min-width:3.2rem;line-height:1.1}.fha-btn .fha-ico{display:block;font-size:.95rem}.fha-btn .fha-lbl{display:block;font-size:.52rem;letter-spacing:.06em}}
+
+/* Nationalité après les dates dans la barre de navigation des frises : sur mobile, sur sa propre ligne */
+@media(max-width:480px){.mh-nat{display:block}.mh-nat>span[aria-hidden]{display:none}}

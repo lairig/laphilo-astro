@@ -132,3 +132,93 @@
     display: none;
   }
 }
+
+/* « À la une » : carte du philosophe vivant, dorée, distincte de la carte
+   « Philosophe à la une » (penseurs du passé) et de celle du courant. */
+.alaune-card--viv {
+  background: linear-gradient(150deg, #f8f0c8 0%, #ecd98c 45%, #dcc060 100%), var(--noise);
+  border-color: #b8860b;
+}
+.alaune-card--viv::before { background: linear-gradient(90deg, transparent, #b8860b, #f0c040, #b8860b, transparent); opacity: 0.9; }
+.alaune-card--viv .alaune-subeyebrow { color: #6b4a00; }
+.alaune-card--viv .alaune-portrait { border-color: #b8860b; filter: none; }
+.alaune-card--viv .alaune-btn { background: linear-gradient(150deg, #f0c040, #b8860b); border-color: #8a6508; }
+.alaune-live {
+  font-family: 'Cinzel', serif;
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1e5e12;
+}
+.alaune-themes { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.15rem 0 0.1rem; }
+.alaune-theme {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4a3200;
+  background: rgba(255, 250, 225, 0.65);
+  border: 1px solid rgba(138, 101, 8, 0.45);
+  border-radius: 20px;
+  padding: 0.12rem 0.5rem;
+}
+
+/* Cartouche de la Frise des penseurs du monde, sous « À la une » */
+.monde-accueil-wrap { max-width: 860px; margin: 1.4rem auto 0; padding: 0 1.5rem; }
+.monde-accueil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 1.5rem 1.4rem 1.3rem;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid #d4a843;
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(240, 200, 100, 0.22), transparent 70%),
+    linear-gradient(160deg, rgba(90, 60, 15, 0.6), rgba(30, 18, 8, 0.9));
+  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.45), 0 0 24px rgba(180, 130, 20, 0.18);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.monde-accueil:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(10, 5, 2, 0.5), 0 0 30px rgba(180, 130, 20, 0.35); }
+.monde-accueil-eyebrow { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d4a843; }
+.monde-accueil-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: #f7ecce;
+  text-shadow: 0 0 18px rgba(212, 168, 67, 0.35);
+}
+.monde-accueil-meta { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
+.monde-accueil-portraits { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0.2rem; }
+.monde-accueil-portraits img {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 168, 67, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.monde-accueil-text { max-width: 44rem; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.02rem; line-height: 1.45; color: #ead9a8; }
+.monde-accueil-cta {
+  margin-top: 0.4rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1e1208;
+  background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%);
+  border: 1px solid #e8c870;
+}
+@media (max-width: 660px) {
+  .monde-accueil-wrap { padding: 0 1rem; }
+  .monde-accueil { padding: 1.1rem 0.9rem; }
+  .monde-accueil-portraits img { width: 2.4rem; height: 2.4rem; }
+  .monde-accueil-text { font-size: 0.95rem; }
+}

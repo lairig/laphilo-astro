@@ -632,6 +632,12 @@
     return SEARCH_INDEX.find(function (p) { return p.y === 'courant' && p.n === courantName; }) || null;
   }
 
+  /* Nationalité affichée après les dates (philosophes seulement) : « 1929 – 2026 · Allemande » */
+  function _nationaliteHtml(p, cls) {
+    if (MODE !== 'philosophe' || !p.nationalite) return '';
+    return ` <span class="${cls}"><span aria-hidden="true">· </span>${p.nationalite}</span>`;
+  }
+
   /* Construit le HTML des badges de liens croisés pour une entrée (philosophe ou courant) */
   function _buildCrossLinksHtml(entry) {
     /* Astro : le HTML est déjà pré-calculé à la build (voir [frise].json.ts) */
@@ -749,7 +755,7 @@
       <div class="slide-text">
         <div class="slide-text-inner">
           <h2 class="slide-headline">${p.name}</h2>
-          <div class="slide-dates">${p.display_date}</div>
+          <div class="slide-dates">${p.display_date}${_nationaliteHtml(p, 'slide-nat')}</div>
           <div class="slide-body">${textWithoutAudio}</div>
         </div>
         ${audioBlock}
@@ -843,7 +849,7 @@
           onclick="window._frise.goTo(${current}-1)" ${hp ? '' : 'disabled'}>&#8249;</button>
         <div class="mh-center">
           <div class="mh-name">${DATA[current].name}</div>
-          <div class="mh-dates">${DATA[current].display_date}</div>
+          <div class="mh-dates">${DATA[current].display_date}${_nationaliteHtml(DATA[current], 'mh-nat')}</div>
         </div>
         <button class="mh-btn next" aria-label="${_isEN ? 'Next' : 'Suivant'}"
           onclick="window._frise.goTo(${current}+1)" ${hn ? '' : 'disabled'}>&#8250;</button>
