@@ -133,36 +133,117 @@
   }
 }
 
-/* « À la une » : carte du philosophe vivant, dorée, distincte de la carte
-   « Philosophe à la une » (penseurs du passé) et de celle du courant. */
-.alaune-card--viv {
-  background: linear-gradient(150deg, #f8f0c8 0%, #ecd98c 45%, #dcc060 100%), var(--noise);
-  border-color: #b8860b;
+/* « Activité du jour » : un philosophe vivant, à part du bloc « À la une »,
+   sur fond sombre avec un liseré vert (« en activité ») et or. */
+.activite-jour {
+  margin-top: 1.8rem;
+  padding: 1.4rem 1.4rem 1.2rem;
+  text-align: center;
+  border: 1px solid rgba(90, 170, 70, 0.55);
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(90, 170, 70, 0.16), transparent 65%),
+    linear-gradient(160deg, rgba(20, 45, 18, 0.55), rgba(20, 14, 6, 0.85));
+  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.4), inset 0 0 40px rgba(90, 170, 70, 0.06);
 }
-.alaune-card--viv::before { background: linear-gradient(90deg, transparent, #b8860b, #f0c040, #b8860b, transparent); opacity: 0.9; }
-.alaune-card--viv .alaune-subeyebrow { color: #6b4a00; }
-.alaune-card--viv .alaune-portrait { border-color: #b8860b; filter: none; }
-.alaune-card--viv .alaune-btn { background: linear-gradient(150deg, #f0c040, #b8860b); border-color: #8a6508; }
-.alaune-live {
+.activite-eyebrow {
+  display: block;
   font-family: 'Cinzel', serif;
-  font-style: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8fd47a;
+  text-shadow: 0 1px 12px rgba(90, 170, 70, 0.35);
+}
+.activite-sub {
+  display: block;
+  margin: 0.25rem 0 1rem;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  color: #ead9a8;
+}
+.activite-card {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  text-align: left;
+  text-decoration: none;
+  border: 1px solid rgba(212, 168, 67, 0.55);
+  border-left: 4px solid #5aaa46;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.activite-card:hover { transform: translateY(-2px); border-color: #d4a843; border-left-color: #7fd066; background: rgba(90, 170, 70, 0.08); }
+.activite-portrait {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #5aaa46;
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+.activite-text { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+.activite-live {
+  font-family: 'Cinzel', serif;
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #1e5e12;
+  color: #8fd47a;
 }
-.alaune-themes { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.15rem 0 0.1rem; }
-.alaune-theme {
+.activite-name { font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: #f7ecce; }
+.activite-meta { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
+.activite-desc { font-family: 'EB Garamond', serif; font-size: 1rem; line-height: 1.4; color: #ead9a8; }
+.activite-btn {
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
   font-family: 'Cinzel', serif;
-  font-size: 0.55rem;
-  letter-spacing: 0.04em;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4a3200;
-  background: rgba(255, 250, 225, 0.65);
-  border: 1px solid rgba(138, 101, 8, 0.45);
+  color: #10240c;
+  background: linear-gradient(150deg, #b7e6a4 0%, #6cbf55 55%, #3f8f2e 100%);
+  border: 1px solid #8fd47a;
+}
+.activite-sujets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  margin-top: 0.9rem;
+}
+.activite-sujets-lbl { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(143, 212, 122, 0.9); }
+.activite-sujets a {
+  padding: 0.3rem 0.8rem;
   border-radius: 20px;
-  padding: 0.12rem 0.5rem;
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #d8f0cc;
+  border: 1px solid rgba(143, 212, 122, 0.6);
+  background: rgba(90, 170, 70, 0.12);
+}
+.activite-sujets a::after { content: ' →'; }
+.activite-sujets a:hover { background: rgba(90, 170, 70, 0.28); color: #fff; }
+@media (max-width: 660px) {
+  .activite-jour { padding: 1.1rem 0.8rem 1rem; margin-top: 1.4rem; }
+  .activite-card { flex-direction: column; text-align: center; gap: 0.7rem; padding: 1rem 0.8rem; }
+  .activite-text { align-items: center; }
+  .activite-btn { align-self: center; }
+  .activite-portrait { width: 84px; height: 84px; }
+  .activite-name { font-size: 1.1rem; }
+  .activite-desc { font-size: 0.95rem; }
+  .activite-sujets a { padding: 0.5rem 0.8rem; }
 }
 
 /* Cartouche de la Frise des penseurs du monde, sous « À la une » */

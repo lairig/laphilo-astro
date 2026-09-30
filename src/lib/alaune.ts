@@ -1,4 +1,4 @@
-/* Bloc « À la une aujourd'hui » de la page d'accueil.
+/* Blocs « À la une aujourd'hui » et « Activité du jour » (un philosophe vivant) de la page d'accueil.
    Le même HTML est rendu au build dans index.astro (jour du build) et en
    fragments /data/alaune/<jour>.txt que home-alaune.js charge les autres
    jours : pas de saut de mise en page, pas de gros index à télécharger. */
@@ -12,8 +12,9 @@ interface Entry {
   t: string;
   desc: string;
   dom: string;
-  /** Philosophes vivants : libellés de leurs sujets de travail */
-  th?: string[];
+  /** Philosophes vivants : leurs sujets de travail [code, libellé] */
+  th?: [string, string][];
+  nat?: string;
 }
 
 const VIVANTS = ['france-contemporains', 'contemporains-monde'];
@@ -39,9 +40,10 @@ export async function getAlaunePools() {
     t: p.thumbnail || '',
     desc: p.description || '',
     dom: '',
-    th: (p.themes || []).map((c) => libelleTheme.get(c) || c),
+    th: (p.themes || []).map((c): [string, string] => [c, libelleTheme.get(c) || c]),
+    nat: p.nationalite,
   });
-  /* « Philosophe à la une » : les penseurs du passé ; les vivants ont leur propre carte */
+  /* « Philosophe à la une » : les penseurs du passé ; les vivants ont leur propre bloc, « Activité du jour » */
   const phi: Entry[] = avecFiche.filter(({ data: p }) => !VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
   const viv: Entry[] = avecFiche.filter(({ data: p }) => VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
   const cur: Entry[] = courants
@@ -118,19 +120,6 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
     '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
     '</div>' +
     '</a>' +
-    `<a class="alaune-card alaune-card--viv" href="${friseUrl(entryViv)}">` +
-    '<span class="alaune-subeyebrow">Philosophe vivant à la une</span>' +
-    '<div class="alaune-inner">' +
-    `<img class="alaune-portrait" src="${attr(entryViv.t)}" alt="${attr(entryViv.n)}" width="72" height="72" loading="lazy">` +
-    '<div class="alaune-text">' +
-    `<span class="alaune-name">${titleCase(entryViv.n)}</span>` +
-    `<span class="alaune-dates"><span class="alaune-live">● En activité</span> · ${entryViv.d}</span>` +
-    (entryViv.th?.length ? `<span class="alaune-themes">${entryViv.th.map((t) => `<span class="alaune-theme">${attr(t)}</span>`).join('')}</span>` : '') +
-    `<span class="alaune-desc">${entryViv.desc}</span>` +
-    '</div>' +
-    '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
-    '</div>' +
-    '</a>' +
     `<a class="alaune-card alaune-card--cur" href="${friseUrl(entryCur)}">` +
     '<span class="alaune-subeyebrow">Courant de pensée à la une</span>' +
     '<div class="alaune-inner">' +
@@ -144,6 +133,34 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
     '</div>' +
     '</a>' +
     '</div>' +
+    '</div>' +
+    activiteHtml(entryViv)
+  );
+}
+
+/* « Activité du jour » : un philosophe vivant, à part du bloc « À la une »,
+   avec ses sujets de travail et un lien vers la frise de chacun */
+function activiteHtml(e: Entry) {
+  const sujets = e.th ?? [];
+  return (
+    '<div class="activite-jour">' +
+    '<span class="activite-eyebrow">✦ Activité du jour ✦</span>' +
+    '<span class="activite-sub">Un philosophe vivant, qui pense notre époque</span>' +
+    `<a class="activite-card" href="${friseUrl(e)}">` +
+    `<img class="activite-portrait" src="${attr(e.t)}" alt="${attr(e.n)}" width="96" height="96" loading="lazy">` +
+    '<span class="activite-text">' +
+    '<span class="activite-live">● En activité</span>' +
+    `<span class="activite-name">${titleCase(e.n)}</span>` +
+    `<span class="activite-meta">${[e.nat, e.d].filter(Boolean).map((x) => attr(x!)).join(' · ')}</span>` +
+    `<span class="activite-desc">${e.desc}</span>` +
+    '<span class="activite-btn">Découvrir sa pensée <span aria-hidden="true">↗</span></span>' +
+    '</span>' +
+    '</a>' +
+    (sujets.length
+      ? '<div class="activite-sujets"><span class="activite-sujets-lbl">Sur le même sujet :</span>' +
+        sujets.map(([code, label]) => `<a href="/philosophes/frise/vivants-${attr(code)}/">${attr(label)}</a>`).join('') +
+        '</div>'
+      : '') +
     '</div>'
   );
 }
