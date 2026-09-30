@@ -6,19 +6,47 @@ import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import catalogue from '../data/frises-catalogue.json';
 
-/* Menu « Frises » : toutes les frises du catalogue (page /frises/), groupées */
-type Entry = { label: string; href: string };
-const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map((g: any) => ({
-  title: g.label,
-  entries: g.items.flatMap((it: any): Entry[] =>
-    it.links
-      ? it.links.map((l: any) => ({
-          label: l.label === 'Frise complète' ? `${it.name} — frise complète` : `${it.name} — ${l.label}`,
-          href: l.href,
-        }))
-      : [{ label: it.name, href: it.href }],
-  ),
-}));
+/* Menu « Frises » : toutes les frises du catalogue (page /frises/), sur trois niveaux :
+   rubrique (section du catalogue) → sous-titre explicite → frises, chacune avec ses dates. */
+type Entry = { label: string; href: string; note?: string };
+type Block = { heading?: string; hint?: string; entries: Entry[] };
+type Section = { title: string; blocks: Block[] };
+
+/* Les libellés courts du catalogue (« Anciens »…) ne se comprennent pas hors de la page /frises/ */
+const SOUS_TITRES: Record<string, [string, string?]> = {
+  Anciens: ['Philosophes anciens', "de l'Antiquité aux Lumières"],
+  Modernes: ['Philosophes modernes', 'du XVIIIᵉ au XXᵉ siècle'],
+  Contemporains: ['Philosophes contemporains', 'encore en activité'],
+  'Par pays': ['Par pays ou langue'],
+  'Par grande tradition': ['Par grande tradition'],
+  'Par thème': ['Par thème'],
+};
+const nomCourt = (name: string) => {
+  const n = name.replace(/^Tou(?:te)?s les /, '');
+  return n.charAt(0).toUpperCase() + n.slice(1);
+};
+const dates = (tag?: string) => tag?.replace(/^-(\d+) av\. J\.-C\./, '$1 av. J.-C.');
+
+const friseSections: Section[] = [];
+for (const g of catalogue.groups as any[]) {
+  if (g.section || !friseSections.length) friseSections.push({ title: g.section ?? g.label, blocks: [] });
+  const section = friseSections[friseSections.length - 1];
+  const simples = g.items.filter((it: any) => !it.links);
+  if (simples.length) {
+    const [heading, hint] = SOUS_TITRES[g.label] ?? [g.label];
+    section.blocks.push({
+      heading: heading === section.title ? undefined : heading,
+      hint,
+      entries: simples.map((it: any) => ({ label: nomCourt(it.name), href: it.href, note: dates(it.tag) })),
+    });
+  }
+  for (const it of g.items.filter((it: any) => it.links)) {
+    section.blocks.push({
+      heading: it.name === section.title ? undefined : it.name,
+      entries: it.links.map((l: any) => ({ label: l.label, href: l.href, note: l.desc })),
+    });
+  }
+}
 ---
 
 <html lang="fr">
@@ -294,40 +322,70 @@ const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map(
       top: calc(100% + 6px);
       right: 0;
       z-index: 60;
-      width: min(360px, calc(100vw - 32px));
-      max-height: min(70vh, 560px);
+      width: min(400px, calc(100vw - 32px));
+      max-height: min(70vh, 600px);
       overflow-y: auto;
-      padding: 0.4rem 0 0.6rem;
+      padding: 0 0 0.6rem;
       background: #1f1208;
       border: 1px solid rgba(212, 168, 67, 0.55);
       border-radius: 8px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      text-align: left;
     }
+    /* Rubrique : bandeau doré, bien distinct des sous-titres */
     .list-page .phi-frise-menu-title {
-      margin: 0.7rem 1rem 0.3rem;
+      margin: 0;
+      padding: 0.6rem 1rem 0.5rem;
       font-family: 'Cinzel', serif;
-      font-size: 0.68rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: #f0d590;
+      background: rgba(180, 130, 20, 0.22);
+      border-top: 1px solid rgba(212, 168, 67, 0.45);
+      border-bottom: 1px solid rgba(212, 168, 67, 0.25);
+    }
+    .list-page .phi-frise-menu-section:first-child .phi-frise-menu-title { border-top: 0; }
+    /* Sous-titre : « Philosophes anciens — de l'Antiquité aux Lumières » */
+    .list-page .phi-frise-menu-sub {
+      margin: 0.75rem 1rem 0.15rem;
+      font-family: 'EB Garamond', serif;
+      font-size: 1.02rem;
+      font-weight: 600;
+      line-height: 1.25;
       color: #d4a843;
     }
+    .list-page .phi-frise-menu-hint {
+      font-weight: 400;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: #b9a57c;
+    }
+    .list-page .phi-frise-menu-hint::before { content: ' — '; }
     .list-page .phi-frise-menu-panel a {
       display: block;
-      padding: 0.45rem 1rem;
+      padding: 0.35rem 1rem 0.35rem 1.6rem;
       font-family: 'EB Garamond', serif;
       font-size: 1rem;
-      line-height: 1.3;
+      line-height: 1.25;
       color: #f7ecce;
       text-decoration: none;
     }
+    .list-page .phi-frise-menu-title + a { padding-top: 0.6rem; }
     .list-page .phi-frise-menu-panel a:hover,
     .list-page .phi-frise-menu-panel a:focus-visible {
       background: rgba(180, 130, 20, 0.2);
       color: #fff4dc;
       outline: none;
     }
-    .list-page .phi-frise-menu-panel a::after { content: ' ↗'; color: #d4a843; font-size: 0.85em; }
+    .list-page .phi-frise-menu-name::after { content: ' ↗'; color: #d4a843; font-size: 0.85em; }
+    .list-page .phi-frise-menu-note {
+      display: block;
+      font-size: 0.82rem;
+      line-height: 1.25;
+      color: #b9a57c;
+    }
 
     .frise-header { padding-top: 3rem; }
     @media (max-width: 480px) {
@@ -355,11 +413,26 @@ const friseGroups: { title: string; entries: Entry[] }[] = catalogue.groups.map(
     <details class="phi-frise-menu">
       <summary class="phi-all-mode-tab">◈ Frises</summary>
       <div class="phi-frise-menu-panel" aria-label="Ouvrir une frise dans un nouvel onglet">
-        {friseGroups.map((g) => (
-          <>
-            <p class="phi-frise-menu-title" set:html={g.title} />
-            {g.entries.map((e) => <a href={e.href} target="_blank" rel="noopener" set:html={e.label} />)}
-          </>
+        {friseSections.map((s) => (
+          <section class="phi-frise-menu-section">
+            <p class="phi-frise-menu-title" set:html={s.title} />
+            {s.blocks.map((b) => (
+              <>
+                {b.heading && (
+                  <p class="phi-frise-menu-sub">
+                    <span set:html={b.heading} />
+                    {b.hint && <span class="phi-frise-menu-hint">{b.hint}</span>}
+                  </p>
+                )}
+                {b.entries.map((e) => (
+                  <a href={e.href} target="_blank" rel="noopener">
+                    <span class="phi-frise-menu-name" set:html={e.label} />
+                    {e.note && <span class="phi-frise-menu-note">{e.note}</span>}
+                  </a>
+                ))}
+              </>
+            ))}
+          </section>
         ))}
       </div>
     </details>

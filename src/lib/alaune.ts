@@ -13,7 +13,14 @@ interface Entry {
   dom: string;
 }
 
-const byName = (a: Entry, b: Entry) => (a.n < b.n ? -1 : a.n > b.n ? 1 : 0);
+/* Ordre de passage : mélange stable (tri par empreinte du nom), pour que deux
+   jours de suite ne montrent pas deux voisins de l'ordre alphabétique. */
+const empreinte = (s: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0;
+  return h;
+};
+const melange = (a: Entry, b: Entry) => empreinte(a.n) - empreinte(b.n) || (a.n < b.n ? -1 : a.n > b.n ? 1 : 0);
 
 export async function getAlaunePools() {
   const philosophes = await getCollection('philosophes');
@@ -28,7 +35,7 @@ export async function getAlaunePools() {
       dom: '',
     }))
     .filter((e) => e.t && e.desc)
-    .sort(byName);
+    .sort(melange);
   const cur: Entry[] = courants
     .map(({ data: c }) => ({
       n: c.name,
@@ -39,7 +46,7 @@ export async function getAlaunePools() {
       dom: (c.branches && c.branches[0]) || '',
     }))
     .filter((e) => e.desc)
-    .sort(byName);
+    .sort(melange);
   return { phi, cur };
 }
 
@@ -54,7 +61,19 @@ export function dayOfYear(now: Date) {
   );
 }
 
-const titleCase = (s: string) =>
+/* Numéro absolu (jours depuis 1970) de la prochaine date portant ce jour de
+   l'année, à partir de la veille du build. La rotation se poursuit ainsi d'une
+   année sur l'autre et parcourt toutes les fiches, au lieu de rejouer chaque
+   année les 366 mêmes. */
+const BUILD_EPOCH_DAY = Math.floor(Date.now() / 86400000);
+function epochDayFor(day: number) {
+  for (let e = BUILD_EPOCH_DAY - 1; e < BUILD_EPOCH_DAY + 366; e++) {
+    if (dayOfYear(new Date(e * 86400000)) === day) return e;
+  }
+  return BUILD_EPOCH_DAY + day; // jour 366 hors année bissextile
+}
+
+const titleCase =(s: string) =>
   s.toLowerCase().replace(/(^|[^a-zàâäéèêëïîôöùûüç])([a-zàâäéèêëïîôöùûüç])/gi, (_m, sep, c) => sep + c.toUpperCase());
 
 const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -64,8 +83,9 @@ const friseUrl = (e: Entry) => attr(e.u + '?p=' + encodeURIComponent(e.n));
 export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, day: number) {
   const { phi, cur } = pools;
   if (!phi.length || !cur.length) return '';
-  const entry = phi[day % phi.length];
-  const entryCur = cur[(day + 47) % cur.length];
+  const n = epochDayFor(day);
+  const entry = phi[n % phi.length];
+  const entryCur = cur[n % cur.length];
 
   let domHue = 0;
   for (let i = 0; i < entryCur.dom.length; i++) domHue = (domHue * 31 + entryCur.dom.charCodeAt(i)) >>> 0;
