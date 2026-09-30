@@ -105,32 +105,31 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
   domHue = domHue % 360;
 
   return (
+    /* « À la une » : même présentation que « Activité du jour » (cartes sombres,
+       portrait, étiquette, nom, repères, description, bouton), en cuivre et or */
     '<div class="alaune-group">' +
     '<span class="alaune-eyebrow">✦ À la une ✦</span>' +
-    '<div class="alaune-group-grid">' +
-    `<a class="alaune-card alaune-card--phi" href="${friseUrl(entry)}">` +
-    '<span class="alaune-subeyebrow">Philosophe à la une</span>' +
-    '<div class="alaune-inner">' +
-    `<img class="alaune-portrait" src="${attr(entry.t)}" alt="${attr(entry.n)}" width="72" height="72" loading="lazy">` +
-    '<div class="alaune-text">' +
-    `<span class="alaune-name">${titleCase(entry.n)}</span>` +
-    `<span class="alaune-dates">${entry.d}</span>` +
-    `<span class="alaune-desc">${entry.desc}</span>` +
-    '</div>' +
-    '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
-    '</div>' +
+    '<span class="une-sub">Un philosophe et un courant de pensée, chaque jour</span>' +
+    '<div class="une-grid">' +
+    `<a class="une-card une-card--phi" href="${friseUrl(entry)}">` +
+    `<img class="une-portrait" src="${attr(entry.t)}" alt="${attr(entry.n)}" width="64" height="64" loading="lazy">` +
+    '<span class="une-text">' +
+    '<span class="une-label">Philosophe à la une</span>' +
+    `<span class="une-name">${titleCase(entry.n)}</span>` +
+    `<span class="une-meta">${[entry.nat, entry.d].filter(Boolean).map((x) => attr(x!)).join(' · ')}</span>` +
+    `<span class="une-desc">${entry.desc}</span>` +
+    '<span class="une-btn">Découvrir <span aria-hidden="true">↗</span></span>' +
+    '</span>' +
     '</a>' +
-    `<a class="alaune-card alaune-card--cur" href="${friseUrl(entryCur)}">` +
-    '<span class="alaune-subeyebrow">Courant de pensée à la une</span>' +
-    '<div class="alaune-inner">' +
-    (entryCur.dom ? `<span class="alaune-dom-badge" style="--dom-hue:${domHue}">${entryCur.dom}</span>` : '') +
-    '<div class="alaune-text">' +
-    `<span class="alaune-name">${entryCur.n}</span>` +
-    `<span class="alaune-dates">${entryCur.d}</span>` +
-    `<span class="alaune-desc">${entryCur.desc}</span>` +
-    '</div>' +
-    '<span class="alaune-btn">Découvrir <span class="alaune-btn-arrow">↗</span></span>' +
-    '</div>' +
+    `<a class="une-card une-card--cur" href="${friseUrl(entryCur)}">` +
+    (entryCur.dom ? `<span class="une-badge" style="--dom-hue:${domHue}">${entryCur.dom}</span>` : '<span class="une-badge une-badge--vide">◈</span>') +
+    '<span class="une-text">' +
+    '<span class="une-label">Courant de pensée à la une</span>' +
+    `<span class="une-name">${entryCur.n}</span>` +
+    `<span class="une-meta">${attr(entryCur.d)}</span>` +
+    `<span class="une-desc">${entryCur.desc}</span>` +
+    '<span class="une-btn">Découvrir <span aria-hidden="true">↗</span></span>' +
+    '</span>' +
     '</a>' +
     '</div>' +
     '</div>' +
