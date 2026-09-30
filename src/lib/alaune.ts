@@ -65,12 +65,14 @@ export function dayOfYear(now: Date) {
    l'année, à partir de la veille du build. La rotation se poursuit ainsi d'une
    année sur l'autre et parcourt toutes les fiches, au lieu de rejouer chaque
    année les 366 mêmes. */
-const BUILD_EPOCH_DAY = Math.floor(Date.now() / 86400000);
 function epochDayFor(day: number) {
-  for (let e = BUILD_EPOCH_DAY - 1; e < BUILD_EPOCH_DAY + 366; e++) {
+  /* Date lue ici et non au chargement du module : sur Cloudflare (workerd),
+     l'horloge vaut 0 hors du traitement d'une requête. */
+  const buildEpochDay = Math.floor(Date.now() / 86400000);
+  for (let e = buildEpochDay - 1; e < buildEpochDay + 366; e++) {
     if (dayOfYear(new Date(e * 86400000)) === day) return e;
   }
-  return BUILD_EPOCH_DAY + day; // jour 366 hors année bissextile
+  return buildEpochDay + day; // jour 366 hors année bissextile
 }
 
 const titleCase =(s: string) =>
@@ -83,7 +85,7 @@ const friseUrl = (e: Entry) => attr(e.u + '?p=' + encodeURIComponent(e.n));
 export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, day: number) {
   const { phi, cur } = pools;
   if (!phi.length || !cur.length) return '';
-  const n = epochDayFor(day);
+  const n = Math.max(0, epochDayFor(day));
   const entry = phi[n % phi.length];
   const entryCur = cur[n % cur.length];
 
