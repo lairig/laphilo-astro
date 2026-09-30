@@ -178,8 +178,8 @@
 }
 .activite-card:hover { transform: translateY(-2px); border-color: #d4a843; border-left-color: #7fd066; background: rgba(90, 170, 70, 0.08); }
 .activite-portrait {
-  width: 96px;
-  height: 96px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
   object-fit: cover;
   border-radius: 50%;
@@ -240,7 +240,7 @@
   .activite-card { flex-direction: column; text-align: center; gap: 0.7rem; padding: 1rem 0.8rem; }
   .activite-text { align-items: center; }
   .activite-btn { align-self: center; }
-  .activite-portrait { width: 84px; height: 84px; }
+  .activite-portrait { width: 60px; height: 60px; }
   .activite-name { font-size: 1.1rem; }
   .activite-desc { font-size: 0.95rem; }
   .activite-sujets a { padding: 0.5rem 0.8rem; }
@@ -303,3 +303,15 @@
   .monde-accueil-portraits img { width: 2.4rem; height: 2.4rem; }
   .monde-accueil-text { font-size: 0.95rem; }
 }
+
+/* Cartouche « À la une » : sa propre couleur (cuivre et or), distincte du vert
+   de « Activité du jour » ; remplace le fond presque transparent de styles.css */
+.alaune-group {
+  border: 1px solid rgba(214, 130, 60, 0.6);
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(240, 190, 90, 0.18), transparent 65%),
+    linear-gradient(160deg, rgba(125, 48, 16, 0.55), rgba(30, 14, 6, 0.88));
+  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.4), inset 0 0 40px rgba(214, 130, 60, 0.08);
+}
+.alaune-group > .alaune-eyebrow { color: #f0c27a; text-shadow: 0 1px 12px rgba(214, 130, 60, 0.45); }

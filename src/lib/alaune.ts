@@ -106,7 +106,7 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
 
   return (
     '<div class="alaune-group">' +
-    '<span class="alaune-eyebrow">✦ À la une aujourd\'hui ✦</span>' +
+    '<span class="alaune-eyebrow">✦ À la une ✦</span>' +
     '<div class="alaune-group-grid">' +
     `<a class="alaune-card alaune-card--phi" href="${friseUrl(entry)}">` +
     '<span class="alaune-subeyebrow">Philosophe à la une</span>' +
@@ -147,7 +147,7 @@ function activiteHtml(e: Entry) {
     '<span class="activite-eyebrow">✦ Activité du jour ✦</span>' +
     '<span class="activite-sub">Un philosophe vivant, qui pense notre époque</span>' +
     `<a class="activite-card" href="${friseUrl(e)}">` +
-    `<img class="activite-portrait" src="${attr(e.t)}" alt="${attr(e.n)}" width="96" height="96" loading="lazy">` +
+    `<img class="activite-portrait" src="${attr(e.t)}" alt="${attr(e.n)}" width="64" height="64" loading="lazy">` +
     '<span class="activite-text">' +
     '<span class="activite-live">● En activité</span>' +
     `<span class="activite-name">${titleCase(e.n)}</span>` +
