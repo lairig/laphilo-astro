@@ -25,9 +25,11 @@ export const GET: APIRoute = async () => {
     const isOriental = meta?.isOriental || false;
     const epoque = isOriental ? epoqueFromYear(p.year) : meta?.epoque || 'modernes';
     const live = meta?.colorFilter === 'live';
+    /* Codes de branche en minuscules (une fiche porte « Langage ») */
+    const branches = (p.branches || []).map((d) => d.toLowerCase());
 
     if (p.nationalite) natsSet.add(p.nationalite);
-    (p.branches || []).forEach((d) => domsSet.add(d));
+    branches.forEach((d) => domsSet.add(d));
     (p.courants || []).forEach((c) => cursSet.add(c));
 
     index.push({
@@ -40,7 +42,7 @@ export const GET: APIRoute = async () => {
       trad: p.traditions || [],
       grp: p.groupe || '',
       th: p.themes || [],
-      dom: p.branches || [],
+      dom: branches,
       cur: p.courants || [],
       desc: p.description || '',
       live,

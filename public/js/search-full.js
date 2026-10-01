@@ -9,6 +9,10 @@
 
   var _index = [];
   var _meta = { nats: [], doms: [], doms_cur: [], curs: [] };
+  /* Libellés des codes de branche des philosophes (colonne Branches des xlsx) */
+  var BRANCHES_FR = { metaphysique: 'Métaphysique', epistemologie: 'Épistémologie', ethique: 'Éthique', politique: 'Politique',
+    esthetique: 'Esthétique', logique: 'Logique', langage: 'Langage', spiritualite: 'Spiritualité' };
+  function brancheFr(v) { return BRANCHES_FR[v] || v; }
 
   var COLOR_FILTERS = [
     { v: 'oriental', fr: 'Orientaux', grad: '#1e8c3c' },
@@ -478,7 +482,7 @@
       }
       if (domSel) {
         var prevDom = domSel.value;
-        domSel.innerHTML = '<option value="">— Toutes branches —</option>' + doms.map(function (v) { return '<option value="' + v + '">' + v + '</option>'; }).join('');
+        domSel.innerHTML = '<option value="">— Toutes branches —</option>' + doms.map(function (v) { return '<option value="' + v + '">' + brancheFr(v) + '</option>'; }).join('');
         if (prevDom && doms.indexOf(prevDom) !== -1) domSel.value = prevDom; else if (prevDom) { domSel.value = ''; _filters.dom = ''; }
       }
       if (curSel) {
@@ -946,6 +950,14 @@
           themeSel.querySelector('option[value="' + t.v + '"]').textContent = t.fr + ' (' + n + ')';
         });
         populateSelects();
+        /* Lien direct vers une branche, depuis « C'est quoi la philosophie ? » : /recherche/?branche=ethique */
+        var brancheUrl = (new URLSearchParams(location.search).get('branche') || '').toLowerCase();
+        if (brancheUrl && domSel && (_meta.doms || []).indexOf(brancheUrl) !== -1) {
+          domSel.value = brancheUrl;
+          _filters.dom = brancheUrl;
+          if (filtresBox) filtresBox.open = true;
+          populateSelects();
+        }
         updateCompatibility();
         refresh();
       })

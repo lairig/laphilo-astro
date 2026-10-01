@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import { getCollection } from 'astro:content';
 const branches = [
   {
     name: 'La métaphysique',
@@ -90,18 +91,211 @@ const branches = [
     audioSrc: 'https://media.radiofrance-podcast.net/podcast09/16256-17.09.2012-ITEMA_20401016-2012C6256S0261-NET_CDC48275-DC3E-45C1-B7F3-86D283756A5E_DF-21.mp3',
   },
   {
-    name: 'Le langage',
-    tag: 'Communication · Argumentation',
+    name: "L'esprit et le langage",
+    tag: 'Conscience · Sens · Communication',
     ytId: 'CocKcq8J_H4',
-    text: `La philosophie du langage interroge le lien entre les mots, la pensée et le monde. Quand je dis "justice", "bonheur", est-ce que je désigne quelque chose de réel ? Le langage nous permet-il de tout dire, ou y a-t-il des expériences fondamentalement indicibles ? Le langage crée-t-il la réalité, ou se contente-t-il de la décrire ?
+    text: `L'esprit et le langage sont si liés qu'on les étudie souvent ensemble. Qu'est-ce que la conscience : est-elle produite par le cerveau, ou y a-t-il en nous quelque chose qui échappe à la matière ? Et comment des mots peuvent-ils avoir un sens ? Quand je dis "justice", "bonheur", est-ce que je désigne quelque chose de réel ? Le langage nous permet-il de tout dire, ou y a-t-il des expériences fondamentalement indicibles ? Aujourd'hui, une question les réunit : une intelligence artificielle qui manie parfaitement la langue pense-t-elle, et comprend-elle ce qu'elle dit ?
 <br><br>
-<strong>Définition</strong> : Étude des relations entre les mots, leurs sens, leurs références et leur usage dans la communication.
+<strong>Définition</strong> : Étude de l'esprit et de la conscience, de leur rapport au corps et au cerveau, ainsi que des relations entre les mots, leur sens, leurs références et leur usage dans la communication.
 <br>
-<strong>Philosophes clés</strong> : Frege (distinction sens/référence), Saussure (le signe linguistique est arbitraire), Wittgenstein (<em>les jeux de langage</em> — le sens naît de l'usage, pas de l'essence), Derrida (déconstruction — les mots ne renvoient qu'à d'autres mots), J.L. Austin (les actes de langage — dire, c'est aussi faire).
+<strong>Philosophes clés</strong> : Descartes (dualisme de l'âme et du corps), Frege (distinction sens/référence), Saussure (le signe linguistique est arbitraire), Wittgenstein (<em>les jeux de langage</em> — le sens naît de l'usage, pas de l'essence), J.L. Austin (les actes de langage — dire, c'est aussi faire), Derrida (déconstruction — les mots ne renvoient qu'à d'autres mots), Thomas Nagel (« Quel effet cela fait-il d'être une chauve-souris ? »), John Searle (la « chambre chinoise » — manipuler des symboles n'est pas comprendre), David Chalmers (le « problème difficile » de la conscience).
 <br>
-<strong>Ce qu'elle nous apprend</strong> : Comprendre le langage, c'est comprendre comment nous construisons notre réalité — pourquoi tant de malentendus, de manipulations et de conflits naissent d'un mauvais usage des mots.`,
+<strong>Ce qu'elle nous apprend</strong> : Comprendre l'esprit et le langage, c'est comprendre comment nous pensons et construisons notre réalité — pourquoi tant de malentendus, de manipulations et de conflits naissent d'un mauvais usage des mots, et ce qu'une machine pourrait, ou non, devenir.`,
     audioTitle: 'Wittgenstein : Décrire les usages du langage – France Culture',
     audioSrc: 'https://media.radiofrance-podcast.net/podcast09/10467-15.03.2016-ITEMA_20936507-2016C12410S0075-21.mp3',
+  },
+];
+
+/* ── Ce qui relie la page au reste du site ──────────────────────────────
+   Les penseurs et courants cités ci-dessous doivent exister : sinon la
+   construction s'arrête (pas de lien cassé en ligne). */
+const philosophes = await getCollection('philosophes');
+const courants = await getCollection('courants');
+const parId = new Map(philosophes.map((e) => [e.id, e]));
+const friseDuCourant = new Map(courants.map((c) => [c.data.name, c.data.frise_source]));
+
+type Lien = { label: string; href: string };
+const penseur = (id: string, label: string): Lien => {
+  if (!parId.has(id)) throw new Error(`definition.astro : pas de fiche « ${id} »`);
+  return { label, href: `/philosophes/${id}/` };
+};
+const courant = (name: string): Lien => {
+  const frise = friseDuCourant.get(name);
+  if (!frise) throw new Error(`definition.astro : pas de courant « ${name} »`);
+  return { label: name, href: `/courants/frise/${frise}/?p=${encodeURIComponent(name)}` };
+};
+const vivants = (code: string, label: string): Lien => ({ label, href: `/philosophes/frise/vivants-${code}/` });
+
+/* Nombre de philosophes par branche (colonne Branches des xlsx, en minuscules) */
+const parBranche = new Map<string, number>();
+for (const e of philosophes) for (const b of e.data.branches || []) parBranche.set(b.toLowerCase(), (parBranche.get(b.toLowerCase()) || 0) + 1);
+
+/* Sous-frises des courants (catalogue de /frises/) */
+const SF = {
+  occMeta: { label: 'Courants : Métaphysique & Théologie', href: '/courants/frise/occidental--metaphysique-theologie/' },
+  occPol: { label: 'Courants : Politique & Éthique', href: '/courants/frise/occidental--politique-ethique/' },
+  occCon: { label: 'Courants : Connaissance & Sciences', href: '/courants/frise/occidental--connaissance-sciences/' },
+  occTout: { label: 'Tous les courants occidentaux', href: '/courants/frise/occidental/' },
+  oriTheo: { label: 'Pensée orientale : Théologie & Spiritualité', href: '/courants/frise/oriental--theologie-spiritualite/' },
+  oriPol: { label: 'Pensée orientale : Politique & Métaphysique', href: '/courants/frise/oriental--politique-metaphysique/' },
+  oriLog: { label: 'Pensée orientale : Logique, Éthique & Sciences', href: '/courants/frise/oriental--logique-ethique-sciences/' },
+};
+
+/* « Explorer » sous chacune des 7 branches */
+const explorer: Record<string, { code: string; de: string; frises: Lien[]; aujourdhui?: Lien[] }> = {
+  'La métaphysique': { code: 'metaphysique', de: 'de la métaphysique', frises: [SF.occMeta, SF.oriPol] },
+  "L'épistémologie": { code: 'epistemologie', de: "de l'épistémologie", frises: [SF.occCon, SF.oriLog] },
+  "L'éthique": { code: 'ethique', de: "de l'éthique", frises: [SF.occPol, SF.oriLog] },
+  'La politique': { code: 'politique', de: 'de la politique', frises: [SF.occPol, SF.oriPol] },
+  "L'esthétique": { code: 'esthetique', de: "de l'esthétique", frises: [SF.occTout] },
+  'La logique': { code: 'logique', de: 'de la logique', frises: [SF.occCon, SF.oriLog] },
+  "L'esprit et le langage": {
+    code: 'langage', de: 'du langage',
+    frises: [SF.occCon, courant('Fonctionnalisme'), courant('Computationnalisme')],
+    aujourdhui: [vivants('esprit-ia', 'Esprit, cerveau & IA')],
+  },
+};
+const rechercheBranche = (code: string) => `/recherche/?branche=${code}`;
+
+/* Branches spécialisées, les « philosophies de… » : présentées comme les 7
+   branches (accordéon, vidéo, texte, philosophes clés, liens vers le site).
+   ytId : identifiant de la vidéo YouTube (la partie après « v= » dans l'adresse) ;
+   tant qu'il est vide, la vidéo n'est pas affichée. */
+/* Typographie française : espace insécable avant ? ! : ; » et après « */
+const fr = (t: string) => t.replace(/ ([?!:;»])/g, ' $1').replace(/« /g, '« ');
+type Cle = Lien & { note: string };
+const cle = (id: string, label: string, note: string): Cle => ({ ...penseur(id, label), note });
+const nSpiritualite = parBranche.get('spiritualite') || 0;
+const specialisees: {
+  nom: string; tag: string; ytId: string; intro: string; definition: string;
+  penseurs: Cle[]; apprend: string; liens: Lien[]; aujourdhui: Lien[];
+}[] = [
+  {
+    nom: 'La philosophie des sciences', tag: 'Méthode · Preuve · Révolutions scientifiques', ytId: 'vfo1GxpeWnM',
+    intro: "Qu'est-ce qui distingue une théorie scientifique d'une simple croyance ? La science progresse-t-elle en accumulant des vérités, ou par ruptures successives ? Les lois de la physique décrivent-elles le réel lui-même, ou seulement nos façons de le mesurer ? Elle se décline aussi en domaines : philosophie de la physique, de la biologie, des mathématiques.",
+    definition: 'Réflexion sur les méthodes, les concepts, la valeur et les limites de la connaissance scientifique.',
+    penseurs: [
+      cle('gaston-bachelard', 'Gaston Bachelard', 'l’obstacle épistémologique'),
+      cle('karl-popper', 'Karl Popper', 'une théorie scientifique doit pouvoir être réfutée'),
+      cle('thomas-kuhn', 'Thomas Kuhn', 'paradigmes et révolutions scientifiques'),
+      cle('georges-canguilhem', 'Georges Canguilhem', 'philosophie de la biologie et de la médecine'),
+    ],
+    apprend: 'Comprendre comment la science établit ses vérités aide à lui faire confiance sans la croire infaillible — et à reconnaître les fausses sciences.',
+    liens: [SF.occCon, courant('Positivisme Logique')],
+    aujourdhui: [vivants('reel', 'Réel & connaissance')],
+  },
+  {
+    nom: 'La philosophie de la religion', tag: 'Dieu · Foi · Raison', ytId: '6n78mWKftZ8',
+    intro: "Peut-on prouver l'existence de Dieu ? La foi a-t-elle besoin de la raison, ou la dépasse-t-elle ? Comment concilier un Dieu bon et la présence du mal ? Toutes les grandes traditions, chrétienne, juive, islamique, indienne ou chinoise, ont confronté leurs croyances aux exigences de la pensée rationnelle.",
+    definition: 'Examen philosophique des croyances religieuses, du divin, du sacré et des rapports entre la foi et la raison.',
+    penseurs: [
+      cle('al-ghazali', 'Al-Ghazali', 'les limites de la philosophie face à la foi'),
+      cle('moise-maimonide', 'Maïmonide', 'accorder la Torah et Aristote'),
+      cle('thomas-d-aquin', "Thomas d'Aquin", 'les cinq voies vers Dieu'),
+      cle('blaise-pascal', 'Pascal', 'le pari, et « le cœur a ses raisons »'),
+      cle('soren-kierkegaard', 'Kierkegaard', 'la foi comme saut et engagement'),
+    ],
+    apprend: 'Croyant ou non, on comprend mieux les civilisations, et ses propres convictions, en examinant ce que croire veut dire.',
+    liens: [{ label: `Les ${nSpiritualite} philosophes de la spiritualité`, href: rechercheBranche('spiritualite') }, SF.oriTheo],
+    aujourdhui: [vivants('sens', 'Sens & spiritualité')],
+  },
+  {
+    nom: 'La philosophie du droit', tag: 'Loi · Justice · Droits', ytId: 'U0anrh4iNT0',
+    intro: "Une loi est-elle juste parce qu'elle est la loi ? Existe-t-il des droits naturels, antérieurs à tout État ? Pourquoi punir, et jusqu'où ? Faut-il obéir à une loi injuste ? Entre morale et politique, la philosophie du droit interroge ce qui fonde l'autorité des règles qui nous gouvernent.",
+    definition: 'Réflexion sur la nature, les fondements et la légitimité du droit, de la loi et de la justice.',
+    penseurs: [
+      cle('hugo-grotius', 'Grotius', 'le droit naturel et le droit des gens'),
+      cle('montesquieu', 'Montesquieu', '<em>De l’esprit des lois</em>, la séparation des pouvoirs'),
+      cle('jeremy-bentham', 'Jeremy Bentham', 'le droit au service du plus grand bonheur'),
+    ],
+    apprend: 'Le droit n’est pas une simple technique : il traduit des choix sur ce que nous nous devons les uns aux autres.',
+    liens: [SF.occPol],
+    aujourdhui: [vivants('justice', 'Justice & démocratie')],
+  },
+  {
+    nom: "La philosophie de l'histoire", tag: 'Sens · Progrès · Civilisations', ytId: 'bUGsQjLZ-Eg',
+    intro: "L'histoire a-t-elle un sens, une direction ? Les civilisations naissent-elles et meurent-elles comme des êtres vivants ? Le progrès est-il une loi, ou une illusion ? Sommes-nous les acteurs de l'histoire, ou emportés par elle ?",
+    definition: 'Réflexion sur le cours des événements humains, leurs causes, leur sens et la manière d’en écrire le récit.',
+    penseurs: [
+      cle('ibn-khaldoun', 'Ibn Khaldoun', 'le cycle des dynasties'),
+      cle('giambattista-vico', 'Vico', 'les âges successifs des nations'),
+      cle('frederic-hegel', 'Hegel', 'l’histoire comme progrès de la liberté'),
+      cle('karl-marx', 'Marx', 'l’histoire comme lutte des classes'),
+    ],
+    apprend: 'Se demander où va l’histoire, c’est aussi se demander ce que nous pouvons y faire.',
+    liens: [courant('Marxisme')],
+    aujourdhui: [],
+  },
+  {
+    nom: 'La philosophie de la technique', tag: 'Outils · Machines · Numérique', ytId: 'hWYF131cuQo',
+    intro: "La technique est-elle un simple moyen au service de nos fins, ou transforme-t-elle notre manière d'être au monde ? Le numérique nous libère-t-il ou nous rend-il dépendants ? Faut-il faire tout ce que l'on sait faire ? Du silex au smartphone, la technique façonne l'humain autant que l'humain la façonne.",
+    definition: 'Réflexion sur la nature des objets et des systèmes techniques, et sur leurs effets sur l’homme, la société et la nature.',
+    penseurs: [
+      cle('martin-heidegger', 'Heidegger', 'la technique comme « arraisonnement » du monde'),
+      cle('gilbert-simondon', 'Gilbert Simondon', 'le mode d’existence des objets techniques'),
+      cle('jacques-ellul', 'Jacques Ellul', 'le « système technicien »'),
+      cle('bernard-stiegler', 'Bernard Stiegler', 'la technique, à la fois remède et poison'),
+    ],
+    apprend: 'Penser la technique, c’est reprendre la main sur des outils qui orientent nos vies sans que nous y prenions garde.',
+    liens: [courant('Transhumanisme')],
+    aujourdhui: [vivants('esprit-ia', 'Esprit, cerveau & IA')],
+  },
+  {
+    nom: "La philosophie de l'éducation", tag: 'Apprendre · Transmettre · Émanciper', ytId: '-a2ObnoOTe0',
+    intro: "Éduquer, est-ce remplir une tête ou former un jugement ? Faut-il d'abord transmettre un savoir, ou apprendre à penser par soi-même ? L'école doit-elle former des citoyens, des travailleurs, ou des esprits libres ? Posées depuis l'Antiquité, ces questions traversent tous les débats sur l'école.",
+    definition: 'Réflexion sur les fins, les méthodes et la valeur de l’éducation et de la transmission.',
+    penseurs: [
+      cle('michel-de-montaigne', 'Montaigne', '« une tête bien faite plutôt que bien pleine »'),
+      cle('jean-jacques-rousseau', 'Rousseau', '<em>Émile</em>, suivre la nature de l’enfant'),
+      cle('nicolas-de-condorcet', 'Condorcet', 'l’instruction publique pour former des citoyens libres'),
+      cle('john-dewey', 'John Dewey', 'apprendre en faisant, l’école et la démocratie'),
+    ],
+    apprend: 'Toute éducation repose sur une idée de l’être humain : l’interroger, c’est choisir quelle humanité nous voulons transmettre.',
+    liens: [courant('Pragmatisme')],
+    aujourdhui: [],
+  },
+  {
+    nom: "L'anthropologie philosophique", tag: 'Humain · Nature · Culture', ytId: 'pjT9d5UwKtA',
+    intro: "Qu'est-ce que l'homme ? Pour Kant, cette question résume toutes les autres. L'être humain est-il un animal comme les autres, ou un être à part ? Qu'est-ce qui relève de la nature, et qu'est-ce qui relève de la culture ? Les sociétés humaines, si diverses, partagent-elles un fond commun ?",
+    definition: 'Réflexion sur la nature et la condition humaines, et sur la place de l’homme dans le monde.',
+    penseurs: [
+      cle('emmanuel-kant', 'Kant', '« Qu’est-ce que l’homme ? »'),
+      cle('max-scheler', 'Max Scheler', 'la place de l’homme dans le cosmos'),
+      cle('helmuth-plessner', 'Helmuth Plessner', 'l’homme, être « excentrique »'),
+      cle('claude-levi-strauss', 'Claude Lévi-Strauss', 'l’unité de l’esprit humain sous la diversité des cultures'),
+    ],
+    apprend: 'Savoir ce qui fait l’humain aide à respecter ce que nous avons en commun, comme ce qui nous distingue.',
+    liens: [courant('Humanisme'), courant('Structuralisme')],
+    aujourdhui: [],
+  },
+  {
+    nom: 'La philosophie sociale et féministe', tag: 'Société · Domination · Reconnaissance', ytId: 'Ay5C5b1_7yw',
+    intro: "D'où viennent les inégalités et les dominations, entre classes, entre femmes et hommes, entre peuples ? Pourquoi certaines personnes sont-elles invisibles ou méprisées ? Qu'est-ce qu'une société juste pour toutes et tous ? Ces pensées partent de l'expérience vécue pour critiquer les rapports de pouvoir.",
+    definition: 'Analyse critique de la société, des rapports de pouvoir, des inégalités et des conditions d’une vie sociale juste.',
+    penseurs: [
+      cle('simone-de-beauvoir', 'Simone de Beauvoir', '« On ne naît pas femme, on le devient »'),
+      cle('bell-hooks', 'bell hooks', 'féminisme, race et classe'),
+      cle('axel-honneth', 'Axel Honneth', 'la lutte pour la reconnaissance'),
+      cle('nancy-fraser', 'Nancy Fraser', 'redistribution et reconnaissance'),
+      cle('judith-butler', 'Judith Butler', 'le genre comme performance'),
+    ],
+    apprend: 'Ce qui paraît naturel dans l’ordre social est souvent construit — et peut donc être changé.',
+    liens: [courant('Féminisme'), courant('Anticolonialisme')],
+    aujourdhui: [vivants('genre', 'Féminisme & genre'), vivants('decolonial', 'Décolonisation & pensées du Sud')],
+  },
+  {
+    nom: "L'éthique appliquée", tag: 'Bioéthique · Environnement · Numérique', ytId: 'CJjUrafFkUU',
+    intro: "Peut-on modifier le génome humain ? Avons-nous des devoirs envers les animaux et les générations futures ? Qui est responsable quand un algorithme se trompe ? L'éthique appliquée confronte les grands principes moraux aux questions concrètes que posent la médecine, l'écologie et le numérique.",
+    definition: 'Application de la réflexion morale aux problèmes concrets : bioéthique, éthique environnementale, éthique animale, éthique du numérique.',
+    penseurs: [
+      cle('hans-jonas', 'Hans Jonas', 'le principe responsabilité'),
+      cle('peter-singer', 'Peter Singer', 'la libération animale'),
+      cle('catherine-larrere', 'Catherine Larrère', 'l’éthique de l’environnement'),
+      cle('martha-nussbaum', 'Martha Nussbaum', 'les capabilités et la dignité'),
+    ],
+    apprend: 'L’éthique appliquée montre que la philosophie n’est pas abstraite : elle aide à décider, ici et maintenant.',
+    liens: [courant('Ecologisme'), courant('Utilitarisme')],
+    aujourdhui: [vivants('ecologie', 'Écologie & vivant')],
   },
 ];
 ---
@@ -112,17 +306,73 @@ const branches = [
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <GoatCounter />
-  <title>C'est quoi la philosophie ? Les 7 branches | LaPhilo.fr</title>
-  <meta name="description" content="Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage : les 7 grandes branches de la philosophie expliquées, avec vidéos et podcasts." />
+  <title>C'est quoi la philosophie ? Les 7 branches et les philosophies de… | LaPhilo.fr</title>
+  <meta name="description" content="Les 7 grandes branches de la philosophie (métaphysique, épistémologie, éthique, politique, esthétique, logique, esprit et langage) expliquées avec vidéos et podcasts, et les philosophies des sciences, de la religion, de la technique, la bioéthique…" />
   <SeoHead
-    title="C'est quoi la philosophie ? Les 7 branches | LaPhilo.fr"
-    description="Métaphysique, épistémologie, éthique, politique, esthétique, logique, langage : les 7 grandes branches de la philosophie expliquées, avec vidéos et podcasts."
+    title="C'est quoi la philosophie ? Les 7 branches et les philosophies de… | LaPhilo.fr"
+    description="Les 7 grandes branches de la philosophie (métaphysique, épistémologie, éthique, politique, esthétique, logique, esprit et langage) expliquées avec vidéos et podcasts, et les philosophies des sciences, de la religion, de la technique, la bioéthique…"
     path="/definition/"
   />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/definition.css" />
+  <style is:global>
+    /* ── Cartouche d'introduction (vidéo + texte), repris de l'accueil ── */
+    /* Même largeur que sur l'accueil (860 px), au-delà de la colonne de 760 px de la page */
+    .definition-page .intro-cartouche { max-width: none; padding: 0; margin: 0 calc(50% - min(430px, 50vw - 16px)) 2.6rem; }
+    .definition-page .intro-cartouche .intro-text-col { background: none; border: 0; border-radius: 0; box-shadow: none; }
+    /* Texte plus long qu'à l'accueil : la vidéo garde son format 16/9, centrée sur fond d'écran */
+    @media (min-width: 641px) {
+      .definition-page .intro-video-col { background: #0d0805; }
+      .definition-page .intro-video-col .youtube-container { flex: none; margin: auto 0; }
+      .definition-page .intro-video-caption { background: linear-gradient(150deg, #f7efcc 0%, #ead8a0 100%); }
+    }
+
+    /* ── Sommaire de la page ── */
+    .def-sommaire { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin: 0 0 1.6rem; }
+    .def-sommaire a {
+      padding: .35rem .85rem; border-radius: 999px; text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase;
+      color: #d4a843; border: 1px solid rgba(212, 168, 67, .4); background: rgba(30, 18, 8, .6);
+    }
+    .def-sommaire a:hover, .def-sommaire a:focus-visible { background: rgba(180, 130, 20, .2); border-color: #d4a843; color: #f7ecce; outline: none; }
+
+    /* ── Titres de section ── */
+    .def-titre {
+      margin: 2.6rem 0 .5rem; text-align: center; scroll-margin-top: 1rem;
+      font-family: 'Cinzel', serif; font-size: .9rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
+      color: #d4a843; text-shadow: 0 1px 12px rgba(180, 130, 20, .35);
+    }
+    .def-titre::before, .def-titre::after { content: ' ✦ '; }
+    .def-chapeau { max-width: 640px; margin: 0 auto 1.2rem; text-align: center; font-family: 'EB Garamond', serif;
+      font-style: italic; font-size: 1.02rem; line-height: 1.5; color: #ead9a8; }
+
+    /* ── « Explorer » sous chaque branche ── */
+    .def-explorer { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem .5rem; margin-top: 1rem; padding-top: .9rem;
+      border-top: 1px solid rgba(184, 146, 60, .4); }
+    .def-explorer-lbl { width: 100%; font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: #8b3a0f; }
+    .def-explorer a { padding: .3rem .7rem; border-radius: 4px; text-decoration: none; font-family: 'Cinzel', serif; font-size: .64rem;
+      letter-spacing: .04em; color: #5c3d1e; background: rgba(255, 251, 236, .55); border: 1px solid rgba(184, 146, 60, .6); }
+    .def-explorer a:hover { background: rgba(255, 251, 236, .9); border-color: #8b3a0f; color: #8b3a0f; }
+    .def-explorer a.def-explorer-main { font-weight: 700; color: #fff8e6; background: linear-gradient(150deg, #c05a20 0%, #8b3a0f 100%); border-color: #7a3210; }
+    .def-explorer a.def-explorer-main:hover { filter: brightness(1.1); color: #fff; }
+
+    /* ── Branches spécialisées : mêmes accordéons que les 7 branches ── */
+    .acc-text a.def-cle { color: #8b3a0f; text-decoration: none; border-bottom: 1px solid rgba(139, 58, 15, .35); }
+    .acc-text a.def-cle:hover { color: #c05a20; border-bottom-color: #c05a20; }
+
+    @media (max-width: 640px) {
+      /* Accordéons : mots-clés sous le nom, flèche à droite (les noms longs ne s'empilent plus) */
+      .acc-toggle { grid-template-columns: 1fr auto; grid-template-areas: "nom fleche" "mots fleche"; row-gap: .2rem; }
+      .acc-name { grid-area: nom; }
+      .acc-date { grid-area: mots; white-space: normal; line-height: 1.25; }
+      .acc-chevron { grid-area: fleche; }
+      .def-titre { letter-spacing: .12em; }
+      .def-sommaire a { padding: .5rem .85rem; }
+      .def-explorer a { padding: .55rem .75rem; }
+    }
+  </style>
 </head>
 <body>
 
@@ -137,15 +387,28 @@ const branches = [
     </a>
   </div>
   <h1 class="site-title">C'est quoi la philosophie ?</h1>
-  <p class="site-subtitle">Définition · Les 7 grandes branches</p>
+  <p class="site-subtitle">Définition · Les grandes branches · Les philosophies de…</p>
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
 <main class="definition-page">
-  <div class="intro-text-col">
-    <p class="intro-drop-cap">La philosophie est l'art de penser avec rigueur ce que tout le monde ressent confusément. Elle pose des questions fondamentales sur l'existence, la connaissance, la réalité, la morale, la politique et le langage — non pour y répondre définitivement, mais pour mieux comprendre ce que ces questions impliquent. Philosopher, c'est refuser les réponses toutes faites et s'engager dans un dialogue exigeant.</p>
-    <p class="intro-body">Contrairement aux sciences qui cherchent des lois vérifiables, à la religion qui s'appuie sur la révélation, elle avance par arguments, par dialogues et par remises en question successives. Elle n'a pas d'objet fixe : elle peut interroger aussi bien la nature du temps que la légitimité du pouvoir, la possibilité du bonheur ou les fondements des mathématiques.</p>
-    <p class="intro-body">Elle se divise en plusieurs branches qui chacune constitue un champ d'investigation autonome, mais toutes partagent la même ambition : penser plus clairement le monde et notre place en lui.</p>
+  <!-- Même cartouche que « Philosopher, c'est s'étonner » sur l'accueil : vidéo à gauche, texte à droite -->
+  <div class="intro-cartouche">
+    <div class="intro-cartouche-inner">
+      <div class="intro-video-col">
+        <div class="youtube-container" data-id="ORMLzyK7XVw">
+          <img src="https://img.youtube.com/vi/ORMLzyK7XVw/hqdefault.jpg"
+               alt="Vidéo : Qu'est-ce que la philosophie ?"
+               fetchpriority="high" width="480" height="360" />
+          <button class="play-button" aria-label="Lancer la vidéo : Qu'est-ce que la philosophie ?"></button>
+        </div>
+        <p class="intro-video-caption">Qu'est-ce que la philosophie ?</p>
+      </div>
+      <div class="intro-text-col">
+        <p class="intro-drop-cap">La philosophie est l'art de penser avec rigueur ce que tout le monde ressent confusément. Elle pose des questions fondamentales sur l'existence, la connaissance, la réalité, la morale, la politique et le langage — non pour y répondre définitivement, mais pour mieux comprendre ce que ces questions impliquent. Philosopher, c'est refuser les réponses toutes faites et s'engager dans un dialogue exigeant.</p>
+        <p class="intro-body">Contrairement aux sciences qui cherchent des lois vérifiables, à la religion qui s'appuie sur la révélation, elle avance par arguments, par dialogues et par remises en question successives. Elle n'a pas d'objet fixe : elle peut interroger aussi bien la nature du temps que la légitimité du pouvoir, la possibilité du bonheur ou les fondements des mathématiques.</p>
+      </div>
+    </div>
   </div>
 
   <div class="drawer-intro-sep" aria-hidden="true">
@@ -154,9 +417,17 @@ const branches = [
     <span class="drawer-intro-sep-line"></span>
   </div>
 
+  <nav class="def-sommaire" aria-label="Sur cette page">
+    <a href="#branches">Les 7 branches</a>
+    <a href="#specialisees">Les philosophies de…</a>
+  </nav>
+
+  <h2 class="def-titre" id="branches">Les 7 grandes branches</h2>
+  <p class="def-chapeau">La philosophie se divise en plusieurs branches qui chacune constitue un champ d'investigation autonome, mais toutes partagent la même ambition&nbsp;: penser plus clairement le monde et notre place en lui. Ouvrez une branche pour sa définition, une vidéo, un podcast, puis les philosophes et les courants qui s'y rattachent sur le site.</p>
+
   <div class="acc-list">
     {branches.map((b) => (
-      <div class="acc-item">
+      <div class="acc-item" id={explorer[b.name] ? `branche-${explorer[b.name].code}` : undefined}>
         <button class="acc-toggle" aria-expanded="false" type="button">
           <span class="acc-name">{b.name}</span>
           <span class="acc-date">{b.tag}</span>
@@ -175,6 +446,57 @@ const branches = [
             <audio controls title={b.audioTitle}>
               <source src={b.audioSrc} type="audio/mpeg" />
             </audio>
+          </div>
+          {explorer[b.name] && (
+            <div class="def-explorer">
+              <span class="def-explorer-lbl">Explorer sur LaPhilo.fr</span>
+              <a class="def-explorer-main" href={rechercheBranche(explorer[b.name].code)}>
+                Les {parBranche.get(explorer[b.name].code) || 0} philosophes {explorer[b.name].de} →
+              </a>
+              {(explorer[b.name].aujourdhui || []).map((l) => <a class="def-explorer-main" href={l.href}>Aujourd'hui : {l.label} →</a>)}
+              {explorer[b.name].frises.map((l) => <a href={l.href}>{l.label}</a>)}
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <h2 class="def-titre" id="specialisees">Les branches spécialisées</h2>
+  <p class="def-chapeau">Au-delà des sept grandes branches, la philosophie se ramifie en « philosophies de… », souvent considérées comme des branches à part entière. Elles touchent aux questions les plus actuelles : intelligence artificielle, écologie, bioéthique, justice.</p>
+
+  <div class="acc-list acc-list--spe">
+    {specialisees.map((s) => (
+      <div class="acc-item">
+        <button class="acc-toggle" aria-expanded="false" type="button">
+          <span class="acc-name">{s.nom}</span>
+          <span class="acc-date">{s.tag}</span>
+          <span class="acc-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="acc-content">
+          {s.ytId && (
+            <div class="acc-video">
+              <div class="youtube-container" data-id={s.ytId}>
+                <img src={`https://img.youtube.com/vi/${s.ytId}/hqdefault.jpg`} alt={`Vidéo : ${s.nom}`} loading="lazy" width="480" height="360" />
+                <button class="play-button" aria-label={`Lancer la vidéo : ${s.nom}`}></button>
+              </div>
+            </div>
+          )}
+          <div class="acc-text">
+            {fr(s.intro)}
+            <br /><br />
+            <strong>Définition</strong>&nbsp;: {fr(s.definition)}
+            <br />
+            <strong>Philosophes clés</strong>&nbsp;: {s.penseurs.map((p, i) => (
+              <>{i > 0 && ', '}<a class="def-cle" href={p.href}>{p.label}</a> (<Fragment set:html={fr(p.note)} />)</>
+            ))}.
+            <br />
+            <strong>Ce qu'elle nous apprend</strong>&nbsp;: {fr(s.apprend)}
+          </div>
+          <div class="def-explorer">
+            <span class="def-explorer-lbl">Explorer sur LaPhilo.fr</span>
+            {s.aujourdhui.map((l) => <a class="def-explorer-main" href={l.href}>Aujourd'hui : {l.label} →</a>)}
+            {s.liens.map((l) => <a href={l.href}>{l.label}</a>)}
           </div>
         </div>
       </div>
@@ -203,6 +525,15 @@ const branches = [
 <script src="/js/home-main.js" defer></script>
 <script src="/js/home-portraits.js" defer></script>
 <script src="/js/accordion.js" defer></script>
+<script is:inline>
+  /* Lien vers une branche (#branche-langage) : on ouvre son accordéon */
+  function ouvrirBranche() {
+    var item = location.hash.indexOf('#branche-') === 0 && document.getElementById(location.hash.slice(1));
+    if (item && !item.classList.contains('expanded')) item.querySelector('.acc-toggle').click();
+  }
+  addEventListener('hashchange', ouvrirBranche);
+  addEventListener('DOMContentLoaded', function () { setTimeout(ouvrirBranche, 0); });
+</script>
 
 </body>
 </html>
