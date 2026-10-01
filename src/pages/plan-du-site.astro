@@ -11,7 +11,7 @@ import catalogue from '../data/frises-catalogue.json';
    catalogue apparaît ici automatiquement, dans la rubrique de son groupe. */
 type Link = { label: string; href: string; note?: string };
 type Group = { title?: string; links: Link[] };
-type Block = { id: string; title: string; nav: string; groups: Group[] };
+type Block = { id: string; col: 1 | 2 | 3; title: string; nav: string; groups: Group[] };
 
 const groups: any[] = catalogue.groups;
 const byLabel = (label: string): any[] => groups.find((g) => g.label === label)?.items ?? [];
@@ -42,23 +42,24 @@ const courant = (it: any): Group => ({
 
 const blocks: Block[] = [
   {
-    id: 'site', nav: 'Le site', title: 'Le site',
+    id: 'site', col: 1, nav: 'Le site', title: 'Le site',
     groups: [
       { title: 'Commencer', links: [
         { label: 'Accueil', href: '/' },
-        { label: 'Nouveau ici ? Présentation du site', href: '/bienvenue/' },
+        { label: 'Nouveau ici ?', href: '/bienvenue/' },
         { label: 'C’est quoi la philosophie ?', href: '/definition/' },
       ] },
       { title: 'Comprendre', links: [
         { label: 'Histoire des philosophes', href: '/histoire-des-philosophes/' },
-        { label: 'Histoire des courants', href: '/histoire-des-courants/' },
+        { label: 'Histoire des courants de pensée', href: '/histoire-des-courants/' },
       ] },
       { title: 'Trouver', links: [
         { label: 'Recherche', href: '/recherche/', note: 'philosophes, courants, frises' },
         { label: 'Toutes les frises', href: '/frises/', note: 'présentées' },
+        ...byLabel('Par thème').map((it) => frise(it, 'Pensée féminine')),
       ] },
       { title: 'À propos', links: [
-        { label: 'Pourquoi ce site ?', href: '/pourquoi/' },
+        { label: 'Pourquoi ce site', href: '/pourquoi/' },
         { label: 'Ressources utilisées', href: '/ressources/' },
         { label: 'Échanges & contact', href: '/echanges/' },
         { label: 'Musique Lairig', href: '/lairig/' },
@@ -66,44 +67,45 @@ const blocks: Block[] = [
     ],
   },
   {
-    id: 'monde', nav: 'Penseurs du monde', title: 'Les penseurs du monde',
+    id: 'monde', col: 1, nav: 'Frise du monde', title: 'Frise complète du monde',
     groups: [
       { links: [
-        { label: 'La Frise des penseurs du monde', href: mondeLien("Vue d'ensemble"), note: period(monde.tag) },
-        { label: 'À la même époque', href: '/frises/a-la-meme-epoque/', note: 'qui pensait quoi, et où' },
+        { label: 'Frise des penseurs du monde', href: mondeLien("Vue d'ensemble"), note: period(monde.tag) },
+        { label: 'Tableau des penseurs', href: '/frises/a-la-meme-epoque/', note: 'qui pensait quoi, et où' },
+        { label: 'Les femmes dans l’histoire', href: mondeLien('Femmes uniquement'), note: period(byLabel('Par thème')[0]?.tag) },
       ] },
-      { title: 'Grandes périodes', links: ['Âge axial', "Âge d'or islamique", 'XIXᵉ siècle'].map((l) => ({ label: l, href: mondeLien(l) })) },
-      { title: 'Femmes', links: [{ label: 'Les philosophes femmes du monde', href: mondeLien('Femmes uniquement') }] },
-    ],
+      { title: 'Grandes périodes', links: /* dates des préréglages de /frises/penseurs-du-monde/ */
+        [['Âge axial', '650 av. J.-C. → 150 av. J.-C.'], ["Âge d'or islamique", '750 → 1300'], ['XIXᵉ siècle', '1780 → 1950']]
+          .map(([l, note]) => ({ label: l, href: mondeLien(l), note })) },    ],
   },
   {
-    id: 'epoques', nav: 'Par époque', title: 'Philosophes par époque',
+    id: 'courants', col: 2, nav: 'Courants', title: 'Courants de pensée',
+    groups: byLabel('Les Courants de Pensée').map(courant),
+  },
+  {
+    id: 'traditions', col: 2, nav: 'Par tradition', title: 'Philosophes par tradition',
     groups: [
-      { title: 'Antiquité, Moyen Âge, Renaissance', links: byLabel('Anciens').map((it) => frise(it)) },
-      { title: 'Époque moderne', links: byLabel('Modernes').map(autres) },
+      { title: 'Grandes traditions, toutes époques', links: byLabel('Par grande tradition').map((it) => frise(it)) },
     ],
   },
   {
-    id: 'aujourdhui', nav: 'Aujourd’hui', title: 'Philosophes d’aujourd’hui',
+    id: 'pays', col: 2, nav: 'Par pays', title: 'Philosophes par pays',
+    groups: [{ title: 'Toutes époques', links: byLabel('Par pays').map((it) => frise(it)) }],
+  },
+  {
+    id: 'aujourdhui', col: 3, nav: 'Aujourd’hui', title: 'Philosophes d’aujourd’hui',
     groups: [
       { title: 'Contemporains', links: byLabel('Contemporains').map(autres) },
       { title: 'Vivants, par sujet de travail', links: byLabel('Vivants par sujet de travail').map((it) => frise(it)) },
     ],
   },
   {
-    id: 'pays', nav: 'Par pays', title: 'Philosophes par pays',
-    groups: [{ title: 'Toutes époques', links: byLabel('Par pays').map((it) => frise(it)) }],
-  },
-  {
-    id: 'traditions', nav: 'Par tradition', title: 'Philosophes par tradition',
+    id: 'epoques', col: 3, nav: 'Par époque', title: 'Philosophes par époque',
     groups: [
-      { title: 'Grandes traditions, toutes époques', links: byLabel('Par grande tradition').map((it) => frise(it)) },
-      { title: 'Par thème', links: byLabel('Par thème').map((it) => frise(it, it.name.includes('Femmes') ? 'Philosophes femmes' : undefined)) },
+      /* du plus récent (en haut) au plus ancien (Proche-Orient ancien tout en bas) */
+      { title: 'Époque moderne', links: [...byLabel('Modernes')].sort((a, b) => parseInt(b.tag) - parseInt(a.tag)).map(autres) },
+      { title: 'Renaissance, Moyen Âge, Antiquité', links: byLabel('Anciens').map((it) => frise(it)).reverse() },
     ],
-  },
-  {
-    id: 'courants', nav: 'Courants', title: 'Courants de pensée',
-    groups: byLabel('Les Courants de Pensée').map(courant),
   },
 ];
 const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site.";
@@ -133,11 +135,14 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
       color: #d4a843; border: 1px solid rgba(212, 168, 67, .4); background: rgba(30, 18, 8, .6);
     }
     .pds-sommaire a:hover, .pds-sommaire a:focus-visible { background: rgba(180, 130, 20, .2); border-color: #d4a843; color: #f7ecce; outline: none; }
+    /* Utile seulement quand les rubriques sont sur une colonne (mobile) */
+    @media (min-width: 900px) { .pds-sommaire { display: none; } }
 
-    /* Rubriques empilées en colonnes : chaque colonne se remplit sans trou */
-    .pds-grid { columns: 3 300px; column-gap: 1.1rem; }
+    /* 3 colonnes fixes (champ col de chaque rubrique) ; une seule sur mobile */
+    .pds-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 1.1rem; align-items: start; }
+    @media (max-width: 899px) { .pds-grid { grid-template-columns: 1fr; } }
     .pds-block {
-      break-inside: avoid; display: inline-block; width: 100%; margin: 0 0 1.1rem;
+      display: block; width: 100%; margin: 0 0 1.1rem;
       padding: .9rem 1.1rem .7rem;
       background: rgba(30, 18, 8, .75);
       border: 1px solid rgba(212, 168, 67, .35); border-top: 3px solid #d4a843;
@@ -200,7 +205,9 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
   </nav>
 
   <div class="pds-grid">
-    {blocks.map((b) => (
+    {[1, 2, 3].map((c) => (
+    <div class="pds-col">
+    {blocks.filter((b) => b.col === c).map((b) => (
       <section class="pds-block" id={b.id}>
         <h2>{b.title}</h2>
         {b.groups.map((g) => (
@@ -219,6 +226,8 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
           </>
         ))}
       </section>
+    ))}
+    </div>
     ))}
   </div>
 
