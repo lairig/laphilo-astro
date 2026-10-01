@@ -313,3 +313,191 @@
   font-size: 0.88rem; line-height: 1.3;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden;
 }
+
+/* ══ Les 4 cartouches de l'accueil (C'est quoi la philosophie ? · Les philosophes ·
+   Les courants · Les frises) : coup de neuf (2026-10-01).
+   Cadre doré double (filet intérieur), filet or et rouille en haut, typographie
+   alignée sur les autres cartouches du site (texte 0,9rem comme les accordéons), boutons plus visibles. ══ */
+.timeline-section:not(.timeline-section--top) .tl-card {
+  padding: 1.7rem 2rem 1.6rem;
+  border: 1px solid var(--parch-border, #b8923c);
+  border-radius: 6px;
+  overflow: visible;
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 251, 236, 0.45),
+    inset 0 0 0 6px rgba(184, 146, 60, 0.55),
+    5px 5px 0 rgba(120, 80, 20, 0.22),
+    0 14px 36px rgba(10, 5, 2, 0.5);
+}
+.timeline-section:not(.timeline-section--top) .tl-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 6px; right: 6px;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, var(--gold, #b8860b) 18%, var(--rust, #8b3a0f) 50%, var(--gold, #b8860b) 82%, transparent);
+  opacity: 0.75;
+}
+.timeline-section:not(.timeline-section--top) .tl-card--featured {
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 251, 236, 0.5),
+    inset 0 0 0 6px rgba(184, 134, 11, 0.7),
+    5px 5px 0 rgba(120, 80, 20, 0.26),
+    0 14px 40px rgba(10, 5, 2, 0.55),
+    0 0 24px rgba(212, 168, 67, 0.18);
+}
+.timeline-section:not(.timeline-section--top) .tl-node:hover .tl-card {
+  box-shadow:
+    inset 0 0 0 5px rgba(255, 251, 236, 0.55),
+    inset 0 0 0 6px rgba(139, 58, 15, 0.55),
+    7px 7px 0 rgba(120, 80, 20, 0.26),
+    0 20px 48px rgba(10, 5, 2, 0.6);
+}
+.timeline-section:not(.timeline-section--top) .tl-era { font-size: 0.66rem; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 0.55rem; }
+.timeline-section:not(.timeline-section--top) .tl-era sup { font-size: 0.7em; letter-spacing: 0; vertical-align: super; line-height: 0; }
+.timeline-section:not(.timeline-section--top) .tl-title { font-size: clamp(1rem, 1.8vw, 1.15rem); margin-bottom: 0.75rem; }
+.timeline-section:not(.timeline-section--top) .tl-desc { font-size: 0.9rem; line-height: 1.78; color: var(--ink-mid, #3d2410); margin-bottom: 1.15rem; text-wrap: pretty; }
+.timeline-section:not(.timeline-section--top) .tl-cta-alt {
+  font-size: 0.66rem; letter-spacing: 0.1em; font-weight: 700;
+  padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none;
+}
+.timeline-section:not(.timeline-section--top) .tl-cta-alt--sec { border-width: 1.5px; background: rgba(255, 251, 236, 0.45); }
+@media (max-width: 760px) {
+  .timeline-section:not(.timeline-section--top) .tl-card { padding: 1.4rem 1.3rem 1.3rem; }
+  .timeline-section:not(.timeline-section--top) .tl-era { font-size: 0.62rem; }
+  .timeline-section:not(.timeline-section--top) .tl-cta-alt { padding: 0.6rem 1rem; }
+}
+
+/* ══ « Questions fréquentes » : relooké (2026-10-01) dans le style parchemin des
+   accordéons de /definition/ : questions numérotées, flèche ronde, encre brune,
+   liens rouille. Les réponses gardent la taille de texte des autres cartouches. ══ */
+.faq-section { padding: 2.6rem 1.5rem 2.8rem; }
+.faq-inner { max-width: 760px; }
+.faq-title {
+  font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold-light, #d4a843); text-shadow: 0 1px 12px rgba(180, 130, 20, 0.35); margin-bottom: 0.5rem;
+}
+.faq-title::after { content: ' ✦'; }
+.faq-subtitle { font-size: 1.02rem; color: #ead9a8; margin-bottom: 1.4rem; text-wrap: balance; }
+.faq-grid { gap: 0.7rem; counter-reset: faq; }
+.faq-item {
+  counter-increment: faq;
+  background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 30%, #e7d494 65%, #dfc87c 100%);
+  border: 1px solid var(--parch-border, #b8923c);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(120, 80, 20, 0.18), 0 8px 24px rgba(10, 5, 2, 0.3);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.faq-item:hover { transform: translateY(-1px); box-shadow: 5px 5px 0 rgba(120, 80, 20, 0.22), 0 12px 28px rgba(10, 5, 2, 0.4); }
+.faq-question {
+  gap: 0.8rem; justify-content: flex-start;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.78rem; letter-spacing: 0.04em; color: var(--ink, #1e1208);
+}
+.faq-question::before {
+  content: counter(faq);
+  flex: none; display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%;
+  font-family: 'Cinzel Decorative', serif; font-size: 0.8rem; font-weight: 700; color: var(--ink, #1e1208);
+  background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #a07a1c;
+}
+.faq-question::after {
+  content: '▶'; margin-left: auto;
+  display: grid; place-items: center; width: 1.45rem; height: 1.45rem; border-radius: 50%;
+  font-size: 0.5rem; color: var(--rust, #8b3a0f); border: 1px solid rgba(139, 58, 15, 0.45);
+  transition: transform 0.25s, background 0.2s, color 0.2s;
+}
+.faq-item[open] .faq-question { background: rgba(255, 251, 236, 0.45); border-bottom: 1px solid rgba(184, 146, 60, 0.4); }
+.faq-item[open] .faq-question::after { transform: rotate(90deg); background: var(--rust, #8b3a0f); color: #fff8e6; border-color: var(--rust, #8b3a0f); }
+.faq-question:hover { background: rgba(255, 251, 236, 0.35); }
+.faq-answer { padding: 0.9rem 1.2rem 1.1rem; font-size: 0.9rem; line-height: 1.78; color: var(--ink-mid, #3d2410); }
+.faq-name-link { color: var(--rust, #8b3a0f); text-decoration-color: rgba(139, 58, 15, 0.45); }
+.faq-name-link:hover, .faq-name-link:focus-visible { color: var(--rust-light, #c05a20); text-decoration-color: var(--rust-light, #c05a20); }
+.faq-link-row { background: rgba(255, 251, 236, 0.55); border-color: rgba(184, 146, 60, 0.6); color: var(--rust, #8b3a0f); font-size: 0.66rem; }
+.faq-link-row::before { color: var(--rust, #8b3a0f); }
+.faq-link { color: var(--rust, #8b3a0f); border-bottom-color: rgba(139, 58, 15, 0.45); }
+.faq-link:hover { color: var(--rust-light, #c05a20); border-bottom-color: var(--rust-light, #c05a20); }
+@media (max-width: 640px) {
+  .faq-section { padding: 2rem 1rem 2.2rem; }
+  .faq-title { letter-spacing: 0.12em; }
+  .faq-question { padding: 0.8rem 0.85rem; line-height: 1.35; }
+  .faq-answer { padding: 0.8rem 0.95rem 1rem; }
+}
+
+/* ══ Les 3 boutons du haut (Nouveau ici · Recherche · Je veux explorer) :
+   relookés (2026-10-01). Médaillon doré pour l'icône, filet or en haut,
+   et texte sur 2 lignes exactement quand les 3 sont côte à côte. ══ */
+.entry-guide-btn {
+  position: relative; overflow: hidden;
+  gap: 0.85rem; padding: 0.85rem 1.1rem 0.85rem 0.9rem;
+  max-width: 290px;
+  background: linear-gradient(160deg, rgba(58, 36, 14, 0.9) 0%, rgba(30, 18, 8, 0.88) 100%);
+  border: 1px solid rgba(212, 168, 67, 0.55);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255, 236, 190, 0.06), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.entry-guide-btn::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-light, #d4a843), transparent); opacity: 0.8;
+}
+.entry-guide-btn:hover, .entry-guide-btn:focus-visible {
+  background: linear-gradient(160deg, rgba(86, 56, 20, 0.95) 0%, rgba(46, 28, 10, 0.92) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 236, 190, 0.1), 0 8px 22px rgba(0, 0, 0, 0.5), 0 0 18px rgba(212, 168, 67, 0.15);
+}
+.entry-guide-icon {
+  display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%;
+  font-size: 1.15rem; color: var(--ink, #1e1208);
+  background: radial-gradient(circle at 35% 30%, #f7e3a0 0%, #d4a843 55%, #9c7414 100%);
+  border: 1px solid #e8c870;
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.15), 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s;
+}
+.entry-guide-btn:hover .entry-guide-icon { transform: scale(1.08); }
+.entry-guide-text { gap: 0.12rem; min-width: 0; }
+.entry-guide-text strong { font-size: 0.78rem; }
+.entry-guide-text span { font-size: 0.92rem; color: #ead9a8; }
+/* Côte à côte : une ligne pour le titre, une pour le sous-titre */
+@media (min-width: 769px) {
+  .entry-guide-text strong, .entry-guide-text span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+/* Empilés (tablette, mobile) : pleine largeur, comme avant */
+@media (max-width: 768px) {
+  .entry-guide-btn { max-width: 100%; }
+}
+
+/* ══ Boutons « Découvrir / Explorer / Accéder » des 4 cartouches (2026-10-01) :
+   pilules, flèche dans une pastille ronde qui avance au survol.
+   Principal (C'est quoi la philosophie ?) : rouille plein ; les autres : clairs, liseré rouille. ══ */
+.timeline-section:not(.timeline-section--top) .tl-cta-alt {
+  gap: 0.6rem;
+  padding: 0.38rem 0.4rem 0.38rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid #7a3210;
+  color: #fff8e6;
+  background: linear-gradient(150deg, #d0703a 0%, #a8461a 55%, #8b3a0f 100%);
+  box-shadow: 0 3px 10px rgba(139, 58, 15, 0.35), inset 0 1px 0 rgba(255, 220, 180, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+.timeline-section:not(.timeline-section--top) .tl-cta-alt .tl-arrow {
+  display: grid; place-items: center; width: 1.45rem; height: 1.45rem; border-radius: 50%;
+  font-size: 0.8rem; line-height: 1; letter-spacing: 0;
+  color: #8b3a0f; background: #fff3d6;
+  transition: transform 0.2s;
+}
+.timeline-section:not(.timeline-section--top) .tl-cta-alt--sec {
+  color: #8b3a0f;
+  background: linear-gradient(150deg, #fffbec 0%, #f6e7bd 100%);
+  border: 1px solid rgba(139, 58, 15, 0.6);
+  box-shadow: 0 2px 6px rgba(120, 80, 20, 0.2);
+}
+.timeline-section:not(.timeline-section--top) .tl-cta-alt--sec .tl-arrow { color: #fff8e6; background: linear-gradient(150deg, #c05a20, #8b3a0f); }
+.timeline-section:not(.timeline-section--top) .tl-node:hover .tl-cta-alt,
+.timeline-section:not(.timeline-section--top) .tl-cta-alt:hover {
+  transform: translateY(-1px); filter: brightness(1.06); gap: 0.6rem;
+  background: linear-gradient(150deg, #d0703a 0%, #a8461a 55%, #8b3a0f 100%); border-color: #7a3210; color: #fff8e6;
+  box-shadow: 0 6px 16px rgba(139, 58, 15, 0.45), inset 0 1px 0 rgba(255, 220, 180, 0.35);
+}
+.timeline-section:not(.timeline-section--top) .tl-node:hover .tl-cta-alt .tl-arrow,
+.timeline-section:not(.timeline-section--top) .tl-cta-alt:hover .tl-arrow { transform: translateX(3px); color: #8b3a0f; background: #fff3d6; }
+@media (max-width: 760px) {
+  .timeline-section:not(.timeline-section--top) .tl-cta-alt { padding: 0.45rem 0.45rem 0.45rem 1.1rem; }
+}

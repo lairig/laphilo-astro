@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import Voyage from '../components/Voyage.astro';
 import data from '../data/definition-philosophes.json';
 
 const { intro, items } = data as {
@@ -185,6 +186,8 @@ const EXPLORER: Record<string, Lien[]> = {
       </div>
     </>
   ))}
+
+  <Voyage href="/frises/" />
 </main>
 
 <footer class="site-footer">
