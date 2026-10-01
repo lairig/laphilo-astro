@@ -16,6 +16,15 @@ interface PhilosopheData {
    le bouton « Vivants uniquement » de la recherche, champ live de l'index). */
 const vivant = (p: PhilosopheData) => ['france-contemporains', 'contemporains-monde'].includes(p.frise_source);
 
+/* Contemporains hors France, par grande région (nationalité) ; une nationalité
+   absente de ces listes reste seulement dans « contemporains-monde ». */
+export const regionsContemporains: { slug: string; label: string; nats: string[] }[] = [
+  { slug: 'contemporains-europe', label: 'Europe', nats: ['Britannique', 'Irlandaise', 'Allemande', 'Autrichienne', 'Suisse', 'Italienne', 'Espagnole', 'Portugaise', 'Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Polonaise', 'Tchèque', 'Slovaque', 'Hongroise', 'Roumaine', 'Bulgare', 'Slovène', 'Croate', 'Serbe', 'Grecque', 'Russe', 'Ukrainienne', 'Lettone', 'Lituanienne', 'Estonienne'] },
+  { slug: 'contemporains-ameriques', label: 'Amériques', nats: ['Américaine', 'Canadienne', 'Mexicaine', 'Argentine', 'Uruguayenne', 'Brésilienne', 'Chilienne', 'Colombienne', 'Péruvienne', 'Vénézuélienne', 'Cubaine', 'Haïtienne', 'Martiniquaise'] },
+  { slug: 'contemporains-afrique-moyen-orient', label: 'Afrique & Moyen-Orient', nats: ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Sud-Africaine', 'Nigériane', 'Congolaise', 'Ivoirienne', 'Béninoise', 'Kényane', 'Éthiopienne', 'Tunisienne', 'Marocaine', 'Algérienne', 'Égyptienne', 'Libanaise', 'Syrienne', 'Perse', 'Iranienne', 'Turque', 'Israélienne', 'Palestinienne', 'Irakienne'] },
+  { slug: 'contemporains-asie-oceanie', label: 'Asie & Océanie', nats: ['Japonaise', 'Chinoise', 'Coréenne', 'Taïwanaise', 'Vietnamienne', 'Indienne', 'Pakistanaise', 'Bangladaise', 'Sri-lankaise', 'Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Australienne', 'Néo-zélandaise'] },
+];
+
 export interface VirtualFrise {
   label: string;
   match: (p: PhilosopheData) => boolean;
@@ -102,6 +111,12 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: 'Philosophes juifs — toutes époques',
     match: (p) => (p.traditions ?? []).includes('juive'),
   },
+  ...Object.fromEntries(
+    regionsContemporains.map((r): [string, VirtualFrise] => [
+      r.slug,
+      { label: `Philosophes contemporains — ${r.label}`, match: (p) => p.frise_source === 'contemporains-monde' && r.nats.includes(p.nationalite ?? '') },
+    ]),
+  ),
   /* Philosophes vivants, par sujet de travail (colonne « Thèmes » des xlsx
      d'actifs) ; mêmes règles que les pastilles « Sujet de travail » de la recherche */
   ...Object.fromEntries(

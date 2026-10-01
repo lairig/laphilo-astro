@@ -166,7 +166,31 @@
           "href": "/philosophes/frise/france-contemporains/"
         },
         {
-          "name": "Autres Philosophes Contemporains",
+          "name": "Philosophes Contemporains d'Europe",
+          "tag": "1926 → 2026",
+          "text": "Les philosophes européens (hors France) encore en activité en 2026. <br> Du Royaume-Uni à la Russie, de l'Italie à l'Allemagne : Giorgio Agamben, Slavoj Žižek, Axel Honneth, Timothy Williamson, Luciano Floridi, Hartmut Rosa, Markus Gabriel et Amia Srinivasan.",
+          "href": "/philosophes/frise/contemporains-europe/"
+        },
+        {
+          "name": "Philosophes Contemporains des Amériques",
+          "tag": "1931 → 2026",
+          "text": "Les philosophes d'Amérique du Nord et d'Amérique latine encore en activité en 2026. <br> De Charles Taylor et Thomas Nagel à Martha Nussbaum, Angela Davis, Cornel West, Michael Sandel et Judith Butler, sans oublier Mauricio Beuchot et Eduardo Gudynas.",
+          "href": "/philosophes/frise/contemporains-ameriques/"
+        },
+        {
+          "name": "Philosophes Contemporains d'Afrique &amp; du Moyen-Orient",
+          "tag": "1933 → 2026",
+          "text": "Les philosophes d'Afrique, du Maghreb et d'Iran encore en activité en 2026. <br> De Seyyed Hossein Nasr et Abdallah Laroui à Kwame Anthony Appiah, Souleymane Bachir Diagne, Achille Mbembe et Felwine Sarr.",
+          "href": "/philosophes/frise/contemporains-afrique-moyen-orient/"
+        },
+        {
+          "name": "Philosophes Contemporains d'Asie &amp; d'Océanie",
+          "tag": "1933 → 2026",
+          "text": "Les philosophes d'Asie et d'Océanie encore en activité en 2026. <br> D'Amartya Sen et Kōjin Karatani à Peter Singer, Vandana Shiva, David Chalmers, Byung-Chul Han et Kate Manne.",
+          "href": "/philosophes/frise/contemporains-asie-oceanie/"
+        },
+        {
+          "name": "Philosophes Contemporains du monde entier",
           "tag": "1926 → 2026",
           "text": "Frise des philosophes contemporains non français encore en activité en 2026. <br> Des États-Unis à l'Allemagne, de Corée du Sud à l'Italie, retrouvez les grandes figures mondiales de la philosophie actuelle : Slavoj Žižek, Peter Singer, Martha Nussbaum, Byung-Chul Han et bien d'autres.",
           "href": "/philosophes/frise/contemporains-monde/"

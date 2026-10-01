@@ -26,7 +26,7 @@ const clean = (name: string) => {
     .replace(/^(Modernes|Contemporains)\s+/, '')
     .replace(/^vivants\s*:\s*/i, '')
     .replace(/^(d'|de l'|du |des )/, '')
-    .replace(/ &amp; (du |de la )/, ' &amp; ');
+    .replace(/ &amp; (du |de la |d')/, ' &amp; ');
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 const frise = (it: any, label?: string): Link => ({ label: label ?? clean(it.name), href: it.href, note: period(it.tag) });

@@ -280,15 +280,7 @@
       '<option value="courants">Courants de pensée</option>' +
       '</select></label>' +
       '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Regroupement</span>' +
-      '<select class="phi-all-select phi-fr-regroup">' +
-      '<option value="">— Tous les regroupements —</option>' +
-      '<option value="epoque">Par époque</option>' +
-      '<option value="pays">Par pays ou langue</option>' +
-      '<option value="tradition">Par grande tradition</option>' +
-      '<option value="theme">Par thème (femmes)</option>' +
-      '<option value="vivants">Philosophes vivants, par sujet de travail</option>' +
-      '<option value="courants">Courants de pensée, par thème</option>' +
-      '</select></label>' +
+      '<select class="phi-all-select phi-fr-regroup"></select></label>' +
       '</div></details>' +
       /* Onglet Frises : la Frise des penseurs du monde, frise principale, toujours visible, sous ses filtres */
       '<div class="phi-monde-banner" hidden></div>' +
@@ -506,7 +498,8 @@
       _frises.forEach(function (f) {
         if (f.c === 'monde') return;
         if (_fr.contenu && f.c !== _fr.contenu) return;
-        if (_fr.regroup && f.r !== _fr.regroup) return;
+        /* r peut lister plusieurs regroupements séparés par des espaces */
+        if (_fr.regroup && (' ' + f.r + ' ').indexOf(' ' + _fr.regroup + ' ') < 0) return;
         /* Philosophes (ou courants) de la frise qui correspondent : cherchés même
            quand le nom ou la description de la frise correspond déjà */
         var hits = [];
@@ -748,7 +741,28 @@
       }
     }
 
-    frContenu.addEventListener('change', function () { _fr.contenu = frContenu.value; refresh(); });
+    /* Regroupements proposés selon le Contenu choisi (c = contenu des frises du regroupement) */
+    var FR_REGROUPS = [
+      ['epoque', 'Par époque', 'philosophes'],
+      ['pays', 'Par pays ou langue', 'philosophes'],
+      ['tradition', 'Par grande tradition', 'philosophes'],
+      ['theme', 'Philosophes femmes, toutes époques', 'philosophes'],
+      ['region', 'Philosophes vivants, par région du monde', 'philosophes'],
+      ['vivants', 'Philosophes vivants, par sujet de travail', 'philosophes'],
+      ['courants-theme', 'Courants : par thème', 'courants'],
+      ['courants-occ', 'Courants : pensée occidentale', 'courants'],
+      ['courants-ori', 'Courants : pensée orientale', 'courants'],
+      ['courants-complet', 'Tous les courants', 'courants'],
+    ];
+    function fillRegroup() {
+      var opts = FR_REGROUPS.filter(function (o) { return !_fr.contenu || o[2] === _fr.contenu; });
+      if (!opts.some(function (o) { return o[0] === _fr.regroup; })) _fr.regroup = '';
+      frRegroup.innerHTML = '<option value="">— Tous les regroupements —</option>' +
+        opts.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+      frRegroup.value = _fr.regroup;
+    }
+    fillRegroup();
+    frContenu.addEventListener('change', function () { _fr.contenu = frContenu.value; fillRegroup(); refresh(); });
     frRegroup.addEventListener('change', function () { _fr.regroup = frRegroup.value; refresh(); });
     primaryBtns.forEach(function (btn) { btn.addEventListener('click', function () { setPrimary(btn.dataset.primary); }); });
 
@@ -909,6 +923,7 @@
       setCurColorFilter('');
       frContenu.value = ''; frRegroup.value = '';
       _fr = { contenu: '', regroup: '' };
+      fillRegroup();
       populateSelects();
       refresh();
     });

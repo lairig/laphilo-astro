@@ -17,12 +17,12 @@ type Membre = { name: string; id: string; year: number; fin: number; thumbnail?:
 const REGROUPEMENTS: Record<string, string> = {
   Anciens: 'epoque',
   Modernes: 'epoque',
-  Contemporains: 'epoque',
+  /* les contemporains (français, par région, monde entier) sont aussi « par région du monde » */
+  Contemporains: 'epoque region',
   'Vivants par sujet de travail': 'vivants',
   'Par pays': 'pays',
   'Par grande tradition': 'tradition',
   'Par thème': 'theme',
-  'Les Courants de Pensée': 'courants',
   'La Frise des Penseurs du Monde': 'monde',
 };
 
@@ -52,8 +52,14 @@ function couleur(href: string): string {
   if (href.startsWith('/frises/')) return 'monde';
   const slug = href.split('/').filter(Boolean).pop() ?? '';
   if (href.startsWith('/courants/')) return slug.startsWith('oriental') ? 'courant-ori' : 'courant-occ';
-  if (slug.startsWith('vivants-')) return 'live';
+  if (slug.startsWith('vivants-') || slug.startsWith('contemporains-')) return 'live';
   return COULEUR_VIRTUELLE[slug] ?? philosopheFriseMeta[slug]?.colorFilter ?? '';
+}
+
+/* Frises de courants : complète ou thématique (« occidental--… »), et occidentale ou orientale */
+function regroupCourant(href: string): string {
+  const slug = href.split('/').filter(Boolean).pop() ?? '';
+  return `${slug.includes('--') ? 'courants-theme' : 'courants-complet'} ${slug.startsWith('oriental') ? 'courants-ori' : 'courants-occ'}`;
 }
 
 const texte = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -137,7 +143,7 @@ export const GET: APIRoute = async () => {
       n: texte(e.label),
       u: e.href,
       c: e.href.startsWith('/courants/') ? 'courants' : e.href.startsWith('/frises/') ? 'monde' : 'philosophes',
-      r: REGROUPEMENTS[e.groupe] ?? '',
+      r: e.href.startsWith('/courants/') ? regroupCourant(e.href) : REGROUPEMENTS[e.groupe] ?? '',
       tag: texte(e.tag || ''),
       desc: texte(e.text || ''),
       debut: tries.length ? tries[0].year : null,
