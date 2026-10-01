@@ -7,6 +7,7 @@
      - autres lecteurs (Spotify…) : le script qui les ouvre appelle
        LaphiloMedia.start(iframe) et écoute « laphilo:media-start » pour
        fermer son lecteur quand un autre média démarre.
+   Tout est aussi coupé quand on ouvre un lien dans un nouvel onglet.
    Chargé sur toutes les pages par SeoHead.astro.
    ══════════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -68,6 +69,19 @@
 
   /* Tout couper (changement de fiche, départ vers une autre page…) */
   function stopAll() { start(null); }
+
+  /* Un lien qui s'ouvre dans un nouvel onglet (frises, sites externes, clic
+     molette ou Ctrl/Cmd + clic) : la page quittée reste ouverte, on coupe
+     donc ce qui y joue. Écouté en phase de bouillonnement, après le script de
+     SeoHead.astro qui pose target="_blank" sur les liens de frise. */
+  function versNouvelOnglet(e) {
+    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (!a || a.getAttribute('href').charAt(0) === '#') return;
+    var nouvelOnglet = a.target === '_blank' || e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey;
+    if (nouvelOnglet) stopAll();
+  }
+  document.addEventListener('click', versNouvelOnglet);
+  document.addEventListener('auxclick', versNouvelOnglet);
 
   window.LaphiloMedia = { start: start, stopAll: stopAll };
 })();

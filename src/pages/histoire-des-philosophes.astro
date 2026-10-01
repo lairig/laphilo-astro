@@ -12,6 +12,82 @@ const { intro, items } = data as {
 };
 
 const westernCount = 13;
+
+/* Introduction : mêmes styles que /definition/ (lettrine, texte justifié) au lieu des styles en ligne du JSON */
+const introHtml = intro
+  .replace(/\s*style="[^"]*"/g, '')
+  .replace('<p>', '<p class="intro-drop-cap">')
+  .replaceAll('<p>', '<p class="intro-body">');
+
+/* Deux groupes, titrés comme ceux de /definition/ */
+const groupes = [
+  {
+    id: 'occidentaux', titre: 'Les philosophes occidentaux', nav: 'Occidentaux', items: items.slice(0, westernCount),
+    chapeau: [
+      'Des présocratiques grecs aux penseurs du XXIᵉ siècle, les grandes périodes de la philosophie occidentale.',
+      'Ouvrez une période pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.',
+    ],
+  },
+  {
+    id: 'non-occidentaux', titre: 'Les philosophes non-occidentaux', nav: 'Non-occidentaux', items: items.slice(westernCount),
+    chapeau: [
+      'Inde, Chine, monde arabe et islamique, Afrique, Japon, pensée juive : des traditions longtemps ignorées des histoires de la philosophie.',
+      'Ouvrez une tradition pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.',
+    ],
+  },
+];
+
+/* Les anciens boutons « Frise des … → » en fin de texte sont retirés : leurs liens
+   (frise ouverte sur le premier philosophe de la période, ?p=) passent dans le bloc
+   « Explorer sur LaPhilo.fr », sous des libellés plus courts. */
+const ANCIEN_BOUTON = /(?:\s*<br\s*\/?>)*\s*<p class="ldl-li"[^>]*>[\s\S]*?<\/p>/g;
+const textes = items.map((it) => ({ ...it, text: it.text.replace(ANCIEN_BOUTON, '').trim() }));
+groupes.forEach((g) => { g.items = g.items.map((it) => textes.find((t) => t.name === it.name) ?? it); });
+
+/* Bloc « Explorer » : le premier lien est le bouton principal ; la Frise des
+   penseurs du monde s'ouvre dans un nouvel onglet */
+type Lien = { href: string; label: string; monde?: boolean };
+const frise = (slug: string, p?: string) => `/philosophes/frise/${slug}/${p ? `?p=${encodeURIComponent(p)}` : ''}`;
+const M = {
+  axial: { href: '/frises/penseurs-du-monde/?periode=age-axial', label: 'Frise du monde : Âge axial', monde: true },
+  orIslam: { href: '/frises/penseurs-du-monde/?periode=age-d-or-islamique', label: 'Frise du monde : Âge d’or islamique', monde: true },
+  xix: { href: '/frises/penseurs-du-monde/?periode=xixe-siecle', label: 'Frise du monde : XIXᵉ siècle', monde: true },
+  tout: { href: '/frises/penseurs-du-monde/', label: 'Frise des penseurs du monde', monde: true },
+};
+const EXPLORER: Record<string, Lien[]> = {
+  'Présocratiques': [{ href: frise('greco-romains', 'PITTACOS de Mytilène'), label: 'Les présocratiques sur la frise' }, M.axial],
+  'Gréco-Classique': [{ href: frise('greco-romains', 'GORGIAS'), label: 'Les classiques grecs sur la frise' }, M.axial],
+  'Hellénistique': [{ href: frise('greco-romains', 'CRATÈS de Thèbes'), label: 'La période hellénistique sur la frise' }],
+  'Antiquité Romaine': [{ href: frise('greco-romains', "POSIDONIOS d'Apamée"), label: 'L’Antiquité romaine sur la frise' }],
+  'Antiquité tardive': [{ href: frise('greco-romains', 'PLOTIN'), label: 'L’Antiquité tardive sur la frise' }],
+  'Haut Moyen Âge': [{ href: frise('medievaux', "DENYS L'Aéropagite"), label: 'Le haut Moyen Âge sur la frise' }, M.orIslam],
+  'Scolastique Centrale': [{ href: frise('medievaux', "GERBERT d'Aurillac"), label: 'La scolastique sur la frise' }, M.orIslam],
+  'Fin du Moyen Âge': [{ href: frise('medievaux', 'Thierry de FREIBERG'), label: 'La fin du Moyen Âge sur la frise' }],
+  'Renaissance & Humanisme': [{ href: frise('renaissance-lumieres', 'Jean PIC de la Mirandole'), label: 'La Renaissance sur la frise' }],
+  'Moderne - Rationaliste - Empiriste': [{ href: frise('renaissance-lumieres', 'Thomas HOBBES'), label: 'Rationalistes et empiristes sur la frise' }],
+  'Moderne - Lumières': [{ href: frise('renaissance-lumieres', 'MONTESQUIEU'), label: 'Les Lumières sur la frise' }],
+  'Contemporains': [
+    { href: frise('france', 'Charles FOURIER'), label: 'Les penseurs français sur la frise' },
+    { href: frise('allemands', 'Johann Gottlieb FICHTE'), label: 'Penseurs allemands' },
+    { href: frise('americains', 'Ralph Waldo EMERSON'), label: 'Penseurs américains' },
+    { href: frise('modernes', 'Karl Leonhard REINHOLD'), label: 'Autres pays' },
+    M.xix,
+  ],
+  'XXIesiècles': [
+    { href: frise('france-contemporains', 'Pierre MAGNARD'), label: 'Les penseurs français actuels sur la frise' },
+    { href: frise('contemporains-europe'), label: 'Europe' },
+    { href: frise('contemporains-ameriques'), label: 'Amériques' },
+    { href: frise('contemporains-afrique-moyen-orient'), label: 'Afrique & Moyen-Orient' },
+    { href: frise('contemporains-asie-oceanie'), label: 'Asie & Océanie' },
+    { href: frise('contemporains-monde', 'Hermann LUBBE'), label: 'Monde entier' },
+  ],
+  "Grands sages de l'Inde ancienne": [{ href: frise('inde-bouddhisme-toutes-epoques', 'Siddharta GAUTAMA'), label: 'Les philosophes de l’Inde sur la frise' }, M.axial],
+  'Grands philosophes de la Chine classique': [{ href: frise('asie-est-toutes-epoques', 'CONFUCIUS'), label: 'Les philosophes chinois sur la frise' }, M.axial],
+  'Philosophes arabes & islamiques médiévaux': [{ href: frise('monde-islamique-toutes-epoques', 'AL-KINDI'), label: 'Le monde islamique sur la frise' }, M.orIslam],
+  'Philosophes africains': [{ href: frise('pensees-du-sud-toutes-epoques'), label: 'Les pensées africaines et du Sud sur la frise' }, M.tout],
+  'Philosophes japonais': [{ href: frise('asie-est-toutes-epoques', 'KÜKAI'), label: 'Les philosophes japonais sur la frise' }, M.tout],
+  'Philosophes hébraïques & juifs': [{ href: frise('pensee-juive-toutes-epoques', 'Moïse MAÏMONIDE'), label: 'Les philosophes juifs sur la frise' }, M.tout],
+};
 ---
 
 <html lang="fr">
@@ -30,7 +106,7 @@ const westernCount = 13;
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
 </head>
 <body>
 
@@ -49,8 +125,8 @@ const westernCount = 13;
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
-  <div class="intro-text-col" set:html={intro} />
+<main class="definition-page def-page">
+  <div class="intro-text-col" set:html={introHtml} />
 
   <div class="drawer-intro-sep" aria-hidden="true">
     <span class="drawer-intro-sep-line"></span>
@@ -58,63 +134,57 @@ const westernCount = 13;
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  <div class="definition-section-sep" aria-hidden="true">
-    <span class="drawer-intro-sep-line"></span>
-    <span class="drawer-intro-sep-ornament">Philosophes occidentaux</span>
-    <span class="drawer-intro-sep-line"></span>
-  </div>
+  <nav class="def-sommaire" aria-label="Sur cette page">
+    {groupes.map((g) => <a href={`#${g.id}`}>{g.nav}</a>)}
+  </nav>
 
-  <div class="acc-list">
-    {items.slice(0, westernCount).map((it) => (
-      <div class="acc-item">
-        <button class="acc-toggle" aria-expanded="false" type="button">
-          <span class="acc-name">{it.name}</span>
-          <span class="acc-date" set:html={it.tag} />
-          <span class="acc-chevron" aria-hidden="true">▶</span>
-        </button>
-        <div class="acc-content">
-          {it.ytId && (
-            <div class="acc-video">
-              <div class="youtube-container" data-id={it.ytId}>
-                <img src={`https://img.youtube.com/vi/${it.ytId}/hqdefault.jpg`} alt={`Vidéo : ${it.name}`} loading="lazy" width="480" height="360" />
-                <button class="play-button" aria-label={`Lancer la vidéo : ${it.name}`}></button>
-              </div>
-            </div>
-          )}
-          <div class="acc-text" set:html={it.text} />
+  {groupes.map((g, i) => (
+    <>
+      {i > 0 && (
+        <div class="drawer-intro-sep def-sep" aria-hidden="true">
+          <span class="drawer-intro-sep-line"></span>
+          <span class="drawer-intro-sep-ornament">✦</span>
+          <span class="drawer-intro-sep-line"></span>
         </div>
-      </div>
-    ))}
-  </div>
+      )}
+      <h2 class="def-titre" id={g.id}>{g.titre}</h2>
+      {g.chapeau.map((c) => <p class="def-chapeau">{c}</p>)}
 
-  <div class="definition-section-sep" aria-hidden="true">
-    <span class="drawer-intro-sep-line"></span>
-    <span class="drawer-intro-sep-ornament">Philosophes non-occidentaux</span>
-    <span class="drawer-intro-sep-line"></span>
-  </div>
-
-  <div class="acc-list">
-    {items.slice(westernCount).map((it) => (
-      <div class="acc-item">
-        <button class="acc-toggle" aria-expanded="false" type="button">
-          <span class="acc-name">{it.name}</span>
-          <span class="acc-date" set:html={it.tag} />
-          <span class="acc-chevron" aria-hidden="true">▶</span>
-        </button>
-        <div class="acc-content">
-          {it.ytId && (
-            <div class="acc-video">
-              <div class="youtube-container" data-id={it.ytId}>
-                <img src={`https://img.youtube.com/vi/${it.ytId}/hqdefault.jpg`} alt={`Vidéo : ${it.name}`} loading="lazy" width="480" height="360" />
-                <button class="play-button" aria-label={`Lancer la vidéo : ${it.name}`}></button>
-              </div>
+      <div class="acc-list">
+        {g.items.map((it) => (
+          <div class="acc-item">
+            <button class="acc-toggle" aria-expanded="false" type="button">
+              <span class="acc-name">{it.name}</span>
+              <span class="acc-date" set:html={it.tag} />
+              <span class="acc-chevron" aria-hidden="true">▶</span>
+            </button>
+            <div class="acc-content">
+              {it.ytId && (
+                <div class="acc-video">
+                  <div class="youtube-container" data-id={it.ytId}>
+                    <img src={`https://img.youtube.com/vi/${it.ytId}/hqdefault.jpg`} alt={`Vidéo : ${it.name}`} loading="lazy" width="480" height="360" />
+                    <button class="play-button" aria-label={`Lancer la vidéo : ${it.name}`}></button>
+                  </div>
+                </div>
+              )}
+              <div class="acc-text" set:html={it.text} />
+              {EXPLORER[it.name] && (
+                <div class="def-explorer">
+                  <span class="def-explorer-lbl">Explorer sur LaPhilo.fr</span>
+                  {EXPLORER[it.name].map((l, j) => (
+                    <a class={j === 0 ? 'def-explorer-main' : undefined} href={l.href}
+                       target={l.monde ? '_blank' : undefined} rel={l.monde ? 'noopener' : undefined}>
+                      {j === 0 ? `${l.label} →` : l.label}{l.monde && ' ↗'}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-          <div class="acc-text" set:html={it.text} />
-        </div>
+          </div>
+        ))}
       </div>
-    ))}
-  </div>
+    </>
+  ))}
 </main>
 
 <footer class="site-footer">

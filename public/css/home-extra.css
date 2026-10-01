@@ -288,11 +288,28 @@
 @media (max-width: 760px) {
   .une-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 660px) {
-  .une-card { flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; padding: 1rem 0.8rem; }
-  .une-text { align-items: center; }
-  .une-btn { align-self: center; }
-  .une-portrait { width: 60px; height: 60px; }
-  .une-name { font-size: 1rem; }
-  .une-desc { font-size: 0.95rem; }
+
+/* Version compacte (2026-10-01) : cartouche nettement plus petit. Sous-titre et
+   boutons « Découvrir » masqués (toute la carte est cliquable, flèche ↗ à droite),
+   portraits réduits, description sur une seule ligne. */
+.alaune-group { padding: 0.75rem 0.9rem 0.85rem; }
+.alaune-group > .alaune-eyebrow { margin-bottom: 0.5rem; }
+.une-sub, .une-btn { display: none; }
+.une-grid { gap: 0.6rem; }
+.une-card { align-items: center; gap: 0.7rem; padding: 0.5rem 2rem 0.5rem 0.7rem; position: relative; }
+.une-card::after {
+  content: '↗'; position: absolute; right: 0.7rem; top: 50%; transform: translateY(-50%);
+  font-size: 0.9rem; color: var(--accent); transition: transform 0.2s;
+}
+.une-card:hover::after { transform: translate(2px, calc(-50% - 2px)); }
+.une-portrait { width: 44px; height: 44px; border-width: 2px; }
+.une-badge { width: 54px; padding: 0.3rem 0.15rem; font-size: 0.4rem; letter-spacing: 0; overflow-wrap: anywhere; }
+.une-badge--vide { font-size: 1rem; }
+.une-text { gap: 0.05rem; }
+.une-label { font-size: 0.52rem; }
+.une-name { font-size: 0.95rem; line-height: 1.2; }
+.une-meta { font-size: 0.56rem; }
+.une-desc {
+  font-size: 0.88rem; line-height: 1.3;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden;
 }

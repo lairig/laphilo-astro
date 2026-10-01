@@ -1,0 +1,32 @@
+---
+/* « Continuer le voyage » : bouton en bas des pages du parcours conseillé aux
+   nouveaux venus (Bienvenue → C'est quoi la philosophie ? → Histoire des
+   courants → Histoire des philosophes). href = page suivante. */
+interface Props {
+  href: string;
+}
+const { href } = Astro.props;
+---
+
+<nav class="voyage" aria-label="Continuer le voyage">
+  <div class="drawer-intro-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+  <a class="voyage-btn" href={href}>Continuer le voyage →</a>
+</nav>
+
+<style>
+  .voyage { margin: 2.8rem 0 0; text-align: center; }
+  /* Footer remonté sous le bouton (les pages ont 64 px de marge basse) */
+  :global(main:has(> .voyage)) { padding-bottom: 0; }
+  .voyage-btn {
+    display: inline-block; margin-top: 1.2rem; padding: .7rem 1.6rem; border-radius: 4px; text-decoration: none;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: #1e1208; background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
+    box-shadow: 0 6px 20px rgba(10, 5, 2, .45);
+    transition: filter .2s, transform .2s;
+  }
+  .voyage-btn:hover, .voyage-btn:focus-visible { filter: brightness(1.08); transform: translateY(-1px); outline: none; }
+</style>

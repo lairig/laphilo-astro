@@ -8,6 +8,7 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import catalogue from '../data/frises-catalogue.json';
 
 const philosophes = await getCollection('philosophes');
 const courants = await getCollection('courants');
@@ -17,47 +18,69 @@ type Lien = { href: string; titre: string; texte: string };
 /* Parcours conseillé, dans l'ordre */
 const parcours: Lien[] = [
   { href: '/definition/', titre: "C'est quoi la philosophie ?", texte: 'Les sept grandes branches : métaphysique, éthique, politique, logique… Le meilleur point de départ.' },
-  { href: '/histoire-des-philosophes/', titre: 'Les philosophes', texte: "Les grandes figures, des présocratiques aux penseurs d'aujourd'hui, présentées époque par époque." },
   { href: '/histoire-des-courants/', titre: 'Les courants de pensée', texte: 'Stoïcisme, bouddhisme, Lumières, existentialisme… les grandes familles d’idées et leurs filiations.' },
+  { href: '/histoire-des-philosophes/', titre: 'Les philosophes', texte: "Les grandes figures, des présocratiques aux penseurs d'aujourd'hui, présentées époque par époque." },
   { href: '/frises/', titre: 'Les frises chronologiques', texte: 'Le cœur du site : chaque penseur situé dans son époque, par pays, par tradition ou par courant.' },
   { href: '/frises/penseurs-du-monde/', titre: 'La Frise des penseurs du monde', texte: 'Toutes les traditions côte à côte : Occident, islam, Inde, Chine, Afrique, Russie…' },
 ];
 
-/* Tous les principaux liens, par rubrique */
+/* Tous les principaux liens, par rubrique (mêmes libellés que le plan du site) */
 const rubriques: { titre: string; liens: Lien[] }[] = [
   {
     titre: 'Comprendre',
     liens: [
       { href: '/definition/', titre: "C'est quoi la philosophie ?", texte: 'Les 7 branches' },
       { href: '/histoire-des-philosophes/', titre: 'Histoire des philosophes', texte: 'Les grandes figures' },
-      { href: '/histoire-des-courants/', titre: 'Histoire des courants', texte: 'Les familles d’idées' },
+      { href: '/histoire-des-courants/', titre: 'Histoire des courants de pensée', texte: 'Les familles d’idées' },
     ],
   },
   {
-    titre: 'Explorer les frises',
+    titre: 'Frise complète du monde',
     liens: [
-      { href: '/frises/', titre: 'Toutes les frises', texte: 'Par époque, pays, tradition' },
       { href: '/frises/penseurs-du-monde/', titre: 'Frise des penseurs du monde', texte: 'Les traditions côte à côte' },
-      { href: '/frises/a-la-meme-epoque/', titre: 'À la même époque', texte: 'Qui pensait quoi, et où' },
+      { href: '/frises/a-la-meme-epoque/', titre: 'Tableau des penseurs', texte: 'Qui pensait quoi, et où' },
+      { href: '/frises/penseurs-du-monde/?femmes=1', titre: 'Les femmes dans l’histoire', texte: 'Les penseuses du monde entier' },
     ],
   },
   {
     titre: 'Trouver',
     liens: [
       { href: '/recherche/', titre: 'Recherche', texte: 'Philosophes, courants, frises' },
+      { href: '/frises/', titre: 'Toutes les frises', texte: 'Par époque, pays, tradition' },
+      { href: '/philosophes/frise/femmes-toutes-epoques/', titre: 'Pensée féminine', texte: 'Les philosophes femmes' },
       { href: '/plan-du-site/', titre: 'Plan du site', texte: 'Toutes les pages et frises' },
     ],
   },
   {
-    titre: 'Le site',
+    titre: 'À propos',
     liens: [
-      { href: '/pourquoi/', titre: 'Pourquoi ce site ?', texte: 'La genèse du projet' },
+      { href: '/pourquoi/', titre: 'Pourquoi ce site', texte: 'La genèse du projet' },
       { href: '/ressources/', titre: 'Ressources utilisées', texte: 'Sources et références' },
       { href: '/echanges/', titre: 'Échanges & contact', texte: 'Écrire, proposer' },
       { href: '/lairig/', titre: 'Musique Lairig', texte: "L'autre face du projet" },
     ],
   },
 ];
+
+/* Vidéo YouTube et podcast France Culture de la présentation. À remplir :
+   ytId = la partie après « v= » dans l'adresse YouTube ;
+   podcast.src = adresse du fichier .mp3 (radiofrance-podcast.net), podcast.titre = titre de l'émission.
+   Tant qu'un champ est vide, son bloc n'apparaît pas sur le site (un emplacement est montré en local). */
+const media = {
+  ytId: 'tSeNdAwn5Hc',
+  ytTitre: 'L’histoire de la philosophie en 5 minutes (Le philosophe)',
+  podcast: {
+    src: 'https://media.radiofrance-podcast.net/podcast09/26835-27.09.2026-ITEMA_24688390-2026F4170S0270-NET_MFI_0FE428CA-1B56-4195-96A7-33F9A6F70853-27-1ce14113cd570598717fbf8d39b97981.m4a',
+    titre: 'En quoi croyons-nous ?',
+  },
+};
+const dev = import.meta.env.DEV;
+
+/* Chiffres calculés : grandes traditions = groupes de la Frise des penseurs du
+   monde qui ont au moins une fiche ; frises = toutes les frises du catalogue (/frises/) */
+const nbTraditions = new Set(philosophes.map((p) => p.data.groupe).filter(Boolean)).size;
+const nbFrises = (catalogue.groups as any[]).reduce((n, g) =>
+  n + g.items.reduce((m: number, it: any) => m + (it.href ? 1 : 0) + (it.links || []).filter((l: any) => !l.href.includes('?')).length, 0), 0);
 
 const title = 'Nouveau ici ? Bienvenue sur LaPhilo.fr';
 const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophes.length} philosophes et ${courants.length} courants de pensée de toutes les traditions, des frises chronologiques interactives, par où commencer et tous les liens pour naviguer.`;
@@ -106,6 +129,38 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
       border-top: 1px solid rgba(180, 130, 50, .3); }
     .bv-chiffres span { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rust, #8b3a0f); text-align: center; }
     .bv-chiffres b { display: block; font-family: 'Cinzel Decorative', serif; font-size: 1.6rem; color: var(--ink, #1e1208); letter-spacing: 0; }
+
+    /* Vidéo + podcast sous la présentation : côte à côte, empilés sur mobile */
+    .bv-media { display: grid; grid-template-columns: 3fr 2fr; gap: 1rem; margin-top: 1.4rem; align-items: stretch; }
+    .bv-media:has(> :only-child) { grid-template-columns: 1fr; max-width: 640px; margin-left: auto; margin-right: auto; }
+    .bv-video, .bv-podcast { border: 1px solid rgba(212, 168, 67, .4); border-radius: 6px; overflow: hidden; background: rgba(30, 18, 8, .75); }
+    .bv-video .youtube-container { aspect-ratio: 16 / 9; }
+    .bv-media-legende { margin: 0; padding: .45rem .8rem; font-family: 'EB Garamond', serif; font-style: italic; font-size: .95rem; color: #ead9a8; }
+    /* Podcast : aux couleurs violettes de France Culture */
+    .bv-podcast {
+      display: flex; flex-direction: column; justify-content: center; gap: .9rem; padding: 1.3rem 1.3rem 1.2rem;
+      background: radial-gradient(circle at 85% 10%, rgba(214, 92, 196, .28), transparent 55%), linear-gradient(160deg, #4a1645 0%, #2a0d28 60%, #1c0a1a 100%);
+      border: 1px solid rgba(214, 120, 200, .45); border-top: 3px solid #c94fb8;
+    }
+    .bv-fc-tete { display: flex; align-items: center; gap: .8rem; }
+    .bv-fc-ondes { flex: none; display: flex; align-items: center; justify-content: center; gap: 3px; width: 2.9rem; height: 2.9rem; border-radius: 50%;
+      background: #c94fb8; box-shadow: 0 0 0 4px rgba(201, 79, 184, .25); }
+    .bv-fc-ondes i { display: block; width: 3px; border-radius: 2px; background: #fff; height: 40%; }
+    .bv-fc-ondes i:nth-child(2), .bv-fc-ondes i:nth-child(4) { height: 65%; }
+    .bv-fc-ondes i:nth-child(3) { height: 85%; }
+    .bv-podcast.en-lecture .bv-fc-ondes i { animation: bv-onde .9s ease-in-out infinite alternate; }
+    .bv-podcast.en-lecture .bv-fc-ondes i:nth-child(2n) { animation-delay: -.45s; }
+    .bv-podcast.en-lecture .bv-fc-ondes i:nth-child(3) { animation-delay: -.2s; }
+    @keyframes bv-onde { from { height: 25%; } to { height: 90%; } }
+    @media (prefers-reduced-motion: reduce) { .bv-podcast.en-lecture .bv-fc-ondes i { animation: none; } }
+    .bv-fc-marque { display: flex; flex-direction: column; line-height: 1.15; }
+    .bv-fc-marque b { font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+    .bv-fc-marque small { font-family: 'EB Garamond', serif; font-size: .95rem; font-style: italic; color: #e6b3dc; }
+    .bv-podcast-titre { margin: 0; font-family: 'EB Garamond', serif; font-size: 1.1rem; line-height: 1.4; color: #f6e6f2; }
+    .bv-podcast audio { width: 100%; border-radius: 999px; }
+    .bv-vide { display: grid; place-items: center; min-height: 160px; padding: 1rem; text-align: center; border-style: dashed;
+      font-family: 'EB Garamond', serif; font-size: 1rem; color: #c9a96e; }
+    .bv-vide small { font-size: .8rem; opacity: .8; }
 
     /* Parcours conseillé : étapes numérotées */
     .bv-parcours { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; counter-reset: etape; }
@@ -159,6 +214,7 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
       .bv-lettrine::first-letter { font-size: 2.4rem; }
       .bv-chiffres { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; }
       .bv-chiffres b { font-size: 1.3rem; }
+      .bv-media { grid-template-columns: 1fr; }
       .bv-etape a { padding: .8rem .8rem; gap: .8rem; }
       .bv-fleche { display: none; }
       .bv-rub a { padding: .6rem .2rem; }
@@ -191,13 +247,42 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
   <section class="bv-parch" aria-label="Présentation">
     <p class="bv-lettrine">LaPhilo.fr est une invitation à voyager dans l'histoire de la pensée, sans prérequis. Pas un cours magistral : un lieu où l'on peut flâner, d'un penseur à l'autre, d'une époque à l'autre, d'une culture à l'autre.</p>
     <p>Le site réunit les philosophes et les courants de pensée de toutes les traditions : la Grèce et l'Occident, mais aussi le monde islamique et juif, l'Inde, la Chine et le Japon, l'Afrique et les Amériques, la Russie, jusqu'aux sagesses de l'Égypte et de la Mésopotamie. Chacun est présenté par un court texte, souvent accompagné d'une vidéo ou d'un podcast, et situé sur des frises chronologiques interactives pour voir qui a pensé quoi, quand, et en dialogue avec qui.</p>
+    <p>Car la philosophie ne s'est jamais pensée seule. Socrate, le Bouddha et Confucius ont vécu à la même époque sans se connaître ; Averroès a transmis Aristote à l'Europe latine ; les Lumières ont lu les sages chinois, et la pensée africaine dialogue aujourd'hui avec celle de Paris ou de New York. Les frises rendent ces rencontres visibles : on y découvre des contemporains inattendus, des filiations, des ruptures.</p>
+    <p>Le site fait aussi une place à celles et ceux que les manuels oublient souvent : les femmes philosophes, d'Enheduanna et Hypatie à Simone de Beauvoir et Hannah Arendt, et les penseurs vivants, en France et dans le monde, classés par région et par sujet de travail : l'intelligence artificielle, l'écologie, la justice, le genre, la décolonisation, le sens de l'existence…</p>
+    <p>Chacun peut y entrer à sa façon : par une question (« c'est quoi la philosophie ? »), par un nom, par une époque, par un pays ou par une grande idée. Il n'y a pas de bon ordre : il suffit de se laisser guider par la curiosité.</p>
     <div class="bv-chiffres">
       <span><b>{philosophes.length}</b>philosophes</span>
       <span><b>{courants.length}</b>courants de pensée</span>
-      <span><b>40+</b>frises</span>
-      <span><b>7</b>grandes traditions</span>
+      <span><b>{nbFrises}</b>frises</span>
+      <span><b>{nbTraditions}</b>grandes traditions</span>
     </div>
   </section>
+
+  {(media.ytId || media.podcast.src || dev) && (
+    <section class="bv-media" aria-label="Écouter et regarder">
+      {media.ytId ? (
+        <div class="bv-video">
+          <div class="youtube-container" data-id={media.ytId}>
+            <img src={`https://img.youtube.com/vi/${media.ytId}/hqdefault.jpg`} alt={`Vidéo : ${media.ytTitre || 'présentation'}`} loading="lazy" width="480" height="360" />
+            <button class="play-button" aria-label={`Lancer la vidéo : ${media.ytTitre || 'présentation'}`}></button>
+          </div>
+          {media.ytTitre && <p class="bv-media-legende">{media.ytTitre}</p>}
+        </div>
+      ) : dev && <div class="bv-video bv-vide">Emplacement de la vidéo YouTube<br /><small>(renseigner media.ytId — visible seulement en local)</small></div>}
+      {media.podcast.src ? (
+        <div class="bv-podcast">
+          <div class="bv-fc-tete">
+            <span class="bv-fc-ondes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="bv-fc-marque"><b>France Culture</b><small>Podcast · à écouter</small></span>
+          </div>
+          <p class="bv-podcast-titre">{media.podcast.titre || 'Prolonger la découverte à l’écoute d’une émission de France Culture.'}</p>
+          <audio controls preload="none" title={media.podcast.titre || 'Podcast France Culture'}>
+            <source src={media.podcast.src} type={media.podcast.src.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg'} />
+          </audio>
+        </div>
+      ) : dev && <div class="bv-podcast bv-vide">Emplacement du podcast France Culture<br /><small>(renseigner media.podcast — visible seulement en local)</small></div>}
+    </section>
+  )}
 
   <h2 class="bv-titre">Par où commencer</h2>
   <ol class="bv-parcours">
@@ -259,6 +344,14 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
 </footer>
 
 <script src="/js/home-main.js" defer></script>
+<script is:inline>
+  /* Ondes animées du cartouche France Culture pendant la lecture */
+  document.querySelectorAll('.bv-podcast audio').forEach(function (a) {
+    var c = a.closest('.bv-podcast');
+    a.addEventListener('play', function () { c.classList.add('en-lecture'); });
+    ['pause', 'ended'].forEach(function (ev) { a.addEventListener(ev, function () { c.classList.remove('en-lecture'); }); });
+  });
+</script>
 
 </body>
 </html>

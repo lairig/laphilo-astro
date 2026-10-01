@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import Voyage from '../components/Voyage.astro';
 import { getCollection } from 'astro:content';
 const branches = [
   {
@@ -316,7 +317,7 @@ const specialisees: {
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
   <style is:global>
     /* ── Cartouche d'introduction (vidéo + texte), repris de l'accueil ── */
     /* Même largeur que sur l'accueil (860 px), au-delà de la colonne de 760 px de la page */
@@ -329,49 +330,8 @@ const specialisees: {
       .definition-page .intro-video-caption { background: linear-gradient(150deg, #f7efcc 0%, #ead8a0 100%); }
     }
 
-    /* ── Sommaire de la page ── */
-    .def-sommaire { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin: 0 0 1.6rem; }
-    .def-sommaire a {
-      padding: .35rem .85rem; border-radius: 999px; text-decoration: none;
-      font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase;
-      color: #d4a843; border: 1px solid rgba(212, 168, 67, .4); background: rgba(30, 18, 8, .6);
-    }
-    .def-sommaire a:hover, .def-sommaire a:focus-visible { background: rgba(180, 130, 20, .2); border-color: #d4a843; color: #f7ecce; outline: none; }
-
-    /* ── Titres de section ── */
-    .def-titre {
-      margin: 2.6rem 0 .5rem; text-align: center; scroll-margin-top: 1rem;
-      font-family: 'Cinzel', serif; font-size: .9rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
-      color: #d4a843; text-shadow: 0 1px 12px rgba(180, 130, 20, .35);
-    }
-    .def-titre::before, .def-titre::after { content: ' ✦ '; }
-    .def-chapeau { max-width: 640px; margin: 0 auto 1.2rem; text-align: center; font-family: 'EB Garamond', serif;
-      font-style: italic; font-size: 1.02rem; line-height: 1.5; color: #ead9a8; }
-
-    /* ── « Explorer » sous chaque branche ── */
-    .def-explorer { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem .5rem; margin-top: 1rem; padding-top: .9rem;
-      border-top: 1px solid rgba(184, 146, 60, .4); }
-    .def-explorer-lbl { width: 100%; font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: #8b3a0f; }
-    .def-explorer a { padding: .3rem .7rem; border-radius: 4px; text-decoration: none; font-family: 'Cinzel', serif; font-size: .64rem;
-      letter-spacing: .04em; color: #5c3d1e; background: rgba(255, 251, 236, .55); border: 1px solid rgba(184, 146, 60, .6); }
-    .def-explorer a:hover { background: rgba(255, 251, 236, .9); border-color: #8b3a0f; color: #8b3a0f; }
-    .def-explorer a.def-explorer-main { font-weight: 700; color: #fff8e6; background: linear-gradient(150deg, #c05a20 0%, #8b3a0f 100%); border-color: #7a3210; }
-    .def-explorer a.def-explorer-main:hover { filter: brightness(1.1); color: #fff; }
-
-    /* ── Branches spécialisées : mêmes accordéons que les 7 branches ── */
-    .acc-text a.def-cle { color: #8b3a0f; text-decoration: none; border-bottom: 1px solid rgba(139, 58, 15, .35); }
-    .acc-text a.def-cle:hover { color: #c05a20; border-bottom-color: #c05a20; }
-
-    @media (max-width: 640px) {
-      /* Accordéons : mots-clés sous le nom, flèche à droite (les noms longs ne s'empilent plus) */
-      .acc-toggle { grid-template-columns: 1fr auto; grid-template-areas: "nom fleche" "mots fleche"; row-gap: .2rem; }
-      .acc-name { grid-area: nom; }
-      .acc-date { grid-area: mots; white-space: normal; line-height: 1.25; }
-      .acc-chevron { grid-area: fleche; }
-      .def-titre { letter-spacing: .12em; }
-      .def-sommaire a { padding: .5rem .85rem; }
-      .def-explorer a { padding: .55rem .75rem; }
-    }
+    /* Footer remonté sous « Continuer le voyage » (la page a 64 px de marge basse) */
+    main.definition-page { padding-bottom: 0; }
   </style>
 </head>
 <body>
@@ -391,7 +351,7 @@ const specialisees: {
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
+<main class="definition-page def-page">
   <!-- Même cartouche que « Philosopher, c'est s'étonner » sur l'accueil : vidéo à gauche, texte à droite -->
   <div class="intro-cartouche">
     <div class="intro-cartouche-inner">
@@ -423,7 +383,8 @@ const specialisees: {
   </nav>
 
   <h2 class="def-titre" id="branches">Les 7 grandes branches</h2>
-  <p class="def-chapeau">La philosophie se divise en plusieurs branches qui chacune constitue un champ d'investigation autonome, mais toutes partagent la même ambition&nbsp;: penser plus clairement le monde et notre place en lui. Ouvrez une branche pour sa définition, une vidéo, un podcast, puis les philosophes et les courants qui s'y rattachent sur le site.</p>
+  <p class="def-chapeau">La philosophie se divise en plusieurs branches. Chacune constitue un champ d'investigation autonome, mais toutes partagent la même ambition&nbsp;: penser plus clairement le monde et notre place en lui.</p>
+  <p class="def-chapeau">Ouvrez une branche pour découvrir sa définition, une vidéo et un podcast, puis les philosophes et les courants qui s'y rattachent sur le site.</p>
 
   <div class="acc-list">
     {branches.map((b) => (
@@ -462,8 +423,15 @@ const specialisees: {
     ))}
   </div>
 
+  <div class="drawer-intro-sep def-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
   <h2 class="def-titre" id="specialisees">Les branches spécialisées</h2>
-  <p class="def-chapeau">Au-delà des sept grandes branches, la philosophie se ramifie en « philosophies de… », souvent considérées comme des branches à part entière. Elles touchent aux questions les plus actuelles : intelligence artificielle, écologie, bioéthique, justice.</p>
+  <p class="def-chapeau">Au-delà des sept grandes branches, la philosophie se ramifie en «&nbsp;philosophies de…&nbsp;», souvent considérées comme des branches à part entière.</p>
+  <p class="def-chapeau">Elles touchent aux questions les plus actuelles&nbsp;: intelligence artificielle, écologie, bioéthique, justice.</p>
 
   <div class="acc-list acc-list--spe">
     {specialisees.map((s) => (
@@ -502,6 +470,8 @@ const specialisees: {
       </div>
     ))}
   </div>
+
+  <Voyage href="/histoire-des-courants/" />
 </main>
 
 <footer class="site-footer">

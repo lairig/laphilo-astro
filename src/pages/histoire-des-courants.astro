@@ -4,6 +4,7 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import Voyage from '../components/Voyage.astro';
 import data from '../data/definition-courants.json';
 
 const { intro, items } = data as {
@@ -18,7 +19,39 @@ const { intro, items } = data as {
   }[];
 };
 
+/* Introduction : mêmes styles que /definition/ (lettrine, texte justifié) au lieu des styles en ligne du JSON */
+const introHtml = intro
+  .replace(/\s*style="[^"]*"/g, '')
+  .replace('<p>', '<p class="intro-drop-cap">')
+  .replaceAll('<p>', '<p class="intro-body">');
+
+/* Sections : titre, chapeau et ancre, comme les deux groupes de /definition/ */
+const SECTIONS: Record<string, { id: string; titre: string; nav: string; chapeau: string[]; frise: string; friseLabel: string }> = {
+  'Pensée Occidentale': {
+    id: 'occidentale', titre: 'La pensée occidentale', nav: 'Pensée occidentale',
+    chapeau: [
+      'De la Grèce antique à nos jours, une longue conversation où chaque école répond à celle qui l’a précédée.',
+      'Ouvrez un courant pour sa présentation, une vidéo et un podcast, puis retrouvez-le sur la frise des courants.',
+    ],
+    frise: '/courants/frise/occidental/', friseLabel: 'La frise de la pensée occidentale',
+  },
+  'Pensée Orientale': {
+    id: 'orientale', titre: 'La pensée orientale', nav: 'Pensée orientale',
+    chapeau: [
+      'De l’Inde védique au Japon de l’école de Kyōto, en passant par la Chine, l’Islam, l’Afrique et les Amériques : d’autres chemins vers les mêmes questions.',
+      'Ouvrez un courant pour sa présentation et une vidéo, puis retrouvez-le sur la frise des courants.',
+    ],
+    frise: '/courants/frise/oriental/', friseLabel: 'La frise de la pensée orientale',
+  },
+};
 const sections = Array.from(new Set(items.map((it) => it.section)));
+
+/* Le lien « Voir la frise → » en fin de texte devient le bouton du bloc « Explorer » */
+const FRISE_LIEN = /(?:\s*<br\s*\/?>)*\s*<a class="parch-link" href="([^"]+)">Voir la frise →<\/a>\s*$/;
+const cartes = items.map((it) => {
+  const m = it.text.match(FRISE_LIEN);
+  return { ...it, text: m ? it.text.replace(FRISE_LIEN, '') : it.text, frise: m ? m[1] : null };
+});
 ---
 
 <html lang="fr">
@@ -37,7 +70,7 @@ const sections = Array.from(new Set(items.map((it) => it.section)));
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
 </head>
 <body>
 
@@ -56,8 +89,8 @@ const sections = Array.from(new Set(items.map((it) => it.section)));
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
-  <div class="intro-text-col" set:html={intro} />
+<main class="definition-page def-page">
+  <div class="intro-text-col" set:html={introHtml} />
 
   <div class="drawer-intro-sep" aria-hidden="true">
     <span class="drawer-intro-sep-line"></span>
@@ -65,16 +98,24 @@ const sections = Array.from(new Set(items.map((it) => it.section)));
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  {sections.map((section) => (
+  <nav class="def-sommaire" aria-label="Sur cette page">
+    {sections.map((section) => <a href={`#${SECTIONS[section]?.id}`}>{SECTIONS[section]?.nav ?? section}</a>)}
+  </nav>
+
+  {sections.map((section, i) => (
     <>
-      <div class="courants-section-header" aria-hidden="true">
-        <span class="courants-section-line"></span>
-        <span class="courants-section-label">{section}</span>
-        <span class="courants-section-line"></span>
-      </div>
+      {i > 0 && (
+        <div class="drawer-intro-sep def-sep" aria-hidden="true">
+          <span class="drawer-intro-sep-line"></span>
+          <span class="drawer-intro-sep-ornament">✦</span>
+          <span class="drawer-intro-sep-line"></span>
+        </div>
+      )}
+      <h2 class="def-titre" id={SECTIONS[section]?.id}>{SECTIONS[section]?.titre ?? section}</h2>
+      {(SECTIONS[section]?.chapeau ?? []).map((c) => <p class="def-chapeau">{c}</p>)}
 
       <div class="acc-list">
-        {items.filter((it) => it.section === section).map((it) => (
+        {cartes.filter((it) => it.section === section).map((it) => (
           <div class="acc-item">
             <button class="acc-toggle" aria-expanded="false" type="button">
               <span class="acc-name">{it.name}</span>
@@ -99,12 +140,19 @@ const sections = Array.from(new Set(items.map((it) => it.section)));
                   </audio>
                 </div>
               )}
+              <div class="def-explorer">
+                <span class="def-explorer-lbl">Explorer sur LaPhilo.fr</span>
+                {it.frise && <a class="def-explorer-main" href={it.frise}>Voir sur la frise des courants →</a>}
+                {SECTIONS[section] && <a href={SECTIONS[section].frise}>{SECTIONS[section].friseLabel}</a>}
+              </div>
             </div>
           </div>
         ))}
       </div>
     </>
   ))}
+
+  <Voyage href="/histoire-des-philosophes/" />
 </main>
 
 <footer class="site-footer">
