@@ -1,9 +1,8 @@
-/* Blocs « À la une aujourd'hui » et « Activité du jour » (un philosophe vivant) de la page d'accueil.
+/* Bloc « À la une » de la page d'accueil (un philosophe et un courant de pensée par jour).
    Le même HTML est rendu au build dans index.astro (jour du build) et en
    fragments /data/alaune/<jour>.txt que home-alaune.js charge les autres
    jours : pas de saut de mise en page, pas de gros index à télécharger. */
 import { getCollection } from 'astro:content';
-import { themesVivants } from '../data/themes-vivants';
 
 interface Entry {
   n: string;
@@ -12,13 +11,12 @@ interface Entry {
   t: string;
   desc: string;
   dom: string;
-  /** Philosophes vivants : leurs sujets de travail [code, libellé] */
-  th?: [string, string][];
   nat?: string;
+  /** Philosophe vivant (« En activité ») */
+  vivant?: boolean;
 }
 
 const VIVANTS = ['france-contemporains', 'contemporains-monde'];
-const libelleTheme = new Map(themesVivants.map((t) => [t.code, t.label]));
 
 /* Ordre de passage : mélange stable (tri par empreinte du nom), pour que deux
    jours de suite ne montrent pas deux voisins de l'ordre alphabétique. */
@@ -40,12 +38,11 @@ export async function getAlaunePools() {
     t: p.thumbnail || '',
     desc: p.description || '',
     dom: '',
-    th: (p.themes || []).map((c): [string, string] => [c, libelleTheme.get(c) || c]),
     nat: p.nationalite,
+    vivant: VIVANTS.includes(p.frise_source),
   });
-  /* « Philosophe à la une » : les penseurs du passé ; les vivants ont leur propre bloc, « Activité du jour » */
-  const phi: Entry[] = avecFiche.filter(({ data: p }) => !VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
-  const viv: Entry[] = avecFiche.filter(({ data: p }) => VIVANTS.includes(p.frise_source)).map(versEntry).sort(melange);
+  /* « Philosophe à la une » : penseurs du passé et vivants, dans une même rotation */
+  const phi: Entry[] = avecFiche.map(versEntry).sort(melange);
   const cur: Entry[] = courants
     .map(({ data: c }) => ({
       n: c.name,
@@ -57,7 +54,7 @@ export async function getAlaunePools() {
     }))
     .filter((e) => e.desc)
     .sort(melange);
-  return { phi, viv, cur };
+  return { phi, cur };
 }
 
 /** Jour de l'année (1 à 366), calculé comme dans home-alaune.js. */
@@ -93,11 +90,10 @@ const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').rep
 const friseUrl = (e: Entry) => attr(e.u + '?p=' + encodeURIComponent(e.n));
 
 export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, day: number) {
-  const { phi, viv, cur } = pools;
-  if (!phi.length || !cur.length || !viv.length) return '';
+  const { phi, cur } = pools;
+  if (!phi.length || !cur.length) return '';
   const n = Math.max(0, epochDayFor(day));
   const entry = phi[n % phi.length];
-  const entryViv = viv[n % viv.length];
   const entryCur = cur[n % cur.length];
 
   let domHue = 0;
@@ -105,8 +101,8 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
   domHue = domHue % 360;
 
   return (
-    /* « À la une » : même présentation que « Activité du jour » (cartes sombres,
-       portrait, étiquette, nom, repères, description, bouton), en cuivre et or */
+    /* « À la une » : cartouche parchemin, deux cartes (portrait ou branche,
+       étiquette, nom, repères, description, bouton) */
     '<div class="alaune-group">' +
     '<span class="alaune-eyebrow">✦ À la une ✦</span>' +
     '<span class="une-sub">Un philosophe et un courant de pensée, chaque jour</span>' +
@@ -116,7 +112,7 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
     '<span class="une-text">' +
     '<span class="une-label">Philosophe à la une</span>' +
     `<span class="une-name">${titleCase(entry.n)}</span>` +
-    `<span class="une-meta">${[entry.nat, entry.d].filter(Boolean).map((x) => attr(x!)).join(' · ')}</span>` +
+    `<span class="une-meta">${entry.vivant ? '<span class="une-live">● En activité</span> · ' : ''}${[entry.nat, entry.d].filter(Boolean).map((x) => attr(x!)).join(' · ')}</span>` +
     `<span class="une-desc">${entry.desc}</span>` +
     '<span class="une-btn">Découvrir <span aria-hidden="true">↗</span></span>' +
     '</span>' +
@@ -132,34 +128,6 @@ export function alauneHtml(pools: Awaited<ReturnType<typeof getAlaunePools>>, da
     '</span>' +
     '</a>' +
     '</div>' +
-    '</div>' +
-    activiteHtml(entryViv)
-  );
-}
-
-/* « Activité du jour » : un philosophe vivant, à part du bloc « À la une »,
-   avec ses sujets de travail et un lien vers la frise de chacun */
-function activiteHtml(e: Entry) {
-  const sujets = e.th ?? [];
-  return (
-    '<div class="activite-jour">' +
-    '<span class="activite-eyebrow">✦ Activité du jour ✦</span>' +
-    '<span class="activite-sub">Un philosophe vivant, qui pense notre époque</span>' +
-    `<a class="activite-card" href="${friseUrl(e)}">` +
-    `<img class="activite-portrait" src="${attr(e.t)}" alt="${attr(e.n)}" width="64" height="64" loading="lazy">` +
-    '<span class="activite-text">' +
-    '<span class="activite-live">● En activité</span>' +
-    `<span class="activite-name">${titleCase(e.n)}</span>` +
-    `<span class="activite-meta">${[e.nat, e.d].filter(Boolean).map((x) => attr(x!)).join(' · ')}</span>` +
-    `<span class="activite-desc">${e.desc}</span>` +
-    '<span class="activite-btn">Découvrir sa pensée <span aria-hidden="true">↗</span></span>' +
-    '</span>' +
-    '</a>' +
-    (sujets.length
-      ? '<div class="activite-sujets"><span class="activite-sujets-lbl">Sur le même sujet :</span>' +
-        sujets.map(([code, label]) => `<a href="/philosophes/frise/vivants-${attr(code)}/">${attr(label)}</a>`).join('') +
-        '</div>'
-      : '') +
     '</div>'
   );
 }

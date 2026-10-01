@@ -72,7 +72,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .chip small { opacity: .75; }
     .chip[aria-pressed="true"] { color: var(--parch); border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
     .chip[aria-pressed="true"] .pastille { opacity: 1; }
-    .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold);
+    .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold); text-decoration: none;
       background: rgba(212,168,67,.06); border: 1px solid var(--line); border-radius: 4px; padding: .3rem .6rem; }
     .btn:hover, .chip:hover { border-color: var(--gold); }
     .btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(212,168,67,.16); }
@@ -238,6 +238,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       <button class="btn" id="zplus" aria-label="Zoomer">+</button>
     </div>
     <button class="btn" id="femmes" type="button" aria-pressed="false">♀ Femmes uniquement</button>
+    <a class="btn" id="vers-epoque" href="/frises/a-la-meme-epoque/">⇄ À la même époque</a>
   </div>
   <p class="aide" id="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
 
@@ -331,6 +332,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
       if (femmes) u.searchParams.set('femmes', '1');
       if (choisi) u.searchParams.set('p', choisi);
+      $('vers-epoque').href = '/frises/a-la-meme-epoque/' + (choisi ? '?p=' + encodeURIComponent(choisi) : '');
       history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
     }
 
@@ -481,6 +483,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}${aussi.length ? ' · aussi : ' + esc(aussi.join(', ')) : ''}</p>
           <p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
+          <a class="btn" href="/frises/a-la-meme-epoque/?p=${encodeURIComponent(s.id)}">⇄ À la même époque</a>
           <button class="btn fermer-carte" type="button">Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${autres.length ? autres.map(({ g, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${liste.length}</h3><ul>`

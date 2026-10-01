@@ -59,7 +59,7 @@ const jsonLd = [
   <link rel="preconnect" href="https://i.ytimg.com" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/home-extra.css?v=20260930f" />
+  <link rel="stylesheet" href="/css/home-extra.css?v=20261001" />
 </head>
 <body>
 
@@ -77,16 +77,15 @@ const jsonLd = [
 <main>
 
 <div class="timeline-section timeline-section--top">
-  <p class="timeline-section-title">✦ Explorer la philosophie ✦</p>
   <p class="timeline-section-subtitle" id="js-stats-fr"><span class="stats-group">✦ <span class="stats-num">{courants.length}</span> courants de pensée</span> <span class="stats-group">✦ <span class="stats-num">{philosophes.length}</span> philosophes</span></p>
 
   <nav class="entry-guide" aria-label="Par où commencer ?">
     <div class="entry-guide-items">
-      <a class="entry-guide-btn" href="/histoire-des-courants/">
+      <a class="entry-guide-btn" href="/bienvenue/">
         <span class="entry-guide-icon">☿</span>
         <span class="entry-guide-text">
           <strong>Nouveau ici</strong>
-          <span>Les courants de pensée</span>
+          <span>Présentation du site</span>
         </span>
       </a>
       <a class="entry-guide-btn" href="/recherche/">
@@ -96,20 +95,16 @@ const jsonLd = [
           <span>Philosophes ou courants de pensée</span>
         </span>
       </a>
-      <a class="entry-guide-btn" href="/frises/">
+      <a class="entry-guide-btn" href="/frises/a-la-meme-epoque/">
         <span class="entry-guide-icon">◈</span>
         <span class="entry-guide-text">
           <strong>Je veux explorer</strong>
-          <span>Parcourir les frises</span>
+          <span>Qui pensait quoi, et où</span>
         </span>
       </a>
     </div>
   </nav>
 </div>
-
-<div class="alaune-wrap" id="alaune-wrap" data-day={buildDay} set:html={alaune}></div>
-
-<div class="alaune-sep" aria-hidden="true"><span class="alaune-sep-mark">✦</span></div>
 
 <div class="intro-cartouche">
   <div class="intro-cartouche-inner">
@@ -129,6 +124,10 @@ const jsonLd = [
     </div>
   </div>
 </div>
+
+<div class="alaune-sep" aria-hidden="true"><span class="alaune-sep-mark">✦</span></div>
+
+<div class="alaune-wrap" id="alaune-wrap" data-day={buildDay} set:html={alaune}></div>
 
 <div class="timeline-section">
   <div class="timeline-spine" role="list" aria-label="Accès aux grandes sections philosophiques">

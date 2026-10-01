@@ -1,0 +1,264 @@
+---
+/* « Nouveau ici ? » : présentation du site et mode d'emploi, avec un parcours
+   conseillé et tous les principaux liens. Cible du bouton « Nouveau ici » de
+   l'accueil. */
+import { getCollection } from 'astro:content';
+import Favicons from '../components/Favicons.astro';
+import BackButton from '../components/BackButton.astro';
+import Fonts from '../components/Fonts.astro';
+import GoatCounter from '../components/GoatCounter.astro';
+import SeoHead from '../components/SeoHead.astro';
+
+const philosophes = await getCollection('philosophes');
+const courants = await getCollection('courants');
+
+type Lien = { href: string; titre: string; texte: string };
+
+/* Parcours conseillé, dans l'ordre */
+const parcours: Lien[] = [
+  { href: '/definition/', titre: "C'est quoi la philosophie ?", texte: 'Les sept grandes branches : métaphysique, éthique, politique, logique… Le meilleur point de départ.' },
+  { href: '/histoire-des-philosophes/', titre: 'Les philosophes', texte: "Les grandes figures, des présocratiques aux penseurs d'aujourd'hui, présentées époque par époque." },
+  { href: '/histoire-des-courants/', titre: 'Les courants de pensée', texte: 'Stoïcisme, bouddhisme, Lumières, existentialisme… les grandes familles d’idées et leurs filiations.' },
+  { href: '/frises/', titre: 'Les frises chronologiques', texte: 'Le cœur du site : chaque penseur situé dans son époque, par pays, par tradition ou par courant.' },
+  { href: '/frises/penseurs-du-monde/', titre: 'La Frise des penseurs du monde', texte: 'Toutes les traditions côte à côte : Occident, islam, Inde, Chine, Afrique, Russie…' },
+];
+
+/* Tous les principaux liens, par rubrique */
+const rubriques: { titre: string; liens: Lien[] }[] = [
+  {
+    titre: 'Comprendre',
+    liens: [
+      { href: '/definition/', titre: "C'est quoi la philosophie ?", texte: 'Les 7 branches' },
+      { href: '/histoire-des-philosophes/', titre: 'Histoire des philosophes', texte: 'Les grandes figures' },
+      { href: '/histoire-des-courants/', titre: 'Histoire des courants', texte: 'Les familles d’idées' },
+    ],
+  },
+  {
+    titre: 'Explorer les frises',
+    liens: [
+      { href: '/frises/', titre: 'Toutes les frises', texte: 'Par époque, pays, tradition' },
+      { href: '/frises/penseurs-du-monde/', titre: 'Frise des penseurs du monde', texte: 'Les traditions côte à côte' },
+      { href: '/frises/a-la-meme-epoque/', titre: 'À la même époque', texte: 'Qui pensait quoi, et où' },
+    ],
+  },
+  {
+    titre: 'Trouver',
+    liens: [
+      { href: '/recherche/', titre: 'Recherche', texte: 'Philosophes, courants, frises' },
+      { href: '/plan-du-site/', titre: 'Plan du site', texte: 'Toutes les pages et frises' },
+    ],
+  },
+  {
+    titre: 'Le site',
+    liens: [
+      { href: '/pourquoi/', titre: 'Pourquoi ce site ?', texte: 'La genèse du projet' },
+      { href: '/ressources/', titre: 'Ressources utilisées', texte: 'Sources et références' },
+      { href: '/echanges/', titre: 'Échanges & contact', texte: 'Écrire, proposer' },
+      { href: '/lairig/', titre: 'Musique Lairig', texte: "L'autre face du projet" },
+    ],
+  },
+];
+
+const title = 'Nouveau ici ? Bienvenue sur LaPhilo.fr';
+const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophes.length} philosophes et ${courants.length} courants de pensée de toutes les traditions, des frises chronologiques interactives, par où commencer et tous les liens pour naviguer.`;
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/bienvenue/" />
+
+  <Fonts />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .bv { max-width: 920px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+    .bv-titre {
+      margin: 2.6rem 0 1rem; text-align: center;
+      font-family: 'Cinzel', serif; font-size: .85rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--gold-light, #d4a843); text-shadow: 0 1px 12px rgba(180, 130, 20, .35);
+    }
+    .bv-titre::before, .bv-titre::after { content: ' ✦ '; }
+
+    /* Présentation : parchemin, comme le cartouche d'introduction de l'accueil */
+    .bv-parch {
+      position: relative; overflow: hidden;
+      padding: 1.6rem 2rem 1.4rem;
+      background: linear-gradient(150deg, #f7efcc 0%, #ead8a0 45%, #e0cb8a 100%), var(--noise);
+      border: 1px solid var(--parch-border, #b8923c); border-radius: var(--radius, 6px);
+      box-shadow: 5px 5px 0 rgba(120, 80, 20, .2), 0 16px 48px rgba(10, 5, 2, .5);
+    }
+    .bv-parch::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: .6;
+      background: linear-gradient(90deg, transparent, var(--gold, #b8860b), var(--rust, #8b3a0f), var(--gold, #b8860b), transparent);
+    }
+    .bv-parch p { font-family: 'EB Garamond', serif; font-size: 1.05rem; line-height: 1.7; color: var(--ink-mid, #3d2410); text-align: justify; }
+    .bv-parch p + p { margin-top: .7rem; }
+    .bv-lettrine::first-letter {
+      font-family: 'Cinzel Decorative', serif; font-size: 3.2rem; font-weight: 700; color: var(--rust, #8b3a0f);
+      float: left; line-height: .8; margin: .08em .12em 0 0;
+    }
+    .bv-chiffres { display: flex; justify-content: center; flex-wrap: wrap; gap: .6rem 2rem; margin-top: 1.2rem; padding-top: 1rem;
+      border-top: 1px solid rgba(180, 130, 50, .3); }
+    .bv-chiffres span { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rust, #8b3a0f); text-align: center; }
+    .bv-chiffres b { display: block; font-family: 'Cinzel Decorative', serif; font-size: 1.6rem; color: var(--ink, #1e1208); letter-spacing: 0; }
+
+    /* Parcours conseillé : étapes numérotées */
+    .bv-parcours { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; counter-reset: etape; }
+    .bv-etape a {
+      display: flex; align-items: center; gap: 1rem; padding: .9rem 1.1rem; text-decoration: none;
+      background: rgba(30, 18, 8, .75); border: 1px solid rgba(212, 168, 67, .4); border-radius: 6px;
+      transition: transform .2s, border-color .2s, background .2s;
+    }
+    .bv-etape a:hover, .bv-etape a:focus-visible { transform: translateX(4px); border-color: #d4a843; background: rgba(60, 36, 12, .85); outline: none; }
+    .bv-num {
+      flex: none; width: 2.4rem; height: 2.4rem; border-radius: 50%; display: grid; place-items: center;
+      font-family: 'Cinzel Decorative', serif; font-weight: 700; font-size: 1.05rem; color: var(--ink, #1e1208);
+      background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
+    }
+    .bv-etape-txt { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+    .bv-etape-txt strong { font-family: 'Cinzel', serif; font-size: .92rem; letter-spacing: .04em; color: #f7ecce; }
+    .bv-etape-txt span { font-family: 'EB Garamond', serif; font-size: 1rem; line-height: 1.35; color: #ead9a8; font-style: italic; }
+    .bv-fleche { margin-left: auto; flex: none; color: #d4a843; font-size: 1.1rem; }
+
+    /* Mode d'emploi des frises */
+    .bv-mode { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .8rem; }
+    .bv-astuce { padding: 1rem 1.1rem; background: rgba(30, 18, 8, .6); border: 1px solid rgba(212, 168, 67, .25); border-top: 3px solid #d4a843; border-radius: 6px; }
+    .bv-astuce b { display: block; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: #d4a843; margin-bottom: .35rem; }
+    .bv-astuce p { font-family: 'EB Garamond', serif; font-size: 1rem; line-height: 1.45; color: #ead9a8; }
+
+    /* Tous les liens */
+    .bv-liens { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 1rem; align-items: start; }
+    .bv-rub { padding: 1rem 1.1rem .8rem; background: rgba(30, 18, 8, .75); border: 1px solid rgba(212, 168, 67, .35); border-radius: 6px; }
+    .bv-rub h3 { margin: 0 0 .4rem; padding-bottom: .4rem; border-bottom: 1px solid rgba(212, 168, 67, .3);
+      font-family: 'Cinzel', serif; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #d4a843; }
+    .bv-rub ul { list-style: none; margin: 0; padding: 0; }
+    .bv-rub li + li { border-top: 1px solid rgba(212, 168, 67, .1); }
+    .bv-rub a { display: flex; flex-direction: column; padding: .45rem .2rem; text-decoration: none; }
+    .bv-rub a strong { font-family: 'EB Garamond', serif; font-size: 1.08rem; font-weight: 500; color: #f7ecce; }
+    .bv-rub a span { font-family: 'EB Garamond', serif; font-size: .9rem; font-style: italic; color: #c9a96e; }
+    .bv-rub a:hover strong, .bv-rub a:focus-visible strong { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+    .bv-rub a:focus-visible { outline: none; background: rgba(180, 130, 20, .15); }
+
+    .bv-fin { margin-top: 2.4rem; text-align: center; }
+    .bv-cta {
+      display: inline-block; padding: .7rem 1.6rem; border-radius: 4px; text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--ink, #1e1208); background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
+    }
+    .bv-cta:hover { filter: brightness(1.08); }
+
+    @media (max-width: 600px) {
+      .bv { padding: 0 1rem 2.5rem; }
+      .bv-parch { padding: 1.2rem 1.1rem 1.1rem; }
+      .bv-parch p { font-size: 1rem; text-align: left; }
+      .bv-lettrine::first-letter { font-size: 2.4rem; }
+      .bv-chiffres { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; }
+      .bv-chiffres b { font-size: 1.3rem; }
+      .bv-etape a { padding: .8rem .8rem; gap: .8rem; }
+      .bv-fleche { display: none; }
+      .bv-rub a { padding: .6rem .2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <div class="sitemap-switcher">
+    <BackButton />
+    <a href="/plan-du-site/" class="sitemap-btn">
+      <span class="sitemap-flag" aria-hidden="true">≡</span>
+      <span class="sitemap-text">Plan du site</span>
+    </a>
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
+  <h1 class="site-title">Bienvenue</h1>
+  <p class="site-subtitle">Nouveau ici · Présentation du site</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="bv">
+
+  <section class="bv-parch" aria-label="Présentation">
+    <p class="bv-lettrine">LaPhilo.fr est une invitation à voyager dans l'histoire de la pensée, sans prérequis. Pas un cours magistral : un lieu où l'on peut flâner, d'un penseur à l'autre, d'une époque à l'autre, d'une culture à l'autre.</p>
+    <p>Le site réunit les philosophes et les courants de pensée de toutes les traditions : la Grèce et l'Occident, mais aussi le monde islamique et juif, l'Inde, la Chine et le Japon, l'Afrique et les Amériques, la Russie, jusqu'aux sagesses de l'Égypte et de la Mésopotamie. Chacun est présenté par un court texte, souvent accompagné d'une vidéo ou d'un podcast, et situé sur des frises chronologiques interactives pour voir qui a pensé quoi, quand, et en dialogue avec qui.</p>
+    <div class="bv-chiffres">
+      <span><b>{philosophes.length}</b>philosophes</span>
+      <span><b>{courants.length}</b>courants de pensée</span>
+      <span><b>40+</b>frises</span>
+      <span><b>7</b>grandes traditions</span>
+    </div>
+  </section>
+
+  <h2 class="bv-titre">Par où commencer</h2>
+  <ol class="bv-parcours">
+    {parcours.map((e, i) => (
+      <li class="bv-etape">
+        <a href={e.href}>
+          <span class="bv-num" aria-hidden="true">{i + 1}</span>
+          <span class="bv-etape-txt"><strong>{e.titre}</strong><span>{e.texte}</span></span>
+          <span class="bv-fleche" aria-hidden="true">→</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+
+  <h2 class="bv-titre">Comment lire une frise</h2>
+  <div class="bv-mode">
+    <div class="bv-astuce"><b>Faire défiler</b><p>Chaque frise présente ses penseurs dans l'ordre du temps : avancez avec les flèches, le doigt ou la barre de navigation sous la frise.</p></div>
+    <div class="bv-astuce"><b>Lire une fiche</b><p>Un texte de présentation, avec ses liens vers Wikipédia et les œuvres, et souvent une vidéo ou un podcast à lancer d'un clic.</p></div>
+    <div class="bv-astuce"><b>Rebondir</b><p>Sous chaque fiche, les courants de pensée du philosophe mènent à leur propre frise : on passe ainsi d'une idée à une autre.</p></div>
+    <div class="bv-astuce"><b>Chercher</b><p>Un nom en tête ? La recherche trouve un philosophe, un courant ou une frise, avec des filtres par époque, pays ou tradition.</p></div>
+  </div>
+
+  <h2 class="bv-titre">Tous les liens pour naviguer</h2>
+  <div class="bv-liens">
+    {rubriques.map((r) => (
+      <section class="bv-rub">
+        <h3>{r.titre}</h3>
+        <ul>
+          {r.liens.map((l) => (
+            <li><a href={l.href}><strong>{l.titre}</strong><span>{l.texte}</span></a></li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <div class="bv-fin">
+    <a class="bv-cta" href="/definition/">Commencer le voyage →</a>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-social-nav" aria-label="Lien Social">
+    <a class="footer-social-btn" href="/" aria-label="Accueil">
+      <span class="footer-social-icon">⌂</span>
+      <span class="footer-social-label">Accueil</span>
+    </a>
+    <a class="footer-social-btn" href="/plan-du-site/" aria-label="Plan du site">
+      <span class="footer-social-icon">🗺</span>
+      <span class="footer-social-label">Plan du site</span>
+    </a>
+    <a class="footer-social-btn" href="/recherche/" aria-label="Recherche">
+      <span class="footer-social-icon">🔍</span>
+      <span class="footer-social-label">Recherche</span>
+    </a>
+  </nav>
+  <p>© 2026 – laphilo.fr – Tous droits réservés</p>
+</footer>
+
+<script src="/js/home-main.js" defer></script>
+
+</body>
+</html>

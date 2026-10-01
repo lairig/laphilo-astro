@@ -133,119 +133,6 @@
   }
 }
 
-/* « Activité du jour » : un philosophe vivant, à part du bloc « À la une »,
-   sur fond sombre avec un liseré vert (« en activité ») et or. */
-.activite-jour {
-  margin-top: 1.8rem;
-  padding: 1.4rem 1.4rem 1.2rem;
-  text-align: center;
-  border: 1px solid rgba(90, 170, 70, 0.55);
-  border-radius: 8px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(90, 170, 70, 0.16), transparent 65%),
-    linear-gradient(160deg, rgba(20, 45, 18, 0.55), rgba(20, 14, 6, 0.85));
-  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.4), inset 0 0 40px rgba(90, 170, 70, 0.06);
-}
-.activite-eyebrow {
-  display: block;
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #8fd47a;
-  text-shadow: 0 1px 12px rgba(90, 170, 70, 0.35);
-}
-.activite-sub {
-  display: block;
-  margin: 0.25rem 0 1rem;
-  font-family: 'EB Garamond', serif;
-  font-style: italic;
-  font-size: 0.98rem;
-  color: #ead9a8;
-}
-.activite-card {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  padding: 1rem 1.2rem;
-  text-align: left;
-  text-decoration: none;
-  border: 1px solid rgba(212, 168, 67, 0.55);
-  border-left: 4px solid #5aaa46;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s, border-color 0.2s, background 0.2s;
-}
-.activite-card:hover { transform: translateY(-2px); border-color: #d4a843; border-left-color: #7fd066; background: rgba(90, 170, 70, 0.08); }
-.activite-portrait {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #5aaa46;
-  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5), 0 4px 14px rgba(0, 0, 0, 0.5);
-}
-.activite-text { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
-.activite-live {
-  font-family: 'Cinzel', serif;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8fd47a;
-}
-.activite-name { font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; color: #f7ecce; }
-.activite-meta { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
-.activite-desc { font-family: 'EB Garamond', serif; font-size: 1rem; line-height: 1.4; color: #ead9a8; }
-.activite-btn {
-  align-self: flex-start;
-  margin-top: 0.3rem;
-  padding: 0.45rem 1rem;
-  border-radius: 4px;
-  font-family: 'Cinzel', serif;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #10240c;
-  background: linear-gradient(150deg, #b7e6a4 0%, #6cbf55 55%, #3f8f2e 100%);
-  border: 1px solid #8fd47a;
-}
-.activite-sujets {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 0.4rem 0.5rem;
-  margin-top: 0.9rem;
-}
-.activite-sujets-lbl { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(143, 212, 122, 0.9); }
-.activite-sujets a {
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  text-decoration: none;
-  font-family: 'Cinzel', serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #d8f0cc;
-  border: 1px solid rgba(143, 212, 122, 0.6);
-  background: rgba(90, 170, 70, 0.12);
-}
-.activite-sujets a::after { content: ' →'; }
-.activite-sujets a:hover { background: rgba(90, 170, 70, 0.28); color: #fff; }
-@media (max-width: 660px) {
-  .activite-jour { padding: 1.1rem 0.8rem 1rem; margin-top: 1.4rem; }
-  .activite-card { flex-direction: column; text-align: center; gap: 0.7rem; padding: 1rem 0.8rem; }
-  .activite-text { align-items: center; }
-  .activite-btn { align-self: center; }
-  .activite-portrait { width: 60px; height: 60px; }
-  .activite-name { font-size: 1.1rem; }
-  .activite-desc { font-size: 0.95rem; }
-  .activite-sujets a { padding: 0.5rem 0.8rem; }
-}
-
 /* Cartouche de la Frise des penseurs du monde, sous « À la une » */
 .monde-accueil-wrap { max-width: 860px; margin: 1.8rem auto 2rem; padding: 0 1.5rem; }
 .monde-accueil {
@@ -304,46 +191,54 @@
   .monde-accueil-text { font-size: 0.95rem; }
 }
 
-/* Cartouche « À la une » : sa propre couleur (cuivre et or), distincte du vert
-   de « Activité du jour » ; remplace le fond presque transparent de styles.css */
+/* Cartouche « À la une » : parchemin, comme le cartouche d'introduction
+   (fond crème doré, bordure dorée, encre brune, filet or et rouille en haut).
+   Deux cartes : le philosophe (liseré or) et le courant de pensée (liseré rouille). */
 .alaune-group {
-  border: 1px solid rgba(214, 130, 60, 0.6);
-  border-radius: 8px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(240, 190, 90, 0.18), transparent 65%),
-    linear-gradient(160deg, rgba(125, 48, 16, 0.55), rgba(30, 14, 6, 0.88));
-  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.4), inset 0 0 40px rgba(214, 130, 60, 0.08);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(150deg, #f7efcc 0%, #ead8a0 45%, #e0cb8a 100%), var(--noise);
+  border: 1px solid var(--parch-border, #b8923c);
+  border-radius: var(--radius, 6px);
+  box-shadow: 5px 5px 0 rgba(120, 80, 20, 0.2), 0 16px 48px rgba(10, 5, 2, 0.5);
 }
-.alaune-group > .alaune-eyebrow { color: #f0c27a; text-shadow: 0 1px 12px rgba(214, 130, 60, 0.45); }
-
-/* Cartes de « À la une », dans l'esprit de « Activité du jour » : cartes sombres
-   à liseré, portrait cerclé, étiquette, nom, repères, description et bouton.
-   Philosophe : or ; courant de pensée : cuivre. Deux colonnes sur grand écran. */
+.alaune-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold, #b8860b), var(--rust, #8b3a0f), var(--gold, #b8860b), transparent);
+  opacity: 0.6;
+}
+.alaune-group > .alaune-eyebrow { color: var(--rust, #8b3a0f); text-shadow: none; }
 .une-sub {
   display: block;
-  margin: -0.8rem 0 1rem;
+  margin: -0.8rem 0 1.1rem;
   text-align: center;
   font-family: 'EB Garamond', serif;
   font-style: italic;
   font-size: 0.98rem;
-  color: #ead9a8;
+  color: var(--ink-light, #5c3d1e);
 }
 .une-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .une-card {
-  --accent: #d4a843;
+  --accent: var(--gold, #b8860b);
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem 1.1rem;
   text-decoration: none;
-  border: 1px solid rgba(212, 168, 67, 0.5);
+  border: 1px solid rgba(184, 146, 60, 0.55);
   border-left: 4px solid var(--accent);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.28);
-  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  border-radius: 4px;
+  background: rgba(255, 251, 236, 0.5);
+  box-shadow: 2px 2px 0 rgba(120, 80, 20, 0.12);
+  transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.une-card--cur { --accent: #d2703a; border-color: rgba(210, 112, 58, 0.5); }
-.une-card:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(212, 168, 67, 0.08); }
+.une-card--cur { --accent: var(--rust-light, #c05a20); }
+.une-card:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(255, 251, 236, 0.78); box-shadow: 3px 4px 0 rgba(120, 80, 20, 0.18); }
 .une-portrait {
   width: 64px;
   height: 64px;
@@ -351,7 +246,7 @@
   object-fit: cover;
   border-radius: 50%;
   border: 3px solid var(--accent);
-  box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.35), 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 251, 236, 0.8), 0 3px 10px rgba(60, 35, 10, 0.35);
 }
 .une-badge {
   flex-shrink: 0;
@@ -365,15 +260,16 @@
   text-transform: uppercase;
   text-align: center;
   color: #fff;
-  background: hsl(var(--dom-hue) 55% 32%);
-  border: 1px solid hsl(var(--dom-hue) 55% 45%);
+  background: hsl(var(--dom-hue) 45% 32%);
+  border: 1px solid hsl(var(--dom-hue) 45% 24%);
 }
 .une-badge--vide { font-size: 1.4rem; background: none; border-color: var(--accent); color: var(--accent); }
 .une-text { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-.une-label { font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
-.une-name { font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: #f7ecce; }
-.une-meta { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
-.une-desc { font-family: 'EB Garamond', serif; font-size: 0.98rem; line-height: 1.4; color: #ead9a8; }
+.une-label { font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust, #8b3a0f); }
+.une-name { font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink, #1e1208); }
+.une-meta { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: #6b4718; }
+.une-live { color: #3f7a2e; font-weight: 700; }
+.une-desc { font-family: 'EB Garamond', serif; font-size: 0.98rem; line-height: 1.45; color: var(--ink-mid, #3d2410); }
 .une-btn {
   align-self: flex-start;
   margin-top: 0.3rem;
@@ -384,11 +280,11 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #1e1208;
+  color: var(--ink, #1e1208);
   background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%);
-  border: 1px solid #e8c870;
+  border: 1px solid #a07a1c;
 }
-.une-card--cur .une-btn { color: #fff; background: linear-gradient(150deg, #e89060 0%, #c0582a 55%, #8f3a14 100%); border-color: #e89060; }
+.une-card--cur .une-btn { color: #fff8e6; background: linear-gradient(150deg, #d0703a 0%, #a8461a 55%, #8b3a0f 100%); border-color: #7a3210; }
 @media (max-width: 760px) {
   .une-grid { grid-template-columns: 1fr; }
 }
