@@ -132,7 +132,8 @@ const jsonLd = [
 <div class="timeline-section">
   <div class="timeline-spine" role="list" aria-label="Accès aux grandes sections philosophiques">
 
-    <div class="tl-node tl-node--featured" role="listitem">
+    <!-- Côtés : tl-node--left = carte à droite de l'axe (flèche à gauche), tl-node--right = carte à gauche. -->
+    <div class="tl-node tl-node--featured tl-node--left" role="listitem">
       <div class="tl-jewel tl-jewel--featured" aria-hidden="true"></div>
       <div class="tl-card tl-card--featured">
         <div class="tl-era">☿ Définition · Branches</div>
@@ -142,7 +143,7 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="tl-node tl-node--left" role="listitem">
+    <div class="tl-node tl-node--right" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
         <div class="tl-era">🏛 VI<sup>e</sup> av. J.-C. → aujourd'hui</div>
@@ -152,7 +153,7 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="tl-node" role="listitem">
+    <div class="tl-node tl-node--left" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
         <div class="tl-era">🌍 Occident · Orient · Afrique · Amériques</div>
@@ -162,23 +163,13 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="tl-node" role="listitem">
+    <div class="tl-node tl-node--right" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
         <div class="tl-era">📜 Égypte ancienne → XXI<sup>e</sup> siècle</div>
         <h2 class="tl-title">Les Frises Temporelles</h2>
         <p class="tl-desc">Naviguez dans les frises chronologiques interactives : philosophes par pays et par époques, grands courants de pensée occidentaux et orientaux.</p>
         <a class="tl-cta-alt tl-cta-alt--sec" href="/frises/">Accéder <span class="tl-arrow">→</span></a>
-      </div>
-    </div>
-
-    <div class="tl-node tl-node--right" role="listitem">
-      <div class="tl-jewel" aria-hidden="true"></div>
-      <div class="tl-card">
-        <div class="tl-era">🔍 Recherche &amp; filtres</div>
-        <h2 class="tl-title">Listes &amp; Recherche</h2>
-        <p class="tl-desc">Recherche par nom parmi les philosophes et courants de pensée. Ou accès direct à chaque frise chronologique. De l'Égypte ancienne au monde contemporain.</p>
-        <a class="tl-cta-alt" href="/recherche/">Rechercher <span class="tl-arrow">↗</span></a>
       </div>
     </div>
 
