@@ -231,7 +231,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
       .carte-tete { flex-wrap: wrap; }
       .carte-actions { margin-left: 0; justify-content: flex-start; }
-      /* Les 3 boutons toujours sur une ligne, même à 320 px */
+      /* Les boutons de la carte toujours sur une ligne, même à 320 px */
       .carte-actions { flex-wrap: nowrap; gap: .3rem; width: 100%; }
       .carte-actions .btn { min-height: 40px; display: inline-flex; align-items: center; white-space: nowrap;
         font-size: clamp(.5rem, 2.9vw, .68rem); letter-spacing: .03em; padding: 0 clamp(.3rem, 1.6vw, .6rem); }
@@ -355,7 +355,6 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
         <div class="carte-tete">${s.th ? `<img src="${esc(s.th)}" alt="" width="64" height="64">` : ''}
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}</p><p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
-          <a class="btn" href="/frises/penseurs-du-monde/?p=${esc(window.paramsMonde(s.id, genre))}">Voir sur la frise</a>
           <button type="button" class="btn btn-fermer" aria-label="Fermer">✕ Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${blocs.length ? blocs.map(({ g, total, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${total}</h3><ul>`

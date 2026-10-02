@@ -495,7 +495,6 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}${aussi.length ? ' · aussi : ' + esc(aussi.join(', ')) : ''}</p>
           <p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
-          <a class="btn" href="/frises/a-la-meme-epoque/?p=${esc(window.paramsMonde(s.id, genre))}">▦ Voir dans le tableau</a>
           <button class="btn fermer-carte" type="button">Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${autres.length ? autres.map(({ g, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${liste.length}</h3><ul>`
