@@ -53,7 +53,7 @@
               "href": "/courants/frise/occidental/"
             },
             {
-              "label": "Métaphysique &amp; Théologie",
+              "label": "Métaphysique &amp; Spiritualité",
               "href": "/courants/frise/occidental--metaphysique-theologie/"
             },
             {
@@ -67,25 +67,77 @@
           ]
         },
         {
-          "name": "La Pensée orientale",
+          "name": "Les autres traditions du monde",
           "tag": "Toutes époques",
-          "text": "Confucianisme, taoïsme, soufisme, Ubuntu… les courants de la pensée philosophique orientale : parcourez la frise complète, ou l'une des trois frises thématiques plus courtes.",
+          "text": "Islam et judaïsme, Inde et bouddhisme, Asie de l'Est, pensée russe, pensées du Sud, Proche-Orient ancien : tous les courants nés hors de l'Occident sur une même frise, ou l'une des trois frises thématiques plus courtes.",
           "links": [
             {
               "label": "Frise complète",
               "href": "/courants/frise/oriental/"
             },
             {
-              "label": "Théologie &amp; Spiritualité",
-              "href": "/courants/frise/oriental--theologie-spiritualite/"
+              "label": "Métaphysique &amp; Spiritualité",
+              "href": "/courants/frise/oriental--metaphysique-theologie/"
             },
             {
-              "label": "Politique &amp; Métaphysique",
-              "href": "/courants/frise/oriental--politique-metaphysique/"
+              "label": "Politique &amp; Éthique",
+              "href": "/courants/frise/oriental--politique-ethique/"
             },
             {
-              "label": "Logique, Éthique &amp; Sciences",
-              "href": "/courants/frise/oriental--logique-ethique-sciences/"
+              "label": "Connaissance &amp; Sciences",
+              "href": "/courants/frise/oriental--connaissance-sciences/"
+            }
+          ]
+        },
+        {
+          "name": "Les courants par tradition",
+          "tag": "Toutes époques",
+          "egaux": true,
+          "text": "Une frise pour chaque grande tradition hors de l'Occident : les courants qui y sont nés, et ceux qui l'ont traversée.",
+          "links": [
+            {
+              "label": "Islam &amp; judaïsme",
+              "href": "/courants/frise/islam-juif/"
+            },
+            {
+              "label": "Inde &amp; bouddhisme",
+              "href": "/courants/frise/inde/"
+            },
+            {
+              "label": "Asie de l'Est",
+              "href": "/courants/frise/asie-est/"
+            },
+            {
+              "label": "Pensée russe",
+              "href": "/courants/frise/russe/"
+            },
+            {
+              "label": "Pensées du Sud",
+              "href": "/courants/frise/sud/"
+            },
+            {
+              "label": "Proche-Orient ancien",
+              "href": "/courants/frise/orient-ancien/"
+            }
+          ]
+        },
+        {
+          "name": "Les courants du monde, par grande question",
+          "tag": "Toutes époques",
+          "egaux": true,
+          "text": "Toutes les traditions réunies autour d'une même question : comment le libéralisme, le légisme chinois, le panafricanisme ou le slavophilisme ont pensé le pouvoir ; comment le platonisme, le Védanta ou le soufisme ont pensé l'être et le sacré.",
+          "links": [
+            {
+              "label": "Métaphysique &amp; Spiritualité",
+              "href": "/courants/frise/monde--metaphysique-theologie/"
+            },
+            {
+              "label": "Politique &amp; Éthique",
+              "href": "/courants/frise/monde--politique-ethique/"
+            },
+            {
+              "label": "Connaissance &amp; Sciences",
+              "href": "/courants/frise/monde--connaissance-sciences/"
             }
           ]
         }

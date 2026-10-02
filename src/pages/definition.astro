@@ -133,23 +133,23 @@ for (const e of philosophes) for (const b of e.data.branches || []) parBranche.s
 
 /* Sous-frises des courants (catalogue de /frises/) */
 const SF = {
-  occMeta: { label: 'Courants : Métaphysique & Théologie', href: '/courants/frise/occidental--metaphysique-theologie/' },
+  occMeta: { label: 'Courants : Métaphysique & Spiritualité', href: '/courants/frise/occidental--metaphysique-theologie/' },
   occPol: { label: 'Courants : Politique & Éthique', href: '/courants/frise/occidental--politique-ethique/' },
   occCon: { label: 'Courants : Connaissance & Sciences', href: '/courants/frise/occidental--connaissance-sciences/' },
   occTout: { label: 'Tous les courants occidentaux', href: '/courants/frise/occidental/' },
-  oriTheo: { label: 'Pensée orientale : Théologie & Spiritualité', href: '/courants/frise/oriental--theologie-spiritualite/' },
-  oriPol: { label: 'Pensée orientale : Politique & Métaphysique', href: '/courants/frise/oriental--politique-metaphysique/' },
-  oriLog: { label: 'Pensée orientale : Logique, Éthique & Sciences', href: '/courants/frise/oriental--logique-ethique-sciences/' },
+  oriMeta: { label: 'Autres traditions : Métaphysique & Spiritualité', href: '/courants/frise/oriental--metaphysique-theologie/' },
+  oriPol: { label: 'Autres traditions : Politique & Éthique', href: '/courants/frise/oriental--politique-ethique/' },
+  oriCon: { label: 'Autres traditions : Connaissance & Sciences', href: '/courants/frise/oriental--connaissance-sciences/' },
 };
 
 /* « Explorer » sous chacune des 7 branches */
 const explorer: Record<string, { code: string; de: string; frises: Lien[]; aujourdhui?: Lien[] }> = {
-  'La métaphysique': { code: 'metaphysique', de: 'de la métaphysique', frises: [SF.occMeta, SF.oriPol] },
-  "L'épistémologie": { code: 'epistemologie', de: "de l'épistémologie", frises: [SF.occCon, SF.oriLog] },
-  "L'éthique": { code: 'ethique', de: "de l'éthique", frises: [SF.occPol, SF.oriLog] },
+  'La métaphysique': { code: 'metaphysique', de: 'de la métaphysique', frises: [SF.occMeta, SF.oriMeta] },
+  "L'épistémologie": { code: 'epistemologie', de: "de l'épistémologie", frises: [SF.occCon, SF.oriCon] },
+  "L'éthique": { code: 'ethique', de: "de l'éthique", frises: [SF.occPol, SF.oriPol] },
   'La politique': { code: 'politique', de: 'de la politique', frises: [SF.occPol, SF.oriPol] },
   "L'esthétique": { code: 'esthetique', de: "de l'esthétique", frises: [SF.occTout] },
-  'La logique': { code: 'logique', de: 'de la logique', frises: [SF.occCon, SF.oriLog] },
+  'La logique': { code: 'logique', de: 'de la logique', frises: [SF.occCon, SF.oriCon] },
   "L'esprit et le langage": {
     code: 'langage', de: 'du langage',
     frises: [SF.occCon, courant('Fonctionnalisme'), courant('Computationnalisme')],
@@ -197,7 +197,7 @@ const specialisees: {
       cle('soren-kierkegaard', 'Kierkegaard', 'la foi comme saut et engagement'),
     ],
     apprend: 'Croyant ou non, on comprend mieux les civilisations, et ses propres convictions, en examinant ce que croire veut dire.',
-    liens: [{ label: `Les ${nSpiritualite} philosophes de la spiritualité`, href: rechercheBranche('spiritualite') }, SF.oriTheo],
+    liens: [{ label: `Les ${nSpiritualite} philosophes de la spiritualité`, href: rechercheBranche('spiritualite') }, SF.oriMeta],
     aujourdhui: [vivants('sens', 'Sens & spiritualité')],
   },
   {

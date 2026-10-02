@@ -63,8 +63,12 @@ PHILOSOPHE_FICHIERS = {
 # ── Fichiers courants : xlsx -> (frise_source, frise_label) ─────────────────
 COURANT_FICHIERS = {
     'frise-courant-pensee-occidental': ('occidental', 'Courants de pensée occidentaux'),
-    'frise-courant-pensee-oriental':   ('oriental',   'Courants de pensée orientaux'),
+    'frise-courant-pensee-oriental':   ('oriental',   'Courants des autres traditions du monde'),
 }
+# La frise complète d'un courant suit sa colonne Groupe (validée le 2026-10-02),
+# pas le fichier où il est rangé : Occident -> occidental, le reste -> oriental.
+FRISE_COURANT_PAR_GROUPE = {'occident': 'occidental'}
+LIBELLES_FRISE_COURANT = {src: lab for src, lab in COURANT_FICHIERS.values()}
 
 # ── Nationalité par défaut selon la frise (repris de convert-xlsx.py) ───────
 NAT_DEFAUT = {
@@ -318,6 +322,9 @@ def construire(fichiers_map, dest_name):
         if entrees is None:
             continue
         for e in entrees:
+            if fichiers_map is COURANT_FICHIERS and e.get('groupe'):
+                frise_source = FRISE_COURANT_PAR_GROUPE.get(e['groupe'], 'oriental')
+                frise_label = LIBELLES_FRISE_COURANT[frise_source]
             e['frise_source'] = frise_source
             e['frise_label'] = frise_label
             base_slug = slugify(e['name'])
@@ -381,6 +388,17 @@ def verifier(philosophes, courants):
                 alertes.append(f"{nom} ({ou}) : thème « {t} » inconnu (codes : {', '.join(THEMES)})")
         if p['_fichier'] in FICHIERS_VIVANTS and not p.get('themes'):
             alertes.append(f"{nom} ({ou}) : thème manquant (colonne Thèmes)")
+    # Courants : Groupe = grande tradition (mêmes codes que les philosophes),
+    # Traditions = traditions secondaires, en codes de groupe aussi
+    for c in courants:
+        ou = f"{c['_fichier']}.xlsx"
+        if not c.get('groupe'):
+            alertes.append(f"courant {c['name']} ({ou}) : groupe manquant")
+        elif c['groupe'] not in GROUPES:
+            alertes.append(f"courant {c['name']} ({ou}) : groupe « {c['groupe']} » inconnu (codes : {', '.join(GROUPES)})")
+        for t in c.get('traditions', []):
+            if t not in GROUPES:
+                alertes.append(f"courant {c['name']} ({ou}) : tradition « {t} » inconnue (codes de groupe : {', '.join(GROUPES)})")
     return alertes
 
 

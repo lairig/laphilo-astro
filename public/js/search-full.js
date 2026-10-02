@@ -109,7 +109,7 @@
   /* source = frise_source des courants (et des sous-frises par thème de _meta.courantBranchGroups) */
   var COURANT_COLOR_FILTERS = [
     { v: 'courant-occ', fr: 'Pensée occidentale', source: 'occidental' },
-    { v: 'courant-ori', fr: 'Pensée orientale', source: 'oriental' },
+    { v: 'courant-ori', fr: 'Autres traditions du monde', source: 'oriental' },
   ];
   var CUR_FAMILY_LABELS = {
     antiquite: 'Antiquité',
@@ -243,7 +243,7 @@
       courants: [
         { v: 'courant-all', lbl: 'Tous les courants' },
         { v: 'courant-occ', lbl: 'Pensée occidentale' },
-        { v: 'courant-ori', lbl: 'Pensée orientale / russe' },
+        { v: 'courant-ori', lbl: 'Autres traditions du monde' },
       ],
       frises: [{ v: 'frises', lbl: 'Toutes les frises' }],
     };
@@ -749,9 +749,10 @@
       ['theme', 'Philosophes femmes, toutes époques', 'philosophes'],
       ['region', 'Philosophes vivants, par région du monde', 'philosophes'],
       ['vivants', 'Philosophes vivants, par sujet de travail', 'philosophes'],
+      ['courants-tradition', 'Courants : par tradition', 'courants'],
       ['courants-theme', 'Courants : par thème', 'courants'],
       ['courants-occ', 'Courants : pensée occidentale', 'courants'],
-      ['courants-ori', 'Courants : pensée orientale', 'courants'],
+      ['courants-ori', 'Courants : autres traditions du monde', 'courants'],
       ['courants-complet', 'Tous les courants', 'courants'],
     ];
     function fillRegroup() {

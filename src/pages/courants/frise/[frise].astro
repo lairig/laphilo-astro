@@ -7,22 +7,15 @@ import BackButton from '../../../components/BackButton.astro';
 import FriseFooter from '../../../components/FriseFooter.astro';
 import { plainText } from '../../../lib/seo';
 import { getCollection } from 'astro:content';
-import { courantFriseConfig, courantBranchGroups } from '../../../data/frise-engine-config';
+import { courantFriseConfig, courantFriseDefaut, courantBranchGroups, courantFriseSlugs, courantsDeLaFrise, libelleFriseCourant } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
   const courants = await getCollection('courants');
-  const bySource = new Map<string, { label: string; count: number; items: typeof courants }>();
-  for (const entry of courants) {
-    const key = entry.data.frise_source;
-    if (!bySource.has(key)) bySource.set(key, { label: entry.data.frise_label, count: 0, items: [] });
-    const bucket = bySource.get(key)!;
-    bucket.count++;
-    bucket.items.push(entry);
-  }
-
-  const sourcePaths = Array.from(bySource.entries()).map(([frise, { label, count, items }]) => {
-    const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
+  /* Frises complètes, sous-frises thématiques, frises par tradition et frises
+     « monde » par thème : voir courantsDeLaFrise (frise-engine-config.ts) */
+  return courantFriseSlugs().map((frise) => {
+    const sorted = courantsDeLaFrise(frise, courants)!.slice().sort((a, b) => a.data.year - b.data.year);
     const indexItems = sorted.map((entry) => ({
       id: entry.id,
       name: entry.data.name,
@@ -32,33 +25,14 @@ export async function getStaticPaths() {
     }));
     return {
       params: { frise },
-      props: { label, count, indexItems },
+      props: { label: libelleFriseCourant(frise), count: sorted.length, indexItems },
     };
   });
-
-  const branchGroupPaths = courantBranchGroups.map((group) => {
-    const sourceItems = courants.filter((c) => c.data.frise_source === group.source);
-    const items = sourceItems.filter((c) => (c.data.branches || []).some((b) => group.branches.includes(b)));
-    const sorted = items.slice().sort((a, b) => a.data.year - b.data.year);
-    const indexItems = sorted.map((entry) => ({
-      id: entry.id,
-      name: entry.data.name,
-      displayDate: entry.data.display_date,
-      branches: entry.data.branches,
-      description: entry.data.description ? plainText(entry.data.description) : entry.data.description,
-    }));
-    return {
-      params: { frise: group.slug },
-      props: { label: group.label, count: sorted.length, indexItems },
-    };
-  });
-
-  return [...sourcePaths, ...branchGroupPaths];
 }
 
 const { frise } = Astro.params;
 const { label, count, indexItems } = Astro.props;
-const cfg = courantFriseConfig[frise as string] ?? { defaultIndex: 0, scale_factor: 9, mode: 'courant' };
+const cfg = courantFriseConfig[frise as string] ?? courantFriseDefaut;
 const description = (friseDescriptions as Record<string, string>)[frise as string] ?? `${count} fiches sur une frise chronologique interactive.`;
 const descriptionText = description.replace(/<[^>]+>/g, '');
 /* Pas de « Philosophes médiévaux — Philosophes médiévaux (…) » : le libellé

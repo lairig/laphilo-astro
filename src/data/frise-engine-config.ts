@@ -54,141 +54,111 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'vivants-continental': { defaultIndex: 12, scale_factor: 18 },
 };
 
-export const courantFriseConfig: Record<string, FriseEngineConfig> = {
-  occidental: {
-    defaultIndex: 45,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  oriental: {
-    defaultIndex: 11,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'occidental--metaphysique-theologie': {
-    defaultIndex: 30,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'occidental--politique-ethique': {
-    defaultIndex: 25,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'occidental--connaissance-sciences': {
-    defaultIndex: 20,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'oriental--theologie-spiritualite': {
-    defaultIndex: 15,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'oriental--politique-metaphysique': {
-    defaultIndex: 8,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
-  'oriental--logique-ethique-sciences': {
-    defaultIndex: 3,
-    scale_factor: 3,
-    mode: 'courant',
-    pxPerYear: 22,
-    pxMin: 4,
-    pxMax: 80,
-    zoomSteps: [2, 4, 8, 15],
-  },
+/* Réglages communs à toutes les frises de courants ; les frises ajoutées
+   (traditions, thèmes du monde) partent du plus ancien courant (index 0). */
+const COURANT_DEFAUT: FriseEngineConfig = {
+  defaultIndex: 0,
+  scale_factor: 3,
+  mode: 'courant',
+  pxPerYear: 22,
+  pxMin: 4,
+  pxMax: 80,
+  zoomSteps: [2, 4, 8, 15],
 };
+const courant = (defaultIndex: number): FriseEngineConfig => ({ ...COURANT_DEFAUT, defaultIndex });
 
-// Sous-frises thématiques de "occidental" et "oriental", filtrées par Branche
-// (colonne K du xlsx source). Chaque groupe reprend un sous-ensemble des
-// courants d'une frise_source pour l'alléger ; la source de données reste
-// unique (courants.json), seul le filtrage change.
+export const courantFriseConfig: Record<string, FriseEngineConfig> = {
+  occidental: courant(45),
+  oriental: courant(11),
+  'occidental--metaphysique-theologie': courant(30),
+  'occidental--politique-ethique': courant(25),
+  'occidental--connaissance-sciences': courant(20),
+  'oriental--metaphysique-theologie': courant(12),
+  'oriental--politique-ethique': courant(6),
+  'oriental--connaissance-sciences': courant(2),
+};
+export const courantFriseDefaut = COURANT_DEFAUT;
+
+/* ── Frises de courants ──────────────────────────────────────────────────
+   Deux frises complètes, selon la colonne Groupe du courant (build-data.py) :
+   « occidental » (groupe occident) et « oriental » (toutes les autres
+   traditions, libellé « Courants des autres traditions du monde »).
+   Trois mêmes thèmes partout (colonne Branche) : sous-frises des deux frises
+   complètes (boutons « Tout / thème » en haut de celles-ci) et frises
+   « monde » toutes traditions confondues. */
+export interface CourantTheme {
+  cle: string;
+  shortLabel: string;
+  branches: string[];
+}
+export const courantThemes: CourantTheme[] = [
+  { cle: 'metaphysique-theologie', shortLabel: 'Métaphysique & Spiritualité', branches: ['Métaphysique', 'Théologie et spiritualité'] },
+  { cle: 'politique-ethique', shortLabel: 'Politique & Éthique', branches: ['Philosophie politique', 'Éthique'] },
+  { cle: 'connaissance-sciences', shortLabel: 'Connaissance & Sciences', branches: ['Épistémologie', 'Philosophie des sciences et du vivant', "Philosophie de l'esprit", 'Logique'] },
+];
+
 export interface CourantBranchGroup {
   slug: string;
-  source: 'occidental' | 'oriental';
+  source: 'occidental' | 'oriental' | 'monde';
   label: string;
   shortLabel: string;
   branches: string[];
-  description: string;
+}
+const SOURCES_THEMES: [CourantBranchGroup['source'], string][] = [
+  ['occidental', 'Courants occidentaux'],
+  ['oriental', 'Autres traditions du monde'],
+  ['monde', 'Courants du monde entier'],
+];
+export const courantBranchGroups: CourantBranchGroup[] = SOURCES_THEMES.flatMap(([source, prefixe]) =>
+  courantThemes.map((t) => ({
+    slug: `${source}--${t.cle}`,
+    source,
+    label: `${prefixe} — ${t.shortLabel}`,
+    shortLabel: t.shortLabel,
+    branches: t.branches,
+  })),
+);
+
+/* Frises par tradition (hors Occident, qui a sa frise complète) : courants dont
+   c'est la tradition principale ou une tradition secondaire (colonne Traditions). */
+export interface CourantTraditionFrise {
+  slug: string;
+  groupe: string;
+  label: string;
+  shortLabel: string;
+}
+export const courantTraditionFrises: CourantTraditionFrise[] = [
+  { slug: 'islam-juif', groupe: 'islam-juif', label: 'Courants du monde islamique et juif', shortLabel: 'Islam & judaïsme' },
+  { slug: 'inde', groupe: 'inde', label: "Courants de l'Inde et du bouddhisme", shortLabel: 'Inde & bouddhisme' },
+  { slug: 'asie-est', groupe: 'asie-est', label: "Courants de l'Asie de l'Est", shortLabel: "Asie de l'Est" },
+  { slug: 'russe', groupe: 'russe', label: 'Courants de la pensée russe', shortLabel: 'Pensée russe' },
+  { slug: 'sud', groupe: 'sud', label: 'Courants des pensées du Sud', shortLabel: 'Pensées du Sud' },
+  { slug: 'orient-ancien', groupe: 'orient-ancien', label: 'Courants du Proche-Orient ancien', shortLabel: 'Proche-Orient ancien' },
+];
+
+/* Les courants d'une frise (slug d'URL), ou null si le slug est inconnu. */
+interface CourantPourFrise {
+  data: { frise_source: string; branches?: string[]; groupe?: string; traditions?: string[] };
+}
+export function courantsDeLaFrise<T extends CourantPourFrise>(slug: string, courants: T[]): T[] | null {
+  const groupe = courantBranchGroups.find((g) => g.slug === slug);
+  if (groupe) {
+    return courants.filter((c) => (groupe.source === 'monde' || c.data.frise_source === groupe.source)
+      && (c.data.branches || []).some((b) => groupe.branches.includes(b)));
+  }
+  const trad = courantTraditionFrises.find((t) => t.slug === slug);
+  if (trad) return courants.filter((c) => c.data.groupe === trad.groupe || (c.data.traditions || []).includes(trad.groupe));
+  if (slug === 'occidental' || slug === 'oriental') return courants.filter((c) => c.data.frise_source === slug);
+  return null;
 }
 
-export const courantBranchGroups: CourantBranchGroup[] = [
-  {
-    slug: 'occidental--metaphysique-theologie',
-    source: 'occidental',
-    label: 'Courants occidentaux — Métaphysique & Théologie',
-    shortLabel: 'Métaphysique & Théologie',
-    branches: ['Métaphysique', 'Théologie et spiritualité'],
-    description: "L'être, le divin et le sens : des cosmologies antiques aux théologies chrétiennes, du polythéisme aux métaphysiques de la subjectivité moderne.",
-  },
-  {
-    slug: 'occidental--politique-ethique',
-    source: 'occidental',
-    label: 'Courants occidentaux — Politique & Éthique',
-    shortLabel: 'Politique & Éthique',
-    branches: ['Philosophie politique', 'Éthique'],
-    description: "Le pouvoir, la justice et la vie bonne : des cités grecques aux idéologies modernes, du contrat social aux éthiques contemporaines.",
-  },
-  {
-    slug: 'occidental--connaissance-sciences',
-    source: 'occidental',
-    label: 'Courants occidentaux — Connaissance & Sciences',
-    shortLabel: 'Connaissance & Sciences',
-    branches: ['Épistémologie', 'Philosophie des sciences et du vivant', "Philosophie de l'esprit", 'Logique'],
-    description: "Ce que l'on peut savoir et comment : de la logique antique à l'épistémologie contemporaine, en passant par la philosophie des sciences et de l'esprit.",
-  },
-  {
-    slug: 'oriental--theologie-spiritualite',
-    source: 'oriental',
-    label: 'Courants orientaux — Théologie & Spiritualité',
-    shortLabel: 'Théologie & Spiritualité',
-    branches: ['Théologie et spiritualité'],
-    description: "Le sacré et la libération : bouddhisme, hindouisme, soufisme, taoïsme religieux et traditions mystiques d'Asie, du Moyen-Orient et d'Afrique.",
-  },
-  {
-    slug: 'oriental--politique-metaphysique',
-    source: 'oriental',
-    label: 'Courants orientaux — Politique & Métaphysique',
-    shortLabel: 'Politique & Métaphysique',
-    branches: ['Philosophie politique', 'Métaphysique'],
-    description: "L'ordre du monde et de la cité : confucianisme et légisme politiques, cosmologies et métaphysiques de l'être en Asie, au Moyen-Orient et en Afrique.",
-  },
-  {
-    slug: 'oriental--logique-ethique-sciences',
-    source: 'oriental',
-    label: 'Courants orientaux — Logique, Éthique & Sciences',
-    shortLabel: 'Logique, Éthique & Sciences',
-    branches: ['Logique', 'Épistémologie', 'Éthique', 'Philosophie des sciences et du vivant'],
-    description: "Raisonner, connaître et bien agir : logique bouddhiste et islamique, épistémologie et éthiques orientales, philosophie des sciences en terre d'Asie et d'Islam.",
-  },
+/* Tous les slugs de frises de courants, et leur libellé */
+export const courantFriseSlugs = (): string[] => [
+  'occidental', 'oriental', ...courantBranchGroups.map((g) => g.slug), ...courantTraditionFrises.map((t) => t.slug),
 ];
+export function libelleFriseCourant(slug: string): string {
+  if (slug === 'occidental') return 'Courants de pensée occidentaux';
+  if (slug === 'oriental') return 'Courants des autres traditions du monde';
+  return courantBranchGroups.find((g) => g.slug === slug)?.label
+    ?? courantTraditionFrises.find((t) => t.slug === slug)?.label ?? slug;
+}

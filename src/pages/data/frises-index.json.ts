@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import catalogue from '../../data/frises-catalogue.json';
 import { virtualPhilosopheFrises } from '../../data/virtual-frises';
-import { courantBranchGroups } from '../../data/frise-engine-config';
+import { courantsDeLaFrise, courantTraditionFrises } from '../../data/frise-engine-config';
 import friseDescriptions from '../../data/frise-descriptions.json';
 import { philosopheFriseMeta } from '../../data/search-frise-meta';
 
@@ -51,14 +51,18 @@ const COULEUR_VIRTUELLE: Record<string, string> = {
 function couleur(href: string): string {
   if (href.startsWith('/frises/')) return 'monde';
   const slug = href.split('/').filter(Boolean).pop() ?? '';
-  if (href.startsWith('/courants/')) return slug.startsWith('oriental') ? 'courant-ori' : 'courant-occ';
+  if (href.startsWith('/courants/')) return slug.startsWith('occidental') || slug.startsWith('monde') ? 'courant-occ' : 'courant-ori';
   if (slug.startsWith('vivants-') || slug.startsWith('contemporains-')) return 'live';
   return COULEUR_VIRTUELLE[slug] ?? philosopheFriseMeta[slug]?.colorFilter ?? '';
 }
 
-/* Frises de courants : complète ou thématique (« occidental--… »), et occidentale ou orientale */
+/* Frises de courants : complète, par tradition ou thématique (« occidental--… »,
+   « monde--… »), et occidentale ou des autres traditions du monde */
+const TRADITIONS_COURANTS = new Set(courantTraditionFrises.map((t) => t.slug));
 function regroupCourant(href: string): string {
   const slug = href.split('/').filter(Boolean).pop() ?? '';
+  if (slug.startsWith('monde--')) return 'courants-theme courants-occ courants-ori';
+  if (TRADITIONS_COURANTS.has(slug)) return 'courants-tradition courants-ori';
   return `${slug.includes('--') ? 'courants-theme' : 'courants-complet'} ${slug.startsWith('oriental') ? 'courants-ori' : 'courants-occ'}`;
 }
 
@@ -97,12 +101,7 @@ export const GET: APIRoute = async () => {
     }
     m = href.match(/^\/courants\/frise\/([^/]+)\/$/);
     if (m) {
-      const g = courantBranchGroups.find((x) => x.slug === m![1]);
-      return {
-        liste: cur.filter((c) =>
-          g ? c.data.frise_source === g.source && (c.data.branches || []).some((b) => g.branches.includes(b)) : c.data.frise_source === m![1]),
-        parId: false,
-      };
+      return { liste: courantsDeLaFrise(m[1], cur) ?? [], parId: false };
     }
     if (href === '/frises/penseurs-du-monde/') return { liste: phi.filter((p) => p.data.groupe), parId: true };
     return { liste: [], parId: false };
@@ -117,11 +116,12 @@ export const GET: APIRoute = async () => {
          sont des réglages de la même frise) */
       (it.links || []).forEach((l: any, i: number) => {
         if (l.href.includes('?')) return;
-        const nom = i === 0 ? it.name : `${it.name} — ${l.label}`;
+        const principal = i === 0 && !it.egaux;
+        const nom = principal ? it.name : `${it.name} — ${l.label}`;
         /* Sous-frise sans texte propre dans le catalogue : sa description de frise_descriptions.json, comme sur /frises/ */
         const slug = l.href.split('/').filter(Boolean).pop() ?? '';
-        const propre = i > 0 ? (friseDescriptions as Record<string, string>)[slug] : undefined;
-        entrees.push({ label: nom, groupe: g.label, href: l.href, tag: it.tag, text: i === 0 && l.href.startsWith('/frises/') ? it.text : l.desc || propre || it.text });
+        const propre = !principal ? (friseDescriptions as Record<string, string>)[slug] : undefined;
+        entrees.push({ label: nom, groupe: g.label, href: l.href, tag: it.tag, text: principal && l.href.startsWith('/frises/') ? it.text : l.desc || propre || it.text });
       });
     }
   }

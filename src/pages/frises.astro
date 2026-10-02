@@ -18,6 +18,8 @@ const { intro, groups } = data as {
       text: string;
       href?: string;
       links?: { label: string; href: string; desc?: string }[];
+      /* Liens tous équivalents (pas de « frise complète » mise en avant) */
+      egaux?: boolean;
     }[];
   }[];
 };
@@ -33,10 +35,10 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
   <Favicons />
   <GoatCounter />
   <title>Toutes les frises chronologiques | LaPhilo.fr</title>
-  <meta name="description" content="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée occidentaux et orientaux." />
+  <meta name="description" content="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée de toutes les traditions." />
   <SeoHead
     title="Toutes les frises chronologiques | LaPhilo.fr"
-    description="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée occidentaux et orientaux."
+    description="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée de toutes les traditions."
     path="/frises/"
   />
 
@@ -171,7 +173,7 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
             <p class="frise-hub-text" set:html={it.text} />
             <div class="frise-hub-links">
               {it.links.map((link, li) => (
-                <a href={link.href} class:list={['frise-hub-link', { 'frise-hub-link--main': li === 0 }]}>
+                <a href={link.href} class:list={['frise-hub-link', { 'frise-hub-link--main': li === 0 && !it.egaux }]}>
                   <span class="frise-hub-link-title" set:html={link.label} />
                   <span class="frise-hub-link-desc" set:html={link.desc ?? linkDescription(link.href)} />
                   <span class="frise-hub-link-arrow" aria-hidden="true">→</span>
