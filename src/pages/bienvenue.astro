@@ -21,7 +21,7 @@ const parcours: Lien[] = [
   { href: '/histoire-des-courants/', titre: 'Les courants de pensée', texte: 'Stoïcisme, bouddhisme, Lumières, existentialisme… les grandes familles d’idées et leurs filiations.' },
   { href: '/histoire-des-philosophes/', titre: 'Les philosophes', texte: "Les grandes figures, des présocratiques aux penseurs d'aujourd'hui, présentées époque par époque." },
   { href: '/frises/', titre: 'Les frises chronologiques', texte: 'Le cœur du site : chaque penseur situé dans son époque, par pays, par tradition ou par courant.' },
-  { href: '/frises/penseurs-du-monde/', titre: 'La Frise des penseurs du monde', texte: 'Toutes les traditions côte à côte : Occident, islam, Inde, Chine, Afrique, Russie…' },
+  { href: '/frises/penseurs-du-monde/', titre: 'Les penseurs du monde', texte: 'Toutes les traditions côte à côte : Occident, islam, Inde, Chine, Afrique, Russie…' },
 ];
 
 /* Tous les principaux liens, par rubrique (mêmes libellés que le plan du site) */
@@ -29,16 +29,16 @@ const rubriques: { titre: string; liens: Lien[] }[] = [
   {
     titre: 'Comprendre',
     liens: [
-      { href: '/definition/', titre: "C'est quoi la philosophie ?", texte: 'Les 7 branches' },
-      { href: '/histoire-des-philosophes/', titre: 'Histoire des philosophes', texte: 'Les grandes figures' },
-      { href: '/histoire-des-courants/', titre: 'Histoire des courants de pensée', texte: 'Les familles d’idées' },
+      { href: '/definition/', titre: "C'est quoi ?", texte: 'Les 7 branches' },
+      { href: '/histoire-des-philosophes/', titre: 'Les philosophes', texte: 'Les grandes figures' },
+      { href: '/histoire-des-courants/', titre: 'Les courants de pensée', texte: 'Les familles d’idées' },
     ],
   },
   {
-    titre: 'Frise complète du monde',
+    titre: 'Frise du monde',
     liens: [
-      { href: '/frises/penseurs-du-monde/', titre: 'Frise des penseurs du monde', texte: 'Les traditions côte à côte' },
-      { href: '/frises/a-la-meme-epoque/', titre: 'Tableau des penseurs', texte: 'Qui pensait quoi, et où' },
+      { href: '/frises/penseurs-du-monde/', titre: 'Penseurs du monde', texte: 'Frise et tableau des penseurs' },
+      { href: '/frises/courants-du-monde/', titre: 'Pensées du monde', texte: 'Frise et tableau des courants' },
       { href: '/frises/penseurs-du-monde/?femmes=1', titre: 'Les femmes dans l’histoire', texte: 'Les penseuses du monde entier' },
     ],
   },
@@ -248,7 +248,7 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
     <p class="bv-lettrine">LaPhilo.fr est une invitation à voyager dans l'histoire de la pensée, sans prérequis. Pas un cours magistral : un lieu où l'on peut flâner, d'un penseur à l'autre, d'une époque à l'autre, d'une culture à l'autre.</p>
     <p>Le site réunit les philosophes et les courants de pensée de toutes les traditions : la Grèce et l'Occident, mais aussi le monde islamique et juif, l'Inde, la Chine et le Japon, l'Afrique et les Amériques, la Russie, jusqu'aux sagesses de l'Égypte et de la Mésopotamie. Chacun est présenté par un court texte, souvent accompagné d'une vidéo ou d'un podcast, et situé sur des frises chronologiques interactives pour voir qui a pensé quoi, quand, et en dialogue avec qui.</p>
     <p>Car la philosophie ne s'est jamais pensée seule. Socrate, le Bouddha et Confucius ont vécu à la même époque sans se connaître ; Averroès a transmis Aristote à l'Europe latine ; les Lumières ont lu les sages chinois, et la pensée africaine dialogue aujourd'hui avec celle de Paris ou de New York. Les frises rendent ces rencontres visibles : on y découvre des contemporains inattendus, des filiations, des ruptures.</p>
-    <p>Le site fait aussi une place à celles et ceux que les manuels oublient souvent : les femmes philosophes, d'Enheduanna et Hypatie à Simone de Beauvoir et Hannah Arendt, et les penseurs vivants, en France et dans le monde, classés par région et par sujet de travail : l'intelligence artificielle, l'écologie, la justice, le genre, la décolonisation, le sens de l'existence…</p>
+    <p>Le site fait aussi une place à celles et ceux que les manuels oublient souvent : les femmes philosophes, d'Enheduanna à Simone de Beauvoir et Hannah Arendt, et les penseurs vivants, en France et dans le monde, classés par région et par sujet de travail : l'intelligence artificielle, l'écologie, la justice, le genre, la décolonisation, le sens de l'existence…</p>
     <div class="bv-chiffres">
       <span><b>{philosophes.length}</b>philosophes</span>
       <span><b>{courants.length}</b>courants de pensée</span>
@@ -298,10 +298,10 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
 
   <h2 class="bv-titre">Comment lire une frise</h2>
   <div class="bv-mode">
-    <div class="bv-astuce"><b>Faire défiler</b><p>Chaque frise présente ses penseurs dans l'ordre du temps : avancez avec les flèches, le doigt ou la barre de navigation sous la frise.</p></div>
-    <div class="bv-astuce"><b>Lire une fiche</b><p>Un texte de présentation, avec ses liens vers Wikipédia et les œuvres, et souvent une vidéo ou un podcast à lancer d'un clic.</p></div>
-    <div class="bv-astuce"><b>Rebondir</b><p>Sous chaque fiche, les courants de pensée du philosophe mènent à leur propre frise : on passe ainsi d'une idée à une autre.</p></div>
-    <div class="bv-astuce"><b>Chercher</b><p>Un nom en tête ? La recherche trouve un philosophe, un courant ou une frise, avec des filtres par époque, pays ou tradition.</p></div>
+    <div class="bv-astuce"><b>Faire défiler</b><p>Chaque frise présente ses penseurs dans l'ordre du temps : avancez avec les flèches, le doigt ou la souris.</p></div>
+    <div class="bv-astuce"><b>Lire une fiche</b><p>Un texte de présentation, avec ses liens vers Wikipédia et les œuvres, une vidéo ou un podcast à lancer d'un clic.</p></div>
+    <div class="bv-astuce"><b>Rebondir</b><p>Sous chaque fiche, les courants de pensée mènent à leur propre frise : on passe ainsi d'une idée à une autre.</p></div>
+    <div class="bv-astuce"><b>Chercher</b><p>La recherche trouve un philosophe, un courant ou une frise, avec des filtres par époque, pays ou tradition.</p></div>
   </div>
 
   <h2 class="bv-titre">Tous les liens pour naviguer</h2>
