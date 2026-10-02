@@ -48,7 +48,7 @@ export function poids(p: Philosophe['data'], cite: number): number {
 }
 
 /* Année où le philosophe avait environ 40 ans (ou sa mort, si avant) : situe
-   chacun dans une seule période du tableau « À la même époque ». */
+   chacun dans une seule période du Tableau des penseurs. */
 export function floruit(p: Philosophe['data']): number {
   return Math.min(p.year + 40, finVie(p));
 }

@@ -1,5 +1,5 @@
 ---
-/* « À la même époque » : compagnon de la Frise des penseurs du monde.
+/* « Le Tableau des penseurs » (ex « À la même époque ») : compagnon de la Frise des penseurs du monde.
    En haut, une recherche centre la page sur un penseur et montre ses
    contemporains dans les autres traditions (calcul dans le navigateur, sur
    /data/frise-penseurs-monde.json). En dessous, le tableau époque par époque,
@@ -7,6 +7,7 @@
 import { getCollection } from 'astro:content';
 import Favicons from '../../components/Favicons.astro';
 import BackButton from '../../components/BackButton.astro';
+import BasculeMonde from '../../components/BasculeMonde.astro';
 import FriseFooter from '../../components/FriseFooter.astro';
 import Fonts from '../../components/Fonts.astro';
 import GoatCounter from '../../components/GoatCounter.astro';
@@ -37,16 +38,33 @@ const cite = citations(philosophes);
 const groupes = groupesMonde.filter((g) => philosophes.some((e) => e.data.groupe === g.id));
 const GROUPES = groupes.map(({ id, label, court, color }) => ({ id, label, court, color }));
 
+/* Nom court (la plus longue suite de mots en capitales : « SCHELLING »,
+   « LAO TSEU »), affiché sur PC quand le nom complet ne tient pas sur une ligne. */
+function nomCourt(nom: string) {
+  let meilleur: string[] = [], suite: string[] = [];
+  for (const brut of nom.split(/\s+/)) {
+    const m = brut.replace(/^\p{Ll}+['’]/u, ''); // d'HOLBACH → HOLBACH
+    if (/\p{Lu}{2}/u.test(m) && m === m.toUpperCase()) suite.push(m);
+    else suite = [];
+    if (suite.join(' ').length > meilleur.join(' ').length) meilleur = [...suite];
+  }
+  return meilleur.length ? meilleur.join(' ') : nom;
+}
+
 const lignes = PERIODES.map(([de, a, dates, nom], i) => {
   const dans = philosophes.filter((e) => { const f = floruit(e.data); return f >= de && f < a; });
   const cases = groupes.map((g) => dans
     .filter((e) => e.data.groupe === g.id)
     .sort((x, y) => poids(y.data, cite.get(y.id) ?? 0) - poids(x.data, cite.get(x.id) ?? 0) || x.data.year - y.data.year)
-    .map((e) => ({ id: e.id, name: e.data.name, date: e.data.display_date })));
+    .map((e) => ({ id: e.id, name: e.data.name, court: nomCourt(e.data.name),
+      // Filtre de genre, comme sur la frise : tag « femme » ; « hommes » = ni femme ni non-binaire
+      genre: (e.data.traditions ?? []).includes('femme') ? 'f' : (e.data.traditions ?? []).includes('non-binaire') ? undefined : 'h',
+      // Bulle au survol : dates, puis la phrase de présentation
+      info: [e.data.display_date, e.data.description].filter(Boolean).join('\n') })));
   return { i, de, a, dates, nom, cases, n: dans.length };
 });
 
-const title = 'À la même époque : les penseurs du monde côte à côte | LaPhilo.fr';
+const title = 'Le Tableau des penseurs : les traditions du monde, époque par époque | LaPhilo.fr';
 const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afrique au temps de Platon, de Descartes ou de Kant ? Cherchez un philosophe pour voir ses contemporains dans les autres traditions, ou parcourez le tableau des grandes traditions, époque par époque.";
 ---
 <html lang="fr">
@@ -83,13 +101,12 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       line-height: 1.2; text-shadow: 0 2px 18px rgba(180,130,20,.45); }
     .fm-sous-titre { font-family: 'Cinzel', serif; font-size: clamp(.66rem, 1.4vw, .8rem); letter-spacing: .2em; text-transform: uppercase;
       color: var(--parch-dim); margin-top: .7rem; }
-    .vers-frise { display: inline-block; margin-top: .9rem; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .1em;
-      text-decoration: none; color: var(--gold); border: 1px solid var(--line); border-radius: 4px; padding: .35rem .8rem;
-      background: rgba(212,168,67,.06); }
-    .vers-frise:hover { border-color: var(--gold); background: rgba(212,168,67,.14); }
     .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold); text-decoration: none;
       background: rgba(212,168,67,.06); border: 1px solid var(--line); border-radius: 4px; padding: .3rem .6rem; }
     .btn:hover { border-color: var(--gold); }
+    button.btn { font-family: 'Cinzel', serif; line-height: inherit; }
+    .btn-fermer { color: var(--parch-dim); }
+    .btn-fermer:hover { color: var(--parch); }
 
     /* ── Recherche ── */
     .recherche { position: relative; max-width: 560px; margin: 1.4rem auto 0; padding: 0 16px; }
@@ -132,6 +149,23 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     .contemps .autres { font-style: italic; }
     .vide-msg { color: var(--parch-dim); font-style: italic; }
 
+    /* ── Bulle au survol (PC seulement), au style des cartes de /recherche/ ── */
+    .bulle { position: fixed; z-index: 50; width: max-content; max-width: 380px; pointer-events: none;
+      display: flex; align-items: flex-start; gap: .65rem; padding: .55rem .8rem .6rem .7rem; border-radius: 5px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, #1f130a), #1f130a 70%);
+      border-left: 5px solid var(--c); box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 0 1px rgba(212,168,67,.25);
+      opacity: 0; transition: opacity .12s; }
+    .bulle.vue { opacity: 1; }
+    .bulle img, .bulle .ph { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; margin-top: .1rem;
+      border: 1px solid rgba(180,130,20,.35); background: rgba(180,130,20,.12); }
+    .bulle b { display: block; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700; color: #f7ecce; line-height: 1.2; }
+    .bulle .dates { display: block; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .05em; color: #d8a24a; margin-top: .18rem; }
+    .bulle .curs { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .3rem; }
+    .bulle .curs span { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .03em; border-radius: 2px; padding: .08rem .34rem;
+      color: #fff; background: #606060; border: 1px solid #444; white-space: nowrap; }
+    .bulle .desc { display: block; font-family: 'EB Garamond', serif; font-style: italic; font-size: .95rem; color: #ead9a8;
+      line-height: 1.45; margin-top: .25rem; }
+
     /* ── Tableau époque par époque ── */
     .tableau-titre { text-align: center; margin: 2.4rem 16px .3rem; font-family: 'Cinzel', serif; font-weight: 400; color: var(--gold);
       font-size: .9rem; letter-spacing: .16em; text-transform: uppercase; }
@@ -166,6 +200,25 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     .footer-tagline { font-family: 'EB Garamond', serif; font-style: italic; font-size: .92rem; color: #c8962a; letter-spacing: .03em; }
     .ff-copy { font-family: 'EB Garamond', serif; font-style: italic; font-size: .72rem; color: #e8c870; text-align: center; opacity: .65; }
 
+    .carte-actions .btn { white-space: nowrap; }
+    /* Écran moyen : les boutons de la carte passent sous le nom, sur une ligne */
+    @media (max-width: 1000px) {
+      .carte-tete { flex-wrap: wrap; }
+      .carte-actions { margin-left: 0; justify-content: flex-start; flex-wrap: nowrap; width: 100%; }
+    }
+    /* Filtre « Femmes / Hommes uniquement » (voir appliquerGenre) */
+    .vide-g { display: none; }
+    .tableau[data-genre="femmes"] .case li:not(.f), .tableau[data-genre="hommes"] .case li:not(.h) { display: none; }
+    .tableau .periode.sans-g, .tableau .case details.sans-g { display: none; }
+    .tableau .case.sans-g ul, .tableau .case.sans-g details { display: none; }
+    .tableau .case.sans-g .vide-g { display: inline; }
+    @media (max-width: 760px) { .tableau .case.sans-g { display: none; } }
+
+    /* PC : un nom par ligne (nom court si besoin, voir ajusterNoms) */
+    @media (min-width: 761px) {
+      .case li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .case a { font-size: .9rem; }
+    }
     /* Écran moyen : le tableau défile en largeur */
     @media (max-width: 1100px) and (min-width: 761px) {
       .tableau { overflow-x: auto; }
@@ -178,7 +231,10 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
       .carte-tete { flex-wrap: wrap; }
       .carte-actions { margin-left: 0; justify-content: flex-start; }
-      .carte-actions .btn { min-height: 40px; display: inline-flex; align-items: center; }
+      /* Les 3 boutons toujours sur une ligne, même à 320 px */
+      .carte-actions { flex-wrap: nowrap; gap: .3rem; width: 100%; }
+      .carte-actions .btn { min-height: 40px; display: inline-flex; align-items: center; white-space: nowrap;
+        font-size: clamp(.5rem, 2.9vw, .68rem); letter-spacing: .03em; padding: 0 clamp(.3rem, 1.6vw, .6rem); }
       .contemps { grid-template-columns: 1fr; }
       .t-entete { display: none; }
       .periode { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .8rem .9rem;
@@ -204,9 +260,9 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       <a href="/frises/" class="sitemap-btn"><span class="sitemap-flag" aria-hidden="true">≡</span><span class="sitemap-text">Frises</span></a>
       <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil"><span class="sitemap-flag" aria-hidden="true">⌂</span><span class="sitemap-text">Accueil</span></a>
     </div>
-    <h1>À la même époque</h1>
+    <h1>Le Tableau des penseurs</h1>
     <p class="fm-sous-titre">Les penseurs du monde côte à côte</p>
-    <a class="vers-frise" href="/frises/penseurs-du-monde/">← La Frise des penseurs du monde</a>
+    <BasculeMonde actif="tableau" />
   </header>
 
   <div class="recherche" role="search">
@@ -220,7 +276,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
 
   <h2 class="tableau-titre">Les traditions, époque par époque</h2>
   <p class="tableau-aide">Chaque penseur figure dans la période où il avait environ 40 ans. Choisissez un nom pour voir ses contemporains.</p>
-  <div class="tableau" style={`--n:${groupes.length}`}>
+  <div class="tableau" id="tableau" style={`--n:${groupes.length}`}>
     <div class="t-entete" aria-hidden="true">
       <span></span>
       {groupes.map((g) => <span style={`--c:${g.color}`}><span class="pastille"></span>{g.court}</span>)}
@@ -233,17 +289,18 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
             <h4><span class="pastille"></span>{groupes[j].court}</h4>
             {liste.length === 0 ? <span class="vide">—</span> : (
               <>
+                <span class="vide vide-g">—</span>
                 <ul>
                   {liste.slice(0, VISIBLES).map((p) => (
-                    <li><a href={`?p=${p.id}`} data-id={p.id} title={p.date}>{p.name}</a></li>
+                    <li class={p.genre}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
                   ))}
                 </ul>
                 {liste.length > VISIBLES && (
                   <details>
-                    <summary>+ {liste.length - VISIBLES} autre{liste.length - VISIBLES > 1 ? 's' : ''}</summary>
+                    <summary>+ <span class="nb">{liste.length - VISIBLES}</span> autre<span class="pl">{liste.length - VISIBLES > 1 ? 's' : ''}</span></summary>
                     <ul>
                       {liste.slice(VISIBLES).map((p) => (
-                        <li><a href={`?p=${p.id}`} data-id={p.id} title={p.date}>{p.name}</a></li>
+                        <li class={p.genre}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
                       ))}
                     </ul>
                   </details>
@@ -258,7 +315,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
 
   <FriseFooter />
 
-  <script is:inline define:vars={{ GROUPES }}>
+  <script is:inline define:vars={{ GROUPES, VISIBLES }}>
   (() => {
     const AGE_ACTIF = 25, ECART_ANCIEN = 30, PAR_GROUPE = 6;
     const $ = (id) => document.getElementById(id);
@@ -267,13 +324,18 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const centre = $('centre'), q = $('q'), sugg = $('suggestions');
     let DATA = [], parId = {};
+    let genre = window.lireGenre(); // '', 'femmes' ou 'hommes'
+    const tableau = $('tableau');
+    const choisiActuel = () => new URLSearchParams(location.search).get('p');
+    const adresse = (id) => location.pathname + window.paramsMonde(id, genre);
+    const garder = (d) => !genre || (genre === 'femmes' ? d.f : d.h);
 
     /* Contemporains : vies actives (dès 25 ans) qui se recouvrent ; avant l'an
        1000, dates approximatives, 30 ans d'écart tolérés. Les plus marquants
        d'abord (importance, citations), à poids égal le plus proche. */
     function contemporains(a) {
       return GROUPES.filter((g) => g.id !== a.g).map((g) => {
-        const liste = DATA.filter((b) => b.g === g.id
+        const liste = DATA.filter((b) => b.g === g.id && garder(b)
           && Math.max(a.actif, b.actif) - Math.min(a.e, b.e) <= (Math.min(a.y, b.y) < 1000 ? ECART_ANCIEN : 0))
           .map((b) => ({ b, score: b.poids - Math.abs(a.milieu - b.milieu) }))
           .sort((x, y) => y.score - x.score);
@@ -283,6 +345,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
 
     function afficher(id, defiler) {
       const s = parId[id];
+      window.setBascule(s ? id : null, genre);
       document.querySelectorAll('.case a.choisi').forEach((a) => a.classList.remove('choisi'));
       document.querySelectorAll('.periode.ici').forEach((p) => p.classList.remove('ici'));
       if (!s) { centre.innerHTML = ''; return; }
@@ -292,15 +355,16 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
         <div class="carte-tete">${s.th ? `<img src="${esc(s.th)}" alt="" width="64" height="64">` : ''}
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}</p><p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
-          <a class="btn" href="/frises/penseurs-du-monde/?p=${encodeURIComponent(s.id)}">Voir sur la frise</a></div></div>
+          <a class="btn" href="/frises/penseurs-du-monde/?p=${esc(window.paramsMonde(s.id, genre))}">Voir sur la frise</a>
+          <button type="button" class="btn btn-fermer" aria-label="Fermer">✕ Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${blocs.length ? blocs.map(({ g, total, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${total}</h3><ul>`
-          + liste.map((d) => `<li><a href="?p=${encodeURIComponent(d.id)}" data-id="${esc(d.id)}">`
+          + liste.map((d) => `<li><a href="?p=${encodeURIComponent(d.id)}" data-id="${esc(d.id)}"${d.x ? ` title="${esc(d.x)}"` : ''}>`
             + (d.th ? `<img class="mini" src="${esc(d.th)}" alt="" width="32" height="32" loading="lazy">` : '<span class="mini vide"></span>')
             + `<span><span class="n">${esc(d.n)}</span><br><small>${esc(d.d)}</small></span></a></li>`).join('')
           + (total > liste.length ? `<li class="autres">et ${total - liste.length} autre${total - liste.length > 1 ? 's' : ''}</li>` : '')
           + '</ul></div>').join('')
-          : '<p class="vide-msg">Aucun contemporain dans les autres traditions sur le site.</p>'}</div></div>`;
+          : `<p class="vide-msg">${genre === 'femmes' ? 'Aucune contemporaine (filtre « Femmes uniquement »)' : genre === 'hommes' ? 'Aucun contemporain (filtre « Hommes uniquement »)' : 'Aucun contemporain'} dans les autres traditions sur le site.</p>`}</div></div>`;
       // Dans le tableau : la période du penseur et son nom
       document.querySelectorAll(`.case a[data-id="${CSS.escape(id)}"]`).forEach((a) => {
         a.classList.add('choisi');
@@ -313,11 +377,56 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
 
     function choisir(id, defiler = true) {
       if (!parId[id]) return;
-      history.pushState({ p: id }, '', '?p=' + encodeURIComponent(id));
+      history.pushState({ p: id }, '', adresse(id));
       fermer(); q.value = ''; q.blur();
       afficher(id, defiler);
     }
-    addEventListener('popstate', () => afficher(new URLSearchParams(location.search).get('p'), false));
+    addEventListener('popstate', () => { genre = window.lireGenre(); appliquerGenre(); });
+
+    /* Filtre de genre : dans chaque case, les 5 premiers noms retenus restent
+       visibles, les suivants passent sous « + N autres » (compte mis à jour) ;
+       cases et périodes vides signalées. La carte ne garde que ce genre. */
+    const CLASSE = { femmes: 'f', hommes: 'h' };
+    function appliquerGenre() {
+      if (genre) tableau.dataset.genre = genre; else delete tableau.dataset.genre;
+      tableau.querySelectorAll('.case').forEach((c) => {
+        const lis = [...c.querySelectorAll('li')];
+        if (!lis.length) return;
+        lis.forEach((li, i) => { if (!li.dataset.rang) li.dataset.rang = i; });
+        lis.sort((a, b) => a.dataset.rang - b.dataset.rang);
+        const gardes = genre ? lis.filter((li) => li.classList.contains(CLASSE[genre])) : lis;
+        c.classList.toggle('sans-g', !gardes.length);
+        const det = c.querySelector('details');
+        if (!det) return;
+        const [haut, bas] = c.querySelectorAll('ul');
+        const visibles = new Set(gardes.slice(0, VISIBLES));
+        lis.forEach((li) => (visibles.has(li) ? haut : bas).append(li));
+        const reste = gardes.length - visibles.size;
+        det.classList.toggle('sans-g', reste <= 0);
+        det.querySelector('.nb').textContent = reste;
+        det.querySelector('.pl').textContent = reste > 1 ? 's' : '';
+        det.open = !!det.querySelector('a.choisi');
+      });
+      tableau.querySelectorAll('.periode').forEach((p) => p.classList.toggle('sans-g', !p.querySelector('.case:not(.sans):not(.sans-g)')));
+      afficher(choisiActuel(), false);
+      ajusterNoms();
+    }
+    document.querySelectorAll('.bascule-genre').forEach((b) => b.addEventListener('click', () => {
+      genre = genre === b.dataset.genre ? '' : b.dataset.genre;
+      history.replaceState(history.state, '', adresse(choisiActuel()));
+      appliquerGenre();
+    }));
+
+    /* Fermer la carte : retour à la page sans penseur choisi */
+    function fermerCarte() {
+      if (!centre.innerHTML) return;
+      history.pushState({}, '', adresse(null));
+      afficher(null, false);
+      document.title = TITRE;
+    }
+    const TITRE = document.title;
+    centre.addEventListener('click', (e) => { if (e.target.closest('.btn-fermer')) fermerCarte(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.activeElement !== q) fermerCarte(); });
 
     /* Liens « ?p=… » du tableau et de la carte : sans recharger la page */
     document.addEventListener('click', (e) => {
@@ -359,17 +468,68 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     sugg.addEventListener('click', (e) => { const li = e.target.closest('li[data-id]'); if (li) choisir(li.dataset.id); });
     q.addEventListener('blur', () => setTimeout(fermer, 150));
 
+    /* ── Bulle au survol d'un nom (PC : souris seulement). Remplace la bulle
+       native du navigateur (attribut title, gardé pour les autres écrans). ── */
+    let bulle = null;
+    function activerBulles() {
+      if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      bulle = document.createElement('div');
+      bulle.className = 'bulle';
+      bulle.setAttribute('aria-hidden', 'true');
+      document.body.append(bulle);
+      document.querySelectorAll('.case a[data-id][title]').forEach((a) => a.removeAttribute('title'));
+      document.addEventListener('mouseover', (e) => {
+        const a = e.target.closest('.case a[data-id], #centre .contemps a[data-id]');
+        if (!a) return;
+        const s = parId[a.dataset.id];
+        if (!s) return;
+        a.removeAttribute('title');
+        bulle.style.setProperty('--c', G[s.g].color);
+        bulle.innerHTML = (s.th ? `<img src="${esc(s.th)}" alt="">` : '<span class="ph"></span>')
+          + `<span><b>${esc(s.n)}</b><span class="dates">${esc(s.d)}</span>`
+          + (s.cur.length ? `<span class="curs">${s.cur.map((c) => `<span>${esc(c)}</span>`).join('')}</span>` : '')
+          + (s.x ? `<span class="desc">${esc(s.x)}</span>` : '') + '</span>';
+        // Sous le nom, ou au-dessus s'il n'y a pas la place ; jamais hors de l'écran
+        const r = a.getBoundingClientRect(), h = bulle.offsetHeight, w = bulle.offsetWidth;
+        const haut = r.bottom + 8 + h > innerHeight ? r.top - 8 - h : r.bottom + 8;
+        bulle.style.top = Math.max(8, haut) + 'px';
+        bulle.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+        bulle.classList.add('vue');
+      });
+      document.addEventListener('mouseout', (e) => {
+        const a = e.target.closest('.case a[data-id], #centre .contemps a[data-id]');
+        if (a && !a.contains(e.relatedTarget)) bulle.classList.remove('vue');
+      });
+      addEventListener('scroll', () => bulle.classList.remove('vue'), { passive: true });
+    }
+
+    /* ── PC : le nom complet s'il tient sur la ligne, sinon le nom court ── */
+    const PC = matchMedia('(min-width: 761px)');
+    function ajusterNoms(racine = document) {
+      const liens = [...racine.querySelectorAll('.case a[data-court]')];
+      liens.forEach((a) => { if (!a.dataset.nom) a.dataset.nom = a.textContent; a.textContent = a.dataset.nom; });
+      if (!PC.matches) return;
+      const trop = liens.filter((a) => { const li = a.parentElement; return li.clientWidth && li.scrollWidth > li.clientWidth; });
+      trop.forEach((a) => { a.textContent = a.dataset.court; });
+    }
+    ajusterNoms();
+    let attente;
+    addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(ajusterNoms, 150); });
+    document.querySelectorAll('.case details').forEach((d) => d.addEventListener('toggle', () => { if (d.open) ajusterNoms(d); }));
+    document.fonts?.ready.then(() => ajusterNoms());
+    if (genre) appliquerGenre(); // sans attendre les données
+
     /* ── Chargement ── */
     fetch('/data/frise-penseurs-monde.json')
       .then((r) => r.json())
       .then((lignes) => {
-        DATA = lignes.map(([id, n, y, e, d, g, s, th, x]) => ({
-          id, n, y, e, d, g, th, x, actif: Math.min(y + AGE_ACTIF, e), milieu: (y + e) / 2,
+        DATA = lignes.map(([id, n, y, e, d, g, s, th, x, t, cur]) => ({
+          id, n, y, e, d, g, th, x, f: t.split(';').includes('femme'), h: !/(^|;)(femme|non-binaire)(;|$)/.test(t), cur: cur ? cur.split(';') : [], actif: Math.min(y + AGE_ACTIF, e), milieu: (y + e) / 2,
           poids: Math.floor(s / 1000) * 100 + Math.min(s % 1000, 50) * 2, cle: norm(n),
         })).filter((d) => G[d.g]);
         parId = Object.fromEntries(DATA.map((d) => [d.id, d]));
-        const p = new URLSearchParams(location.search).get('p');
-        if (p) afficher(p, false);
+        activerBulles();
+        appliquerGenre();
       });
   })();
   </script>

@@ -6,6 +6,7 @@
 import { getCollection } from 'astro:content';
 import Favicons from '../../components/Favicons.astro';
 import BackButton from '../../components/BackButton.astro';
+import BasculeMonde from '../../components/BasculeMonde.astro';
 import FriseFooter from '../../components/FriseFooter.astro';
 import Fonts from '../../components/Fonts.astro';
 import GoatCounter from '../../components/GoatCounter.astro';
@@ -77,11 +78,19 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     .btn:hover, .chip:hover { border-color: var(--gold); }
     .btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(212,168,67,.16); }
     .zoom .btn { font-size: 1rem; padding: .1rem .6rem; font-family: inherit; }
+    /* Zoom : un peu à l'écart des périodes, avec son libellé */
+    .zoom { margin-left: 1.4rem; padding: .2rem .25rem .2rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+      background: rgba(0,0,0,.2); flex-wrap: nowrap; }
+    .zoom-label { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--parch-dim); margin-right: .2rem; }
+    .zoom .btn { border-radius: 999px; min-width: 2rem; }
+    .aide:empty { display: none; }
     .aide { text-align: center; color: var(--parch-dim); font-size: .92rem; padding: 0 16px .5rem; }
 
     #scroller { overflow-x: auto; overflow-y: hidden; position: relative; margin: 0 0 1rem; border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line); cursor: grab; min-height: 200px; }
     #scroller.drag { cursor: grabbing; user-select: none; }
+    #scroller.zoom-glisse, #scroller.zoom-glisse * { cursor: ns-resize !important; user-select: none; }
     #chargement { padding: 3rem 16px; text-align: center; color: var(--parch-dim); font-style: italic; }
     #monde { position: relative; }
     .axe { position: relative; height: 44px; border-bottom: 1px solid var(--line); background: rgba(22,13,5,.92); z-index: 3; }
@@ -202,6 +211,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       .chip, .periodes .btn { flex-shrink: 0; white-space: nowrap; }
       .chip { font-size: .9rem; }
       .aide { font-size: .85rem; padding-bottom: .3rem; }
+      .zoom { margin-left: 0; }
       .contemps { grid-template-columns: 1fr 1fr; gap: .6rem .9rem; }
       .contemps li button, .contemps li small { font-size: .92rem; }
     }
@@ -228,19 +238,19 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     </div>
     <h1>La Frise des penseurs du monde</h1>
     <p class="fm-sous-titre">Les grandes traditions philosophiques</p>
+    <BasculeMonde actif="frise" />
   </header>
 
   <div class="barre"><div class="groupes" id="groupes"></div></div>
   <div class="barre">
     <div class="periodes" id="periodes"></div>
-    <div class="zoom">
+    <div class="zoom" role="group" aria-label="Zoom">
+      <span class="zoom-label" aria-hidden="true">Zoom</span>
       <button class="btn" id="zmoins" aria-label="Dézoomer">−</button>
       <button class="btn" id="zplus" aria-label="Zoomer">+</button>
     </div>
-    <button class="btn" id="femmes" type="button" aria-pressed="false">♀ Femmes uniquement</button>
-    <a class="btn" id="vers-epoque" href="/frises/a-la-meme-epoque/">⇄ À la même époque</a>
   </div>
-  <p class="aide" id="aide">Glissez pour vous déplacer, zoomez avec + et − (ou Ctrl + molette) pour faire apparaître les noms masqués.</p>
+  <p class="aide" id="aide"></p>
 
   <div id="scroller">
     <p id="chargement">Chargement de la frise…</p>
@@ -306,9 +316,11 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     let DATA = [], parId = {}, parGroupe = {};
     let actifs = DEFAUT.slice(), k = 0.4, choisi = null, periode = null;
     /* « Femmes uniquement » : tag « femme » de la colonne Traditions */
-    let femmes = false;
+    let genre = ''; // '', 'femmes' ou 'hommes' (« Hommes » : ni femme ni non-binaire)
     const estFemme = (d) => d.t.split(';').includes('femme');
-    const membres = (gid) => (femmes ? (parGroupe[gid] || []).filter(estFemme) : parGroupe[gid] || []);
+    const estHomme = (d) => !/(^|;)(femme|non-binaire)(;|$)/.test(d.t);
+    const garder = (d) => !genre || (genre === 'femmes' ? estFemme(d) : estHomme(d));
+    const membres = (gid) => (genre ? (parGroupe[gid] || []).filter(garder) : parGroupe[gid] || []);
     function majCompteurs() {
       GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${membres(g.id).length})`; });
     }
@@ -330,9 +342,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (periode) u.searchParams.set('periode', periode);
       const def = periode ? PERIODES.find((p) => p.id === periode).g : DEFAUT;
       if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
-      if (femmes) u.searchParams.set('femmes', '1');
+      if (genre) u.searchParams.set(genre, '1');
       if (choisi) u.searchParams.set('p', choisi);
-      $('vers-epoque').href = '/frises/a-la-meme-epoque/' + (choisi ? '?p=' + encodeURIComponent(choisi) : '');
+      window.setBascule(choisi, genre);
       history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
     }
 
@@ -483,7 +495,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
           <div><h2>${esc(s.n)}</h2><p>${esc(s.d)} · ${esc(g.label)}${aussi.length ? ' · aussi : ' + esc(aussi.join(', ')) : ''}</p>
           <p>${esc(s.x)}</p></div>
           <div class="carte-actions"><a class="btn" href="/philosophes/${esc(s.id)}/">Voir la fiche →</a>
-          <a class="btn" href="/frises/a-la-meme-epoque/?p=${encodeURIComponent(s.id)}">⇄ À la même époque</a>
+          <a class="btn" href="/frises/a-la-meme-epoque/?p=${esc(window.paramsMonde(s.id, genre))}">▦ Voir dans le tableau</a>
           <button class="btn fermer-carte" type="button">Fermer</button></div></div>
         <p class="contemps-titre">À la même époque, ailleurs dans le monde</p>
         <div class="contemps">${autres.length ? autres.map(({ g, liste }) => `<div style="--c:${g.color}"><h3>${esc(g.court)} · ${liste.length}</h3><ul>`
@@ -612,12 +624,11 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const el = e.target.closest('.item');
       if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); choisir(el.dataset.id, false); }
     });
-    $('femmes').onclick = () => {
-      femmes = !femmes;
-      $('femmes').setAttribute('aria-pressed', femmes);
-      if (femmes && choisi && !estFemme(parId[choisi])) { choisi = null; fermerBulle(); }
+    document.querySelectorAll('.bascule-genre').forEach((b) => (b.onclick = () => {
+      genre = genre === b.dataset.genre ? '' : b.dataset.genre;
+      if (genre && choisi && !garder(parId[choisi])) { choisi = null; fermerBulle(); }
       majCompteurs(); dessiner(); majUrl();
-    };
+    }));
     document.querySelectorAll('[data-seul]').forEach((b) => (b.onclick = () => {
       periode = null; setActifs([b.dataset.seul]); choisi = null; dessiner(); majUrl();
       scroller.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -669,16 +680,33 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       if (pinceFin) { clearTimeout(pinceFin.t); pinceFin.f(); }
     });
 
-    /* ── Glisser à la souris, curseur d'année ── */
-    let depart = null, bouge = false;
+    /* ── Glisser à la souris, bouton enfoncé : gauche / droite = se déplacer
+       dans le temps, haut / bas = zoomer (vers le haut : zoom avant) autour de
+       l'année qui était sous la souris. Le sens est fixé au début du geste. ── */
+    let depart = null, bouge = false, zoomDessin = null;
     scroller.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse') { depart = { x: e.clientX, s: scroller.scrollLeft }; bouge = false; }
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      const ax = e.clientX - scroller.getBoundingClientRect().left;
+      depart = { x: e.clientX, y: e.clientY, s: scroller.scrollLeft, k: k, ax, an: (scroller.scrollLeft + ax) / k + Y0, mode: null };
+      bouge = false;
     });
+    function zoomGlisse(dy) {
+      const d = depart;
+      const nk = Math.min(KMAX, Math.max(kMin(), d.k * Math.exp(-dy / 120)));
+      if (nk === k) return;
+      cancelAnimationFrame(zoomDessin);
+      zoomDessin = requestAnimationFrame(() => { k = nk; dessiner(); scroller.scrollLeft = x(d.an) - d.ax; });
+    }
     window.addEventListener('pointermove', (e) => {
       if (depart) {
-        const dx = e.clientX - depart.x;
-        if (Math.abs(dx) > 4) { bouge = true; scroller.classList.add('drag'); }
-        if (bouge) scroller.scrollLeft = depart.s - dx;
+        const dx = e.clientX - depart.x, dy = e.clientY - depart.y;
+        if (!depart.mode && Math.hypot(dx, dy) > 6) {
+          depart.mode = Math.abs(dy) > Math.abs(dx) && DATA.length ? 'zoom' : 'temps';
+          bouge = true;
+          scroller.classList.add(depart.mode === 'zoom' ? 'zoom-glisse' : 'drag');
+        }
+        if (depart.mode === 'temps') scroller.scrollLeft = depart.s - dx;
+        else if (depart.mode === 'zoom') { e.preventDefault(); zoomGlisse(dy); }
       }
       if (!DATA.length || e.pointerType !== 'mouse') return;
       const r = scroller.getBoundingClientRect();
@@ -691,7 +719,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       } else curseur.style.display = 'none';
     });
     window.addEventListener('pointerup', () => {
-      depart = null; scroller.classList.remove('drag');
+      depart = null; scroller.classList.remove('drag', 'zoom-glisse');
       setTimeout(() => (bouge = false), 0);
     });
     let largeur = 0;
@@ -707,8 +735,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
           .filter((d) => G[d.g]);
         parId = Object.fromEntries(DATA.map((d) => [d.id, d]));
         for (const d of DATA) (parGroupe[d.g] ||= []).push(d);
-        femmes = new URLSearchParams(location.search).get('femmes') === '1';
-        $('femmes').setAttribute('aria-pressed', femmes);
+        genre = window.lireGenre();
         majCompteurs();
         $('chargement').remove();
         monde.hidden = false;

@@ -1,0 +1,97 @@
+---
+/* Sélecteur Frise ⇄ Tableau des penseurs, sous le titre des deux
+   pages. La page courante est en surbrillance ; l'autre est un lien qui garde
+   le penseur sélectionné (?p=) et le filtre de genre (?femmes=1 ou ?hommes=1).
+   Chaque page met ce lien à jour : setBascule(id, genre) (fonction globale).
+   À droite, deux petits boutons ronds « ♀ » / « ♂ » ([data-genre]) : chaque page
+   branche leur clic ; lireGenre() lit le filtre dans l'adresse. */
+interface Props {
+  actif: 'frise' | 'tableau';
+}
+const { actif } = Astro.props;
+const pages = [
+  { cle: 'frise', href: '/frises/penseurs-du-monde/', ico: '⟷', nom: 'Frise', suite: 'des penseurs' },
+  { cle: 'tableau', href: '/frises/a-la-meme-epoque/', ico: '▦', nom: 'Tableau', suite: 'des penseurs' },
+];
+---
+<div class="bascule-ligne">
+<nav class="bascule" aria-label="Changer de vue">
+  {pages.map((p) => p.cle === actif ? (
+    <span class="bascule-opt actif" aria-current="page"><span class="ico" aria-hidden="true">{p.ico}</span><span>{p.nom}<span class="suite"> {p.suite}</span></span></span>
+  ) : (
+    <a class="bascule-opt" id="bascule-lien" href={p.href} data-base={p.href}><span class="ico" aria-hidden="true">{p.ico}</span><span>{p.nom}<span class="suite"> {p.suite}</span></span><span class="fleche" aria-hidden="true">→</span></a>
+  ))}
+</nav>
+<button type="button" class="bascule-genre" data-genre="femmes" aria-pressed="false" aria-label="Femmes uniquement"
+  data-bulle="Femmes uniquement">♀</button>
+<button type="button" class="bascule-genre" data-genre="hommes" aria-pressed="false" aria-label="Hommes uniquement"
+  data-bulle="Hommes uniquement">♂</button>
+</div>
+
+<script is:inline>
+  window.lireGenre = () => {
+    const u = new URLSearchParams(location.search);
+    return u.get('femmes') === '1' ? 'femmes' : u.get('hommes') === '1' ? 'hommes' : '';
+  };
+  /* Paramètres ?p=…&femmes=1 (ou &hommes=1), communs aux deux pages */
+  window.paramsMonde = (id, genre) => {
+    const u = new URLSearchParams();
+    if (id) u.set('p', id);
+    if (genre) u.set(genre, '1');
+    return u.size ? '?' + u : '';
+  };
+  window.setBascule = (id, genre) => {
+    document.querySelectorAll('.bascule-genre').forEach((b) => b.setAttribute('aria-pressed', b.dataset.genre === genre));
+    const a = document.getElementById('bascule-lien');
+    if (a) a.href = a.dataset.base + window.paramsMonde(id, genre);
+  };
+  window.setBascule(new URLSearchParams(location.search).get('p'), window.lireGenre());
+</script>
+
+<style>
+  .bascule-ligne { display: flex; justify-content: center; align-items: center; gap: .4rem; margin-top: 1rem; }
+  .bascule { display: inline-flex; border: 1px solid rgba(212,168,67,.55); border-radius: 999px; padding: 3px;
+    background: rgba(0,0,0,.35); box-shadow: 0 0 0 3px rgba(212,168,67,.08), 0 4px 16px rgba(0,0,0,.45); }
+  .bascule-opt { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem 1rem; border-radius: 999px;
+    font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .08em; white-space: nowrap; text-decoration: none; }
+  .bascule-opt.actif { color: #1a0f05; background: linear-gradient(180deg, #e8c060, #c8962a); font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  a.bascule-opt { color: #f0d890; transition: background .15s, color .15s; }
+  a.bascule-opt:hover, a.bascule-opt:focus-visible { background: rgba(212,168,67,.18); color: #fff3cf; }
+  .ico { font-size: .95rem; line-height: 1; }
+  .fleche { transition: transform .15s; }
+  a.bascule-opt:hover .fleche { transform: translateX(3px); }
+  .bascule-genre { width: 34px; height: 34px; flex: none; border-radius: 50%; cursor: pointer; padding: 0;
+    font-size: 1.05rem; line-height: 1; color: rgba(240,216,144,.75); background: rgba(0,0,0,.35);
+    border: 1px solid rgba(212,168,67,.35); transition: background .15s, color .15s, border-color .15s; }
+  .bascule-genre:hover, .bascule-genre:focus-visible { color: #fff3cf; border-color: rgba(212,168,67,.75); }
+  .bascule-genre[data-genre="femmes"] { margin-left: .15rem; }
+  /* Bulle au survol (PC), au style du site : fond sombre, liseré doré */
+  .bascule-genre { position: relative; }
+  @media (hover: hover) and (pointer: fine) {
+    .bascule-genre::after, .bascule-genre::before { position: absolute; left: 50%; pointer-events: none; opacity: 0;
+      transform: translate(-50%, -4px); transition: opacity .15s, transform .15s; z-index: 30; }
+    .bascule-genre::after { content: attr(data-bulle); top: calc(100% + 9px); white-space: nowrap;
+      font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: #f7ecce;
+      padding: .4rem .75rem; border-radius: 4px; border: 1px solid rgba(212,168,67,.55); border-top: 2px solid #c8962a;
+      background: linear-gradient(180deg, #2c1b0c, #1a1007); box-shadow: 0 8px 22px rgba(0,0,0,.6); }
+    .bascule-genre::before { content: ''; top: calc(100% + 3px); border: 6px solid transparent; border-top: 0;
+      border-bottom-color: #c8962a; }
+    .bascule-genre[aria-pressed="true"]::after { content: attr(data-bulle) ' · actif'; }
+    .bascule-genre:hover::after, .bascule-genre:hover::before,
+    .bascule-genre:focus-visible::after, .bascule-genre:focus-visible::before { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .bascule-genre[aria-pressed="true"] { color: #1a0f05; background: linear-gradient(180deg, #e8c060, #c8962a); border-color: #e8c060; }
+  @media (max-width: 600px) {
+    .bascule-genre { width: 38px; height: 38px; }
+    .bascule-ligne { gap: .3rem; }
+    .suite { display: none; }
+    .bascule-opt { padding: .55rem .85rem; font-size: .78rem; min-height: 40px; }
+  }
+  /* Petits téléphones : la ligne doit tenir dans 288 px */
+  @media (max-width: 380px) {
+    .bascule-opt { padding-left: .6rem; padding-right: .6rem; gap: .3rem; letter-spacing: .04em; }
+    .bascule-genre { width: 34px; height: 34px; }
+    .bascule-genre[data-genre="femmes"] { margin-left: 0; }
+  }
+</style>
