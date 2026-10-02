@@ -59,6 +59,8 @@ function couleur(href: string): string {
 /* Frises de courants : complète, par tradition ou thématique (« occidental--… »,
    « monde--… »), et occidentale ou des autres traditions du monde */
 const TRADITIONS_COURANTS = new Set(courantTraditionFrises.map((t) => t.slug));
+/* Frise et Tableau des courants (toutes traditions) */
+const VUES_COURANTS = new Set(['/frises/courants-du-monde/', '/frises/tableau-des-courants/']);
 function regroupCourant(href: string): string {
   const slug = href.split('/').filter(Boolean).pop() ?? '';
   if (slug.startsWith('monde--')) return 'courants-theme courants-occ courants-ori';
@@ -104,6 +106,7 @@ export const GET: APIRoute = async () => {
       return { liste: courantsDeLaFrise(m[1], cur) ?? [], parId: false };
     }
     if (href === '/frises/penseurs-du-monde/') return { liste: phi.filter((p) => p.data.groupe), parId: true };
+    if (VUES_COURANTS.has(href)) return { liste: cur, parId: true }; // pages ouvertes sur ?p=<id du courant>
     return { liste: [], parId: false };
   }
 
@@ -142,8 +145,8 @@ export const GET: APIRoute = async () => {
     return {
       n: texte(e.label),
       u: e.href,
-      c: e.href.startsWith('/courants/') ? 'courants' : e.href.startsWith('/frises/') ? 'monde' : 'philosophes',
-      r: e.href.startsWith('/courants/') ? regroupCourant(e.href) : REGROUPEMENTS[e.groupe] ?? '',
+      c: e.href.startsWith('/courants/') || VUES_COURANTS.has(e.href) ? 'courants' : e.href.startsWith('/frises/') ? 'monde' : 'philosophes',
+      r: VUES_COURANTS.has(e.href) ? 'courants-complet courants-occ courants-ori' : e.href.startsWith('/courants/') ? regroupCourant(e.href) : REGROUPEMENTS[e.groupe] ?? '',
       tag: texte(e.tag || ''),
       desc: texte(e.text || ''),
       debut: tries.length ? tries[0].year : null,

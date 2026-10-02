@@ -295,54 +295,33 @@ import SeoHead from '../components/SeoHead.astro';
     .list-page .phi-frise-card--flag:hover { background: linear-gradient(90deg, rgba(var(--tint), 0.44), rgba(var(--tint), 0.1) 65%); }
     .list-page .phi-frise-card { margin-bottom: 0.35rem; }
 
-    /* Bannière de la Frise des penseurs du monde, en tête de l'onglet Frises */
-    /* Zones bien séparées : filtres, puis frise principale, puis la liste (barre du compteur) */
-    .list-page .phi-monde-banner { margin: 1.3rem 0 0.4rem; padding-top: 1.3rem; border-top: 1px solid rgba(212, 168, 67, 0.3); }
-    .list-page .phi-monde-banner[hidden] { display: none; }
-    .list-page .phi-monde-main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 1.1rem 1.2rem 1rem;
-      text-align: center;
-      text-decoration: none;
-      border: 1px solid #d4a843;
-      border-radius: 10px;
-      background:
-        radial-gradient(ellipse at 50% 0%, rgba(240, 200, 100, 0.22), transparent 70%),
-        linear-gradient(160deg, rgba(90, 60, 15, 0.55), rgba(30, 18, 8, 0.85));
-      box-shadow: 0 6px 24px rgba(180, 130, 20, 0.25), inset 0 0 0 1px rgba(255, 230, 160, 0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
+    /* Petit cartouche « La Frise et le Tableau » (onglets Philosophes et Courants), au-dessus de la liste */
+    .list-page .phi-duo { display: flex; align-items: center; gap: .8rem; margin: 1.1rem 0 .5rem; padding: .7rem .9rem;
+      border: 1px solid rgba(212, 168, 67, .6); border-radius: 8px;
+      background: radial-gradient(ellipse at 20% 0%, rgba(240, 200, 100, .18), transparent 70%), linear-gradient(160deg, rgba(90, 60, 15, .55), rgba(30, 18, 8, .9));
+      box-shadow: 0 6px 18px rgba(10, 5, 2, .4); }
+    .list-page .phi-duo[hidden] { display: none; }
+    .list-page .phi-duo-ico { flex: none; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; font-size: 1.1rem;
+      color: #1e1208; background: radial-gradient(circle at 35% 30%, #f7e3a0 0%, #d4a843 55%, #9c7414 100%); border: 1px solid #e8c870; }
+    .list-page .phi-duo-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
+    .list-page .phi-duo-txt strong { font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .06em; color: #f7ecce; }
+    .list-page .phi-duo-txt span { font-family: 'EB Garamond', serif; font-style: italic; font-size: .95rem; color: #ead9a8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .list-page .phi-duo-btns { flex: none; display: flex; gap: .45rem; }
+    .list-page .phi-duo-btn { padding: .45rem .85rem; border-radius: 4px; text-decoration: none; white-space: nowrap;
+      font-family: 'Cinzel', serif; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: #1e1208; background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870; }
+    .list-page .phi-duo-btn--sec { color: #f3dc92; background: rgba(30, 18, 8, .6); }
+    .list-page .phi-duo-btn:hover, .list-page .phi-duo-btn:focus-visible { box-shadow: 0 0 12px rgba(212, 168, 67, .4); }
+    @media (max-width: 600px) {
+      .list-page .phi-duo { flex-wrap: wrap; }
+      .list-page .phi-duo-btns { width: 100%; }
+      .list-page .phi-duo-btn { flex: 1; text-align: center; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
     }
-    .list-page .phi-monde-main:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(180, 130, 20, 0.4); }
-    .list-page .phi-monde-eyebrow {
-      font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d4a843;
-    }
-    .list-page .phi-monde-title {
-      font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: clamp(1.15rem, 2.6vw, 1.6rem); font-weight: 700; color: #f7ecce;
-      text-shadow: 0 0 18px rgba(212, 168, 67, 0.35);
-    }
-    .list-page .phi-monde-meta {
-      font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843;
-    }
-    .list-page .phi-monde-portraits { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0.15rem; }
-    .list-page .phi-monde-portraits img {
-      width: 2.6rem; height: 2.6rem; object-fit: cover; border-radius: 50%;
-      border: 2px solid rgba(212, 168, 67, 0.75); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    .list-page .phi-monde-desc { max-width: 46rem; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1rem; line-height: 1.45; color: #ead9a8; }
-    .list-page .phi-monde-main .phi-frise-hit { margin: 0; }
-    .list-page .phi-monde-cta {
-      margin-top: 0.35rem; padding: 0.55rem 1.3rem; border-radius: 4px;
-      font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #1e1208;
-      background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
-    }
-    @media (max-width: 760px) {
-      .list-page .phi-monde-main { padding: 0.9rem 0.8rem; }
-      .list-page .phi-monde-portraits img { width: 2.2rem; height: 2.2rem; }
-      .list-page .phi-monde-desc { font-size: 0.95rem; }
-    }
+    /* Frise des penseurs du monde : carte dorée dans la liste de l'onglet Frises */
+    .list-page .phi-all-link--monde { background: linear-gradient(90deg, rgba(212,168,67,.34), rgba(212,168,67,.07) 65%);
+      box-shadow: inset 5px 0 0 #d4a843; border-bottom-color: rgba(212,168,67,.5); }
+    .list-page .phi-all-link--monde:hover { background: linear-gradient(90deg, rgba(212,168,67,.48), rgba(212,168,67,.12) 65%); }
     .list-page .phi-frise-card .phi-result-name { white-space: normal; overflow: visible; text-overflow: clip; }
 
     /* Très petits écrans : les trois onglets du haut tiennent sur la largeur */
@@ -445,7 +424,7 @@ import SeoHead from '../components/SeoHead.astro';
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
-<script src="/js/search-full.js?v=20261002" defer></script>
+<script src="/js/search-full.js?v=20261002c" defer></script>
 
 </body>
 </html>

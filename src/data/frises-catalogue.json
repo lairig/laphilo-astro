@@ -44,6 +44,24 @@
       "label": "Les Courants de Pensée",
       "items": [
         {
+          "name": "La Frise et le Tableau des courants",
+          "tag": "Toutes traditions",
+          "egaux": true,
+          "text": "Tous les courants de pensée du monde, en deux vues reliées : la frise, un couloir par tradition, et le tableau, une colonne par grande question. Choisissez un courant pour voir la liste de ses représentants sur le site.",
+          "links": [
+            {
+              "label": "La Frise des courants",
+              "href": "/frises/courants-du-monde/",
+              "desc": "Un couloir par tradition, de l'Égypte antique à nos jours."
+            },
+            {
+              "label": "Le Tableau des courants",
+              "href": "/frises/tableau-des-courants/",
+              "desc": "Les grandes questions, époque par époque."
+            }
+          ]
+        },
+        {
           "name": "La Pensée occidentale",
           "tag": "Toutes époques",
           "text": "Des présocratiques au wokisme, les courants de la pensée philosophique occidentale : parcourez la frise complète, ou l'une des trois frises thématiques plus courtes.",

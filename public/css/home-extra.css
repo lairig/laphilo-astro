@@ -133,64 +133,6 @@
   }
 }
 
-/* Cartouche de la Frise des penseurs du monde, sous « À la une » */
-.monde-accueil-wrap { max-width: 860px; margin: 1.8rem auto 2rem; padding: 0 1.5rem; }
-.monde-accueil {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 1.5rem 1.4rem 1.3rem;
-  text-align: center;
-  text-decoration: none;
-  border: 1px solid #d4a843;
-  border-radius: 8px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(240, 200, 100, 0.22), transparent 70%),
-    linear-gradient(160deg, rgba(90, 60, 15, 0.6), rgba(30, 18, 8, 0.9));
-  box-shadow: 0 10px 30px rgba(10, 5, 2, 0.45), 0 0 24px rgba(180, 130, 20, 0.18);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.monde-accueil:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(10, 5, 2, 0.5), 0 0 30px rgba(180, 130, 20, 0.35); }
-.monde-accueil-eyebrow { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d4a843; }
-.monde-accueil-title {
-  font-family: 'Cinzel Decorative', 'Cinzel', serif;
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  color: #f7ecce;
-  text-shadow: 0 0 18px rgba(212, 168, 67, 0.35);
-}
-.monde-accueil-meta { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
-.monde-accueil-portraits { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0.2rem; }
-.monde-accueil-portraits img {
-  width: 3rem;
-  height: 3rem;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid rgba(212, 168, 67, 0.8);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-.monde-accueil-text { max-width: 44rem; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.02rem; line-height: 1.45; color: #ead9a8; }
-.monde-accueil-cta {
-  margin-top: 0.4rem;
-  padding: 0.6rem 1.4rem;
-  border-radius: 4px;
-  font-family: 'Cinzel', serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #1e1208;
-  background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%);
-  border: 1px solid #e8c870;
-}
-@media (max-width: 660px) {
-  .monde-accueil-wrap { padding: 0 1rem; }
-  .monde-accueil { padding: 1.1rem 0.9rem; }
-  .monde-accueil-portraits img { width: 2.4rem; height: 2.4rem; }
-  .monde-accueil-text { font-size: 0.95rem; }
-}
-
 /* Cartouche « À la une » : parchemin, comme le cartouche d'introduction
    (fond crème doré, bordure dorée, encre brune, filet or et rouille en haut).
    Deux cartes : le philosophe (liseré or) et le courant de pensée (liseré rouille). */
@@ -423,7 +365,7 @@
   .faq-answer { padding: 0.8rem 0.95rem 1rem; }
 }
 
-/* ══ Les 3 boutons du haut (Nouveau ici · Recherche · Je veux explorer) :
+/* ══ Les boutons du haut (Nouveau ici · Recherche · Explorer les penseurs · Explorer les courants) :
    relookés (2026-10-01). Médaillon doré pour l'icône, filet or en haut,
    et texte sur 2 lignes exactement quand les 3 sont côte à côte. ══ */
 .entry-guide-btn {
@@ -462,6 +404,12 @@
 /* Empilés (tablette, mobile) : pleine largeur, comme avant */
 @media (max-width: 768px) {
   .entry-guide-btn { max-width: 100%; }
+}
+/* 4 boutons (2026-10-02) : 2 × 2 (la zone est trop étroite pour 4 côte à côte),
+   empilés sur téléphone ; même largeur pour tous */
+@media (min-width: 581px) {
+  .entry-guide-items { display: grid; grid-template-columns: repeat(2, minmax(0, 315px)); justify-content: center; }
+  .entry-guide-btn { max-width: none; }
 }
 
 /* ══ Boutons « Découvrir / Explorer / Accéder » des 4 cartouches (2026-10-01) :

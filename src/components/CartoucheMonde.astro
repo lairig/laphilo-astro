@@ -1,0 +1,110 @@
+---
+/* Cartouche doré des deux duos Frise / Tableau, au style du cartouche de la
+   Frise des penseurs du monde (accueil). Réutilisable sur n'importe quelle
+   page : <CartoucheMonde vue="penseurs" /> ou <CartoucheMonde vue="courants" />.
+   Styles inclus, chiffres calculés ; deux boutons, la frise et le tableau.
+   penseurs : un portrait par grande tradition (le plus important de chacune) ;
+   courants : un losange de couleur par tradition. */
+import { getCollection } from 'astro:content';
+import { groupesMonde } from '../data/groupes-monde';
+
+interface Props {
+  vue: 'penseurs' | 'courants';
+}
+const { vue } = Astro.props;
+
+const courants = await getCollection('courants');
+const philosophes = (await getCollection('philosophes')).filter((p) => p.data.groupe);
+const liste: { data: { groupe?: string } }[] = vue === 'penseurs' ? philosophes : courants;
+const traditions = groupesMonde
+  .map((g) => ({ ...g, n: liste.filter((c) => c.data.groupe === g.id).length }))
+  .filter((g) => g.n > 0);
+/* Penseurs : le plus important de chaque tradition (avec portrait), du plus ancien au plus récent */
+const portraits = vue === 'penseurs'
+  ? Array.from(
+      philosophes
+        .filter((e) => e.data.thumbnail)
+        .sort((a, b) => (b.data.importance ?? 1) - (a.data.importance ?? 1) || a.data.year - b.data.year)
+        .reduce((m, e) => (m.has(e.data.groupe) ? m : m.set(e.data.groupe, e)), new Map<string | undefined, (typeof philosophes)[number]>())
+        .values(),
+    ).sort((a, b) => a.data.year - b.data.year)
+  : [];
+
+const V = vue === 'penseurs'
+  ? {
+      eyebrow: '◈ Les penseurs du monde', titre: 'La Frise et le Tableau des penseurs', unite: 'penseurs',
+      texte: "Toutes les grandes traditions côte à côte : la frise pour voir qui pensait quoi à la même époque, le tableau pour les parcourir époque par époque. Choisissez un philosophe pour découvrir ses contemporains ailleurs dans le monde.",
+      frise: '/frises/penseurs-du-monde/', tableau: '/frises/a-la-meme-epoque/',
+    }
+  : {
+      eyebrow: '✧ Les courants du monde', titre: 'La Frise et le Tableau des courants', unite: 'courants',
+      texte: 'Tous les courants de pensée en deux vues reliées : la frise, un couloir par tradition, et le tableau, une colonne par grande question. Choisissez un courant pour voir la liste de ses représentants.',
+      frise: '/frises/courants-du-monde/', tableau: '/frises/tableau-des-courants/',
+    };
+---
+<div class="cc-wrap">
+  <div class="cc">
+    <span class="cc-eyebrow">{V.eyebrow}</span>
+    <span class="cc-title">{V.titre}</span>
+    <span class="cc-meta">{liste.length} {V.unite} · {traditions.length} traditions · de l'Égypte ancienne à nos jours</span>
+    {vue === 'penseurs' ? (
+      <span class="cc-portraits" aria-hidden="true">
+        {portraits.map((e) => <img src={e.data.thumbnail} alt="" title={e.data.name} width="48" height="48" loading="lazy" />)}
+      </span>
+    ) : (
+      <span class="cc-trads" aria-hidden="true">
+        {traditions.map((g) => <span style={`--c:${g.color}`}><i></i>{g.court}</span>)}
+      </span>
+    )}
+    <span class="cc-text">{V.texte}</span>
+    <span class="cc-ctas">
+      <a class="cc-cta" href={V.frise}>⟷ La frise <span aria-hidden="true">→</span></a>
+      <a class="cc-cta cc-cta--sec" href={V.tableau}>▦ Le tableau <span aria-hidden="true">→</span></a>
+    </span>
+  </div>
+</div>
+
+<style>
+  .cc-wrap { max-width: 860px; margin: 1.8rem auto 2rem; padding: 0 1.5rem; }
+  .cc {
+    display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
+    padding: 1.5rem 1.4rem 1.3rem; text-align: center;
+    border: 1px solid #d4a843; border-radius: 8px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(240, 200, 100, 0.22), transparent 70%),
+      linear-gradient(160deg, rgba(90, 60, 15, 0.6), rgba(30, 18, 8, 0.9));
+    box-shadow: 0 10px 30px rgba(10, 5, 2, 0.45), 0 0 24px rgba(180, 130, 20, 0.18);
+  }
+  .cc-eyebrow { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d4a843; }
+  .cc-title {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif; font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 700;
+    color: #f7ecce; text-shadow: 0 0 18px rgba(212, 168, 67, 0.35); line-height: 1.25;
+  }
+  .cc-meta { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: #d4a843; }
+  .cc-portraits { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0.2rem; }
+  .cc-portraits img { width: 3rem; height: 3rem; object-fit: cover; border-radius: 50%; border: 2px solid rgba(212, 168, 67, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }
+  .cc-trads { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 0.8rem; margin: 0.35rem 0 0.15rem; }
+  .cc-trads span { display: inline-flex; align-items: center; gap: 0.35rem; font-family: 'EB Garamond', serif; font-size: 0.95rem; color: #f7ecce; }
+  .cc-trads i { width: 0.6rem; height: 0.6rem; transform: rotate(45deg); background: var(--c); border-radius: 1px; box-shadow: 0 0 6px var(--c); }
+  .cc-text { max-width: 44rem; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.02rem; line-height: 1.45; color: #ead9a8; }
+  .cc-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 0.45rem; }
+  .cc-cta {
+    padding: 0.6rem 1.3rem; border-radius: 4px; text-decoration: none;
+    font-family: 'Cinzel', serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #1e1208; background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cc-cta--sec { color: #f3dc92; background: rgba(30, 18, 8, 0.6); }
+  .cc-cta:hover, .cc-cta:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), 0 0 14px rgba(212, 168, 67, 0.3); }
+  .cc-cta--sec:hover, .cc-cta--sec:focus-visible { background: rgba(212, 168, 67, 0.16); }
+  @media (max-width: 660px) {
+    .cc-wrap { padding: 0 1rem; }
+    .cc { padding: 1.1rem 0.9rem; }
+    .cc-text { font-size: 0.95rem; }
+    .cc-portraits img { width: 2.4rem; height: 2.4rem; }
+    .cc-ctas { width: 100%; }
+    .cc-cta { flex: 1 1 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;
+      padding: 0.5rem 0.5rem; white-space: nowrap; font-size: 0.72rem; letter-spacing: 0.04em; }
+  }
+</style>

@@ -33,6 +33,7 @@ export const GET: APIRoute = async () => {
     (p.courants || []).forEach((c) => cursSet.add(c));
 
     index.push({
+      id: entry.id, // pour ouvrir la Frise ou le Tableau des penseurs sur lui
       n: p.name,
       d: p.display_date,
       y: 'philosophe',
@@ -66,6 +67,7 @@ export const GET: APIRoute = async () => {
     (c.branches || []).forEach((d) => domsCurSet.add(d));
 
     index.push({
+      id: entry.id, // pour ouvrir la Frise ou le Tableau des courants sur lui
       n: c.name,
       d: c.display_date,
       y: 'courant',

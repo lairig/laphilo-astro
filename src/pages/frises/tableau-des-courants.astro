@@ -1,0 +1,355 @@
+---
+/* Le Tableau des courants : compagnon de la Frise des courants (sélecteur
+   Frise | Tableau). Une ligne par époque, une colonne par grande question
+   (colonne Branche des xlsx de courants) ; chaque courant est placé dans
+   l'époque de sa naissance (donnée des xlsx), sans prétendre à une durée de
+   vie. Un courant à plusieurs branches figure dans plusieurs colonnes.
+   Tableau écrit en dur (lisible sans JavaScript) ; au clic, le panneau du
+   courant (courants-panneau.js), le même que sur la Frise des courants. */
+import { getCollection } from 'astro:content';
+import Favicons from '../../components/Favicons.astro';
+import BackButton from '../../components/BackButton.astro';
+import BasculeMonde from '../../components/BasculeMonde.astro';
+import FriseFooter from '../../components/FriseFooter.astro';
+import Fonts from '../../components/Fonts.astro';
+import GoatCounter from '../../components/GoatCounter.astro';
+import SeoHead from '../../components/SeoHead.astro';
+import { groupesMonde } from '../../data/groupes-monde';
+
+/* Mêmes époques que le Tableau des penseurs */
+const PERIODES: [number, number, string, string][] = [
+  [-3000, -800, 'Avant 800 av. J.-C.', 'Les premières sagesses'],
+  [-800, -200, '800 – 200 av. J.-C.', "L'âge axial"],
+  [-200, 500, '200 av. J.-C. – 500', "L'Antiquité tardive"],
+  [500, 1000, '500 – 1000', 'Le haut Moyen Âge'],
+  [1000, 1300, '1000 – 1300', 'Le temps des grandes synthèses'],
+  [1300, 1500, '1300 – 1500', 'La fin du Moyen Âge'],
+  [1500, 1650, '1500 – 1650', 'Renaissance et Réformes'],
+  [1650, 1780, '1650 – 1780', "L'âge classique et les Lumières"],
+  [1780, 1850, '1780 – 1850', "L'âge des révolutions"],
+  [1850, 1914, '1850 – 1914', 'Le second XIXᵉ siècle'],
+  [1914, 1960, '1914 – 1960', 'Guerres mondiales et décolonisations'],
+  [1960, 1990, '1960 – 1990', 'Le second XXᵉ siècle'],
+  [1990, 9999, 'Depuis 1990', "Aujourd'hui"],
+];
+/* Grandes questions : regroupement des branches des courants */
+const QUESTIONS = [
+  { id: 'etre', titre: 'Métaphysique', question: "Qu'est-ce qui existe ?", branches: ['Métaphysique'] },
+  { id: 'sacre', titre: 'Spiritualité', question: 'Le divin, le sacré', branches: ['Théologie et spiritualité'] },
+  { id: 'savoir', titre: 'Connaissance', question: 'Que peut-on savoir ?',
+    branches: ['Épistémologie', 'Logique', 'Philosophie des sciences et du vivant', "Philosophie de l'esprit"] },
+  { id: 'agir', titre: 'Éthique', question: 'Comment bien agir ?', branches: ['Éthique'] },
+  { id: 'cite', titre: 'Politique', question: 'Comment vivre ensemble ?', branches: ['Philosophie politique'] },
+];
+
+const courants = (await getCollection('courants')).sort((a, b) => a.data.year - b.data.year);
+const philosophes = await getCollection('philosophes');
+const nbReps = new Map<string, number>();
+for (const p of philosophes) for (const c of p.data.courants ?? []) nbReps.set(c, (nbReps.get(c) ?? 0) + 1);
+
+const groupes = groupesMonde.filter((g) => courants.some((c) => c.data.groupe === g.id));
+const GROUPES = groupes.map(({ id, label, court, color }) => ({ id, label, court, color }));
+const couleur = Object.fromEntries(groupes.map((g) => [g.id, g.color]));
+const court = Object.fromEntries(groupes.map((g) => [g.id, g.court]));
+
+const lignes = PERIODES.map(([de, a, dates, nom], i) => {
+  const dans = courants.filter((c) => c.data.year >= de && c.data.year < a);
+  const cases = QUESTIONS.map((q) => dans
+    .filter((c) => (c.data.branches ?? []).some((b) => q.branches.includes(b)))
+    .map((c) => ({
+      id: c.id, name: c.data.name, g: c.data.groupe ?? '', reps: nbReps.get(c.data.name) ?? 0,
+      info: [`${c.data.display_date} · ${court[c.data.groupe ?? ''] ?? ''}`, c.data.description ?? ''].filter(Boolean).join('\n'),
+    })));
+  return { i, dates, nom, cases, n: dans.length };
+}).filter((l) => l.n > 0);
+
+const title = 'Le Tableau des courants : les grandes questions, époque par époque | LaPhilo.fr';
+const description = "De quoi débattait-on à chaque époque ? Les courants de pensée de toutes les traditions rangés par grande question (métaphysique, spiritualité, connaissance, éthique, politique) et par époque, avec leurs représentants.";
+---
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/frises/tableau-des-courants/" />
+  <Fonts />
+  <link rel="preload" href="/data/courants-monde.json" as="fetch" crossorigin />
+  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261002b" />
+  <style is:global>
+    :root { --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce; --parch-dim: #c9b48a; --gold: #d4a843; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg) radial-gradient(ellipse 70% 50% at 15% 8%, #3a1c08 0%, transparent 60%) no-repeat;
+      color: var(--parch); font-family: 'EB Garamond', Georgia, serif; min-height: 100vh; }
+    a { color: var(--gold); }
+    .fm-header { position: relative; text-align: center; padding: 3.2rem 16px .8rem; }
+    .sitemap-switcher { position: absolute; top: 14px; right: 16px; display: flex; border: 2px solid rgba(200,150,42,.35);
+      border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+    .sitemap-btn { display: flex; align-items: center; gap: .35rem; padding: .32rem .65rem; background: rgba(30,18,8,.85); border: none;
+      cursor: pointer; font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(247,236,206,.92); text-decoration: none; }
+    .sitemap-btn:hover { background: rgba(60,36,12,.94); color: var(--gold); }
+    .sitemap-btn[hidden] { display: none; }
+    .sitemap-flag { font-size: .88rem; line-height: 1; }
+    h1 { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: clamp(1.35rem, 3.6vw, 2.2rem); letter-spacing: .05em;
+      line-height: 1.2; text-shadow: 0 2px 18px rgba(180,130,20,.45); }
+    .fm-sous-titre { font-family: 'Cinzel', serif; font-size: clamp(.66rem, 1.4vw, .8rem); letter-spacing: .2em; text-transform: uppercase;
+      color: var(--parch-dim); margin-top: .7rem; }
+    .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold); text-decoration: none;
+      background: rgba(212,168,67,.06); border: 1px solid var(--line); border-radius: 4px; padding: .3rem .6rem; }
+    .btn:hover { border-color: var(--gold); }
+    button.btn { line-height: inherit; }
+
+    .tableau-aide { text-align: center; color: var(--parch-dim); font-style: italic; padding: 0 16px; margin: 1.2rem auto .8rem; max-width: 900px; }
+    .groupes { display: flex; flex-wrap: wrap; gap: .35rem; justify-content: center; padding: 0 16px; margin-bottom: 1rem; }
+    .chip { font-family: inherit; font-size: .95rem; cursor: pointer; border-radius: 999px; padding: .2rem .7rem .2rem .45rem;
+      border: 1px solid var(--line); background: transparent; color: var(--parch-dim); display: inline-flex; align-items: center; gap: .4rem; }
+    .chip .pastille { width: .7rem; height: .7rem; border-radius: 50%; background: var(--c); opacity: .35; }
+    .chip[aria-pressed="true"] { color: var(--parch); border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .chip[aria-pressed="true"] .pastille { opacity: 1; }
+    .chip:hover { border-color: var(--gold); }
+
+    #centre { max-width: 1100px; margin: 0 auto 1.4rem; padding: 0 16px; scroll-margin-top: 12px; }
+    #centre:empty { display: none; }
+    .carte { background: var(--panel); border: 1px solid rgba(212,168,67,.35); border-top: 3px solid var(--c); border-radius: 8px; padding: 1rem 1.1rem 1.1rem; }
+    .carte-tete { display: flex; gap: 1rem; align-items: flex-start; }
+    .carte-actions { margin-left: auto; align-self: flex-start; display: flex; gap: .4rem; flex-wrap: nowrap; justify-content: flex-end; }
+    .carte-actions .btn { white-space: nowrap; }
+    .contemps-titre { font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-top: 1.1rem; }
+    .vide { color: rgba(201,180,138,.35); }
+    .cp .vide { color: var(--parch-dim); font-style: italic; }
+
+    .tableau { max-width: 1500px; margin: 0 auto 2.5rem; padding: 0 16px; }
+    .t-entete, .periode { display: grid; grid-template-columns: 10.5rem repeat(5, minmax(0, 1fr)); gap: 0 .8rem; }
+    .t-entete { position: sticky; top: 0; z-index: 5; background: rgba(22,13,5,.96); border-bottom: 1px solid rgba(212,168,67,.35); padding: .55rem 0; }
+    .t-entete span b { display: block; font-family: 'Cinzel', serif; font-weight: 400; font-size: .72rem; letter-spacing: .08em; color: var(--gold);
+      text-transform: uppercase; }
+    .t-entete span i { font-size: .9rem; color: var(--parch-dim); }
+    .periode { border-bottom: 1px solid var(--line); padding: .7rem 0; scroll-margin-top: 60px; }
+    .periode.ici { background: rgba(212,168,67,.05); box-shadow: inset 3px 0 0 var(--gold); }
+    .p-nom { font-weight: 400; padding-left: .5rem; }
+    .p-nom b { display: block; font-family: 'Cinzel', serif; font-size: .78rem; color: var(--gold); letter-spacing: .04em; }
+    .p-nom span { display: block; color: var(--parch-dim); font-style: italic; font-size: .95rem; line-height: 1.2; margin-top: .15rem; }
+    .case { min-width: 0; border-left: 1px solid var(--line); padding-left: .55rem; }
+    .case h4 { display: none; }
+    .case ul { list-style: none; }
+    .case li { line-height: 1.2; margin-bottom: .25rem; }
+    .case li[hidden] { display: none; }
+    .case a { color: var(--parch); text-decoration: none; font-size: .95rem; display: inline-flex; align-items: baseline; gap: .35rem; }
+    .case a::before { content: ''; flex: none; width: 7px; height: 7px; transform: rotate(45deg) translateY(-1px); background: var(--c); border-radius: 1px; }
+    .case a:hover { color: var(--c); text-decoration: underline; }
+    .case a small { color: var(--parch-dim); font-size: .78rem; }
+    .case a.choisi { color: var(--c); font-weight: 700; }
+
+    /* Bulle au survol (PC), au style des cartes de /recherche/ */
+    .bulle { position: fixed; z-index: 50; width: max-content; max-width: 380px; pointer-events: none; padding: .55rem .8rem .6rem .8rem;
+      border-radius: 5px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, #1f130a), #1f130a 70%);
+      border-left: 5px solid var(--c); box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 0 1px rgba(212,168,67,.25); opacity: 0; transition: opacity .12s; }
+    .bulle.vue { opacity: 1; }
+    .bulle b { display: block; font-family: 'Cinzel', serif; font-size: 1rem; color: #f7ecce; }
+    .bulle .dates { display: block; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .05em; color: #d8a24a; margin-top: .18rem; }
+    .bulle .desc { display: block; font-style: italic; font-size: .95rem; color: #ead9a8; line-height: 1.45; margin-top: .25rem; }
+    .bulle .nb { display: block; font-size: .85rem; color: var(--parch-dim); margin-top: .3rem; }
+
+    .frise-footer { display: flex; flex-direction: column; align-items: center; gap: .55rem; padding: 1rem 16px 1.2rem;
+      border-top: 1px solid rgba(180,130,20,.18); background: rgba(0,0,0,.18); }
+    .footer-tagline { font-family: 'EB Garamond', serif; font-style: italic; font-size: .92rem; color: #c8962a; letter-spacing: .03em; }
+    .ff-copy { font-family: 'EB Garamond', serif; font-style: italic; font-size: .72rem; color: #e8c870; text-align: center; opacity: .65; }
+
+    @media (max-width: 1000px) {
+      .carte-tete { flex-wrap: wrap; }
+      .carte-actions { margin-left: 0; justify-content: flex-start; width: 100%; }
+    }
+    @media (max-width: 1100px) and (min-width: 761px) {
+      .tableau { overflow-x: auto; }
+      .t-entete, .periode { min-width: 960px; }
+      .t-entete { position: static; }
+    }
+    /* Téléphone : une carte par époque, les questions l'une sous l'autre */
+    @media (max-width: 760px) {
+      .fm-header { padding: 3.2rem 16px .4rem; }
+      .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
+      .carte-actions .btn { min-height: 40px; display: inline-flex; align-items: center; font-size: clamp(.5rem, 2.9vw, .68rem);
+        letter-spacing: .03em; padding: 0 clamp(.3rem, 1.6vw, .6rem); }
+      .groupes { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+      .groupes::-webkit-scrollbar { display: none; }
+      .chip { flex-shrink: 0; white-space: nowrap; font-size: .9rem; }
+      .t-entete { display: none; }
+      .periode { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .8rem .9rem; margin-bottom: .8rem; }
+      .p-nom { padding: 0 0 .5rem; border-bottom: 1px solid var(--line); margin-bottom: .55rem; }
+      .case { border-left: 0; padding: 0; margin-bottom: .6rem; }
+      .case.sans { display: none; }
+      .case h4 { display: block; font-family: 'Cinzel', serif; font-weight: 400; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+        color: var(--gold); margin-bottom: .25rem; }
+      .case h4 i { font-family: 'EB Garamond', serif; text-transform: none; letter-spacing: 0; color: var(--parch-dim); font-size: .9rem; }
+      .case ul { display: flex; flex-wrap: wrap; gap: .1rem .9rem; }
+      .case li { margin: 0; }
+      .case a { padding: .3rem 0; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="fm-header">
+    <div class="sitemap-switcher">
+      <BackButton />
+      <a href="/frises/" class="sitemap-btn"><span class="sitemap-flag" aria-hidden="true">≡</span><span class="sitemap-text">Frises</span></a>
+      <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil"><span class="sitemap-flag" aria-hidden="true">⌂</span><span class="sitemap-text">Accueil</span></a>
+    </div>
+    <h1>Le Tableau des courants</h1>
+    <p class="fm-sous-titre">Les grandes questions, époque par époque</p>
+    <BasculeMonde actif="tableau" vue="courants" />
+  </header>
+
+  <p class="tableau-aide">Chaque courant figure dans l'époque de sa naissance, sous la ou les grandes questions qu'il a travaillées. Choisissez un courant pour voir ses représentants sur le site.</p>
+  <div class="groupes" id="groupes" role="group" aria-label="Traditions affichées">
+    {groupes.map((g) => (
+      <button class="chip" type="button" data-g={g.id} aria-pressed="true" style={`--c:${g.color}`} title={g.label}>
+        <span class="pastille"></span>{g.court}
+      </button>
+    ))}
+  </div>
+
+  <section id="centre" aria-live="polite"></section>
+
+  <div class="tableau" id="tableau">
+    <div class="t-entete" aria-hidden="true">
+      <span></span>
+      {QUESTIONS.map((q) => <span><b>{q.titre}</b><i>{q.question}</i></span>)}
+    </div>
+    {lignes.map((l) => (
+      <section class="periode" id={`periode-${l.i}`}>
+        <h3 class="p-nom"><b>{l.dates}</b><span>{l.nom}</span></h3>
+        {l.cases.map((liste, j) => (
+          <div class={`case${liste.length ? '' : ' sans'}`}>
+            <h4>{QUESTIONS[j].titre} <i>· {QUESTIONS[j].question}</i></h4>
+            {liste.length === 0 ? <span class="vide">—</span> : (
+              <ul>
+                {liste.map((c) => (
+                  <li data-g={c.g}><a href={`?p=${c.id}`} data-id={c.id} style={`--c:${couleur[c.g]}`} title={c.info}>{c.name}{c.reps > 0 && <small>{c.reps}</small>}</a></li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </section>
+    ))}
+  </div>
+
+  <FriseFooter />
+
+  <script src="/js/courants-panneau.js?v=20261002d" is:inline></script>
+  <script is:inline define:vars={{ GROUPES }}>
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const centre = $('centre'), tableau = $('tableau');
+    const G = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
+    const TITRE = document.title;
+    let parId = {}, prets = false;
+    const choisiActuel = () => new URLSearchParams(location.search).get('p');
+
+    /* ── Filtre par tradition (chips) ── */
+    const actives = new Set(GROUPES.map((g) => g.id));
+    function filtrer() {
+      tableau.querySelectorAll('.case li').forEach((li) => { li.hidden = !actives.has(li.dataset.g); });
+      tableau.querySelectorAll('.case').forEach((c) => {
+        const vis = c.querySelectorAll('li:not([hidden])').length;
+        c.classList.toggle('sans', !vis && !!c.querySelector('li'));
+        const vide = c.querySelector('.vide-f');
+        if (c.querySelector('li')) {
+          if (!vis && !vide) c.insertAdjacentHTML('beforeend', '<span class="vide vide-f">—</span>');
+          if (vis && vide) vide.remove();
+        }
+      });
+    }
+    $('groupes').addEventListener('click', (e) => {
+      const b = e.target.closest('.chip');
+      if (!b) return;
+      if (actives.has(b.dataset.g)) actives.delete(b.dataset.g); else actives.add(b.dataset.g);
+      b.setAttribute('aria-pressed', actives.has(b.dataset.g));
+      filtrer();
+    });
+
+    /* ── Courant choisi : panneau en haut de page, surligné dans le tableau ── */
+    const actions = { choisir: (id) => choisir(id), fermer: () => fermerCarte() };
+    function afficher(id, defiler) {
+      window.setBascule(parId[id] ? id : null, '');
+      tableau.querySelectorAll('a.choisi').forEach((a) => a.classList.remove('choisi'));
+      tableau.querySelectorAll('.periode.ici').forEach((p) => p.classList.remove('ici'));
+      if (!parId[id]) { centre.innerHTML = ''; document.title = TITRE; return; }
+      centre.innerHTML = CourantsPanneau.html(id);
+      CourantsPanneau.brancher(centre, actions);
+      tableau.querySelectorAll(`a[data-id="${CSS.escape(id)}"]`).forEach((a) => {
+        a.classList.add('choisi');
+        a.closest('.periode').classList.add('ici');
+      });
+      document.title = `${parId[id].n} : ses représentants | LaPhilo.fr`;
+      if (defiler) centre.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function choisir(id) {
+      if (!parId[id]) return;
+      history.pushState({ p: id }, '', '?p=' + encodeURIComponent(id));
+      cacherBulle();
+      afficher(id, true);
+    }
+    function fermerCarte() {
+      if (!centre.innerHTML) return;
+      history.pushState({}, '', location.pathname);
+      afficher(null, false);
+    }
+    addEventListener('popstate', () => afficher(choisiActuel(), false));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerCarte(); });
+    tableau.addEventListener('click', (e) => {
+      const a = e.target.closest('a[data-id]');
+      if (!a || !prets || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault();
+      choisir(a.dataset.id);
+    });
+
+    /* ── Bulle au survol d'un courant (PC seulement) ── */
+    let bulle = null;
+    const cacherBulle = () => bulle && bulle.classList.remove('vue');
+    function activerBulles() {
+      if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      bulle = document.createElement('div');
+      bulle.className = 'bulle';
+      bulle.setAttribute('aria-hidden', 'true');
+      document.body.append(bulle);
+      tableau.querySelectorAll('a[data-id][title]').forEach((a) => a.removeAttribute('title'));
+      tableau.addEventListener('mouseover', (e) => {
+        const a = e.target.closest('a[data-id]');
+        const c = a && parId[a.dataset.id];
+        if (!c) return;
+        const g = G[c.g];
+        bulle.style.setProperty('--c', g ? g.color : '#d4a843');
+        bulle.innerHTML = `<b>${esc(c.n)}</b><span class="dates">${esc(c.d)}${g ? ' · ' + esc(g.court) : ''}</span>`
+          + (c.x ? `<span class="desc">${esc(c.x)}</span>` : '')
+          + `<span class="nb">${c.reps.length ? `${c.reps.length} représentant${c.reps.length > 1 ? 's' : ''} sur le site` : 'Aucun représentant sur le site'}</span>`;
+        const r = a.getBoundingClientRect(), h = bulle.offsetHeight, w = bulle.offsetWidth;
+        bulle.style.top = Math.max(8, r.bottom + 8 + h > innerHeight ? r.top - 8 - h : r.bottom + 8) + 'px';
+        bulle.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+        bulle.classList.add('vue');
+      });
+      tableau.addEventListener('mouseout', (e) => {
+        const a = e.target.closest('a[data-id]');
+        if (a && !a.contains(e.relatedTarget)) cacherBulle();
+      });
+      addEventListener('scroll', cacherBulle, { passive: true });
+    }
+
+    /* ── Chargement ── */
+    fetch('/data/courants-monde.json')
+      .then((r) => r.json())
+      .then((json) => {
+        parId = CourantsPanneau.init(json, GROUPES).parId;
+        prets = true;
+        activerBulles();
+        const p = choisiActuel();
+        if (p) afficher(p, false);
+      });
+  })();
+  </script>
+</body>
+</html>

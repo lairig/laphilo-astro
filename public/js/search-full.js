@@ -282,8 +282,6 @@
       '<label class="phi-field phi-field--large"><span class="phi-all-filter-lbl">Regroupement</span>' +
       '<select class="phi-all-select phi-fr-regroup"></select></label>' +
       '</div></details>' +
-      /* Onglet Frises : la Frise des penseurs du monde, frise principale, toujours visible, sous ses filtres */
-      '<div class="phi-monde-banner" hidden></div>' +
       /* Cartouche « Filtres » */
       cartouche('filtres', 'Filtres') +
       '<div class="phi-box-grid">' +
@@ -356,6 +354,8 @@
       '</div>' +
       '<a class="phi-philo-frise-link phi-cur-frise-link" href="#" hidden></a>' +
       '</details>' +
+      /* Onglets Philosophes et Courants : la Frise et le Tableau correspondants, toujours en avant */
+      '<div class="phi-duo" hidden></div>' +
       /* Barre de tri, juste au-dessus de la liste */
       '<div class="phi-toolbar">' +
       '<div class="phi-toolbar-group">' +
@@ -394,8 +394,8 @@
     var frisesBox = container.querySelector('.phi-box--frises');
     var frContenu = container.querySelector('.phi-fr-contenu');
     var frRegroup = container.querySelector('.phi-fr-regroup');
-    var mondeBanner = container.querySelector('.phi-monde-banner');
     var countEl = container.querySelector('#' + uid + '-count');
+    var duoEl = container.querySelector('.phi-duo');
     var listEl = container.querySelector('#' + uid + '-list');
     var moreBtn = container.querySelector('#' + uid + '-more');
     var topBtn = container.querySelector('#' + uid + '-top');
@@ -496,7 +496,6 @@
       if (!_frises) return [];
       var res = [];
       _frises.forEach(function (f) {
-        if (f.c === 'monde') return;
         if (_fr.contenu && f.c !== _fr.contenu) return;
         /* r peut lister plusieurs regroupements séparés par des espaces */
         if (_fr.regroup && (' ' + f.r + ' ').indexOf(' ' + _fr.regroup + ' ') < 0) return;
@@ -615,23 +614,6 @@
       return '<span class="phi-frise-hit">Contient : ' + hits.slice(0, 3).map(function (h) { return '<strong>' + esc(h[0]) + '</strong>'; }).join(', ') +
         (hits.length > 3 ? ' et ' + (hits.length - 3) + ' autre' + (hits.length > 4 ? 's' : '') : '') + '</span>';
     }
-    function renderMonde() {
-      var f = _frises && _frises.filter(function (x) { return x.c === 'monde'; })[0];
-      if (!f) return '';
-      var hits = membresTrouves(f, stripAccents(_query.trim().toLowerCase()));
-      /* Ouverte dans un nouvel onglet : la recherche reste disponible */
-      return '<a class="phi-monde-main" href="' + esc(lienFrise(f, hits)) + '" target="_blank" rel="noopener">' +
-        '<span class="phi-monde-eyebrow">◈ La frise principale</span>' +
-        '<span class="phi-monde-title">' + esc(f.n) + '</span>' +
-        '<span class="phi-monde-meta">' + esc(f.tag) + ' · ' + f.nb + ' penseurs · toutes les traditions côte à côte</span>' +
-        '<span class="phi-monde-portraits" aria-hidden="true">' + f.v.map(function (v) {
-          return '<img src="' + esc(v[1]) + '" alt="" title="' + esc(v[0]) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">';
-        }).join('') + '</span>' +
-        (hits.length ? contientHtml(hits) : '') +
-        '<span class="phi-monde-desc">' + esc(f.desc) + '</span>' +
-        '<span class="phi-monde-cta">Ouvrir la frise →</span>' +
-        '</a>';
-    }
     function classeCouleur(k) {
       if (k && k.indexOf('flag:') === 0) {
         var c = colorDef(k.slice(5));
@@ -667,12 +649,32 @@
       }).join('');
     }
 
+    /* Petit cartouche « La Frise et le Tableau » des penseurs (onglet Philosophes)
+       ou des courants (onglet Courants) ; un seul résultat : ils s'ouvrent sur lui */
+    var DUOS = {
+      penseurs: { ico: '◈', titre: 'La Frise et le Tableau des penseurs', sous: 'Toutes les traditions côte à côte',
+        frise: '/frises/penseurs-du-monde/', tableau: '/frises/a-la-meme-epoque/' },
+      courants: { ico: '✧', titre: 'La Frise et le Tableau des courants', sous: 'Les courants de toutes les traditions',
+        frise: '/frises/courants-du-monde/', tableau: '/frises/tableau-des-courants/' },
+    };
+    function renderDuo() {
+      var cle = estFrises() ? '' : _filters.typex.indexOf('courant') === 0 ? 'courants' : 'penseurs';
+      duoEl.hidden = !cle;
+      if (!cle) return;
+      var d = DUOS[cle];
+      var seul = _filtered.length === 1 && _filtered[0].id ? _filtered[0] : null;
+      var p = seul ? '?p=' + encodeURIComponent(seul.id) : '';
+      duoEl.innerHTML = '<span class="phi-duo-ico" aria-hidden="true">' + d.ico + '</span>' +
+        '<span class="phi-duo-txt"><strong>' + d.titre + '</strong><span>' + (seul ? 'Ouvrir sur ' + esc(seul.n) : d.sous) + '</span></span>' +
+        '<span class="phi-duo-btns"><a class="phi-duo-btn" href="' + d.frise + p + '">⟷ La frise</a>' +
+        '<a class="phi-duo-btn phi-duo-btn--sec" href="' + d.tableau + p + '">▦ Le tableau</a></span>';
+    }
+
     function render() {
+      renderDuo();
       var total = _filtered.length;
       var visible = _filtered.slice(0, _page * PAGE_SIZE);
       listEl.innerHTML = estFrises() ? renderFrises(visible) : renderItems(visible);
-      mondeBanner.hidden = !estFrises() || !_frises;
-      if (!mondeBanner.hidden) mondeBanner.innerHTML = renderMonde();
       countEl.textContent = estFrises()
         ? total + ' ' + (total > 1 ? 'frises' : 'frise')
         : total + ' ' + (total > 1 ? 'résultats' : 'résultat');

@@ -4,15 +4,25 @@
    le penseur sélectionné (?p=) et le filtre de genre (?femmes=1 ou ?hommes=1).
    Chaque page met ce lien à jour : setBascule(id, genre) (fonction globale).
    À droite, deux petits boutons ronds « ♀ » / « ♂ » ([data-genre]) : chaque page
-   branche leur clic ; lireGenre() lit le filtre dans l'adresse. */
+   branche leur clic ; lireGenre() lit le filtre dans l'adresse.
+   vue="courants" : même sélecteur pour la Frise et le Tableau des courants
+   (?p=<id du courant>), sans boutons de genre. */
 interface Props {
   actif: 'frise' | 'tableau';
+  vue?: 'penseurs' | 'courants';
 }
-const { actif } = Astro.props;
-const pages = [
-  { cle: 'frise', href: '/frises/penseurs-du-monde/', ico: '⟷', nom: 'Frise', suite: 'des penseurs' },
-  { cle: 'tableau', href: '/frises/a-la-meme-epoque/', ico: '▦', nom: 'Tableau', suite: 'des penseurs' },
-];
+const { actif, vue = 'penseurs' } = Astro.props;
+const PAGES = {
+  penseurs: [
+    { cle: 'frise', href: '/frises/penseurs-du-monde/', ico: '⟷', nom: 'Frise', suite: 'des penseurs' },
+    { cle: 'tableau', href: '/frises/a-la-meme-epoque/', ico: '▦', nom: 'Tableau', suite: 'des penseurs' },
+  ],
+  courants: [
+    { cle: 'frise', href: '/frises/courants-du-monde/', ico: '⟷', nom: 'Frise', suite: 'des courants' },
+    { cle: 'tableau', href: '/frises/tableau-des-courants/', ico: '▦', nom: 'Tableau', suite: 'des courants' },
+  ],
+};
+const pages = PAGES[vue];
 ---
 <div class="bascule-ligne">
 <nav class="bascule" aria-label="Changer de vue">
@@ -22,10 +32,14 @@ const pages = [
     <a class="bascule-opt" id="bascule-lien" href={p.href} data-base={p.href}><span class="ico" aria-hidden="true">{p.ico}</span><span>{p.nom}<span class="suite"> {p.suite}</span></span><span class="fleche" aria-hidden="true">→</span></a>
   ))}
 </nav>
-<button type="button" class="bascule-genre" data-genre="femmes" aria-pressed="false" aria-label="Femmes uniquement"
-  data-bulle="Femmes uniquement">♀</button>
-<button type="button" class="bascule-genre" data-genre="hommes" aria-pressed="false" aria-label="Hommes uniquement"
-  data-bulle="Hommes uniquement">♂</button>
+{vue === 'penseurs' && (
+  <>
+    <button type="button" class="bascule-genre" data-genre="femmes" aria-pressed="false" aria-label="Femmes uniquement"
+      data-bulle="Femmes uniquement">♀</button>
+    <button type="button" class="bascule-genre" data-genre="hommes" aria-pressed="false" aria-label="Hommes uniquement"
+      data-bulle="Hommes uniquement">♂</button>
+  </>
+)}
 </div>
 
 <script is:inline>

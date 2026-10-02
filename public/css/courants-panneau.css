@@ -1,0 +1,30 @@
+/* Panneau d'un courant (courants-panneau.js) : Frise et Tableau des courants.
+   Les classes de base (.carte, .carte-tete, .carte-actions, .btn,
+   .contemps-titre, .vide) sont celles des pages des frises du monde. */
+.cp .cp-titre { min-width: 0; }
+.cp .carte-tete h2 { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--c); }
+.cp .carte-tete p { color: var(--parch-dim); }
+.cp-questions { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.cp-questions span { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .05em; text-transform: uppercase; color: #fff;
+  background: #5a5a5a; border: 1px solid #444; border-radius: 2px; padding: .08rem .38rem; }
+.cp-desc { margin-top: .7rem; color: var(--parch); font-style: italic; line-height: 1.45; }
+.cp-video { margin-top: .6rem; }
+.cp-lecteur iframe { display: block; width: 100%; max-width: 560px; aspect-ratio: 16 / 9; border: 0; border-radius: 6px; margin-top: .6rem; }
+.cp-reps { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: .35rem 1rem; margin-top: .6rem;
+  max-height: 340px; overflow-y: auto; padding-right: .3rem; }
+.cp-reps li { display: flex; align-items: center; gap: .55rem; min-width: 0; padding: .2rem .3rem .2rem .2rem; border-radius: 4px;
+  border-left: 3px solid var(--g); background: rgba(247,236,206,.03); }
+.cp-reps li:hover { background: rgba(247,236,206,.07); }
+.cp-mini { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; border: 1.5px solid var(--g); background: #2a1a0c; display: inline-block; }
+.cp-nom { flex: 1; min-width: 0; line-height: 1.15; }
+.cp-nom a { color: var(--parch); text-decoration: none; }
+.cp-nom a:hover { color: var(--g); text-decoration: underline; }
+.cp-nom small { display: block; color: var(--parch-dim); font-size: .85rem; margin-top: .1rem; }
+.cp-trad { color: var(--g); }
+.cp-vivant { color: #6cc070; font-size: .75rem; }
+.cp-frise { flex: none; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+  color: var(--gold); text-decoration: none; border: 1px solid var(--line); font-size: .95rem; }
+.cp-frise:hover { border-color: var(--gold); background: rgba(212,168,67,.12); }
+@media (max-width: 640px) {
+  .cp-reps { grid-template-columns: 1fr; max-height: none; }
+}

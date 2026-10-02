@@ -1,0 +1,617 @@
+---
+/* La Frise des courants : les courants de pensée de toutes les traditions sur
+   un même axe du temps, un couloir par tradition (colonne Groupe des xlsx de
+   courants). Compagnon du Tableau des courants (sélecteur Frise | Tableau).
+   Un courant est posé à sa date de naissance (donnée des xlsx) ; on ne dessine
+   ni fin ni « durée de vie » : à la sélection, un trait ouvert jusqu'à
+   aujourd'hui porte ses représentants présents sur le site, à leurs dates.
+   Le panneau (courants-panneau.js) est le même que celui du Tableau. */
+import { getCollection } from 'astro:content';
+import Favicons from '../../components/Favicons.astro';
+import BackButton from '../../components/BackButton.astro';
+import BasculeMonde from '../../components/BasculeMonde.astro';
+import FriseFooter from '../../components/FriseFooter.astro';
+import Fonts from '../../components/Fonts.astro';
+import GoatCounter from '../../components/GoatCounter.astro';
+import SeoHead from '../../components/SeoHead.astro';
+import { groupesMonde } from '../../data/groupes-monde';
+
+const courants = await getCollection('courants');
+const GROUPES = groupesMonde
+  .filter((g) => courants.some((c) => c.data.groupe === g.id))
+  .map(({ id, label, court, color }) => ({ id, label, court, color }));
+
+const title = 'La Frise des courants de pensée du monde | LaPhilo.fr';
+const description = "Les courants de pensée de toutes les traditions sur un même axe du temps : Occident, islam et judaïsme, Inde, Asie de l'Est, pensée russe, pensées du Sud, Proche-Orient ancien. Choisissez un courant pour voir ses représentants.";
+---
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/frises/courants-du-monde/" />
+  <Fonts />
+  <link rel="preload" href="/data/courants-monde.json" as="fetch" crossorigin />
+  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261002b" />
+  <style is:global>
+    :root {
+      --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce;
+      --parch-dim: #c9b48a; --gold: #d4a843; --row: 22px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg) radial-gradient(ellipse 70% 50% at 15% 8%, #3a1c08 0%, transparent 60%) no-repeat;
+      color: var(--parch); font-family: 'EB Garamond', Georgia, serif; min-height: 100vh; }
+    a { color: var(--gold); }
+
+    .fm-header { position: relative; text-align: center; padding: 3.2rem 16px .8rem; }
+    .sitemap-switcher { position: absolute; top: 14px; right: 16px; display: flex; border: 2px solid rgba(200,150,42,.35);
+      border-radius: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+    .sitemap-btn { display: flex; align-items: center; gap: .35rem; padding: .32rem .65rem; background: rgba(30,18,8,.85); border: none;
+      cursor: pointer; font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(247,236,206,.92); text-decoration: none; }
+    .sitemap-btn:hover { background: rgba(60,36,12,.94); color: var(--gold); }
+    .sitemap-btn[hidden] { display: none; }
+    .sitemap-flag { font-size: .88rem; line-height: 1; }
+    h1 { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: clamp(1.35rem, 3.6vw, 2.2rem); letter-spacing: .05em;
+      line-height: 1.2; text-shadow: 0 2px 18px rgba(180,130,20,.45); }
+    .fm-sous-titre { font-family: 'Cinzel', serif; font-size: clamp(.66rem, 1.4vw, .8rem); letter-spacing: .2em; text-transform: uppercase;
+      color: var(--parch-dim); margin-top: .7rem; }
+
+    .barre { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: center; padding: .6rem 16px; }
+    .groupes, .periodes, .zoom { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; justify-content: center; }
+    .chip { font-family: inherit; font-size: .95rem; cursor: pointer; border-radius: 999px; padding: .2rem .7rem .2rem .45rem;
+      border: 1px solid var(--line); background: transparent; color: var(--parch-dim); display: inline-flex; align-items: center; gap: .4rem; }
+    .chip .pastille { width: .7rem; height: .7rem; border-radius: 50%; background: var(--c); opacity: .35; }
+    .chip small { opacity: .75; }
+    .chip[aria-pressed="true"] { color: var(--parch); border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .chip[aria-pressed="true"] .pastille { opacity: 1; }
+    .btn { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .08em; cursor: pointer; color: var(--gold); text-decoration: none;
+      background: rgba(212,168,67,.06); border: 1px solid var(--line); border-radius: 4px; padding: .3rem .6rem; }
+    .btn:hover, .chip:hover { border-color: var(--gold); }
+    .btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(212,168,67,.16); }
+    .zoom { margin-left: 1.4rem; padding: .2rem .25rem .2rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+      background: rgba(0,0,0,.2); flex-wrap: nowrap; }
+    .zoom-label { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--parch-dim); margin-right: .2rem; }
+    .zoom .btn { font-size: 1rem; padding: .1rem .6rem; font-family: inherit; border-radius: 999px; min-width: 2rem; }
+    .aide:empty { display: none; }
+    .aide { text-align: center; color: var(--parch-dim); font-size: .92rem; padding: 0 16px .5rem; }
+
+    #scroller { overflow-x: auto; overflow-y: hidden; position: relative; margin: 0 0 1rem; border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line); cursor: grab; min-height: 200px; }
+    #scroller.drag { cursor: grabbing; user-select: none; }
+    #scroller.zoom-glisse, #scroller.zoom-glisse * { cursor: ns-resize !important; user-select: none; }
+    #chargement { padding: 3rem 16px; text-align: center; color: var(--parch-dim); font-style: italic; }
+    #monde { position: relative; }
+    .axe { position: relative; height: 44px; border-bottom: 1px solid var(--line); background: rgba(22,13,5,.92); z-index: 3; }
+    .epoque { position: absolute; top: 0; height: 18px; font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--gold); padding: 3px 6px; white-space: nowrap; overflow: hidden; border-left: 1px solid var(--line); }
+    .tick { position: absolute; top: 20px; height: 24px; border-left: 1px solid rgba(212,168,67,.35); font-size: .82rem;
+      color: var(--parch-dim); padding-left: 4px; white-space: nowrap; }
+    .fond { position: absolute; top: 44px; bottom: 0; }
+    .fond.pair { background: rgba(247,236,206,.025); }
+    .couloir { position: relative; border-bottom: 1px solid var(--line); }
+    .couloir-titre { position: sticky; left: 0; z-index: 2; display: inline-flex; align-items: center; gap: .45rem; margin: 6px 0 2px;
+      padding: .1rem .7rem .1rem .6rem; font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .08em; color: var(--c);
+      background: linear-gradient(90deg, rgba(22,13,5,.95) 70%, transparent); border-left: 3px solid var(--c); }
+    .couloir-titre .masques { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .85rem; color: var(--parch-dim); font-style: italic; }
+    .pistes { position: relative; }
+    /* Un courant : losange à sa date de naissance, puis son nom */
+    .item { position: absolute; height: calc(var(--row) - 4px); display: flex; align-items: flex-end; cursor: pointer; white-space: nowrap;
+      padding-left: 12px; }
+    .item::before { content: ''; position: absolute; left: -4px; bottom: 3px; width: 8px; height: 8px; transform: rotate(45deg);
+      background: var(--c); border-radius: 1px; }
+    .item .nom { position: relative; font-size: .9rem; line-height: 1; padding: 0 2px 2px 0; color: var(--parch);
+      text-shadow: 0 1px 2px #000, 0 0 3px #000; }
+    .item .nom small { font-size: .72rem; color: var(--parch-dim); margin-left: .25rem; }
+    .item.top .nom { font-weight: 600; }
+    .item:hover, .item:focus-visible, .item.choisi { z-index: 5; }
+    .item:hover .nom, .item:focus-visible .nom { color: var(--c); }
+    .item:focus-visible { outline: 1px dashed var(--c); }
+    body.selection .item .nom { color: rgba(247,236,206,.55); }
+    body.selection .item.proche .nom { color: var(--gold); }
+    .item.choisi .nom, body.selection .item.choisi .nom { color: var(--c); font-weight: 700; }
+    .item.choisi::before { box-shadow: 0 0 8px var(--c); }
+    /* Représentants du courant choisi : trait ouvert depuis sa naissance, un point par philosophe */
+    .reps { position: relative; height: 34px; border-top: 1px dashed rgba(212,168,67,.25); }
+    .reps-titre { position: sticky; left: 0; display: inline-block; font-size: .82rem; font-style: italic; color: var(--parch-dim);
+      padding: 2px .6rem; background: linear-gradient(90deg, rgba(22,13,5,.95) 75%, transparent); z-index: 2; }
+    .reps-trait { position: absolute; top: 22px; height: 2px; background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 25%, transparent)); }
+    .reps-point { position: absolute; top: 17px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--g);
+      border: 2px solid #160d05; cursor: pointer; z-index: 3; }
+    .reps-point:hover, .reps-point:focus-visible { transform: scale(1.4); box-shadow: 0 0 6px var(--g); }
+    #curseur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dotted rgba(247,236,206,.4); pointer-events: none; display: none; z-index: 6; }
+    #curseur span { position: absolute; top: 46px; left: 8px; font-size: .85rem; background: var(--panel); color: var(--gold);
+      padding: .05rem .4rem; border: 1px solid rgba(212,168,67,.45); border-radius: 3px; white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,.6); }
+
+    #panneau { max-width: 1100px; margin: 0 auto 2rem; padding: 0 16px; display: none; }
+    #panneau.ouvert { display: block; }
+    .carte { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.1rem; }
+    .carte-tete { display: flex; gap: 1rem; align-items: flex-start; }
+    .carte-actions { margin-left: auto; align-self: flex-start; display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .contemps-titre { font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold);
+      margin-top: 1.1rem; }
+    .vide { color: var(--parch-dim); font-style: italic; margin-top: .4rem; }
+    #bulle { position: fixed; z-index: 50; width: min(760px, calc(100vw - 16px)); max-height: 76vh; overflow: auto;
+      border-radius: 8px; box-shadow: 0 10px 34px rgba(0,0,0,.7), 0 0 0 1px rgba(212,168,67,.25); }
+    #bulle .carte { border-color: rgba(212,168,67,.35); }
+    #bulle .cp-reps { max-height: none; }
+
+    .frise-footer { display: flex; flex-direction: column; align-items: center; gap: .55rem; padding: 1rem 16px 1.2rem;
+      border-top: 1px solid rgba(180,130,20,.18); background: rgba(0,0,0,.18); }
+    .footer-tagline { font-family: 'EB Garamond', serif; font-style: italic; font-size: .92rem; color: #c8962a; letter-spacing: .03em; }
+    .ff-copy { font-family: 'EB Garamond', serif; font-style: italic; font-size: .72rem; color: #e8c870; text-align: center; opacity: .65; }
+
+    @media (max-width: 640px) {
+      .fm-header { padding: 3.2rem 16px .4rem; }
+      .fm-sous-titre { margin-top: .4rem; }
+      .sitemap-btn { padding: .22rem .4rem; font-size: .56rem; letter-spacing: .07em; }
+      .carte-tete { flex-wrap: wrap; }
+      .carte-actions { margin-left: 0; justify-content: flex-start; }
+      .barre { padding: .3rem 0; gap: .4rem; }
+      .groupes, .periodes { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; width: 100%;
+        padding: 0 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .groupes::-webkit-scrollbar, .periodes::-webkit-scrollbar { display: none; }
+      .chip, .periodes .btn { flex-shrink: 0; white-space: nowrap; }
+      .chip { font-size: .9rem; }
+      .aide { font-size: .85rem; padding-bottom: .3rem; }
+      .zoom { margin-left: 0; }
+    }
+    /* Écrans tactiles : le panneau du courant monte du bas de l'écran */
+    @media (hover: none), (max-width: 640px) {
+      #panneau { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 0; z-index: 60; max-height: 62vh;
+        overflow-y: auto; transform: translateY(105%); transition: transform .25s ease; display: block; }
+      #panneau.ouvert { transform: none; }
+      #panneau .carte { position: relative; border-radius: 14px 14px 0 0; border-bottom: 0; padding-top: 1.3rem; box-shadow: 0 -8px 30px rgba(0,0,0,.7); }
+      #panneau .carte::before { content: ''; position: absolute; top: 7px; left: 50%; width: 40px; height: 4px; margin-left: -20px;
+        border-radius: 2px; background: rgba(212,168,67,.4); }
+      #scroller { touch-action: pan-x pan-y; }
+    }
+  </style>
+</head>
+<body>
+  <header class="fm-header">
+    <div class="sitemap-switcher">
+      <BackButton />
+      <a href="/frises/" class="sitemap-btn"><span class="sitemap-flag" aria-hidden="true">≡</span><span class="sitemap-text">Frises</span></a>
+      <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil"><span class="sitemap-flag" aria-hidden="true">⌂</span><span class="sitemap-text">Accueil</span></a>
+    </div>
+    <h1>La Frise des courants</h1>
+    <p class="fm-sous-titre">Les courants de pensée du monde</p>
+    <BasculeMonde actif="frise" vue="courants" />
+  </header>
+
+  <div class="barre"><div class="groupes" id="groupes"></div></div>
+  <div class="barre">
+    <div class="periodes" id="periodes"></div>
+    <div class="zoom" role="group" aria-label="Zoom">
+      <span class="zoom-label" aria-hidden="true">Zoom</span>
+      <button class="btn" id="zmoins" aria-label="Dézoomer">−</button>
+      <button class="btn" id="zplus" aria-label="Zoomer">+</button>
+    </div>
+  </div>
+  <p class="aide" id="aide"></p>
+
+  <div id="scroller">
+    <p id="chargement">Chargement de la frise…</p>
+    <div id="monde" hidden>
+      <div class="axe" id="axe"></div>
+      <div id="fonds"></div>
+      <div id="couloirs"></div>
+      <div id="curseur"><span></span></div>
+    </div>
+  </div>
+
+  <section id="panneau" aria-live="polite"></section>
+  <div id="bulle" role="dialog" aria-live="polite" hidden></div>
+
+  <FriseFooter />
+  <div id="marge-bulle" aria-hidden="true"></div>
+
+  <script src="/js/courants-panneau.js?v=20261002d" is:inline></script>
+  <script is:inline define:vars={{ GROUPES }}>
+  (() => {
+    const Y0 = -3000, Y1 = 2030, KMAX = 60;
+    let ROW = 24;
+    const PERIODES = [
+      { id: 'tout', label: 'Tout', de: -3000, a: 2030 },
+      { id: 'antiquite', label: 'Antiquité', de: -1500, a: 500 },
+      { id: 'moyen-age', label: 'Moyen Âge', de: 450, a: 1500 },
+      { id: 'temps-modernes', label: 'Temps modernes', de: 1450, a: 1800 },
+      { id: 'xixe-siecle', label: 'XIXᵉ siècle', de: 1780, a: 1914 },
+      { id: 'xxe-siecle', label: 'XXᵉ – XXIᵉ', de: 1890, a: 2030 },
+    ];
+    const EPOQUES = [[-3000, -800, 'Haute Antiquité'], [-800, 476, 'Antiquité'], [476, 1453, 'Moyen Âge'], [1453, 1600, 'Renaissance'],
+      [1600, 1789, 'Âge classique'], [1789, 1900, 'XIXᵉ siècle'], [1900, 2030, 'XXᵉ – XXIᵉ']];
+
+    const $ = (id) => document.getElementById(id);
+    const scroller = $('scroller'), monde = $('monde'), axe = $('axe'), fonds = $('fonds'), couloirs = $('couloirs');
+    const curseur = $('curseur'), panneau = $('panneau'), zoneGroupes = $('groupes'), zonePeriodes = $('periodes');
+    const ids = GROUPES.map((g) => g.id);
+    const G = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+    let DATA = [], PHILOS = [], parId = {}, parGroupe = {};
+    let actifs = ids.slice(), k = 0.4, choisi = null, periode = null;
+
+    const x = (y) => (y - Y0) * k;
+    const an = (y) => (y < 0 ? `${-y} av. J.-C.` : String(y));
+    const mesure = document.createElement('canvas').getContext('2d');
+    const largeurNom = (n) => { mesure.font = '600 15px "EB Garamond", Georgia, serif'; return mesure.measureText(n).width + 34; };
+    const PC = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!PC) $('aide').textContent = 'Faites glisser la frise, pincez-la ou utilisez + et − pour zoomer. Touchez un courant pour voir ses représentants.';
+
+    function majUrl() {
+      const u = new URL(location.href);
+      u.search = '';
+      if (periode) u.searchParams.set('periode', periode);
+      if (actifs.length !== ids.length) u.searchParams.set('g', actifs.join(','));
+      if (choisi) u.searchParams.set('p', choisi);
+      window.setBascule(choisi, '');
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    }
+
+    /* ── Boutons ── */
+    function majChips() {
+      zoneGroupes.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', actifs.includes(b.dataset.g)));
+      zonePeriodes.querySelectorAll('.btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.p === periode));
+    }
+    function setActifs(liste) { actifs = ids.filter((id) => liste.includes(id)); majChips(); }
+    GROUPES.forEach((g) => {
+      const b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.dataset.g = g.id;
+      b.style.setProperty('--c', g.color);
+      b.innerHTML = `<span class="pastille"></span>${esc(g.court)} <small id="n-${g.id}"></small>`;
+      b.title = g.label;
+      b.onclick = () => {
+        setActifs(actifs.includes(g.id) ? actifs.filter((a) => a !== g.id) : [...actifs, g.id]);
+        dessiner(); majUrl();
+      };
+      zoneGroupes.append(b);
+    });
+    PERIODES.forEach((p) => {
+      const b = document.createElement('button');
+      b.className = 'btn'; b.type = 'button'; b.dataset.p = p.id; b.textContent = p.label;
+      b.onclick = () => allerPeriode(p.id);
+      zonePeriodes.append(b);
+    });
+    function allerPeriode(id) {
+      const p = PERIODES.find((q) => q.id === id);
+      if (!p) return;
+      periode = id;
+      majChips();
+      zoomer(scroller.clientWidth / (p.a - p.de), (p.de + p.a) / 2);
+      majUrl();
+    }
+
+    /* ── Dessin ── */
+    function dessinerAxe() {
+      monde.style.width = x(Y1) + 'px';
+      let h = '';
+      EPOQUES.forEach(([a, b, l]) => { h += `<div class="epoque" style="left:${x(a)}px;width:${x(b) - x(a)}px">${l}</div>`; });
+      const pas = [5, 10, 25, 50, 100, 250, 500, 1000].find((p) => p * k >= 70) || 1000;
+      for (let y = Math.ceil(Y0 / pas) * pas; y <= Y1; y += pas) h += `<div class="tick" style="left:${x(y)}px">${an(y)}</div>`;
+      axe.innerHTML = h;
+      fonds.innerHTML = EPOQUES.map(([a, b], i) => `<div class="fond ${i % 2 ? 'pair' : ''}" style="left:${x(a)}px;width:${x(b) - x(a)}px"></div>`).join('');
+    }
+
+    /* Chaque courant n'occupe que la place de son nom, à sa naissance. Les plus
+       représentés d'abord, chacun dans la première piste libre ; plus on zoome,
+       plus un couloir peut compter de pistes. Le courant choisi garde sa place. */
+    const maxPistes = () => (k < 1.5 ? 8 : k < 6 ? 14 : 30);
+    function placer(items) {
+      const tri = items.slice().sort((a, b) => (b.id === choisi) - (a.id === choisi) || b.reps.length - a.reps.length || a.y - b.y);
+      const pistes = Array.from({ length: maxPistes() }, () => []);
+      const places = [];
+      for (const d of tri) {
+        const g = x(d.y) - 6, dr = x(d.y) + largeurNom(d.n) + 6;
+        const r = pistes.findIndex((p) => p.every(([a, b]) => dr <= a || g >= b));
+        if (r < 0) continue;
+        pistes[r].push([g, dr]);
+        places.push([d, r]);
+      }
+      return places;
+    }
+
+    function dessiner() {
+      dessinerAxe();
+      couloirs.innerHTML = '';
+      const sel = choisi && parId[choisi];
+      for (const gid of actifs) {
+        const items = parGroupe[gid] || [];
+        const places = placer(items);
+        const c = document.createElement('div');
+        c.className = 'couloir';
+        c.style.setProperty('--c', G[gid].color);
+        const vus = new Set(places.map(([d]) => d.id));
+        c.masques = items.filter((d) => !vus.has(d.id)).map((d) => d.y);
+        c.innerHTML = `<div class="couloir-titre">${esc(G[gid].label)} <span class="masques"></span></div>`;
+        const p = document.createElement('div');
+        p.className = 'pistes';
+        const nPistes = Math.max(1, ...places.map(([, r]) => r + 1));
+        p.style.height = nPistes * ROW + 6 + 'px';
+        p.innerHTML = places.map(([d, r]) => `<div class="item${d.reps.length >= 8 ? ' top' : ''}" tabindex="0" role="button" data-id="${esc(d.id)}" `
+          + `style="left:${x(d.y)}px;top:${r * ROW}px" title="${esc(d.n)} (${esc(d.d)})"><span class="nom">${esc(d.n)}`
+          + (d.reps.length ? `<small>${d.reps.length}</small>` : '') + '</span></div>').join('');
+        c.append(p);
+        if (sel && sel.g === gid) c.append(pisteRepresentants(sel));
+        couloirs.append(c);
+      }
+      compterMasques();
+      appliquerSelection();
+    }
+
+    /* Trait ouvert de la naissance du courant jusqu'à aujourd'hui, et un point
+       par représentant sur le site (couleur de sa tradition) */
+    function pisteRepresentants(s) {
+      const el = document.createElement('div');
+      el.className = 'reps';
+      const reps = s.reps.map((i) => PHILOS[i]);
+      el.innerHTML = `<span class="reps-titre">${reps.length ? 'Ses représentants' : 'Aucun représentant sur le site'}</span>`
+        + `<div class="reps-trait" style="left:${x(s.y)}px;width:${x(Y1) - x(s.y)}px"></div>`
+        + reps.map((p) => `<a class="reps-point" href="/philosophes/${esc(p.id)}/" style="left:${x(Math.max(p.y, Y0))}px;--g:${(window._G[p.g] || {}).color || '#d4a843'}" `
+          + `title="${esc(p.n)} (${esc(p.d)})"></a>`).join('');
+      return el;
+    }
+
+    function compterMasques() {
+      const de = scroller.scrollLeft / k + Y0, a = (scroller.scrollLeft + scroller.clientWidth) / k + Y0;
+      couloirs.querySelectorAll('.couloir').forEach((c) => {
+        const n = c.masques.filter((y) => y >= de && y <= a).length;
+        c.querySelector('.masques').textContent = n ? `· ${n} masqué${n > 1 ? 's' : ''} ici, zoomez` : '';
+      });
+    }
+    let compteEnAttente = false;
+    scroller.addEventListener('scroll', () => {
+      if (compteEnAttente || !DATA.length) return;
+      compteEnAttente = true;
+      requestAnimationFrame(() => { compteEnAttente = false; compterMasques(); });
+    });
+
+    /* Courants proches (philosophes en commun) mis en valeur pendant la sélection */
+    function appliquerSelection() {
+      document.body.classList.toggle('selection', !!choisi);
+      if (!choisi) { panneau.classList.remove('ouvert'); return; }
+      const s = parId[choisi];
+      const mine = new Set(s.reps);
+      couloirs.querySelectorAll('.item').forEach((el) => {
+        const d = parId[el.dataset.id];
+        el.classList.toggle('choisi', d.id === choisi);
+        el.classList.toggle('proche', d.id !== choisi && d.reps.some((i) => mine.has(i)));
+      });
+      if (PC) { if (bulleOuverte) positionnerBulle(); } else remplirPanneau();
+    }
+
+    const actionsPanneau = { choisir: (id) => choisir(id, true), fermer: () => deselectionner() };
+    function deselectionner() { choisi = null; fermerBulle(); dessiner(); majUrl(); }
+    function remplirPanneau() {
+      panneau.innerHTML = CourantsPanneau.html(choisi);
+      panneau.classList.add('ouvert');
+      CourantsPanneau.brancher(panneau, actionsPanneau);
+    }
+
+    /* ── Bulle (ordinateur) : s'ouvre au clic sous le nom, se ferme quand la
+       souris quitte le nom et la bulle ; la sélection reste ── */
+    const bulle = $('bulle'), margeBulle = $('marge-bulle');
+    let bulleOuverte = false, minuterie = null, gelJusqua = 0;
+    function ouvrirBulle() {
+      if (!choisi) return;
+      bulle.innerHTML = CourantsPanneau.html(choisi);
+      CourantsPanneau.brancher(bulle, actionsPanneau);
+      bulle.hidden = false;
+      bulleOuverte = true;
+      const el = couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
+      bulle.style.maxHeight = '';
+      const r0 = el && el.getBoundingClientRect();
+      if (r0 && (r0.top < 8 || r0.bottom > innerHeight - 8)) scrollBy({ top: r0.top - innerHeight / 3, behavior: 'instant' });
+      const r = el && el.getBoundingClientRect(), h = bulle.offsetHeight;
+      const manque = r && h > r.top - 14 ? r.bottom + 6 + h - (innerHeight - 8) : 0;
+      const reste = document.documentElement.scrollHeight - innerHeight - scrollY;
+      if (manque > reste) margeBulle.style.height = manque - reste + 'px';
+      positionnerBulle();
+      if (manque > 0) { gelJusqua = Date.now() + 900; scrollBy({ top: manque, behavior: 'smooth' }); }
+    }
+    function fermerBulle() { clearTimeout(minuterie); bulle.hidden = true; bulleOuverte = false; margeBulle.style.height = '0'; }
+    function fermerBientot() {
+      clearTimeout(minuterie);
+      if (Date.now() < gelJusqua) return;
+      minuterie = setTimeout(fermerBulle, 350);
+    }
+    function positionnerBulle() {
+      const el = choisi && couloirs.querySelector(`.item[data-id="${CSS.escape(choisi)}"]`);
+      const r = el && el.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      if (!r || r.right < sr.left || r.left > sr.right || r.bottom < 0 || r.top > innerHeight) { fermerBulle(); return; }
+      bulle.style.maxHeight = '';
+      const h = bulle.offsetHeight, w = bulle.offsetWidth;
+      const bas = innerHeight - r.bottom - 14, haut = r.top - 14;
+      const dessous = h <= bas || (h > haut && bas >= haut);
+      if (h > bas && h > haut) bulle.style.maxHeight = Math.max(200, dessous ? bas : haut) + 'px';
+      const hr = bulle.offsetHeight;
+      bulle.style.top = Math.max(8, dessous ? r.bottom + 6 : r.top - 6 - hr) + 'px';
+      bulle.style.left = Math.min(Math.max(8, r.left), innerWidth - w - 8) + 'px';
+    }
+    bulle.addEventListener('mouseenter', () => clearTimeout(minuterie));
+    bulle.addEventListener('mouseleave', fermerBientot);
+    couloirs.addEventListener('mouseover', (e) => { if (bulleOuverte && e.target.closest('.item.choisi')) clearTimeout(minuterie); });
+    couloirs.addEventListener('mouseout', (e) => {
+      const el = e.target.closest('.item.choisi');
+      if (bulleOuverte && el && !el.contains(e.relatedTarget) && !bulle.contains(e.relatedTarget)) fermerBientot();
+    });
+    let suiviEnAttente = false;
+    const suivre = () => {
+      if (!bulleOuverte || suiviEnAttente) return;
+      suiviEnAttente = true;
+      requestAnimationFrame(() => { suiviEnAttente = false; if (bulleOuverte) positionnerBulle(); });
+    };
+    scroller.addEventListener('scroll', suivre);
+    addEventListener('scroll', suivre, { passive: true });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && choisi) deselectionner(); });
+
+    function apresDefilement(cb) {
+      let avant = -1, stable = 0, essais = 0;
+      const t = setInterval(() => {
+        const s = scroller.scrollLeft;
+        stable = s === avant ? stable + 1 : 0;
+        avant = s;
+        if (stable >= 2 || ++essais > 20) { clearInterval(t); cb(); }
+      }, 100);
+    }
+
+    function choisir(id, centrer, defiler = true) {
+      const d = parId[id];
+      if (!d) return;
+      choisi = id;
+      if (!actifs.includes(d.g)) setActifs([...actifs, d.g]);
+      fermerBulle();
+      dessiner();
+      if (centrer) scroller.scrollTo({ left: x(d.y) - scroller.clientWidth / 3, behavior: 'smooth' });
+      if (PC) {
+        if (centrer) apresDefilement(() => { if (choisi === id) ouvrirBulle(); }); else ouvrirBulle();
+      } else if (defiler) {
+        const el = couloirs.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+        const r = el && el.getBoundingClientRect();
+        const libre = innerHeight - panneau.offsetHeight - 12;
+        if (r && (r.bottom > libre || r.top < 8)) scrollBy({ top: r.top - Math.max(60, libre * 0.35), behavior: 'smooth' });
+      }
+      majUrl();
+    }
+
+    couloirs.addEventListener('click', (e) => {
+      const el = e.target.closest('.item');
+      if (el && !bouge) choisir(el.dataset.id, false);
+      if (bouge && e.target.closest('.reps-point')) e.preventDefault();
+    });
+    couloirs.addEventListener('keydown', (e) => {
+      const el = e.target.closest('.item');
+      if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); choisir(el.dataset.id, false); }
+    });
+
+    /* ── Zoom ── */
+    const kMin = () => scroller.clientWidth / (Y1 - Y0);
+    function zoomer(nouveau, yCentre) {
+      const yc = yCentre ?? (scroller.scrollLeft + scroller.clientWidth / 2) / k + Y0;
+      k = Math.min(KMAX, Math.max(kMin(), nouveau));
+      dessiner();
+      scroller.scrollLeft = x(yc) - scroller.clientWidth / 2;
+    }
+    $('zplus').onclick = () => zoomer(k * 1.6);
+    $('zmoins').onclick = () => zoomer(k / 1.6);
+    scroller.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey || !DATA.length) return;
+      e.preventDefault();
+      const r = scroller.getBoundingClientRect(), avant = e.clientX - r.left;
+      const y = (scroller.scrollLeft + avant) / k + Y0;
+      k = Math.min(KMAX, Math.max(kMin(), k * (e.deltaY < 0 ? 1.25 : 0.8)));
+      dessiner();
+      scroller.scrollLeft = x(y) - avant;
+    }, { passive: false });
+
+    /* Pincement à deux doigts (tactile) */
+    let pince = null, dernierDessin = 0, pinceFin = null;
+    const ecart = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    scroller.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 2 || !DATA.length) return;
+      const r = scroller.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+      pince = { d0: ecart(e.touches), k0: k, cx, y: (scroller.scrollLeft + cx) / k + Y0 };
+    }, { passive: true });
+    scroller.addEventListener('touchmove', (e) => {
+      if (!pince || e.touches.length !== 2) return;
+      e.preventDefault();
+      const nk = Math.min(KMAX, Math.max(kMin(), pince.k0 * ecart(e.touches) / pince.d0));
+      const p = pince;
+      const appliquer = () => { pinceFin = null; k = nk; dessiner(); scroller.scrollLeft = x(p.y) - p.cx; dernierDessin = performance.now(); };
+      clearTimeout(pinceFin && pinceFin.t);
+      if (performance.now() - dernierDessin > 60) appliquer();
+      else pinceFin = { f: appliquer, t: setTimeout(appliquer, 70) };
+    }, { passive: false });
+    scroller.addEventListener('touchend', (e) => {
+      if (e.touches.length >= 2) return;
+      pince = null;
+      if (pinceFin) { clearTimeout(pinceFin.t); pinceFin.f(); }
+    });
+
+    /* ── Glisser à la souris : gauche / droite = temps, haut / bas = zoom ── */
+    let depart = null, bouge = false, zoomDessin = null;
+    scroller.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      const ax = e.clientX - scroller.getBoundingClientRect().left;
+      depart = { x: e.clientX, y: e.clientY, s: scroller.scrollLeft, k: k, ax, an: (scroller.scrollLeft + ax) / k + Y0, mode: null };
+      bouge = false;
+    });
+    function zoomGlisse(dy) {
+      const d = depart;
+      const nk = Math.min(KMAX, Math.max(kMin(), d.k * Math.exp(-dy / 120)));
+      if (nk === k) return;
+      cancelAnimationFrame(zoomDessin);
+      zoomDessin = requestAnimationFrame(() => { k = nk; dessiner(); scroller.scrollLeft = x(d.an) - d.ax; });
+    }
+    window.addEventListener('pointermove', (e) => {
+      if (depart) {
+        const dx = e.clientX - depart.x, dy = e.clientY - depart.y;
+        if (!depart.mode && Math.hypot(dx, dy) > 6) {
+          depart.mode = Math.abs(dy) > Math.abs(dx) && DATA.length ? 'zoom' : 'temps';
+          bouge = true;
+          scroller.classList.add(depart.mode === 'zoom' ? 'zoom-glisse' : 'drag');
+        }
+        if (depart.mode === 'temps') scroller.scrollLeft = depart.s - dx;
+        else if (depart.mode === 'zoom') { e.preventDefault(); zoomGlisse(dy); }
+      }
+      if (!DATA.length || e.pointerType !== 'mouse') return;
+      const r = scroller.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        const px = scroller.scrollLeft + e.clientX - r.left;
+        curseur.style.display = 'block';
+        curseur.style.left = px + 'px';
+        curseur.firstChild.textContent = an(Math.round(px / k + Y0));
+        curseur.firstChild.style.top = Math.max(0, e.clientY - monde.getBoundingClientRect().top - 30) + 'px';
+      } else curseur.style.display = 'none';
+    });
+    window.addEventListener('pointerup', () => {
+      depart = null; scroller.classList.remove('drag', 'zoom-glisse');
+      setTimeout(() => (bouge = false), 0);
+    });
+    let largeur = 0;
+    addEventListener('resize', () => {
+      if (DATA.length && scroller.clientWidth !== largeur) { largeur = scroller.clientWidth; zoomer(k); }
+    });
+
+    /* ── Chargement ── */
+    fetch('/data/courants-monde.json')
+      .then((r) => r.json())
+      .then((json) => {
+        // Couleurs de toutes les traditions (y compris celles d'un philosophe sans couloir de courants)
+        window._G = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
+        const d = CourantsPanneau.init(json, GROUPES);
+        DATA = d.courants.filter((c) => G[c.g]);
+        PHILOS = d.philosophes;
+        parId = d.parId;
+        for (const c of DATA) (parGroupe[c.g] ||= []).push(c);
+        GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${(parGroupe[g.id] || []).length})`; });
+        $('chargement').remove();
+        monde.hidden = false;
+        largeur = scroller.clientWidth;
+
+        const q = new URLSearchParams(location.search);
+        const p = q.get('p'), per = q.get('periode'), g = q.get('g');
+        if (g) setActifs(g.split(','));
+        if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        // Vue de départ : de l'âge axial au haut Moyen Âge (1 100 ans ; 600 sur petit écran)
+        else if (scroller.clientWidth < 700) zoomer(scroller.clientWidth / 600, -300);
+        else zoomer(scroller.clientWidth / 1100, -100);
+        if (p && parId[p]) {
+          if (!per) k = Math.min(KMAX, Math.max(kMin(), scroller.clientWidth / 900));
+          choisir(p, true, false);
+        } else dessiner();
+        majChips();
+      })
+      .catch(() => { $('chargement').textContent = 'La frise n’a pas pu être chargée. Rechargez la page.'; });
+  })();
+  </script>
+</body>
+</html>

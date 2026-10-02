@@ -5,6 +5,7 @@ import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import Voyage from '../components/Voyage.astro';
+import CartoucheMonde from '../components/CartoucheMonde.astro';
 import data from '../data/definition-philosophes.json';
 
 const { intro, items } = data as {
@@ -186,6 +187,15 @@ const EXPLORER: Record<string, Lien[]> = {
       </div>
     </>
   ))}
+
+  <div class="drawer-intro-sep def-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <!-- La Frise et le Tableau des penseurs (composant réutilisable), juste avant « Continuer le voyage » -->
+  <CartoucheMonde vue="penseurs" />
 
   <Voyage href="/frises/" />
 </main>
