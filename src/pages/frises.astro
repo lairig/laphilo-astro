@@ -64,19 +64,23 @@ const carte = (it: Item, titre = court(it.name)): Carte => {
 };
 
 /* ── Courants : pas d'images, mais quatre jalons répartis sur la frise
-   (le premier, deux au milieu, le dernier), à la couleur de leur tradition ── */
+   (le premier, deux au milieu, le dernier), à la couleur de leur tradition.
+   Sur une carte de tradition, seuls les courants dont c'est la tradition
+   principale servent de jalons (pas ceux qu'elle partage en secondaire) ── */
 const couleurGroupe = new Map(groupesMonde.map((g) => [g.id, g.color]));
 const groupeCourant = new Map((await getCollection('courants')).map((c) => [c.data.name, c.data.groupe ?? '']));
-const jalons = (e?: EntreeFrise): Jalon[] => {
-  const noms = (e?.m ?? []).map((m) => m[0]);
+const jalons = (e?: EntreeFrise, groupe?: string): Jalon[] => {
+  const tous = (e?.m ?? []).map((m) => m[0]);
+  const propres = groupe ? tous.filter((nom) => groupeCourant.get(nom) === groupe) : [];
+  const noms = propres.length ? propres : tous;
   if (!noms.length) return [];
   const n = noms.length;
   const rangs = [...new Set([0, Math.round((n - 1) / 3), Math.round((2 * (n - 1)) / 3), n - 1])];
   return rangs.map((i) => ({ nom: noms[i], couleur: couleurGroupe.get(groupeCourant.get(noms[i]) ?? '') ?? '#b8860b' }));
 };
-const carteCourant = (href: string, titre: string, texte: string, extra: Partial<Carte> = {}): Carte => {
+const carteCourant = (href: string, titre: string, texte: string, extra: Partial<Carte> = {}, groupe?: string): Carte => {
   const e = parUrl.get(href);
-  return { titre, href, periode: periode(e), nb: e?.nb ?? 0, unite: 'courants', accroche: texte, portraits: [], jalons: jalons(e), ...extra };
+  return { titre, href, periode: periode(e), nb: e?.nb ?? 0, unite: 'courants', accroche: texte, portraits: [], jalons: jalons(e, groupe), ...extra };
 };
 const lienSous = (l: Lien): Sous => ({ label: propre(l.label), href: l.href, nb: parUrl.get(l.href)?.nb ?? 0 });
 
@@ -92,7 +96,7 @@ const cartesTraditions: Carte[] = [
   ...(occ ? [carteCourant(occ.links![0].href, 'Occident', premiereIdee(occ.text), { sous: occ.links!.slice(1).map(lienSous), couleur: couleurGroupe.get('occident') })] : []),
   ...(parTradition?.links ?? []).map((l) => {
     const t = courantTraditionFrises.find((x) => x.slug === slug(l.href));
-    return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { couleur: t ? couleurGroupe.get(t.groupe) : undefined });
+    return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { couleur: t ? couleurGroupe.get(t.groupe) : undefined }, t?.groupe);
   }),
   ...(ori ? [carteCourant(ori.links![0].href, 'Toutes les autres traditions', premiereIdee(ori.text), { sous: ori.links!.slice(1).map(lienSous) })] : []),
 ];
