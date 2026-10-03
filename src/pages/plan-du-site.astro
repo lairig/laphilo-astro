@@ -95,6 +95,7 @@ const blocks: Block[] = [
   {
     id: 'aujourdhui', col: 3, nav: 'Aujourd’hui', title: 'Philosophes d’aujourd’hui',
     groups: [
+      { links: [{ label: 'Les philosophes d’aujourd’hui', href: '/philosophes-d-aujourd-hui/', note: 'par sujet et par région' }] },
       { title: 'Contemporains', links: byLabel('Contemporains').map(autres) },
       { title: 'Vivants, par sujet de travail', links: byLabel('Vivants par sujet de travail').map((it) => frise(it)) },
     ],

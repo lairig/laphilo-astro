@@ -48,7 +48,7 @@ const jsonLd = [
   <link rel="preconnect" href="https://i.ytimg.com" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/home-extra.css?v=20261002b" />
+  <link rel="stylesheet" href="/css/home-extra.css?v=20261003" />
 </head>
 <body>
 
@@ -129,8 +129,8 @@ const jsonLd = [
   <div class="timeline-spine" role="list" aria-label="Accès aux grandes sections philosophiques">
 
     <!-- Côtés : tl-node--left = carte à droite de l'axe (flèche à gauche), tl-node--right = carte à gauche. -->
-    <!-- Ordre du parcours « Continuer le voyage » : bienvenue → définition → courants → philosophes → frises -->
-    <div class="tl-node tl-node--featured tl-node--right" role="listitem">
+    <!-- Ordre du parcours « Continuer le voyage » : bienvenue → définition → courants → philosophes d'aujourd'hui → philosophes → frises -->
+    <div class="tl-node tl-node--featured tl-node--left" role="listitem">
       <div class="tl-jewel tl-jewel--featured" aria-hidden="true"></div>
       <div class="tl-card tl-card--featured">
         <div class="tl-era">✦ Nouveau ici · Mode d'emploi</div>
@@ -140,7 +140,7 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="tl-node tl-node--left" role="listitem">
+    <div class="tl-node tl-node--right" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
         <div class="tl-era">☿ Définition · Branches</div>
@@ -150,7 +150,7 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="tl-node tl-node--right" role="listitem">
+    <div class="tl-node tl-node--left" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
         <div class="tl-era">🌍 Occident · Orient · Afrique · Amériques</div>
@@ -160,13 +160,23 @@ const jsonLd = [
       </div>
     </div>
 
+    <div class="tl-node tl-node--right" role="listitem">
+      <div class="tl-jewel" aria-hidden="true"></div>
+      <div class="tl-card">
+        <div class="tl-era">● XXIᵉ siècle · En activité</div>
+        <h2 class="tl-title">Les Philosophes d'aujourd'hui</h2>
+        <p class="tl-desc">Ceux qui pensent notre époque, de l'intelligence artificielle à l'écologie, de la démocratie au genre. Leurs questions sont les nôtres : un bon point de départ avant de remonter le temps.</p>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="/philosophes-d-aujourd-hui/">Étape 4 <span class="tl-arrow">→</span></a>
+      </div>
+    </div>
+
     <div class="tl-node tl-node--left" role="listitem">
       <div class="tl-jewel" aria-hidden="true"></div>
       <div class="tl-card">
-        <div class="tl-era">🏛 VIᵉ av. J.-C. → aujourd'hui</div>
+        <div class="tl-era">🏛 VIᵉ av. J.-C. → XXᵉ siècle</div>
         <h2 class="tl-title">Les Philosophes</h2>
-        <p class="tl-desc">Un voyage dans le temps : des présocratiques aux penseurs d'aujourd'hui, d'Occident et d'ailleurs. Leur vie, leurs grandes idées et ce qu'ils nous apprennent encore.</p>
-        <a class="tl-cta-alt tl-cta-alt--sec" href="/histoire-des-philosophes/">Étape 4 <span class="tl-arrow">→</span></a>
+        <p class="tl-desc">Le voyage remonte le temps : des présocratiques aux grandes figures du XXᵉ siècle, d'Occident et d'ailleurs. Leur vie, leurs grandes idées et ce qu'ils nous apprennent encore.</p>
+        <a class="tl-cta-alt tl-cta-alt--sec" href="/histoire-des-philosophes/">Étape 5 <span class="tl-arrow">→</span></a>
       </div>
     </div>
 

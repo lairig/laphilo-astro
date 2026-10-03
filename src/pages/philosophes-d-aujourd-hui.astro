@@ -1,0 +1,215 @@
+---
+import Favicons from '../components/Favicons.astro';
+import BackButton from '../components/BackButton.astro';
+import Fonts from '../components/Fonts.astro';
+import GoatCounter from '../components/GoatCounter.astro';
+import SeoHead from '../components/SeoHead.astro';
+import Voyage from '../components/Voyage.astro';
+import philosophes from '../data/philosophes.json';
+import catalogue from '../data/frises-catalogue.json';
+import { themesVivants, friseDuTheme } from '../data/themes-vivants';
+import { regionsContemporains } from '../data/virtual-frises';
+
+/* Page d'entrée des philosophes vivants : les 10 sujets de travail (frises
+   vivants-<code>) puis les régions du monde (frises contemporains-…).
+   Même règle « vivant » que src/data/virtual-frises.ts. */
+type P = {
+  name: string; year: string; thumbnail?: string; importance?: number; nationalite?: string;
+  themes?: string[]; frise_source: string; _id: string;
+};
+const vivants = (philosophes as P[]).filter((p) => ['france-contemporains', 'contemporains-monde'].includes(p.frise_source));
+
+/* Textes des cartes du catalogue /frises/ : la question (avant <br>) et les noms cités (après) */
+const itemsCatalogue: any[] = catalogue.groups.flatMap((g: any) => g.items ?? []);
+const carte = (slug: string) => itemsCatalogue.find((it) => it.href === `/philosophes/frise/${slug}/`);
+const decode = (s: string) => s.replace(/&amp;/g, '&');
+
+/* Nom court sous un portrait : « Judith BUTLER » → « Butler » ; « bell HOOKS » → « hooks » */
+const nomCourt = (name: string) => {
+  const maj = name.split(/\s+/).filter((w) => w.length > 1 && w === w.toLocaleUpperCase('fr') && /\p{L}/u.test(w));
+  const nom = maj.length ? maj.join(' ') : name.split(/\s+/).pop() ?? name;
+  return nom.toLocaleLowerCase('fr').replace(/(^|[\s'-])(\p{L})/gu, (_, a, b) => a + b.toLocaleUpperCase('fr'));
+};
+
+/* Visages d'un thème : d'abord ceux que cite la carte du catalogue, puis par importance ; 8 au plus, par âge */
+const visages = (membres: P[], cite: string) => {
+  const texte = cite.toLocaleLowerCase('fr');
+  const score = (p: P) => (texte.includes(nomCourt(p.name).toLocaleLowerCase('fr')) ? 10 : 0) + (p.importance ?? 1) + (p.thumbnail ? 1 : 0);
+  return [...membres].sort((a, b) => score(b) - score(a)).slice(0, 8).sort((a, b) => parseInt(a.year) - parseInt(b.year));
+};
+
+const sujets = themesVivants.map((t) => {
+  const membres = vivants.filter((p) => (p.themes ?? []).includes(t.code));
+  const [question = '', cite = ''] = (carte(friseDuTheme(t.code))?.text ?? '').split(/\s*<br\s*\/?>\s*/);
+  return { ...t, href: `/philosophes/frise/${friseDuTheme(t.code)}/`, n: membres.length, question: decode(question), visages: visages(membres, cite) };
+}).sort((a, b) => b.n - a.n);
+
+const francais = vivants.filter((p) => p.frise_source === 'france-contemporains');
+const monde = vivants.filter((p) => p.frise_source === 'contemporains-monde');
+const regions = [
+  { label: 'France', href: '/philosophes/frise/france-contemporains/', n: francais.length },
+  ...regionsContemporains.map((r) => ({
+    label: r.label, href: `/philosophes/frise/${r.slug}/`,
+    n: monde.filter((p) => r.nats.includes(p.nationalite ?? '')).length,
+  })),
+  { label: 'Monde entier, hors France', href: '/philosophes/frise/contemporains-monde/', n: monde.length },
+];
+
+const titre = "Les philosophes d'aujourd'hui : penseurs vivants par sujet et par région | LaPhilo.fr";
+const description = `${vivants.length} philosophes en activité, de France et du monde : intelligence artificielle, écologie, démocratie, critique sociale, genre, décolonisation, spiritualité, art. Leurs frises chronologiques par sujet de travail et par région.`;
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{titre}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={titre} description={description} path="/philosophes-d-aujourd-hui/" />
+
+  <Fonts />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <div class="sitemap-switcher">
+    <BackButton />
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
+  <h1 class="site-title">Les Philosophes d'aujourd'hui</h1>
+  <p class="site-subtitle">Ceux qui pensent notre époque</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page def-page">
+  <div class="intro-text-col">
+    <p class="intro-drop-cap">La philosophie ne s'est pas arrêtée avec Sartre ou Foucault. Aujourd'hui encore, des penseurs du monde entier interrogent ce qui nous arrive : l'intelligence artificielle, la crise écologique, l'avenir de la démocratie, le genre, l'héritage de la colonisation.</p>
+    <p class="intro-body">LaPhilo.fr présente {vivants.length} philosophes en activité, de France et d'ailleurs. Vous pouvez les découvrir par sujet de travail ou par région du monde : chaque entrée ouvre une frise chronologique, où chacun a sa fiche, ses idées et souvent une vidéo.</p>
+  </div>
+
+  <div class="drawer-intro-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <nav class="def-sommaire" aria-label="Sur cette page">
+    <a href="#sujets">Par sujet</a>
+    <a href="#regions">Par région</a>
+  </nav>
+
+  <h2 class="def-titre" id="sujets">Par sujet de travail</h2>
+  <p class="def-chapeau">Dix grandes questions de notre temps, du plus fourni au plus resserré.</p>
+  <p class="def-chapeau">Un même penseur peut travailler sur deux sujets : il figure alors sur les deux frises.</p>
+
+  <div class="acc-list">
+    {sujets.map((s) => (
+      <div class="acc-item" id={`sujet-${s.code}`}>
+        <button class="acc-toggle" aria-expanded="false" type="button">
+          <span class="acc-name">{s.label}</span>
+          <span class="acc-date">{s.n} penseurs</span>
+          <span class="acc-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="acc-content">
+          <p class="auj-question">{s.question}</p>
+          <ul class="auj-visages">
+            {s.visages.map((p) => (
+              <li>
+                <a href={`/philosophes/${p._id}/`} title={p.name}>
+                  {p.thumbnail
+                    ? <img src={p.thumbnail} alt="" loading="lazy" width="64" height="64" />
+                    : <span class="auj-initiale" aria-hidden="true">{nomCourt(p.name).charAt(0)}</span>}
+                  <span>{nomCourt(p.name)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div class="def-explorer">
+            <span class="def-explorer-lbl">Explorer sur LaPhilo.fr</span>
+            <a class="def-explorer-main" href={s.href}>La frise : {s.label} →</a>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="drawer-intro-sep def-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <h2 class="def-titre" id="regions">Par région du monde</h2>
+  <p class="def-chapeau">Les mêmes penseurs, rangés selon leur nationalité.</p>
+
+  <ul class="auj-regions">
+    {regions.map((r) => (
+      <li>
+        <a href={r.href}>
+          <span class="auj-region-nom">{r.label}</span>
+          <span class="auj-region-n">{r.n} penseurs</span>
+          <span class="auj-region-fl" aria-hidden="true">→</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <Voyage href="/histoire-des-philosophes/" />
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-social-nav" aria-label="Lien Social">
+    <a class="footer-social-btn" href="/" aria-label="Accueil">
+      <span class="footer-social-icon">⌂</span>
+      <span class="footer-social-label">Accueil</span>
+    </a>
+    <a class="footer-social-btn" href="/plan-du-site/" aria-label="Plan du site">
+      <span class="footer-social-icon">🗺</span>
+      <span class="footer-social-label">Plan du site</span>
+    </a>
+    <a class="footer-social-btn" href="/recherche/" aria-label="Recherche">
+      <span class="footer-social-icon">🔍</span>
+      <span class="footer-social-label">Recherche</span>
+    </a>
+  </nav>
+  <p>© 2026 – laphilo.fr – Tous droits réservés</p>
+</footer>
+
+<style>
+  .auj-question { margin: 0 0 1rem; font-style: italic; color: #3d2410; }
+  .auj-visages { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: .9rem .5rem; }
+  .auj-visages a { display: flex; flex-direction: column; align-items: center; gap: .35rem; text-decoration: none; color: #3d2410; font-size: .85rem; line-height: 1.15; text-align: center; }
+  .auj-visages img, .auj-initiale {
+    width: 64px; height: 64px; border-radius: 50%; object-fit: cover; object-position: center 20%;
+    border: 2px solid #b8923c; background: #ead9a8; box-shadow: 0 2px 6px rgba(43, 29, 14, .25); transition: border-color .2s, transform .2s;
+  }
+  .auj-initiale { display: grid; place-items: center; font-family: 'Cinzel', serif; font-size: 1.4rem; color: #8b3a0f; }
+  .auj-visages a:hover img, .auj-visages a:hover .auj-initiale, .auj-visages a:focus-visible img { border-color: #8b3a0f; transform: translateY(-2px); }
+  .auj-visages a:hover span:last-child { color: #8b3a0f; }
+
+  .auj-regions { list-style: none; margin: 1.2rem auto 0; padding: 0; max-width: 860px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .8rem; }
+  .auj-regions a {
+    display: flex; align-items: baseline; gap: .6rem; padding: .9rem 1.1rem; border-radius: 4px; text-decoration: none;
+    background: linear-gradient(160deg, #f7ecce 0%, #ead9a8 100%); border: 1px solid #b8923c; border-top: 3px solid #b8860b;
+    box-shadow: 0 4px 14px rgba(10, 5, 2, .35); color: #1e1208; transition: transform .2s, border-color .2s;
+  }
+  .auj-regions a:hover, .auj-regions a:focus-visible { transform: translateY(-2px); border-top-color: #8b3a0f; outline: none; }
+  .auj-region-nom { font-family: 'Cinzel', serif; font-weight: 700; font-size: .95rem; }
+  .auj-region-n { margin-left: auto; font-size: .85rem; color: #5c3d1e; white-space: nowrap; }
+  .auj-region-fl { color: #8b3a0f; font-weight: 700; }
+</style>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/accordion.js" defer></script>
+
+</body>
+</html>

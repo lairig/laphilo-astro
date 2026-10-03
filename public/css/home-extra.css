@@ -449,3 +449,6 @@
 @media (max-width: 760px) {
   .timeline-section:not(.timeline-section--top) .tl-cta-alt { padding: 0.45rem 0.45rem 0.45rem 1.1rem; }
 }
+
+/* 6e carte de la frise d'accueil (Les Philosophes d'aujourd'hui) : suite des délais de styles.css */
+.tl-node:nth-child(6) { animation-delay: 1s; }

@@ -4,28 +4,155 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import CartoucheMonde from '../components/CartoucheMonde.astro';
 import data from '../data/frises-catalogue.json';
 import friseDescriptions from '../data/frise-descriptions.json';
+import { indexDesFrises, type EntreeFrise } from '../lib/frises-index';
+import { groupesMonde } from '../data/groupes-monde';
+import { courantTraditionFrises } from '../data/frise-engine-config';
+import { getCollection } from 'astro:content';
 
-const { intro, groups } = data as {
-  intro: string;
-  groups: {
-    section?: string;
-    label: string;
-    items: {
-      name: string;
-      tag: string;
-      text: string;
-      href?: string;
-      links?: { label: string; href: string; desc?: string }[];
-      /* Liens tous équivalents (pas de « frise complète » mise en avant) */
-      egaux?: boolean;
-    }[];
-  }[];
+/* Page /frises/ : « portes d'entrée » plutôt qu'un long catalogue, en deux
+   espaces construits pareil : les philosophes, puis les courants de pensée.
+   Chacun : sa grande frise du monde (CartoucheMonde), puis des portes (onglets)
+   qui ouvrent une grille de cartes. Tout vient de frises-catalogue.json (même
+   source que le plan du site et l'onglet Frises de la recherche) ; nombres,
+   dates et portraits de src/lib/frises-index.ts. Sans JavaScript, toutes les
+   portes sont ouvertes. */
+
+type Lien = { label: string; href: string; desc?: string };
+type Item = { name: string; tag: string; text: string; href?: string; links?: Lien[]; egaux?: boolean };
+const groups = data.groups as { section?: string; label: string; items: Item[] }[];
+const groupe = (label: string) => groups.find((g) => g.label === label)?.items ?? [];
+
+const index = await indexDesFrises();
+const parUrl = new Map<string, EntreeFrise>(index.map((e) => [e.u, e]));
+const descriptions = friseDescriptions as Record<string, string>;
+const slug = (href: string) => href.split('/').filter(Boolean).pop() ?? '';
+
+const annee = new Date().getFullYear();
+const an = (y: number) => (y < 0 ? `${-y} av. J.-C.` : String(y));
+const periode = (e?: EntreeFrise) =>
+  e && e.debut !== null && e.fin !== null ? `${an(e.debut)} → ${e.fin >= annee ? "aujourd'hui" : an(e.fin)}` : '';
+const propre = (s: string) => s.replace(/&amp;/g, '&');
+/* Nom de carte court : « Tous les Philosophes Français » → « Français » */
+const court = (name: string) => {
+  const s = propre(name)
+    .replace(/^(Tous les|Toutes les)\s+/, '')
+    .replace(/^Philosophes vivants\s*:\s*/, '')
+    .replace(/^(Autres\s+)?Philosophes\s+/, (m, autres) => (autres ? 'Autres ' : ''))
+    .replace(/^(Modernes|Contemporains)\s+/, '')
+    .replace(/^(du |de la |de l'|d'|des )/, '')
+    .replace(/ & (du |de la |de l'|d')/, ' & ');
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+/* Accroche : la description de la frise, sinon le texte du catalogue (coupée à 3 lignes par le CSS) */
+const accroche = (it: Item) => {
+  const d = it.href ? descriptions[slug(it.href)] : undefined;
+  return propre((d ?? it.text.replace(/<br\s*\/?>[\s\S]*$/, '')).replace(/<[^>]+>/g, '')).trim();
 };
 
-const descriptions = friseDescriptions as Record<string, string>;
-const linkDescription = (href: string) => descriptions[href.split('/').filter(Boolean).pop() ?? ''] ?? '';
+type Sous = { label: string; href: string; nb: number };
+type Jalon = { nom: string; couleur: string };
+type Carte = {
+  titre: string; href: string; periode: string; nb: number; unite: string; accroche: string;
+  portraits: [string, string | undefined][]; sous?: Sous[]; jalons?: Jalon[]; couleur?: string;
+};
+const carte = (it: Item, titre = court(it.name)): Carte => {
+  const e = parUrl.get(it.href!);
+  return { titre, href: it.href!, periode: periode(e), nb: e?.nb ?? 0, unite: 'penseurs', accroche: accroche(it), portraits: (e?.v ?? []).slice(0, 4) };
+};
+
+/* ── Courants : pas d'images, mais quatre jalons répartis sur la frise
+   (le premier, deux au milieu, le dernier), à la couleur de leur tradition ── */
+const couleurGroupe = new Map(groupesMonde.map((g) => [g.id, g.color]));
+const groupeCourant = new Map((await getCollection('courants')).map((c) => [c.data.name, c.data.groupe ?? '']));
+const jalons = (e?: EntreeFrise): Jalon[] => {
+  const noms = (e?.m ?? []).map((m) => m[0]);
+  if (!noms.length) return [];
+  const n = noms.length;
+  const rangs = [...new Set([0, Math.round((n - 1) / 3), Math.round((2 * (n - 1)) / 3), n - 1])];
+  return rangs.map((i) => ({ nom: noms[i], couleur: couleurGroupe.get(groupeCourant.get(noms[i]) ?? '') ?? '#b8860b' }));
+};
+const carteCourant = (href: string, titre: string, texte: string, extra: Partial<Carte> = {}): Carte => {
+  const e = parUrl.get(href);
+  return { titre, href, periode: periode(e), nb: e?.nb ?? 0, unite: 'courants', accroche: texte, portraits: [], jalons: jalons(e), ...extra };
+};
+const lienSous = (l: Lien): Sous => ({ label: propre(l.label), href: l.href, nb: parUrl.get(l.href)?.nb ?? 0 });
+
+const hubs = groupe('Les Courants de Pensée');
+const hub = (test: (l: Lien) => boolean) => hubs.find((it) => (it.links ?? []).some(test));
+const occ = hub((l) => l.href === '/courants/frise/occidental/');
+const ori = hub((l) => l.href === '/courants/frise/oriental/');
+const parTradition = hub((l) => l.href === '/courants/frise/islam-juif/');
+const parQuestion = hub((l) => l.href.includes('/monde--'));
+const premiereIdee = (t: string) => propre(t).split(/(?<=[.:])\s/)[0].replace(/\s*:$/, '.');
+
+const cartesTraditions: Carte[] = [
+  ...(occ ? [carteCourant(occ.links![0].href, 'Occident', premiereIdee(occ.text), { sous: occ.links!.slice(1).map(lienSous), couleur: couleurGroupe.get('occident') })] : []),
+  ...(parTradition?.links ?? []).map((l) => {
+    const t = courantTraditionFrises.find((x) => x.slug === slug(l.href));
+    return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { couleur: t ? couleurGroupe.get(t.groupe) : undefined });
+  }),
+  ...(ori ? [carteCourant(ori.links![0].href, 'Toutes les autres traditions', premiereIdee(ori.text), { sous: ori.links!.slice(1).map(lienSous) })] : []),
+];
+/* Une grande question : la frise toutes traditions, et en pastilles la même question côté Occident / autres traditions */
+const cartesQuestions: Carte[] = (parQuestion?.links ?? []).map((l) => {
+  const meme = (h?: Item) => h?.links?.find((x) => x.label === l.label);
+  const sous: Sous[] = [
+    ...(meme(occ) ? [{ ...lienSous(meme(occ)!), label: 'Occident' }] : []),
+    ...(meme(ori) ? [{ ...lienSous(meme(ori)!), label: 'Autres traditions' }] : []),
+  ];
+  return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { sous });
+});
+
+type Porte = { id: string; icone: string; libelle: string; question: string; blocs: { titre?: string; cartes: Carte[] }[]; plus?: { label: string; href: string } };
+const portesPhilosophes: Porte[] = [
+  {
+    id: 'epoque', icone: '⌛', libelle: 'Une époque', question: 'Remonter le temps, période par période',
+    blocs: [
+      { titre: "De l'Antiquité aux Lumières", cartes: groupe('Anciens').map((it) => carte(it)) },
+      { titre: "L'époque moderne", cartes: groupe('Modernes').map((it) => carte(it, court(it.name).replace(/^Modernes\s+/, ''))) },
+      { titre: 'Les contemporains', cartes: groupe('Contemporains').map((it) => carte(it)) },
+    ],
+  },
+  {
+    id: 'pays', icone: '⚑', libelle: 'Un pays', question: 'Les penseurs d’une même langue ou d’un même pays, toutes époques',
+    blocs: [{ cartes: groupe('Par pays').map((it) => carte(it)) }],
+  },
+  {
+    id: 'tradition', icone: '✺', libelle: 'Une tradition', question: 'Les grandes traditions du monde, au-delà des frontières',
+    blocs: [{ cartes: [...groupe('Par grande tradition'), ...groupe('Par thème')].map((it) => carte(it)) }],
+  },
+  {
+    id: 'aujourdhui', icone: '●', libelle: "Un sujet d'aujourd'hui", question: 'Les philosophes vivants, par sujet de travail',
+    blocs: [{ cartes: groupe('Vivants par sujet de travail').map((it) => carte(it)) }],
+    plus: { label: "Tous les philosophes d'aujourd'hui, par sujet et par région", href: '/philosophes-d-aujourd-hui/' },
+  },
+];
+const portesCourants: Porte[] = [
+  {
+    id: 'courants-tradition', icone: '✺', libelle: 'Une tradition', question: 'Chaque tradition du monde et ses familles d’idées',
+    blocs: [{ cartes: cartesTraditions }],
+  },
+  {
+    id: 'courants-question', icone: '❖', libelle: 'Une grande question', question: 'Toutes les traditions réunies autour d’une même question',
+    blocs: [{ cartes: cartesQuestions }],
+  },
+];
+const espaces = [
+  { id: 'philosophes', icone: '◈', titre: 'Les philosophes', vue: 'penseurs' as const, portes: portesPhilosophes },
+  { id: 'courants', icone: '✧', titre: 'Les courants de pensée', vue: 'courants' as const, portes: portesCourants },
+];
+
+/* Raccourcis de la Frise des penseurs du monde (périodes ; pas le filtre femmes) */
+const raccourcis = (groupe('La Frise des Penseurs du Monde')[0]?.links ?? []).filter((l) => l.href.includes('?periode='));
+/* Toutes les frises, pour « Une frise au hasard » */
+const toutes = [...new Set(index.map((e) => e.u))];
+const nbFrises = toutes.length;
+
+const titre = 'Toutes les frises chronologiques | LaPhilo.fr';
+const description = `${nbFrises} frises chronologiques interactives : penseurs et courants du monde entier, par époque, par pays, par tradition ou par sujet d'aujourd'hui. Choisissez votre porte d'entrée.`;
 ---
 
 <html lang="fr">
@@ -34,92 +161,13 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <GoatCounter />
-  <title>Toutes les frises chronologiques | LaPhilo.fr</title>
-  <meta name="description" content="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée de toutes les traditions." />
-  <SeoHead
-    title="Toutes les frises chronologiques | LaPhilo.fr"
-    description="Le catalogue complet des frises chronologiques interactives de LaPhilo.fr : philosophes par nationalité et par époque, grands courants de pensée de toutes les traditions."
-    path="/frises/"
-  />
+  <title>{titre}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={titre} description={description} path="/frises/" />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/definition.css?v=20261001" />
-  <style>
-    .frises-section-title {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(0.95rem, 2.2vw, 1.25rem);
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-align: center;
-      color: #d4a843;
-      margin: 3.2rem 0 1.2rem;
-      padding: 0.65rem 1rem;
-      border-top: 1px solid rgba(212, 168, 67, 0.5);
-      border-bottom: 1px solid rgba(212, 168, 67, 0.5);
-      background: linear-gradient(90deg, transparent, rgba(180, 130, 20, 0.16), transparent);
-      text-shadow: 0 0 18px rgba(212, 168, 67, 0.25);
-    }
-    .drawer-intro-sep + .frises-section-title { margin-top: 2.2rem; }
-
-    .frise-hub-text {
-      margin: 0.2rem 0 0.9rem;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: var(--ink-light, #5c3d1e);
-    }
-    .frise-hub-links {
-      margin-bottom: 1.1rem;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.6rem;
-    }
-    .frise-hub-link {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      padding: 0.7rem 1.9rem 0.75rem 0.85rem;
-      border: 1px solid rgba(139, 58, 15, 0.35);
-      border-radius: 8px;
-      background: rgba(255, 250, 230, 0.45);
-      text-decoration: none;
-      transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    }
-    .frise-hub-link:hover {
-      background: rgba(255, 250, 230, 0.8);
-      border-color: #8b3a0f;
-      transform: translateY(-1px);
-    }
-    .frise-hub-link--main {
-      grid-column: 1 / -1;
-      background: rgba(139, 58, 15, 0.1);
-      border-color: rgba(139, 58, 15, 0.55);
-    }
-    .frise-hub-link-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #3d2410;
-    }
-    .frise-hub-link-desc {
-      font-style: italic;
-      font-size: 0.88rem;
-      line-height: 1.45;
-      color: #5c3d1e;
-    }
-    .frise-hub-link-arrow {
-      position: absolute;
-      top: 0.65rem;
-      right: 0.75rem;
-      color: #8b3a0f;
-      font-weight: 700;
-    }
-    @media (max-width: 720px) {
-      .frise-hub-links { grid-template-columns: 1fr; }
-    }
-  </style>
 </head>
 <body>
 
@@ -133,77 +181,116 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
       <span class="sitemap-text">Accueil</span>
     </a>
   </div>
-  <h1 class="site-title">Toutes les Frises</h1>
-  <p class="site-subtitle">Philosophes et courants de pensée, frise par frise</p>
+  <h1 class="site-title">Les Frises</h1>
+  <p class="site-subtitle">Choisissez votre porte d'entrée</p>
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
-  <div class="intro-text-col" set:html={intro} />
+<main class="definition-page fr-page">
+  <div class="intro-text-col fr-intro">
+    <p class="intro-drop-cap">Voir la pensée humaine d'un seul coup d'œil : {nbFrises} frises pour savoir qui pensait quoi, à quelle époque, et qui étaient ses contemporains. Deux grands espaces, les philosophes et les courants de pensée : dans chacun, une grande frise du monde, puis la porte qui vous ressemble.</p>
+    <ol class="fr-mode" aria-label="Comment lire une frise">
+      <li><span aria-hidden="true">⟷</span> Faites glisser le temps</li>
+      <li><span aria-hidden="true">◉</span> Choisissez un nom</li>
+      <li><span aria-hidden="true">✦</span> Ouvrez sa fiche</li>
+    </ol>
+  </div>
 
-  <div class="drawer-intro-sep" aria-hidden="true">
+  <nav class="fr-sauts" aria-label="Sur cette page">
+    {espaces.map((e) => <a href={`#${e.id}`}><span aria-hidden="true">{e.icone}</span> {e.titre}</a>)}
+  </nav>
+
+  <div class="drawer-intro-sep fr-sep" aria-hidden="true">
     <span class="drawer-intro-sep-line"></span>
     <span class="drawer-intro-sep-ornament">✦</span>
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  {groups.map((group, gi) => (
+  {espaces.map((esp, ei) => (
     <>
-      {group.section && <h2 class="frises-section-title">{group.section}</h2>}
-      {gi > 0 && group.label !== group.section && (
-        <div class="definition-section-sep" aria-hidden="true">
-          <span class="drawer-intro-sep-line"></span>
-          <span class="drawer-intro-sep-ornament">{group.label}</span>
-          <span class="drawer-intro-sep-line"></span>
-        </div>
+    {ei > 0 && (
+      <div class="drawer-intro-sep fr-sep" aria-hidden="true">
+        <span class="drawer-intro-sep-line"></span>
+        <span class="drawer-intro-sep-ornament">✦</span>
+        <span class="drawer-intro-sep-line"></span>
+      </div>
+    )}
+    <section class="fr-espace" id={esp.id} aria-labelledby={`titre-${esp.id}`}>
+      <h2 class="fr-espace-titre" id={`titre-${esp.id}`}><span aria-hidden="true">{esp.icone}</span> {esp.titre}</h2>
+      <CartoucheMonde vue={esp.vue} />
+      {esp.vue === 'penseurs' && raccourcis.length > 0 && (
+        <p class="fr-express">
+          <span class="fr-express-lbl">Embarquer directement :</span>
+          {raccourcis.map((l) => <a href={l.href}>{propre(l.label)}</a>)}
+        </p>
       )}
-      {gi === 0 && !group.section && (
-        <h3 style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 .8rem;opacity:.8;">✦ {group.label}</h3>
-      )}
-      <div class="acc-list">
-        {group.items.map((it) => (
-          it.links ? (
-          <div class="acc-item">
-            <button class="acc-toggle" aria-expanded="false" type="button">
-              <span class="acc-name" set:html={it.name} />
-              <span class="acc-date">{it.tag}</span>
-              <span class="acc-chevron" aria-hidden="true">▶</span>
-            </button>
-            <div class="acc-content">
-            <p class="frise-hub-text" set:html={it.text} />
-            <div class="frise-hub-links">
-              {it.links.map((link, li) => (
-                <a href={link.href} class:list={['frise-hub-link', { 'frise-hub-link--main': li === 0 && !it.egaux }]}>
-                  <span class="frise-hub-link-title" set:html={link.label} />
-                  <span class="frise-hub-link-desc" set:html={link.desc ?? linkDescription(link.href)} />
-                  <span class="frise-hub-link-arrow" aria-hidden="true">→</span>
-                </a>
-              ))}
-            </div>
-            </div>
-          </div>
-          ) : (
-          <div class="acc-item">
-            <button class="acc-toggle" aria-expanded="false" type="button">
-              <span class="acc-name" set:html={it.name} />
-              <span class="acc-date">{it.tag}</span>
-              <span class="acc-chevron" aria-hidden="true">▶</span>
-            </button>
-            <div class="acc-content">
-              <div class="acc-text">
-                <span set:html={it.text} />
-                <br />
-                <div style="display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap;">
-                  <a href={it.href} class="parch-link">Accéder à la frise →</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          )
+
+      <h3 class="fr-titre"><span>Par où voulez-vous entrer ?</span></h3>
+      <div class="fr-portes" role="tablist" aria-label={`Portes d'entrée : ${esp.titre.toLowerCase()}`} style={`--n:${esp.portes.length}`} data-espace={esp.id}>
+        {esp.portes.map((p, i) => (
+          <button class="fr-porte" type="button" role="tab" id={`porte-${p.id}`} aria-controls={`panneau-${p.id}`} aria-selected={i === 0 ? 'true' : 'false'} data-porte={p.id}>
+            <span class="fr-porte-ic" aria-hidden="true">{p.icone}</span>
+            <span class="fr-porte-lbl">{p.libelle}</span>
+          </button>
         ))}
       </div>
+
+      {esp.portes.map((p) => (
+        <div class="fr-panneau" id={`panneau-${p.id}`} role="tabpanel" aria-labelledby={`porte-${p.id}`} data-panneau={p.id} data-espace={esp.id}>
+          <h4 class="fr-panneau-titre"><span aria-hidden="true">{p.icone}</span> {p.libelle}</h4>
+          <p class="fr-question">{p.question}</p>
+          {p.blocs.map((b) => (
+            <>
+              {b.titre && <h5 class="fr-bloc">{b.titre}</h5>}
+              <ul class="fr-grille">
+                {b.cartes.map((c) => (
+                  <li class:list={['fr-carte', { 'fr-carte--c': c.couleur }]} style={c.couleur ? `--c:${c.couleur}` : undefined}>
+                    {c.href
+                      ? <a class="fr-carte-lien" href={c.href}><span class="fr-carte-titre">{c.titre}</span></a>
+                      : <span class="fr-carte-titre">{c.titre}</span>}
+                    <span class="fr-carte-meta">
+                      {c.periode && <span>{c.periode}</span>}
+                      {c.nb > 0 && <span class="fr-nb">{c.nb} {c.unite}</span>}
+                    </span>
+                    {c.portraits.length > 0 && (
+                      <span class="fr-visages" aria-hidden="true">
+                        {c.portraits.map(([nom, src]) => <img src={src} alt="" title={nom} width="40" height="40" loading="lazy" />)}
+                      </span>
+                    )}
+                    {c.jalons && c.jalons.length > 0 && (
+                      <span class="fr-jalons" aria-label={`De ${c.jalons[0].nom} à ${c.jalons[c.jalons.length - 1].nom}`}>
+                        {c.jalons.map((j) => <span style={`--c:${j.couleur}`}><i aria-hidden="true"></i>{j.nom}</span>)}
+                      </span>
+                    )}
+                    <span class="fr-accroche">{c.accroche}</span>
+                    {c.sous && c.sous.length > 0 && (
+                      <span class="fr-sous">
+                        {c.sous.map((x) => <a href={x.href}>{x.label}{x.nb > 0 && <small> · {x.nb}</small>}</a>)}
+                      </span>
+                    )}
+                    {c.href && <span class="fr-carte-go" aria-hidden="true">→</span>}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ))}
+          {p.plus && <p class="fr-plus"><a href={p.plus.href}>{p.plus.label} →</a></p>}
+        </div>
+      ))}
+    </section>
     </>
   ))}
+
+  <div class="drawer-intro-sep fr-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <div class="fr-hasard">
+    <p>Pas d'idée ? Laissez le hasard choisir pour vous.</p>
+    <button type="button" class="fr-hasard-btn" data-frises={JSON.stringify(toutes)}><span aria-hidden="true">⚄</span> Une frise au hasard</button>
+  </div>
 </main>
 
 <footer class="site-footer">
@@ -224,9 +311,167 @@ const linkDescription = (href: string) => descriptions[href.split('/').filter(Bo
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
+<style>
+  .fr-page { max-width: 1080px; }
+  .fr-intro { max-width: 760px; margin: 0 auto; }
+  .fr-intro .intro-drop-cap { margin-bottom: 1.4rem; }
+  .fr-mode { list-style: none; margin: 0; padding: 1.1rem 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem 2rem;
+    border-top: 1px solid rgba(139, 58, 15, .25); font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; color: #8b3a0f; counter-reset: etape; }
+  .fr-mode li { display: inline-flex; align-items: center; gap: .45rem; counter-increment: etape; }
+  .fr-mode li::before { content: counter(etape); display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 50%;
+    background: #8b3a0f; color: #fff8e6; font-size: .7rem; }
+  .fr-mode span { font-size: 1rem; }
+
+  .fr-titre { margin: 3.6rem 0 1.6rem; text-align: center; font-family: 'Cinzel', serif; font-size: clamp(.95rem, 2.2vw, 1.15rem);
+    letter-spacing: .14em; text-transform: uppercase; color: #d4a843; display: flex; align-items: center; gap: 1rem; }
+  .fr-titre::before, .fr-titre::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 168, 67, .6)); }
+  .fr-titre::after { background: linear-gradient(90deg, rgba(212, 168, 67, .6), transparent); }
+
+  /* Deux espaces : les philosophes, les courants de pensée */
+  .fr-sauts { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 2.4rem 0 0; }
+  .fr-sauts a { display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1.2rem; border-radius: 999px; text-decoration: none;
+    font-family: 'Cinzel', serif; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: #f3dc92; border: 1px solid rgba(212, 168, 67, .6); background: rgba(30, 18, 8, .5); transition: background .2s, border-color .2s; }
+  .fr-sauts a:hover, .fr-sauts a:focus-visible { background: rgba(212, 168, 67, .18); border-color: #d4a843; outline: none; }
+  .fr-espace { scroll-margin-top: 1rem; }
+  .fr-sep { margin: 3.4rem auto 0; max-width: 760px; }
+  .fr-espace .fr-espace-titre { margin-top: 3rem; }
+  .fr-espace-titre {
+    margin: 4rem 0 0; padding: .9rem 1rem; text-align: center;
+    font-family: 'Cinzel Decorative', serif; font-size: clamp(1.05rem, 2.6vw, 1.45rem); font-weight: 700; letter-spacing: .06em; color: #d4a843;
+    border-top: 1px solid rgba(212, 168, 67, .5); border-bottom: 1px solid rgba(212, 168, 67, .5);
+    background: linear-gradient(90deg, transparent, rgba(180, 130, 20, .16), transparent); text-shadow: 0 0 18px rgba(212, 168, 67, .25);
+  }
+  .fr-espace :global(.cc-wrap) { margin-top: 2.4rem; margin-bottom: 0; }
+  .fr-express { margin: 1.4rem 0 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
+  .fr-express-lbl { font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #d4a843; margin-right: .3rem; }
+  .fr-express a { padding: .35rem .85rem; border-radius: 999px; border: 1px solid rgba(212, 168, 67, .55); color: #f3dc92; text-decoration: none;
+    font-size: .95rem; background: rgba(30, 18, 8, .5); transition: background .2s, border-color .2s; }
+  .fr-express a:hover, .fr-express a:focus-visible { background: rgba(212, 168, 67, .18); border-color: #d4a843; outline: none; }
+
+  /* Portes : boutons parchemin, la porte ouverte en rouille */
+  .fr-portes { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: 1rem; max-width: calc(var(--n, 4) * 260px); margin: 0 auto; scroll-margin-top: 1rem; }
+  .fr-porte { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: .6rem; padding: .6rem .8rem; min-height: 56px; text-align: left; line-height: 1.2; cursor: pointer;
+    font-family: 'Cinzel', serif; font-size: .8rem; font-weight: 700; letter-spacing: .05em; color: #3d2410;
+    background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 45%, #dfc87c 100%); border: 1px solid #b8923c; border-top: 3px solid #b8860b; border-radius: 4px;
+    box-shadow: 0 6px 18px rgba(10, 5, 2, .35); transition: transform .2s, background .2s, color .2s; }
+  .fr-porte-ic { display: grid; place-items: center; width: 2.1rem; height: 2.1rem; flex: none; border-radius: 50%; font-size: 1.15rem; color: #8b3a0f;
+    background: rgba(255, 251, 236, .7); border: 1px solid rgba(139, 58, 15, .45); }
+  .fr-porte:hover, .fr-porte:focus-visible { transform: translateY(-2px); outline: none; }
+  .fr-porte[aria-selected='true'] { color: #fff8e6; background: linear-gradient(150deg, #c05a20 0%, #8b3a0f 100%); border-color: #7a3210; border-top-color: #f3dc92; }
+  .fr-porte[aria-selected='true'] .fr-porte-ic { color: #8b3a0f; background: #f7ecce; }
+
+  .fr-panneau { margin-top: 2rem; scroll-margin-top: 1rem; }
+  .fr-panneau[hidden] { display: none; }
+  :global(.fr-js) .fr-panneau-titre { display: none; }
+  .fr-panneau-titre { margin: 2rem 0 .2rem; font-family: 'Cinzel', serif; font-size: 1rem; color: #d4a843; text-align: center; }
+  .fr-question { margin: 0 0 .8rem; text-align: center; font-style: italic; font-size: 1.05rem; color: #ead9a8; }
+  .fr-bloc { display: flex; align-items: center; gap: 1rem; margin: 2.4rem 0 1rem; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; color: #d4a843; }
+  .fr-bloc::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(212, 168, 67, .55), transparent); }
+  .fr-grille { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.4rem 1.3rem; }
+
+  /* Carte de frise : tout le parchemin est cliquable (lien étiré sur le titre) */
+  .fr-carte { position: relative; display: flex; flex-direction: column; gap: .65rem; padding: 1.25rem 1.3rem 1.35rem;
+    background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 40%, #e7d494 100%); border: 1px solid #b8923c; border-left: 3px solid #b8860b; border-radius: 4px;
+    box-shadow: 3px 3px 0 rgba(120, 80, 20, .16), 0 8px 20px rgba(10, 5, 2, .3); transition: transform .2s, border-color .2s, box-shadow .2s; }
+  .fr-carte:hover, .fr-carte:focus-within { transform: translateY(-3px); border-left-color: #8b3a0f; box-shadow: 3px 3px 0 rgba(120, 80, 20, .16), 0 12px 26px rgba(10, 5, 2, .4); }
+  .fr-carte-lien { text-decoration: none; color: inherit; }
+  .fr-carte-lien::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+  .fr-carte-lien:focus-visible { outline: none; }
+  .fr-carte-titre { padding-right: 1.4rem; font-family: 'Cinzel', serif; font-weight: 700; font-size: .95rem; line-height: 1.25; color: #1e1208; }
+  .fr-carte-meta { display: flex; flex-direction: column; gap: .25rem; font-size: .85rem; color: #5c3d1e; }
+  .fr-nb { font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8b3a0f; }
+  .fr-visages { display: flex; margin: .2rem 0; }
+  .fr-visages img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center 20%; border: 2px solid #f7ecce;
+    box-shadow: 0 1px 4px rgba(43, 29, 14, .35); background: #ead9a8; }
+  .fr-visages img + img { margin-left: -9px; }
+  .fr-carte--c { border-left-color: var(--c); }
+  .fr-carte--c .fr-carte-titre::before { content: ''; display: inline-block; width: .55rem; height: .55rem; margin: 0 .5rem .12rem 0;
+    transform: rotate(45deg); background: var(--c); box-shadow: 0 0 5px var(--c); vertical-align: middle; }
+  .fr-jalons { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .35rem; margin: .2rem 0; line-height: 1.35; font-size: .82rem; font-style: italic; color: #5c3d1e; }
+  .fr-jalons > span { display: inline-flex; align-items: center; gap: .3rem; }
+  .fr-jalons > span + span::before { content: '→'; font-style: normal; color: #b8860b; margin-right: .1rem; }
+  .fr-jalons i { width: .45rem; height: .45rem; transform: rotate(45deg); background: var(--c); border-radius: 1px; flex: none; }
+  .fr-accroche { font-size: .92rem; line-height: 1.55; color: #3d2410; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .fr-carte-go { position: absolute; top: 1.15rem; right: 1.15rem; color: #8b3a0f; font-weight: 700; transition: transform .2s; }
+  .fr-carte:hover .fr-carte-go { transform: translateX(3px); }
+  .fr-sous { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+  .fr-sous a { padding: .3rem .6rem; border-radius: 999px; font-size: .85rem; text-decoration: none; color: #8b3a0f;
+    background: rgba(255, 251, 236, .7); border: 1px solid rgba(139, 58, 15, .4); transition: background .2s, color .2s; }
+  .fr-sous a:hover, .fr-sous a:focus-visible { background: #8b3a0f; color: #fff8e6; outline: none; }
+  .fr-sous small { font-size: .78rem; opacity: .8; }
+  .fr-plus { margin: 1.8rem 0 0; text-align: center; }
+  .fr-plus a { font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 700; letter-spacing: .06em; color: #f3dc92; text-decoration: none; border-bottom: 1px solid rgba(212, 168, 67, .5); }
+  .fr-plus a:hover { color: #fff; border-bottom-color: #f3dc92; }
+
+  .fr-hasard { margin: 2.6rem auto 0; max-width: 560px; text-align: center; }
+  .fr-hasard p { margin: 0 0 1.1rem; font-style: italic; font-size: 1.05rem; color: #ead9a8; }
+  .fr-hasard-btn { display: inline-flex; align-items: center; gap: .55rem; padding: .7rem 1.6rem; border-radius: 4px; cursor: pointer;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: #1e1208; background: linear-gradient(150deg, #f3dc92 0%, #d4a843 55%, #b8860b 100%); border: 1px solid #e8c870;
+    box-shadow: 0 6px 20px rgba(10, 5, 2, .45); transition: filter .2s, transform .2s; }
+  .fr-hasard-btn span { font-size: 1.3rem; line-height: 1; display: inline-block; transition: transform .5s; }
+  .fr-hasard-btn:hover, .fr-hasard-btn:focus-visible { filter: brightness(1.08); transform: translateY(-1px); outline: none; }
+  .fr-hasard-btn:hover span { transform: rotate(180deg); }
+
+  @media (max-width: 900px) {
+    .fr-portes { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .fr-portes { grid-template-columns: repeat(2, 1fr); gap: .7rem; }
+    .fr-porte { flex-direction: row; justify-content: flex-start; gap: .55rem; padding: .6rem .7rem; min-height: 52px; text-align: left; font-size: .74rem; }
+    .fr-porte-ic { width: 2rem; height: 2rem; flex: none; font-size: 1rem; }
+    .fr-porte:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .fr-mode { gap: .5rem 1rem; font-size: .66rem; }
+    .fr-grille { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  /* Portes d'entrée : dans chaque espace (philosophes, courants), un seul panneau
+     visible ; #epoque, #courants-question… ouvre la bonne porte et y descend */
+  const portes = [...document.querySelectorAll<HTMLButtonElement>('.fr-porte')];
+  const panneaux = [...document.querySelectorAll<HTMLElement>('.fr-panneau')];
+  const espaceDe = (id: string) => panneaux.find((p) => p.dataset.panneau === id)?.dataset.espace;
+  function ouvrir(id: string, defiler = false) {
+    const espace = espaceDe(id);
+    if (!espace) return;
+    panneaux.filter((p) => p.dataset.espace === espace).forEach((p) => { p.hidden = p.dataset.panneau !== id; });
+    portes.filter((b) => b.closest<HTMLElement>('.fr-portes')?.dataset.espace === espace)
+      .forEach((b) => b.setAttribute('aria-selected', String(b.dataset.porte === id)));
+    if (defiler) document.getElementById(`porte-${id}`)?.closest('.fr-portes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  document.documentElement.classList.add('fr-js');
+  /* Première porte de chaque espace ouverte, sauf celle demandée par l'adresse */
+  document.querySelectorAll<HTMLElement>('.fr-portes').forEach((g) => {
+    const premiere = g.querySelector<HTMLButtonElement>('.fr-porte');
+    if (premiere) ouvrir(premiere.dataset.porte!);
+  });
+  const demandee = location.hash.slice(1);
+  if (espaceDe(demandee)) ouvrir(demandee, true);
+  portes.forEach((b) => {
+    b.addEventListener('click', () => {
+      ouvrir(b.dataset.porte!);
+      history.replaceState(null, '', `#${b.dataset.porte}`);
+    });
+    /* Flèches gauche / droite entre les portes d'un même espace (onglets accessibles) */
+    b.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      const soeurs = [...b.parentElement!.querySelectorAll<HTMLButtonElement>('.fr-porte')];
+      const n = soeurs[(soeurs.indexOf(b) + d + soeurs.length) % soeurs.length];
+      n.focus(); n.click();
+    });
+  });
+
+  /* Une frise au hasard */
+  document.querySelector<HTMLButtonElement>('.fr-hasard-btn')?.addEventListener('click', (e) => {
+    const liste: string[] = JSON.parse((e.currentTarget as HTMLElement).dataset.frises || '[]');
+    if (liste.length) location.href = liste[Math.floor(Math.random() * liste.length)];
+  });
+</script>
+
 <script src="/js/home-main.js" defer></script>
-<script src="/js/home-portraits.js" defer></script>
-<script src="/js/accordion.js" defer></script>
 
 </body>
 </html>
