@@ -319,8 +319,10 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     let genre = ''; // '', 'femmes' ou 'hommes' (« Hommes » : ni femme ni non-binaire)
     const estFemme = (d) => d.t.split(';').includes('femme');
     const estHomme = (d) => !/(^|;)(femme|non-binaire)(;|$)/.test(d.t);
-    const garder = (d) => !genre || (genre === 'femmes' ? estFemme(d) : estHomme(d));
-    const membres = (gid) => (genre ? (parGroupe[gid] || []).filter(garder) : parGroupe[gid] || []);
+    /* « Vivants uniquement » : pas d'année de mort (combinable avec le genre) */
+    let vivants = false;
+    const garder = (d) => (!genre || (genre === 'femmes' ? estFemme(d) : estHomme(d))) && (!vivants || d.v);
+    const membres = (gid) => (genre || vivants ? (parGroupe[gid] || []).filter(garder) : parGroupe[gid] || []);
     function majCompteurs() {
       GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${membres(g.id).length})`; });
     }
@@ -343,8 +345,9 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const def = periode ? PERIODES.find((p) => p.id === periode).g : DEFAUT;
       if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
       if (genre) u.searchParams.set(genre, '1');
+      if (vivants) u.searchParams.set('vivants', '1');
       if (choisi) u.searchParams.set('p', choisi);
-      window.setBascule(choisi, genre);
+      window.setBascule(choisi, genre, vivants);
       history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
     }
 
@@ -623,10 +626,23 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
       const el = e.target.closest('.item');
       if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); choisir(el.dataset.id, false); }
     });
-    document.querySelectorAll('.bascule-genre').forEach((b) => (b.onclick = () => {
+    document.querySelectorAll('.bascule-genre[data-genre]').forEach((b) => (b.onclick = () => {
       genre = genre === b.dataset.genre ? '' : b.dataset.genre;
       if (genre && choisi && !garder(parId[choisi])) { choisi = null; fermerBulle(); }
       majCompteurs(); dessiner(); majUrl();
+    }));
+    /* Vivants : toutes les traditions qui en comptent, cadrées sur 1915 → aujourd'hui */
+    function voirVivants() {
+      periode = null;
+      setActifs(ids.filter((gid) => membres(gid).length));
+      zoomer(scroller.clientWidth / (Y1 - 1915), (1915 + Y1) / 2);
+    }
+    document.querySelectorAll('[data-vivants]').forEach((b) => (b.onclick = () => {
+      vivants = !vivants;
+      if (vivants && choisi && !garder(parId[choisi])) { choisi = null; fermerBulle(); }
+      majCompteurs();
+      if (vivants && !choisi) voirVivants(); else dessiner();
+      majUrl();
     }));
     document.querySelectorAll('[data-seul]').forEach((b) => (b.onclick = () => {
       periode = null; setActifs([b.dataset.seul]); choisi = null; dessiner(); majUrl();
@@ -730,11 +746,12 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
     fetch('/data/frise-penseurs-monde.json')
       .then((r) => r.json())
       .then((lignes) => {
-        DATA = lignes.map(([id, n, y, e, d, g, s, th, xd, t]) => ({ id, n, y, e, d, g, s, th, x: xd, t }))
+        DATA = lignes.map(([id, n, y, e, d, g, s, th, xd, t, , v]) => ({ id, n, y, e, d, g, s, th, x: xd, t, v }))
           .filter((d) => G[d.g]);
         parId = Object.fromEntries(DATA.map((d) => [d.id, d]));
         for (const d of DATA) (parGroupe[d.g] ||= []).push(d);
         genre = window.lireGenre();
+        vivants = window.lireVivants();
         majCompteurs();
         $('chargement').remove();
         monde.hidden = false;
@@ -743,6 +760,7 @@ const description = "Les grandes traditions philosophiques côte à côte sur un
         const q = new URLSearchParams(location.search);
         const p = q.get('p'), per = q.get('periode'), g = q.get('g');
         if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        else if (vivants) voirVivants();
         // Vue de départ : l'Antiquité, 1 000 ans sur ordinateur (portraits affichés), 600 ans sur
         // petit écran ; on fait ensuite glisser la frise vers les époques suivantes
         else if (scroller.clientWidth < 700) zoomer(scroller.clientWidth / 600, -350);

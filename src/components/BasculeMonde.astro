@@ -1,10 +1,12 @@
 ---
 /* Sélecteur Frise ⇄ Tableau des penseurs, sous le titre des deux
    pages. La page courante est en surbrillance ; l'autre est un lien qui garde
-   le penseur sélectionné (?p=) et le filtre de genre (?femmes=1 ou ?hommes=1).
-   Chaque page met ce lien à jour : setBascule(id, genre) (fonction globale).
-   À droite, deux petits boutons ronds « ♀ » / « ♂ » ([data-genre]) : chaque page
-   branche leur clic ; lireGenre() lit le filtre dans l'adresse.
+   le penseur sélectionné (?p=), le filtre de genre (?femmes=1 ou ?hommes=1) et
+   le filtre des vivants (?vivants=1, combinable avec le genre).
+   Chaque page met ce lien à jour : setBascule(id, genre, vivants) (fonction globale).
+   À droite, trois petits boutons ronds « ♀ » / « ♂ » ([data-genre]) et « ● »
+   ([data-vivants]) : chaque page branche leur clic ; lireGenre() et
+   lireVivants() lisent les filtres dans l'adresse.
    vue="courants" : même sélecteur pour la Frise et le Tableau des courants
    (?p=<id du courant>), sans boutons de genre. */
 interface Props {
@@ -38,6 +40,8 @@ const pages = PAGES[vue];
       data-bulle="Femmes uniquement">♀</button>
     <button type="button" class="bascule-genre" data-genre="hommes" aria-pressed="false" aria-label="Hommes uniquement"
       data-bulle="Hommes uniquement">♂</button>
+    <button type="button" class="bascule-genre bascule-vivants" data-vivants aria-pressed="false" aria-label="Vivants uniquement"
+      data-bulle="Vivants uniquement"><span aria-hidden="true">●</span></button>
   </>
 )}
 </div>
@@ -47,19 +51,22 @@ const pages = PAGES[vue];
     const u = new URLSearchParams(location.search);
     return u.get('femmes') === '1' ? 'femmes' : u.get('hommes') === '1' ? 'hommes' : '';
   };
-  /* Paramètres ?p=…&femmes=1 (ou &hommes=1), communs aux deux pages */
-  window.paramsMonde = (id, genre) => {
+  window.lireVivants = () => new URLSearchParams(location.search).get('vivants') === '1';
+  /* Paramètres ?p=…&femmes=1 (ou &hommes=1)&vivants=1, communs aux deux pages */
+  window.paramsMonde = (id, genre, vivants) => {
     const u = new URLSearchParams();
     if (id) u.set('p', id);
     if (genre) u.set(genre, '1');
+    if (vivants) u.set('vivants', '1');
     return u.size ? '?' + u : '';
   };
-  window.setBascule = (id, genre) => {
-    document.querySelectorAll('.bascule-genre').forEach((b) => b.setAttribute('aria-pressed', b.dataset.genre === genre));
+  window.setBascule = (id, genre, vivants) => {
+    document.querySelectorAll('.bascule-genre[data-genre]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.genre === genre));
+    document.querySelectorAll('[data-vivants]').forEach((b) => b.setAttribute('aria-pressed', !!vivants));
     const a = document.getElementById('bascule-lien');
-    if (a) a.href = a.dataset.base + window.paramsMonde(id, genre);
+    if (a) a.href = a.dataset.base + window.paramsMonde(id, genre, vivants);
   };
-  window.setBascule(new URLSearchParams(location.search).get('p'), window.lireGenre());
+  window.setBascule(new URLSearchParams(location.search).get('p'), window.lireGenre(), window.lireVivants());
 </script>
 
 <style>
@@ -96,16 +103,21 @@ const pages = PAGES[vue];
     .bascule-genre:focus-visible::after, .bascule-genre:focus-visible::before { opacity: 1; transform: translate(-50%, 0); }
   }
   .bascule-genre[aria-pressed="true"] { color: #1a0f05; background: linear-gradient(180deg, #e8c060, #c8962a); border-color: #e8c060; }
+  /* « Vivants uniquement » : le point vert « ● En activité » du site */
+  .bascule-vivants { margin-left: .15rem; font-size: .8rem; color: #6fbf73; }
+  .bascule-vivants:hover, .bascule-vivants:focus-visible { color: #8fdc92; }
+  .bascule-vivants[aria-pressed="true"] { color: #1f6b2a; }
   @media (max-width: 600px) {
     .bascule-genre { width: 38px; height: 38px; }
     .bascule-ligne { gap: .3rem; }
     .suite { display: none; }
     .bascule-opt { padding: .55rem .85rem; font-size: .78rem; min-height: 40px; }
   }
-  /* Petits téléphones : la ligne doit tenir dans 288 px */
+  /* Petits téléphones : la ligne (bascule + 3 boutons ronds) doit tenir dans 288 px */
   @media (max-width: 380px) {
-    .bascule-opt { padding-left: .6rem; padding-right: .6rem; gap: .3rem; letter-spacing: .04em; }
-    .bascule-genre { width: 34px; height: 34px; }
-    .bascule-genre[data-genre="femmes"] { margin-left: 0; }
+    .bascule-ligne { gap: .2rem; }
+    .bascule-opt { padding-left: .5rem; padding-right: .5rem; gap: .25rem; letter-spacing: .03em; }
+    .bascule-genre { width: 32px; height: 32px; }
+    .bascule-genre[data-genre="femmes"], .bascule-vivants { margin-left: 0; }
   }
 </style>

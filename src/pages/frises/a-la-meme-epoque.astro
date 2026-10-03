@@ -59,6 +59,8 @@ const lignes = PERIODES.map(([de, a, dates, nom], i) => {
     .map((e) => ({ id: e.id, name: e.data.name, court: nomCourt(e.data.name),
       // Filtre de genre, comme sur la frise : tag « femme » ; « hommes » = ni femme ni non-binaire
       genre: (e.data.traditions ?? []).includes('femme') ? 'f' : (e.data.traditions ?? []).includes('non-binaire') ? undefined : 'h',
+      // Filtre « Vivants uniquement » : pas d'année de mort
+      vivant: typeof e.data.end_year !== 'number',
       // Bulle au survol : dates, puis la phrase de présentation
       info: [e.data.display_date, e.data.description].filter(Boolean).join('\n') })));
   return { i, de, a, dates, nom, cases, n: dans.length };
@@ -206,9 +208,10 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       .carte-tete { flex-wrap: wrap; }
       .carte-actions { margin-left: 0; justify-content: flex-start; flex-wrap: nowrap; width: 100%; }
     }
-    /* Filtre « Femmes / Hommes uniquement » (voir appliquerGenre) */
+    /* Filtres « Femmes / Hommes uniquement » et « Vivants uniquement » (voir appliquerGenre) */
     .vide-g { display: none; }
-    .tableau[data-genre="femmes"] .case li:not(.f), .tableau[data-genre="hommes"] .case li:not(.h) { display: none; }
+    .tableau[data-genre="femmes"] .case li:not(.f), .tableau[data-genre="hommes"] .case li:not(.h),
+    .tableau[data-vivants] .case li:not(.v) { display: none; }
     .tableau .periode.sans-g, .tableau .case details.sans-g { display: none; }
     .tableau .case.sans-g ul, .tableau .case.sans-g details { display: none; }
     .tableau .case.sans-g .vide-g { display: inline; }
@@ -292,7 +295,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
                 <span class="vide vide-g">—</span>
                 <ul>
                   {liste.slice(0, VISIBLES).map((p) => (
-                    <li class={p.genre}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
+                    <li class={[p.genre, p.vivant && 'v'].filter(Boolean).join(' ') || undefined}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
                   ))}
                 </ul>
                 {liste.length > VISIBLES && (
@@ -300,7 +303,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
                     <summary>+ <span class="nb">{liste.length - VISIBLES}</span> autre<span class="pl">{liste.length - VISIBLES > 1 ? 's' : ''}</span></summary>
                     <ul>
                       {liste.slice(VISIBLES).map((p) => (
-                        <li class={p.genre}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
+                        <li class={[p.genre, p.vivant && 'v'].filter(Boolean).join(' ') || undefined}><a href={`?p=${p.id}`} data-id={p.id} title={p.info} data-court={p.court !== p.name ? p.court : undefined}>{p.name}</a></li>
                       ))}
                     </ul>
                   </details>
@@ -325,10 +328,11 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     const centre = $('centre'), q = $('q'), sugg = $('suggestions');
     let DATA = [], parId = {};
     let genre = window.lireGenre(); // '', 'femmes' ou 'hommes'
+    let vivants = window.lireVivants(); // combinable avec le genre
     const tableau = $('tableau');
     const choisiActuel = () => new URLSearchParams(location.search).get('p');
-    const adresse = (id) => location.pathname + window.paramsMonde(id, genre);
-    const garder = (d) => !genre || (genre === 'femmes' ? d.f : d.h);
+    const adresse = (id) => location.pathname + window.paramsMonde(id, genre, vivants);
+    const garder = (d) => (!genre || (genre === 'femmes' ? d.f : d.h)) && (!vivants || d.v);
 
     /* Contemporains : vies actives (dès 25 ans) qui se recouvrent ; avant l'an
        1000, dates approximatives, 30 ans d'écart tolérés. Les plus marquants
@@ -343,9 +347,11 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       }).filter((x) => x.total);
     }
 
+    const filtres = () => [genre === 'femmes' ? '« Femmes uniquement »' : genre === 'hommes' ? '« Hommes uniquement »' : '', vivants ? '« Vivants uniquement »' : '']
+      .filter(Boolean).join(' + ');
     function afficher(id, defiler) {
       const s = parId[id];
-      window.setBascule(s ? id : null, genre);
+      window.setBascule(s ? id : null, genre, vivants);
       document.querySelectorAll('.case a.choisi').forEach((a) => a.classList.remove('choisi'));
       document.querySelectorAll('.periode.ici').forEach((p) => p.classList.remove('ici'));
       if (!s) { centre.innerHTML = ''; return; }
@@ -363,7 +369,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
             + `<span><span class="n">${esc(d.n)}</span><br><small>${esc(d.d)}</small></span></a></li>`).join('')
           + (total > liste.length ? `<li class="autres">et ${total - liste.length} autre${total - liste.length > 1 ? 's' : ''}</li>` : '')
           + '</ul></div>').join('')
-          : `<p class="vide-msg">${genre === 'femmes' ? 'Aucune contemporaine (filtre « Femmes uniquement »)' : genre === 'hommes' ? 'Aucun contemporain (filtre « Hommes uniquement »)' : 'Aucun contemporain'} dans les autres traditions sur le site.</p>`}</div></div>`;
+          : `<p class="vide-msg">${genre === 'femmes' ? 'Aucune contemporaine' : 'Aucun contemporain'}${filtres() ? ` (filtre ${filtres()})` : ''} dans les autres traditions sur le site.</p>`}</div></div>`;
       // Dans le tableau : la période du penseur et son nom
       document.querySelectorAll(`.case a[data-id="${CSS.escape(id)}"]`).forEach((a) => {
         a.classList.add('choisi');
@@ -380,20 +386,22 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       fermer(); q.value = ''; q.blur();
       afficher(id, defiler);
     }
-    addEventListener('popstate', () => { genre = window.lireGenre(); appliquerGenre(); });
+    addEventListener('popstate', () => { genre = window.lireGenre(); vivants = window.lireVivants(); appliquerGenre(); });
 
     /* Filtre de genre : dans chaque case, les 5 premiers noms retenus restent
        visibles, les suivants passent sous « + N autres » (compte mis à jour) ;
-       cases et périodes vides signalées. La carte ne garde que ce genre. */
+       cases et périodes vides signalées. La carte ne garde que ce genre.
+       Même mécanique pour « Vivants uniquement » (classe v), seul ou avec le genre. */
     const CLASSE = { femmes: 'f', hommes: 'h' };
     function appliquerGenre() {
       if (genre) tableau.dataset.genre = genre; else delete tableau.dataset.genre;
+      if (vivants) tableau.dataset.vivants = ''; else delete tableau.dataset.vivants;
       tableau.querySelectorAll('.case').forEach((c) => {
         const lis = [...c.querySelectorAll('li')];
         if (!lis.length) return;
         lis.forEach((li, i) => { if (!li.dataset.rang) li.dataset.rang = i; });
         lis.sort((a, b) => a.dataset.rang - b.dataset.rang);
-        const gardes = genre ? lis.filter((li) => li.classList.contains(CLASSE[genre])) : lis;
+        const gardes = lis.filter((li) => (!genre || li.classList.contains(CLASSE[genre])) && (!vivants || li.classList.contains('v')));
         c.classList.toggle('sans-g', !gardes.length);
         const det = c.querySelector('details');
         if (!det) return;
@@ -410,8 +418,13 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
       afficher(choisiActuel(), false);
       ajusterNoms();
     }
-    document.querySelectorAll('.bascule-genre').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.bascule-genre[data-genre]').forEach((b) => b.addEventListener('click', () => {
       genre = genre === b.dataset.genre ? '' : b.dataset.genre;
+      history.replaceState(history.state, '', adresse(choisiActuel()));
+      appliquerGenre();
+    }));
+    document.querySelectorAll('[data-vivants]').forEach((b) => b.addEventListener('click', () => {
+      vivants = !vivants;
       history.replaceState(history.state, '', adresse(choisiActuel()));
       appliquerGenre();
     }));
@@ -516,14 +529,14 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
     addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(ajusterNoms, 150); });
     document.querySelectorAll('.case details').forEach((d) => d.addEventListener('toggle', () => { if (d.open) ajusterNoms(d); }));
     document.fonts?.ready.then(() => ajusterNoms());
-    if (genre) appliquerGenre(); // sans attendre les données
+    if (genre || vivants) appliquerGenre(); // sans attendre les données
 
     /* ── Chargement ── */
     fetch('/data/frise-penseurs-monde.json')
       .then((r) => r.json())
       .then((lignes) => {
-        DATA = lignes.map(([id, n, y, e, d, g, s, th, x, t, cur]) => ({
-          id, n, y, e, d, g, th, x, f: t.split(';').includes('femme'), h: !/(^|;)(femme|non-binaire)(;|$)/.test(t), cur: cur ? cur.split(';') : [], actif: Math.min(y + AGE_ACTIF, e), milieu: (y + e) / 2,
+        DATA = lignes.map(([id, n, y, e, d, g, s, th, x, t, cur, v]) => ({
+          id, n, y, e, d, g, th, x, v, f: t.split(';').includes('femme'), h: !/(^|;)(femme|non-binaire)(;|$)/.test(t), cur: cur ? cur.split(';') : [], actif: Math.min(y + AGE_ACTIF, e), milieu: (y + e) / 2,
           poids: Math.floor(s / 1000) * 100 + Math.min(s % 1000, 50) * 2, cle: norm(n),
         })).filter((d) => G[d.g]);
         parId = Object.fromEntries(DATA.map((d) => [d.id, d]));

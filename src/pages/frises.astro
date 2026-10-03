@@ -110,7 +110,7 @@ const cartesQuestions: Carte[] = (parQuestion?.links ?? []).map((l) => {
   return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { sous });
 });
 
-type Porte = { id: string; icone: string; libelle: string; question: string; blocs: { titre?: string; cartes: Carte[] }[]; plus?: { label: string; href: string } };
+type Porte = { id: string; icone: string; libelle: string; question: string; blocs: { titre?: string; cartes: Carte[] }[] };
 const portesPhilosophes: Porte[] = [
   {
     id: 'epoque', icone: '⌛', libelle: 'Une époque', question: 'Remonter le temps, période par période',
@@ -131,7 +131,6 @@ const portesPhilosophes: Porte[] = [
   {
     id: 'aujourdhui', icone: '●', libelle: "Un sujet d'aujourd'hui", question: 'Les philosophes vivants, par sujet de travail',
     blocs: [{ cartes: groupe('Vivants par sujet de travail').map((it) => carte(it)) }],
-    plus: { label: "Tous les philosophes d'aujourd'hui, par sujet et par région", href: '/philosophes-d-aujourd-hui/' },
   },
 ];
 const portesCourants: Porte[] = [
@@ -149,8 +148,6 @@ const espaces = [
   { id: 'courants', icone: '✧', titre: 'Les courants de pensée', vue: 'courants' as const, portes: portesCourants },
 ];
 
-/* Raccourcis de la Frise des penseurs du monde (périodes ; pas le filtre femmes) */
-const raccourcis = (groupe('La Frise des Penseurs du Monde')[0]?.links ?? []).filter((l) => l.href.includes('?periode='));
 /* Toutes les frises, pour « Une frise au hasard » */
 const toutes = [...new Set(index.map((e) => e.u))];
 const nbFrises = toutes.length;
@@ -222,12 +219,11 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
     <section class="fr-espace" id={esp.id} aria-labelledby={`titre-${esp.id}`}>
       <h2 class="fr-espace-titre" id={`titre-${esp.id}`}><span aria-hidden="true">{esp.icone}</span> {esp.titre}</h2>
       <CartoucheMonde vue={esp.vue} />
-      {esp.vue === 'penseurs' && raccourcis.length > 0 && (
-        <p class="fr-express">
-          <span class="fr-express-lbl">Embarquer directement :</span>
-          {raccourcis.map((l) => <a href={l.href}>{propre(l.label)}</a>)}
-        </p>
-      )}
+      <div class="drawer-intro-sep fr-sep fr-sep--court" aria-hidden="true">
+        <span class="drawer-intro-sep-line"></span>
+        <span class="drawer-intro-sep-ornament">✦</span>
+        <span class="drawer-intro-sep-line"></span>
+      </div>
 
       <h3 class="fr-titre"><span>Par où voulez-vous entrer ?</span></h3>
       <div class="fr-portes" role="tablist" aria-label={`Portes d'entrée : ${esp.titre.toLowerCase()}`} style={`--n:${esp.portes.length}`} data-espace={esp.id}>
@@ -278,7 +274,6 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
               </ul>
             </>
           ))}
-          {p.plus && <p class="fr-plus"><a href={p.plus.href}>{p.plus.label} →</a></p>}
         </div>
       ))}
     </section>
@@ -339,6 +334,7 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
   .fr-sauts a:hover, .fr-sauts a:focus-visible { background: rgba(212, 168, 67, .18); border-color: #d4a843; outline: none; }
   .fr-espace { scroll-margin-top: 1rem; }
   .fr-sep { margin: 3.4rem auto 0; max-width: 760px; }
+  .fr-sep--court { margin-top: 2.2rem; max-width: 520px; }
   .fr-espace .fr-espace-titre { margin-top: 3rem; }
   .fr-espace-titre {
     margin: 4rem 0 0; padding: .9rem 1rem; text-align: center;
@@ -347,11 +343,6 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
     background: linear-gradient(90deg, transparent, rgba(180, 130, 20, .16), transparent); text-shadow: 0 0 18px rgba(212, 168, 67, .25);
   }
   .fr-espace :global(.cc-wrap) { margin-top: 2.4rem; margin-bottom: 0; }
-  .fr-express { margin: 1.4rem 0 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
-  .fr-express-lbl { font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: #d4a843; margin-right: .3rem; }
-  .fr-express a { padding: .35rem .85rem; border-radius: 999px; border: 1px solid rgba(212, 168, 67, .55); color: #f3dc92; text-decoration: none;
-    font-size: .95rem; background: rgba(30, 18, 8, .5); transition: background .2s, border-color .2s; }
-  .fr-express a:hover, .fr-express a:focus-visible { background: rgba(212, 168, 67, .18); border-color: #d4a843; outline: none; }
 
   /* Portes : boutons parchemin, la porte ouverte en rouille */
   .fr-portes { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: 1rem; max-width: calc(var(--n, 4) * 260px); margin: 0 auto; scroll-margin-top: 1rem; }
@@ -372,10 +363,10 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
   .fr-question { margin: 0 0 .8rem; text-align: center; font-style: italic; font-size: 1.05rem; color: #ead9a8; }
   .fr-bloc { display: flex; align-items: center; gap: 1rem; margin: 2.4rem 0 1rem; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; color: #d4a843; }
   .fr-bloc::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(212, 168, 67, .55), transparent); }
-  .fr-grille { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.4rem 1.3rem; }
+  .fr-grille { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.1rem 1.1rem; }
 
   /* Carte de frise : tout le parchemin est cliquable (lien étiré sur le titre) */
-  .fr-carte { position: relative; display: flex; flex-direction: column; gap: .65rem; padding: 1.25rem 1.3rem 1.35rem;
+  .fr-carte { position: relative; display: flex; flex-direction: column; gap: .5rem; padding: 1rem 1.1rem 1.05rem;
     background: linear-gradient(165deg, #f9f2d8 0%, #efdfa8 40%, #e7d494 100%); border: 1px solid #b8923c; border-left: 3px solid #b8860b; border-radius: 4px;
     box-shadow: 3px 3px 0 rgba(120, 80, 20, .16), 0 8px 20px rgba(10, 5, 2, .3); transition: transform .2s, border-color .2s, box-shadow .2s; }
   .fr-carte:hover, .fr-carte:focus-within { transform: translateY(-3px); border-left-color: #8b3a0f; box-shadow: 3px 3px 0 rgba(120, 80, 20, .16), 0 12px 26px rgba(10, 5, 2, .4); }
@@ -397,16 +388,13 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
   .fr-jalons > span + span::before { content: '→'; font-style: normal; color: #b8860b; margin-right: .1rem; }
   .fr-jalons i { width: .45rem; height: .45rem; transform: rotate(45deg); background: var(--c); border-radius: 1px; flex: none; }
   .fr-accroche { font-size: .92rem; line-height: 1.55; color: #3d2410; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-  .fr-carte-go { position: absolute; top: 1.15rem; right: 1.15rem; color: #8b3a0f; font-weight: 700; transition: transform .2s; }
+  .fr-carte-go { position: absolute; top: .9rem; right: 1rem; color: #8b3a0f; font-weight: 700; transition: transform .2s; }
   .fr-carte:hover .fr-carte-go { transform: translateX(3px); }
   .fr-sous { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
   .fr-sous a { padding: .3rem .6rem; border-radius: 999px; font-size: .85rem; text-decoration: none; color: #8b3a0f;
     background: rgba(255, 251, 236, .7); border: 1px solid rgba(139, 58, 15, .4); transition: background .2s, color .2s; }
   .fr-sous a:hover, .fr-sous a:focus-visible { background: #8b3a0f; color: #fff8e6; outline: none; }
   .fr-sous small { font-size: .78rem; opacity: .8; }
-  .fr-plus { margin: 1.8rem 0 0; text-align: center; }
-  .fr-plus a { font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 700; letter-spacing: .06em; color: #f3dc92; text-decoration: none; border-bottom: 1px solid rgba(212, 168, 67, .5); }
-  .fr-plus a:hover { color: #fff; border-bottom-color: #f3dc92; }
 
   .fr-hasard { margin: 2.6rem auto 0; max-width: 560px; text-align: center; }
   .fr-hasard p { margin: 0 0 1.1rem; font-style: italic; font-size: 1.05rem; color: #ead9a8; }
@@ -427,7 +415,18 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
     .fr-porte-ic { width: 2rem; height: 2rem; flex: none; font-size: 1rem; }
     .fr-porte:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .fr-mode { gap: .5rem 1rem; font-size: .66rem; }
-    .fr-grille { grid-template-columns: 1fr; }
+    .fr-grille { grid-template-columns: 1fr; gap: .6rem; }
+    .fr-carte { gap: .28rem; padding: .6rem .75rem .65rem; }
+    .fr-carte-go { top: .55rem; right: .7rem; }
+    .fr-carte-titre { font-size: .84rem; }
+    .fr-carte-meta { flex-direction: row; flex-wrap: wrap; align-items: center; gap: .1rem .6rem; font-size: .78rem; }
+    .fr-visages { margin: 0; }
+    .fr-visages img { width: 28px; height: 28px; }
+    .fr-visages img + img { margin-left: -6px; }
+    .fr-jalons { font-size: .76rem; margin: 0; }
+    .fr-accroche { font-size: .84rem; line-height: 1.4; -webkit-line-clamp: 2; line-clamp: 2; }
+    .fr-sous { gap: .35rem; margin-top: .2rem; }
+    .fr-sous a { padding: .25rem .5rem; font-size: .8rem; }
   }
 </style>
 
