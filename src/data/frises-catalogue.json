@@ -271,9 +271,9 @@
       "label": "Vivants par sujet de travail",
       "items": [
         {
-          "name": "Philosophes vivants : Esprit, cerveau &amp; IA",
+          "name": "Philosophes vivants : Esprit, IA &amp; technique",
           "tag": "en activité",
-          "text": "Qu'est-ce que la conscience ? Une machine peut-elle penser ? Que fait le numérique à nos vies ? <br> De Thomas Nagel et Douglas Hofstadter à Paul et Patricia Churchland, David Chalmers, Thomas Metzinger, Luciano Floridi, Nick Bostrom et Éric Sadin.",
+          "text": "Qu'est-ce que la conscience ? Une machine peut-elle penser ? Que font la technique et le numérique à nos vies ? <br> De Thomas Nagel et Douglas Hofstadter à Paul et Patricia Churchland, David Chalmers, Thomas Metzinger, Luciano Floridi, Nick Bostrom et Éric Sadin.",
           "href": "/philosophes/frise/vivants-esprit-ia/"
         },
         {
@@ -285,8 +285,14 @@
         {
           "name": "Philosophes vivants : Justice &amp; démocratie",
           "tag": "en activité",
-          "text": "Qu'est-ce qu'une société juste ? Comment vivre ensemble, reconnaître chacun, critiquer le présent ? <br> D'Amartya Sen, Charles Taylor, Alain Badiou et Jacques Rancière à Martha Nussbaum, Axel Honneth, Michael Sandel, Slavoj Žižek, Hartmut Rosa et Cynthia Fleury.",
+          "text": "Qu'est-ce qu'une société juste ? Quels droits, quelles libertés, quelle démocratie ? <br> D'Amartya Sen, Charles Taylor et Marcel Gauchet à Martha Nussbaum, Michael Sandel, Christine Korsgaard, Kwame Anthony Appiah, Francis Fukuyama et Cynthia Fleury.",
           "href": "/philosophes/frise/vivants-justice/"
+        },
+        {
+          "name": "Philosophes vivants : Critique sociale &amp; capitalisme",
+          "tag": "en activité",
+          "text": "Que nous font le travail, la consommation et le capitalisme ? Comment critiquer le présent ? <br> D'Alain Badiou, Jacques Rancière et Étienne Balibar à Axel Honneth, Nancy Fraser, Slavoj Žižek, Giorgio Agamben, Judith Butler, Hartmut Rosa et Byung-Chul Han.",
+          "href": "/philosophes/frise/vivants-critique/"
         },
         {
           "name": "Philosophes vivants : Féminisme &amp; genre",
@@ -313,9 +319,15 @@
           "href": "/philosophes/frise/vivants-reel/"
         },
         {
+          "name": "Philosophes vivants : Art &amp; esthétique",
+          "tag": "en activité",
+          "text": "Que nous font les œuvres, les images, la beauté ? Comment l'art pense-t-il ? <br> De Julia Kristeva, Jacques Rancière et Georges Didi-Huberman à Richard Shusterman, Yves Michaud, Éliane Escoubas, Gérard Vilar et Catherine Elgin.",
+          "href": "/philosophes/frise/vivants-art/"
+        },
+        {
           "name": "Philosophes vivants : Héritiers de la pensée continentale",
           "tag": "en activité",
-          "text": "Phénoménologie, herméneutique, déconstruction : la tradition de Husserl, Heidegger, Foucault et Derrida continuée aujourd'hui. <br> De Pierre Macherey et Giorgio Agamben à Barbara Cassin, François Jullien, Georges Didi-Huberman, Slavoj Žižek, Jean-Luc Marion et Frédéric Worms.",
+          "text": "Phénoménologie, herméneutique, déconstruction : la tradition de Husserl, Heidegger, Foucault et Derrida continuée aujourd'hui. <br> De Pierre Macherey et Giorgio Agamben à Barbara Cassin, François Jullien, Slavoj Žižek, Jean-Luc Marion et Frédéric Worms.",
           "href": "/philosophes/frise/vivants-continental/"
         }
       ]

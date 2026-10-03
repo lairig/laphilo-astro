@@ -46,11 +46,13 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'contemporains-asie-oceanie': { defaultIndex: 3, scale_factor: 18 },
   'vivants-esprit-ia': { defaultIndex: 6, scale_factor: 18 },
   'vivants-ecologie': { defaultIndex: 5, scale_factor: 18 },
-  'vivants-justice': { defaultIndex: 25, scale_factor: 18 },
+  'vivants-justice': { defaultIndex: 14, scale_factor: 18 },
+  'vivants-critique': { defaultIndex: 10, scale_factor: 18 },
   'vivants-genre': { defaultIndex: 7, scale_factor: 18 },
   'vivants-decolonial': { defaultIndex: 5, scale_factor: 18 },
   'vivants-sens': { defaultIndex: 8, scale_factor: 18 },
   'vivants-reel': { defaultIndex: 10, scale_factor: 18 },
+  'vivants-art': { defaultIndex: 4, scale_factor: 18 },
   'vivants-continental': { defaultIndex: 12, scale_factor: 18 },
 };
 

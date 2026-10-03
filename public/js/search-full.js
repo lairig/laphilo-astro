@@ -87,13 +87,15 @@
   /* Sujets de travail des philosophes vivants : mêmes codes que
      src/data/themes-vivants.ts (champ th de l'index, frise « vivants-<code> ») */
   var THEMES_VIVANTS = [
-    { v: 'esprit-ia', fr: 'Esprit, cerveau & IA' },
+    { v: 'esprit-ia', fr: 'Esprit, IA & technique' },
     { v: 'ecologie', fr: 'Écologie & vivant' },
     { v: 'justice', fr: 'Justice & démocratie' },
+    { v: 'critique', fr: 'Critique sociale & capitalisme' },
     { v: 'genre', fr: 'Féminisme & genre' },
     { v: 'decolonial', fr: 'Décolonisation & pensées du Sud' },
     { v: 'sens', fr: 'Sens & spiritualité' },
     { v: 'reel', fr: 'Réel & connaissance' },
+    { v: 'art', fr: 'Art & esthétique' },
     { v: 'continental', fr: 'Héritiers de la pensée continentale' },
   ];
   /* Teinte de fond (r,g,b) des cartes de frises « drapeau » (onglet Frises) ;

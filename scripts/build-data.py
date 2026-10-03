@@ -94,13 +94,15 @@ GROUPES = {
 # ── Sujets de travail des philosophes vivants (colonne Thèmes des deux xlsx
 #    d'actifs, codes séparés par « ; ») ; libellés dans src/data/themes-vivants.ts
 THEMES = {
-    'esprit-ia':   'Esprit, cerveau & IA',
+    'esprit-ia':   'Esprit, IA & technique',
     'ecologie':    'Écologie & vivant',
     'justice':     'Justice & démocratie',
+    'critique':    'Critique sociale & capitalisme',
     'genre':       'Féminisme & genre',
     'decolonial':  'Décolonisation & pensées du Sud',
     'sens':        'Sens & spiritualité',
     'reel':        'Réel & connaissance',
+    'art':         'Art & esthétique',
     'continental': 'Héritiers de la pensée continentale',
 }
 FICHIERS_VIVANTS = ('frise-philosophes-france-actif', 'frise-philosophes-autre-actif')

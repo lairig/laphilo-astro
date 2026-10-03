@@ -146,14 +146,23 @@ const SF = {
 const explorer: Record<string, { code: string; de: string; frises: Lien[]; aujourdhui?: Lien[] }> = {
   'La métaphysique': { code: 'metaphysique', de: 'de la métaphysique', frises: [SF.occMeta, SF.oriMeta] },
   "L'épistémologie": { code: 'epistemologie', de: "de l'épistémologie", frises: [SF.occCon, SF.oriCon] },
-  "L'éthique": { code: 'ethique', de: "de l'éthique", frises: [SF.occPol, SF.oriPol] },
-  'La politique': { code: 'politique', de: 'de la politique', frises: [SF.occPol, SF.oriPol] },
-  "L'esthétique": { code: 'esthetique', de: "de l'esthétique", frises: [SF.occTout] },
+  "L'éthique": {
+    code: 'ethique', de: "de l'éthique", frises: [SF.occPol, SF.oriPol],
+    aujourdhui: [vivants('justice', 'Justice & démocratie')],
+  },
+  'La politique': {
+    code: 'politique', de: 'de la politique', frises: [SF.occPol, SF.oriPol],
+    aujourdhui: [vivants('justice', 'Justice & démocratie'), vivants('critique', 'Critique sociale & capitalisme')],
+  },
+  "L'esthétique": {
+    code: 'esthetique', de: "de l'esthétique", frises: [SF.occTout],
+    aujourdhui: [vivants('art', 'Art & esthétique')],
+  },
   'La logique': { code: 'logique', de: 'de la logique', frises: [SF.occCon, SF.oriCon] },
   "L'esprit et le langage": {
     code: 'langage', de: 'du langage',
     frises: [SF.occCon, courant('Fonctionnalisme'), courant('Computationnalisme')],
-    aujourdhui: [vivants('esprit-ia', 'Esprit, cerveau & IA')],
+    aujourdhui: [vivants('esprit-ia', 'Esprit, IA & technique')],
   },
 };
 const rechercheBranche = (code: string) => `/recherche/?branche=${code}`;
@@ -239,7 +248,7 @@ const specialisees: {
     ],
     apprend: 'Penser la technique, c’est reprendre la main sur des outils qui orientent nos vies sans que nous y prenions garde.',
     liens: [courant('Transhumanisme')],
-    aujourdhui: [vivants('esprit-ia', 'Esprit, cerveau & IA')],
+    aujourdhui: [vivants('esprit-ia', 'Esprit, IA & technique')],
   },
   {
     nom: "La philosophie de l'éducation", tag: 'Apprendre · Transmettre · Émanciper', ytId: '-a2ObnoOTe0',
@@ -282,7 +291,7 @@ const specialisees: {
     ],
     apprend: 'Ce qui paraît naturel dans l’ordre social est souvent construit — et peut donc être changé.',
     liens: [courant('Féminisme'), courant('Anticolonialisme')],
-    aujourdhui: [vivants('genre', 'Féminisme & genre'), vivants('decolonial', 'Décolonisation & pensées du Sud')],
+    aujourdhui: [vivants('critique', 'Critique sociale & capitalisme'), vivants('genre', 'Féminisme & genre'), vivants('decolonial','Décolonisation & pensées du Sud')],
   },
   {
     nom: "L'éthique appliquée", tag: 'Bioéthique · Environnement · Numérique', ytId: 'CJjUrafFkUU',
