@@ -5,6 +5,7 @@ import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import Voyage from '../components/Voyage.astro';
+import CartoucheMonde from '../components/CartoucheMonde.astro';
 import philosophes from '../data/philosophes.json';
 import catalogue from '../data/frises-catalogue.json';
 import { themesVivants, friseDuTheme } from '../data/themes-vivants';
@@ -163,6 +164,15 @@ const description = `${vivants.length} philosophes en activité, de France et du
     ))}
   </ul>
 
+  <div class="drawer-intro-sep def-sep" aria-hidden="true">
+    <span class="drawer-intro-sep-line"></span>
+    <span class="drawer-intro-sep-ornament">✦</span>
+    <span class="drawer-intro-sep-line"></span>
+  </div>
+
+  <!-- La Frise et le Tableau des penseurs, filtrés sur les vivants, juste avant « Continuer le voyage » -->
+  <CartoucheMonde vue="penseurs" vivants />
+
   <Voyage href="/histoire-des-philosophes/" />
 </main>
 
@@ -196,16 +206,35 @@ const description = `${vivants.length} philosophes en activité, de France et du
   .auj-visages a:hover img, .auj-visages a:hover .auj-initiale, .auj-visages a:focus-visible img { border-color: #8b3a0f; transform: translateY(-2px); }
   .auj-visages a:hover span:last-child { color: #8b3a0f; }
 
-  .auj-regions { list-style: none; margin: 1.2rem auto 0; padding: 0; max-width: 860px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .8rem; }
+  .auj-regions { list-style: none; margin: 1.2rem auto 0; padding: 0; max-width: 860px; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: .8rem; }
   .auj-regions a {
     display: flex; align-items: baseline; gap: .6rem; padding: .9rem 1.1rem; border-radius: 4px; text-decoration: none;
     background: linear-gradient(160deg, #f7ecce 0%, #ead9a8 100%); border: 1px solid #b8923c; border-top: 3px solid #b8860b;
     box-shadow: 0 4px 14px rgba(10, 5, 2, .35); color: #1e1208; transition: transform .2s, border-color .2s;
   }
   .auj-regions a:hover, .auj-regions a:focus-visible { transform: translateY(-2px); border-top-color: #8b3a0f; outline: none; }
-  .auj-region-nom { font-family: 'Cinzel', serif; font-weight: 700; font-size: .95rem; }
+  /* Nom de région, nombre et flèche toujours sur une seule ligne */
+  .auj-region-nom { font-family: 'Cinzel', serif; font-weight: 700; font-size: .86rem; white-space: nowrap; }
   .auj-region-n { margin-left: auto; font-size: .85rem; color: #5c3d1e; white-space: nowrap; }
   .auj-region-fl { color: #8b3a0f; font-weight: 700; }
+  @media (max-width: 760px) {
+    .auj-regions { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .auj-regions a { gap: .45rem; padding: .8rem .85rem; }
+    .auj-region-nom { font-size: .8rem; letter-spacing: 0; }
+    .auj-region-n { font-size: .78rem; }
+  }
+  @media (max-width: 360px) {
+    .auj-regions a { gap: .35rem; padding: .75rem .7rem; }
+    .auj-region-nom { font-size: .72rem; }
+    .auj-region-n { font-size: .72rem; }
+  }
+  @media (max-width: 340px) {
+    .auj-regions a { gap: .3rem; padding: .7rem .6rem; }
+    .auj-region-nom { font-size: .64rem; }
+    .auj-region-n { font-size: .66rem; }
+  }
 </style>
 
 <script src="/js/home-main.js" defer></script>

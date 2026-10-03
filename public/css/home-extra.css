@@ -298,6 +298,14 @@
 .timeline-section:not(.timeline-section--top) .tl-era { font-size: 0.66rem; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 0.55rem; }
 .timeline-section:not(.timeline-section--top) .tl-era sup { font-size: 0.7em; letter-spacing: 0; vertical-align: super; line-height: 0; }
 .timeline-section:not(.timeline-section--top) .tl-title { font-size: clamp(1rem, 1.8vw, 1.15rem); margin-bottom: 0.75rem; }
+/* Titres sur une seule ligne : taille réglée sur la largeur de la carte (le plus long,
+   « C'est quoi la philosophie ? », fait environ 16 fois la taille de la police) */
+.timeline-section:not(.timeline-section--top) .tl-card { container-type: inline-size; }
+@supports (font-size: 1cqi) {
+  .timeline-section:not(.timeline-section--top) .tl-title { font-size: min(clamp(1rem, 1.8vw, 1.15rem), 100cqi / 16.8); white-space: nowrap; }
+  /* Même principe pour la ligne d'époque ; --n (dans index.astro) = sa largeur en tailles de police */
+  .timeline-section:not(.timeline-section--top) .tl-era { font-size: min(0.66rem, 100cqi / var(--n, 25)); white-space: nowrap; }
+}
 .timeline-section:not(.timeline-section--top) .tl-desc { font-size: 0.9rem; line-height: 1.78; color: var(--ink-mid, #3d2410); margin-bottom: 1.15rem; text-wrap: pretty; }
 .timeline-section:not(.timeline-section--top) .tl-cta-alt {
   font-size: 0.66rem; letter-spacing: 0.1em; font-weight: 700;
@@ -308,6 +316,11 @@
   .timeline-section:not(.timeline-section--top) .tl-card { padding: 1.4rem 1.3rem 1.3rem; }
   .timeline-section:not(.timeline-section--top) .tl-era { font-size: 0.62rem; }
   .timeline-section:not(.timeline-section--top) .tl-cta-alt { padding: 0.6rem 1rem; }
+  /* Une ligne aussi sur téléphone : lettres moins espacées, sans le tiret ; --m = largeur en tailles de police */
+  @supports (font-size: 1cqi) {
+    .timeline-section:not(.timeline-section--top) .tl-era { font-size: min(0.62rem, 100cqi / var(--m, 22)); letter-spacing: 0.05em; }
+    .timeline-section:not(.timeline-section--top) .tl-era::before { display: none; }
+  }
 }
 
 /* ══ « Questions fréquentes » : relooké (2026-10-01) dans le style parchemin des

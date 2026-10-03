@@ -3,6 +3,8 @@
    Frise des penseurs du monde (accueil). Réutilisable sur n'importe quelle
    page : <CartoucheMonde vue="penseurs" /> ou <CartoucheMonde vue="courants" />.
    Styles inclus, chiffres calculés ; deux boutons, la frise et le tableau.
+   <CartoucheMonde vue="penseurs" vivants /> : les seuls philosophes vivants,
+   frise et tableau ouverts avec le filtre « Vivants uniquement ».
    penseurs : un portrait par grande tradition (le plus important de chacune) ;
    courants : un losange de couleur par tradition. */
 import { getCollection } from 'astro:content';
@@ -10,11 +12,14 @@ import { groupesMonde } from '../data/groupes-monde';
 
 interface Props {
   vue: 'penseurs' | 'courants';
+  /** penseurs seulement : les philosophes vivants (pas d'année de mort), liens avec ?vivants=1 */
+  vivants?: boolean;
 }
-const { vue } = Astro.props;
+const { vue, vivants = false } = Astro.props;
 
 const courants = await getCollection('courants');
-const philosophes = (await getCollection('philosophes')).filter((p) => p.data.groupe);
+const philosophes = (await getCollection('philosophes'))
+  .filter((p) => p.data.groupe && (!vivants || typeof p.data.end_year !== 'number'));
 const liste: { data: { groupe?: string } }[] = vue === 'penseurs' ? philosophes : courants;
 const traditions = groupesMonde
   .map((g) => ({ ...g, n: liste.filter((c) => c.data.groupe === g.id).length }))
@@ -33,7 +38,15 @@ const portraits = vue === 'penseurs'
     ).sort((a, b) => a.data.year - b.data.year)
   : [];
 
-const V = vue === 'penseurs'
+const naissances = philosophes.map((p) => p.data.year);
+const V = vivants
+  ? {
+      eyebrow: '● Les penseurs vivants du monde', titre: "La Frise et le Tableau des penseurs d'aujourd'hui", unite: 'penseurs vivants',
+      meta: `nés de ${Math.min(...naissances)} à ${Math.max(...naissances)}`,
+      texte: "Les philosophes en activité, toutes traditions côte à côte : la frise pour les situer les uns par rapport aux autres, le tableau pour les voir tradition par tradition. Choisissez un penseur pour découvrir ses contemporains ailleurs dans le monde.",
+      frise: '/frises/penseurs-du-monde/?vivants=1', tableau: '/frises/a-la-meme-epoque/?vivants=1',
+    }
+  : vue === 'penseurs'
   ? {
       eyebrow: '◈ Les penseurs du monde', titre: 'La Frise et le Tableau des penseurs', unite: 'penseurs',
       texte: "Toutes les grandes traditions côte à côte : la frise pour voir qui pensait quoi à la même époque, le tableau pour les parcourir époque par époque. Choisissez un philosophe pour découvrir ses contemporains ailleurs dans le monde.",
@@ -49,7 +62,7 @@ const V = vue === 'penseurs'
   <div class="cc">
     <span class="cc-eyebrow">{V.eyebrow}</span>
     <span class="cc-title">{V.titre}</span>
-    <span class="cc-meta">{liste.length} {V.unite} · {traditions.length} traditions · de l'Égypte ancienne à nos jours</span>
+    <span class="cc-meta">{liste.length} {V.unite} · {traditions.length} traditions · {'meta' in V ? V.meta : "de l'Égypte ancienne à nos jours"}</span>
     {vue === 'penseurs' ? (
       <span class="cc-portraits" aria-hidden="true">
         {portraits.map((e) => <img src={e.data.thumbnail} alt="" title={e.data.name} width="48" height="48" loading="lazy" />)}
