@@ -68,11 +68,21 @@ LaPhilo.fr propose des frises chronologiques interactives couvrant ${philosophes
 ## Pages principales
 
 - [Accueil](${url('/')}) : portail d'entrée, présentation des sections
+- [Bienvenue](${url('/bienvenue/')}) : présentation du site et parcours conseillé
 - [Plan du site](${url('/plan-du-site/')}) : liste complète des ressources
 - [Recherche](${url('/recherche/')}) : recherche par nom, filtres par époque, nationalité, branche, courant
-- [Définition de la philosophie](${url('/definition/')}) : les 7 grandes branches
-- [Histoire des philosophes](${url('/histoire-des-philosophes/')})
-- [Histoire des courants de pensée](${url('/histoire-des-courants/')})
+- [Définition de la philosophie](${url('/definition/')}) : les 7 grandes branches et les branches spécialisées
+- [Histoire des courants de pensée](${url('/histoire-des-courants/')}) : les grandes familles d'idées, par période
+- [Les philosophes d'aujourd'hui](${url('/philosophes-d-aujourd-hui/')}) : les penseurs vivants, par sujet de travail et par région du monde
+- [Les philosophes anciens](${url('/histoire-des-philosophes/')}) : des présocratiques aux grandes figures du XXᵉ siècle
+- [Les frises](${url('/frises/')}) : toutes les frises chronologiques, par époque, pays, tradition, sujet ou courant
+
+## Penseurs et courants du monde
+
+- [La Frise des penseurs du monde](${url('/frises/penseurs-du-monde/')}) : toutes les traditions philosophiques sur un même axe du temps (filtres femmes, hommes, vivants)
+- [Le Tableau des penseurs](${url('/frises/tableau-des-penseurs/')}) : les traditions du monde époque par époque, et les contemporains de chaque penseur
+- [La Frise des courants](${url('/frises/courants-du-monde/')}) : les courants de pensée de toutes les traditions sur un même axe du temps
+- [Le Tableau des courants](${url('/frises/tableau-des-courants/')}) : les courants rangés par grande question, époque par époque
 
 ## Frises philosophes
 

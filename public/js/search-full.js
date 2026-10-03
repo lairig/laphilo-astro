@@ -655,7 +655,7 @@
        ou des courants (onglet Courants) ; un seul résultat : ils s'ouvrent sur lui */
     var DUOS = {
       penseurs: { ico: '◈', titre: 'La Frise et le Tableau des penseurs', sous: 'Toutes les traditions côte à côte',
-        frise: '/frises/penseurs-du-monde/', tableau: '/frises/a-la-meme-epoque/' },
+        frise: '/frises/penseurs-du-monde/', tableau: '/frises/tableau-des-penseurs/' },
       courants: { ico: '✧', titre: 'La Frise et le Tableau des courants', sous: 'Les courants de toutes les traditions',
         frise: '/frises/courants-du-monde/', tableau: '/frises/tableau-des-courants/' },
     };

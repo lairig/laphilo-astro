@@ -2,7 +2,7 @@ import type { CollectionEntry } from 'astro:content';
 
 /* Notoriété et durée de vie des philosophes, partagées par la Frise des
    penseurs du monde (/data/frise-penseurs-monde.json) et la page « À la même
-   époque » (/frises/a-la-meme-epoque/). */
+   époque » (/frises/tableau-des-penseurs/). */
 
 type Philosophe = CollectionEntry<'philosophes'>;
 

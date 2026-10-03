@@ -63,8 +63,8 @@ const lignes = PERIODES.map(([de, a, dates, nom], i) => {
   return { i, dates, nom, cases, n: dans.length };
 }).filter((l) => l.n > 0);
 
-const title = 'Le Tableau des courants : les grandes questions, époque par époque | LaPhilo.fr';
-const description = "De quoi débattait-on à chaque époque ? Les courants de pensée de toutes les traditions rangés par grande question (métaphysique, spiritualité, connaissance, éthique, politique) et par époque, avec leurs représentants.";
+const title = 'Le Tableau des courants de pensée par époque | LaPhilo.fr';
+const description = "De quoi débattait-on à chaque époque ? Les courants de toutes les traditions rangés par grande question : métaphysique, spiritualité, éthique, politique…";
 ---
 <html lang="fr">
 <head>
@@ -74,7 +74,7 @@ const description = "De quoi débattait-on à chaque époque ? Les courants de p
   <GoatCounter />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <SeoHead title={title} description={description} path="/frises/tableau-des-courants/" />
+  <SeoHead title={title} description={description} path="/frises/tableau-des-courants/" ariane={[['Les frises', '/frises/'], ["Le Tableau des courants", '/frises/tableau-des-courants/']]} />
   <Fonts />
   <link rel="preload" href="/data/courants-monde.json" as="fetch" crossorigin />
   <link rel="stylesheet" href="/css/courants-panneau.css?v=20261002b" />

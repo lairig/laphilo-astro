@@ -44,13 +44,13 @@ const V = vivants
       eyebrow: '● Les penseurs vivants du monde', titre: "La Frise et le Tableau des penseurs d'aujourd'hui", unite: 'penseurs vivants',
       meta: `nés de ${Math.min(...naissances)} à ${Math.max(...naissances)}`,
       texte: "Les philosophes en activité, toutes traditions côte à côte : la frise pour les situer les uns par rapport aux autres, le tableau pour les voir tradition par tradition. Choisissez un penseur pour découvrir ses contemporains ailleurs dans le monde.",
-      frise: '/frises/penseurs-du-monde/?vivants=1', tableau: '/frises/a-la-meme-epoque/?vivants=1',
+      frise: '/frises/penseurs-du-monde/?vivants=1', tableau: '/frises/tableau-des-penseurs/?vivants=1',
     }
   : vue === 'penseurs'
   ? {
       eyebrow: '◈ Les penseurs du monde', titre: 'La Frise et le Tableau des penseurs', unite: 'penseurs',
       texte: "Toutes les grandes traditions côte à côte : la frise pour voir qui pensait quoi à la même époque, le tableau pour les parcourir époque par époque. Choisissez un philosophe pour découvrir ses contemporains ailleurs dans le monde.",
-      frise: '/frises/penseurs-du-monde/', tableau: '/frises/a-la-meme-epoque/',
+      frise: '/frises/penseurs-du-monde/', tableau: '/frises/tableau-des-penseurs/',
     }
   : {
       eyebrow: '✧ Les courants du monde', titre: 'La Frise et le Tableau des courants', unite: 'courants',

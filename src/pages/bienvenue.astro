@@ -83,8 +83,8 @@ const nbTraditions = new Set(philosophes.map((p) => p.data.groupe).filter(Boolea
 const nbFrises = (catalogue.groups as any[]).reduce((n, g) =>
   n + g.items.reduce((m: number, it: any) => m + (it.href ? 1 : 0) + (it.links || []).filter((l: any) => !l.href.includes('?')).length, 0), 0);
 
-const title = 'Nouveau ici ? Bienvenue sur LaPhilo.fr';
-const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophes.length} philosophes et ${courants.length} courants de pensée de toutes les traditions, des frises chronologiques interactives, par où commencer et tous les liens pour naviguer.`;
+const title = 'Bienvenue sur LaPhilo.fr : par où commencer en philosophie';
+const description = `Mode d'emploi de LaPhilo.fr : ${philosophes.length} philosophes et ${courants.length} courants de toutes les traditions, des frises interactives et un parcours pour bien commencer.`;
 ---
 
 <html lang="fr">
@@ -95,7 +95,7 @@ const description = `Présentation de LaPhilo.fr et mode d'emploi : ${philosophe
   <GoatCounter />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <SeoHead title={title} description={description} path="/bienvenue/" />
+  <SeoHead title={title} description={description} path="/bienvenue/" ariane={[['Bienvenue', '/bienvenue/']]} />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />

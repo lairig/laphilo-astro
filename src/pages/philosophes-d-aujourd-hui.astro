@@ -56,8 +56,8 @@ const regions = [
   { label: 'Monde entier, hors France', href: '/philosophes/frise/contemporains-monde/', n: monde.length },
 ];
 
-const titre = "Les philosophes d'aujourd'hui : penseurs vivants par sujet et par région | LaPhilo.fr";
-const description = `${vivants.length} philosophes en activité, de France et du monde : intelligence artificielle, écologie, démocratie, critique sociale, genre, décolonisation, spiritualité, art. Leurs frises chronologiques par sujet de travail et par région.`;
+const titre = "Philosophes d'aujourd'hui, les penseurs vivants | LaPhilo.fr";
+const description = `${vivants.length} philosophes vivants, de France et du monde : IA, écologie, démocratie, genre, décolonisation… Leurs frises par sujet de travail et par région.`;
 ---
 
 <html lang="fr">
@@ -68,7 +68,7 @@ const description = `${vivants.length} philosophes en activité, de France et du
   <GoatCounter />
   <title>{titre}</title>
   <meta name="description" content={description} />
-  <SeoHead title={titre} description={description} path="/philosophes-d-aujourd-hui/" />
+  <SeoHead title={titre} description={description} path="/philosophes-d-aujourd-hui/" ariane={[["Les philosophes d'aujourd'hui", '/philosophes-d-aujourd-hui/']]} />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />

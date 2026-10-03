@@ -71,7 +71,7 @@ const blocks: Block[] = [
     groups: [
       { links: [
         { label: 'Frise des penseurs du monde', href: mondeLien("Vue d'ensemble"), note: period(monde.tag) },
-        { label: 'Tableau des penseurs', href: '/frises/a-la-meme-epoque/', note: 'qui pensait quoi, et où' },
+        { label: 'Tableau des penseurs', href: '/frises/tableau-des-penseurs/', note: 'qui pensait quoi, et où' },
         { label: 'Les femmes dans l’histoire', href: mondeLien('Femmes uniquement'), note: period(byLabel('Par thème')[0]?.tag) },
       ] },
       { title: 'Grandes périodes', links: /* dates des préréglages de /frises/penseurs-du-monde/ */
@@ -109,7 +109,7 @@ const blocks: Block[] = [
     ],
   },
 ];
-const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes les frises chronologiques des philosophes et courants de pensée, et aux pages de contenu et ressources du site.";
+const description = "Plan du site LaPhilo.fr : toutes les frises chronologiques des philosophes et des courants de pensée, par époque, pays et tradition, et toutes les pages.";
 ---
 
 <html lang="fr">
@@ -120,7 +120,7 @@ const description = "Plan du site LaPhilo.fr — accédez rapidement à toutes l
   <GoatCounter />
   <title>Plan du site | LaPhilo.fr</title>
   <meta name="description" content={description} />
-  <SeoHead title="Plan du site | LaPhilo.fr" description={description} path="/plan-du-site/" />
+  <SeoHead title="Plan du site | LaPhilo.fr" description={description} path="/plan-du-site/" ariane={[['Plan du site', '/plan-du-site/']]} />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />

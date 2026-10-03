@@ -66,8 +66,8 @@ const lignes = PERIODES.map(([de, a, dates, nom], i) => {
   return { i, de, a, dates, nom, cases, n: dans.length };
 });
 
-const title = 'Le Tableau des penseurs : les traditions du monde, époque par époque | LaPhilo.fr';
-const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afrique au temps de Platon, de Descartes ou de Kant ? Cherchez un philosophe pour voir ses contemporains dans les autres traditions, ou parcourez le tableau des grandes traditions, époque par époque.";
+const title = 'Le Tableau des penseurs du monde par époque | LaPhilo.fr';
+const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afrique au temps de Platon ou de Kant ? Les contemporains de chaque philosophe, dans le monde.";
 ---
 <html lang="fr">
 <head>
@@ -77,7 +77,7 @@ const description = "Qui pensait en Chine, en Inde, en terre d'islam ou en Afriq
   <GoatCounter />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <SeoHead title={title} description={description} path="/frises/a-la-meme-epoque/" />
+  <SeoHead title={title} description={description} path="/frises/tableau-des-penseurs/" ariane={[['Les frises', '/frises/'], ["Le Tableau des penseurs", '/frises/tableau-des-penseurs/']]} />
   <Fonts />
   <link rel="preload" href="/data/frise-penseurs-monde.json" as="fetch" crossorigin />
   <style is:global>

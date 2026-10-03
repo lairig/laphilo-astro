@@ -152,8 +152,8 @@ const espaces = [
 const toutes = [...new Set(index.map((e) => e.u))];
 const nbFrises = toutes.length;
 
-const titre = 'Toutes les frises chronologiques | LaPhilo.fr';
-const description = `${nbFrises} frises chronologiques interactives : penseurs et courants du monde entier, par époque, par pays, par tradition ou par sujet d'aujourd'hui. Choisissez votre porte d'entrée.`;
+const titre = 'Frises chronologiques de philosophie | LaPhilo.fr';
+const description = `${nbFrises} frises chronologiques interactives de philosophie : penseurs et courants du monde entier, par époque, pays, tradition ou sujet d'aujourd'hui.`;
 ---
 
 <html lang="fr">
@@ -164,7 +164,7 @@ const description = `${nbFrises} frises chronologiques interactives : penseurs e
   <GoatCounter />
   <title>{titre}</title>
   <meta name="description" content={description} />
-  <SeoHead title={titre} description={description} path="/frises/" />
+  <SeoHead title={titre} description={description} path="/frises/" ariane={[['Les frises', '/frises/']]} />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />

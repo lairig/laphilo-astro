@@ -13,7 +13,7 @@ const buildDay = dayOfYear(new Date());
 const alaune = alauneHtml(await getAlaunePools(), buildDay);
 
 const title = `${philosophes.length} philosophes, ${courants.length} courants de pensée : LaPhilo.fr`;
-const description = `${philosophes.length} philosophes et ${courants.length} courants de pensée sur des frises chronologiques interactives, de l'Antiquité à aujourd'hui, occidentale comme orientale.`;
+const description = `${philosophes.length} philosophes et ${courants.length} courants de pensée du monde entier, de l'Égypte ancienne à aujourd'hui, sur des frises chronologiques interactives.`;
 const path = '/';
 const jsonLd = [
   {
@@ -27,6 +27,7 @@ const jsonLd = [
       '@type': 'Organization',
       name: 'LaPhilo.fr',
       url: new URL('/', Astro.site).toString(),
+      slogan: "L'homme est le serviteur de sa propre création",
       logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).toString() },
     },
   },

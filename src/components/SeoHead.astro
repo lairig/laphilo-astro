@@ -4,10 +4,22 @@ interface Props {
   description: string;
   path: string;
   jsonLd?: Record<string, unknown>[];
+  /** Fil d'Ariane pour Google (BreadcrumbList), sans l'accueil ajouté d'office :
+      [['Les frises', '/frises/'], ['La Frise des penseurs du monde', '/frises/penseurs-du-monde/']] */
+  ariane?: [string, string][];
 }
 
-const { title, description, path, jsonLd = [] } = Astro.props;
+const { title, description, path, jsonLd = [], ariane } = Astro.props;
 const url = new URL(path, Astro.site).toString();
+const blocs = ariane?.length
+  ? [...jsonLd, {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [['Accueil', '/'] as [string, string], ...ariane].map(([name, p], i) => ({
+        '@type': 'ListItem', position: i + 1, name, item: new URL(p, Astro.site).toString(),
+      })),
+    }]
+  : jsonLd;
 const ogImage = new URL('/og-banner.webp', Astro.site).toString();
 ---
 
@@ -52,6 +64,6 @@ const ogImage = new URL('/og-banner.webp', Astro.site).toString();
 <meta name="twitter:image" content={ogImage} />
 <meta name="twitter:image:alt" content="LaPhilo.fr – Frises chronologiques de philosophie" />
 
-{jsonLd.map((block) => (
+{blocs.map((block) => (
   <script type="application/ld+json" set:html={JSON.stringify(block)} />
 ))}
