@@ -9,6 +9,7 @@ interface PhilosopheData {
   traditions?: string[];
   themes?: string[];
   groupe?: string;
+  year?: number | string;
   frise_source: string;
 }
 
@@ -18,6 +19,9 @@ const vivant = (p: PhilosopheData) => ['france-contemporains', 'contemporains-mo
 
 /* Contemporains hors France, par grande région (nationalité) ; une nationalité
    absente de ces listes reste seulement dans « contemporains-monde ». */
+/* Penseur de l'époque moderne : né de 1700 à 1935, hors frises des contemporains */
+const moderneHorsOccident = (p: PhilosopheData) => Number(p.year) >= 1700 && Number(p.year) <= 1935 && !vivant(p);
+
 export const regionsContemporains: { slug: string; label: string; nats: string[] }[] = [
   { slug: 'contemporains-europe', label: 'Europe', nats: ['Britannique', 'Irlandaise', 'Allemande', 'Autrichienne', 'Suisse', 'Italienne', 'Espagnole', 'Portugaise', 'Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Polonaise', 'Tchèque', 'Slovaque', 'Hongroise', 'Roumaine', 'Bulgare', 'Slovène', 'Croate', 'Serbe', 'Grecque', 'Russe', 'Ukrainienne', 'Lettone', 'Lituanienne', 'Estonienne'] },
   { slug: 'contemporains-ameriques', label: 'Amériques', nats: ['Américaine', 'Canadienne', 'Mexicaine', 'Argentine', 'Uruguayenne', 'Brésilienne', 'Chilienne', 'Colombienne', 'Péruvienne', 'Vénézuélienne', 'Cubaine', 'Haïtienne', 'Martiniquaise'] },
@@ -101,10 +105,57 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
     label: "Philosophes de l'Inde et du monde bouddhiste — toutes époques",
     match: (p) => p.groupe === 'inde' || (p.traditions ?? []).includes('inde'),
   },
+  /* Colonne « Groupe » : la pensée russe (≠ nationalité, cf. russes-toutes-epoques) */
+  'pensee-russe-toutes-epoques': {
+    label: 'La pensée russe — toutes époques',
+    match: (p) => p.groupe === 'russe' || (p.traditions ?? []).includes('russe'),
+  },
   /* Colonne « Groupe » : Chine, Japon, Corée, Vietnam (remplace l'ancienne frise des Chinois) */
   'asie-est-toutes-epoques': {
     label: "Philosophes d'Asie de l'Est — toutes époques",
     match: (p) => p.groupe === 'asie-est' || (p.traditions ?? []).includes('asie-est'),
+  },
+  /* « Autres philosophes modernes » (frise modernes) découpés en 4 zones */
+  'modernes-europe-nord-centrale': {
+    label: "Philosophes modernes d'Europe du Nord et centrale",
+    match: (p) => p.frise_source === 'modernes' && ['Britannique', 'Irlandaise', 'Australienne', 'Autrichienne', 'Suisse', 'Belge', 'Néerlandaise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Polonaise', 'Tchèque', 'Slovaque', 'Hongroise', 'Roumaine', 'Lettone', 'Lituanienne', 'Estonienne', 'Slovène', 'Croate', 'Serbe', 'Bulgare'].includes(p.nationalite ?? ''),
+  },
+  'modernes-europe-sud': {
+    label: "Philosophes modernes d'Europe du Sud",
+    match: (p) => p.frise_source === 'modernes' && ['Espagnole', 'Portugaise', 'Italienne', 'Grecque'].includes(p.nationalite ?? ''),
+  },
+  /* Époque moderne hors Occident (nés de 1700 à 1935, hors frises des contemporains) */
+  'modernes-asie': {
+    label: "Philosophes modernes d'Asie",
+    match: (p) => moderneHorsOccident(p) && ['inde', 'asie-est', 'asie-se'].includes(p.groupe ?? ''),
+  },
+  'modernes-islam-sud': {
+    label: 'Philosophes modernes : islam et pensées du Sud',
+    match: (p) => moderneHorsOccident(p) && ((p.groupe === 'islam-juif' && !(p.traditions ?? []).includes('juive')) || p.groupe === 'sud'),
+  },
+  /* Toute l'époque moderne sauf la France : réunion des autres cartes « Modernes » de /frises/ */
+  'modernes-monde': {
+    label: 'Philosophes modernes du monde entier (hors France)',
+    match: (p) => ['allemands', 'russes', 'americains', 'modernes'].includes(p.frise_source)
+      || (moderneHorsOccident(p) && (['inde', 'asie-est', 'asie-se', 'sud'].includes(p.groupe ?? '')
+        || (p.groupe === 'islam-juif' && !(p.traditions ?? []).includes('juive')))),
+  },
+  /* Pays d'Asie (nationalité) : en plus des grandes traditions Inde et Asie de l'Est */
+  'indiens-toutes-epoques': {
+    label: "Philosophes de l'Inde — toutes époques",
+    match: (p) => p.nationalite === 'Indienne',
+  },
+  'chinois-toutes-epoques': {
+    label: 'Philosophes chinois — toutes époques',
+    match: (p) => p.nationalite === 'Chinoise',
+  },
+  'coreens-toutes-epoques': {
+    label: 'Philosophes coréens — toutes époques',
+    match: (p) => p.nationalite === 'Coréenne',
+  },
+  'japonais-toutes-epoques': {
+    label: 'Philosophes japonais — toutes époques',
+    match: (p) => p.nationalite === 'Japonaise',
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {

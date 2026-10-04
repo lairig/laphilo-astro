@@ -51,7 +51,17 @@ const COULEUR_VIRTUELLE: Record<string, string> = {
   'grecs-byzantins-toutes-epoques': 'flag:grec',
   'inde-bouddhisme-toutes-epoques': 'flag:indien',
   'asie-est-toutes-epoques': 'flag:asie-est',
+  'pensee-russe-toutes-epoques': 'russe',
   'pensee-juive-toutes-epoques': 'flag:juif',
+  'indiens-toutes-epoques': 'flag:indiens',
+  'modernes-europe-nord-centrale': 'flag:europe-nord-centrale',
+  'modernes-europe-sud': 'flag:italien',
+  'modernes-asie': 'flag:asie-est',
+  'modernes-monde': 'moderne',
+  'modernes-islam-sud': 'flag:arabo-persan',
+  'chinois-toutes-epoques': 'flag:chinois',
+  'coreens-toutes-epoques': 'flag:coreen',
+  'japonais-toutes-epoques': 'flag:japonais',
 };
 function couleur(href: string): string {
   if (href.startsWith('/frises/')) return 'monde';
@@ -111,6 +121,9 @@ export async function indexDesFrises(): Promise<EntreeFrise[]> {
       return { liste: courantsDeLaFrise(m[1], cur) ?? [], parId: false };
     }
     if (href === '/frises/penseurs-du-monde/') return { liste: phi.filter((p) => p.data.groupe), parId: true };
+    /* Une seule voie de la frise du monde : /frises/penseurs-du-monde/?g=occident */
+    m = href.match(/^\/frises\/penseurs-du-monde\/\?g=([a-z-]+)$/);
+    if (m) return { liste: phi.filter((p) => p.data.groupe === m![1]), parId: true };
     if (VUES_COURANTS.has(href)) return { liste: cur, parId: true }; // pages ouvertes sur ?p=<id du courant>
     return { liste: [], parId: false };
   }
@@ -141,7 +154,7 @@ export async function indexDesFrises(): Promise<EntreeFrise[]> {
       .filter((p) => p.thumbnail)
       .sort((a, b) => (b.importance ?? 1) - (a.importance ?? 1) || a.year - b.year);
     /* Frise du monde : un portrait par grande tradition (8) ; ailleurs les 4 plus importants */
-    const vignettes = parId
+    const vignettes = e.href === '/frises/penseurs-du-monde/'
       ? Array.from(new Map(parImportance.map((p) => [(p as any).data.groupe, p])).values())
           .map((p) => parImportance.find((q) => (q as any).data.groupe === (p as any).data.groupe)!)
           .sort((a, b) => a.year - b.year)

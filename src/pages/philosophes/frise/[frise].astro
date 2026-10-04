@@ -86,7 +86,17 @@ const seoTitles: Record<string, string> = {
   'grecs-byzantins-toutes-epoques': 'Philosophes grecs et byzantins de toutes les époques : frise chronologique',
   'inde-bouddhisme-toutes-epoques': "Philosophes de l'Inde et du monde bouddhiste de toutes les époques : frise chronologique",
   'asie-est-toutes-epoques': "Philosophes d'Asie de l'Est (Chine, Japon, Corée, Vietnam) de toutes les époques : frise chronologique",
+  'pensee-russe-toutes-epoques': 'La pensée russe : frise de toutes les époques',
   'pensee-juive-toutes-epoques': 'Philosophes juifs de toutes les époques : frise chronologique',
+  'modernes-europe-nord-centrale': "Penseurs modernes d'Europe du Nord et centrale",
+  'modernes-europe-sud': "Philosophes modernes d'Europe du Sud : frise",
+  'modernes-monde': 'Philosophes modernes du monde entier : frise',
+  'modernes-asie': "Philosophes modernes d'Asie : frise chronologique",
+  'modernes-islam-sud': 'Philosophes modernes : islam et pensées du Sud',
+  'indiens-toutes-epoques': "Philosophes de l'Inde : frise chronologique",
+  'chinois-toutes-epoques': 'Philosophes chinois : frise chronologique',
+  'coreens-toutes-epoques': 'Philosophes coréens : frise chronologique',
+  'japonais-toutes-epoques': 'Philosophes japonais : frise chronologique',
   ...Object.fromEntries(themesVivants.map((t) => [friseDuTheme(t.code), t.seoTitle])),
 };
 const title = `${seoTitles[frise as string] ?? label} | LaPhilo.fr`;

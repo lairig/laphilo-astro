@@ -29,7 +29,8 @@ export function prettyName(name: string): string {
       if (NAME_FIXES[word]) return NAME_FIXES[word];
       // Seuls les mots entièrement en capitales sont retouchés.
       if (word !== word.toUpperCase() || !/\p{L}{2}/u.test(word)) return word;
-      if (ROMAN.test(word)) return word;
+      // Numéro de règne (Jean XXIII), jamais en tête : « LI Zehou » est un nom.
+      if (i > 0 && ROMAN.test(word)) return word;
       if (i > 0 && PARTICLES.has(word.toLowerCase())) return word.toLowerCase();
       return word
         .split('-')

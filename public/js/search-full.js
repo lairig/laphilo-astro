@@ -33,11 +33,15 @@
     { v: 'indien', fr: 'Inde & bouddhisme', grad: 'linear-gradient(180deg,#ff9933 33%,#f7f4ea 33% 66%,#138808 66%)' },
     { v: 'asie-est', fr: "Asie de l'Est", grad: 'linear-gradient(135deg,#de2910 50%,#f7f4ea 50%)' },
     { v: 'juif', fr: 'Juifs', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
+    { v: 'indiens', fr: 'Indiens', grad: 'radial-gradient(circle,#000080 0 14%,transparent 16%),linear-gradient(180deg,#ff9933 33.3%,#f7f4ea 33.3% 66.6%,#138808 66.6%)' },
+    { v: 'chinois', fr: 'Chinois', grad: 'radial-gradient(circle at 28% 30%,#ffde00 0 14%,transparent 16%),#de2910' },
+    { v: 'coreen', fr: 'Coréens', grad: 'radial-gradient(circle,#cd2e3a 0 22%,#0047a0 22% 34%,#f7f4ea 36%)' },
+    { v: 'japonais', fr: 'Japonais', grad: 'radial-gradient(circle,#bc002d 0 28%,#f7f4ea 30%)' },
   ];
   var PHILO_COLOR_GROUPS = [
     /* Même découpage que la page /frises/ : pays, grandes traditions, thème */
     { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
-      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec'] },
+      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec', 'indiens', 'chinois', 'coreen', 'japonais'] },
       { fr: 'Grande tradition', vide: 'Toutes les traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
     ] },
   ];
@@ -61,6 +65,11 @@
     'femme': { trad: 'femme' },
     /* Colonne « Groupe » des xlsx (grande tradition de la Frise des penseurs du monde) */
     'orient-ancien': { groupe: 'orient-ancien' },
+    /* Pays d'Asie (nationalité), en plus des grandes traditions */
+    'indiens': { nats: ['Indienne'] },
+    'chinois': { nats: ['Chinoise'] },
+    'coreen': { nats: ['Coréenne'] },
+    'japonais': { nats: ['Japonaise'] },
   };
   function pillValue(v) {
     return TRADITION_RULES[v] ? 'trad:' + v : v;
@@ -83,6 +92,10 @@
     'juif': { href: '/philosophes/frise/pensee-juive-toutes-epoques/', fr: "Voir la frise des philosophes juifs" },
     'femme': { href: '/philosophes/frise/femmes-toutes-epoques/', fr: "Voir la frise des philosophes femmes" },
     'orient-ancien': { href: '/philosophes/frise/proche-orient-ancien-toutes-epoques/', fr: "Voir la frise du Proche-Orient ancien" },
+    'indiens': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes de l'Inde" },
+    'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: 'Voir la frise des philosophes chinois' },
+    'coreen': { href: '/philosophes/frise/coreens-toutes-epoques/', fr: 'Voir la frise des philosophes coréens' },
+    'japonais': { href: '/philosophes/frise/japonais-toutes-epoques/', fr: 'Voir la frise des philosophes japonais' },
   };
   /* Sujets de travail des philosophes vivants : mêmes codes que
      src/data/themes-vivants.ts (champ th de l'index, frise « vivants-<code> ») */
@@ -104,6 +117,7 @@
     britannique: '40,70,160', italien: '0,146,70', 'europe-nord-centrale': '33,70,139', germanophone: '210,30,30',
     'arabo-persan': '35,159,64', africain: '224,100,20', hispanique: '198,11,30', femme: '142,68,173',
     'orient-ancien': '201,162,39', grec: '13,94,175', indien: '255,153,51', 'asie-est': '222,41,16', juif: '43,90,168',
+    indiens: '255,153,51', chinois: '222,41,16', coreen: '0,71,160', japonais: '188,0,45',
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];
@@ -610,7 +624,7 @@
       return q ? f.m.filter(function (m) { return stripAccents(m[0]).toLowerCase().indexOf(q) !== -1; }) : [];
     }
     function lienFrise(f, hits) {
-      return hits.length === 1 ? f.u + '?p=' + encodeURIComponent(hits[0][1] || hits[0][0]) : f.u;
+      return hits.length === 1 ? f.u + (f.u.indexOf('?') < 0 ? '?' : '&') + 'p=' + encodeURIComponent(hits[0][1] || hits[0][0]) : f.u;
     }
     function contientHtml(hits) {
       return '<span class="phi-frise-hit">Contient : ' + hits.slice(0, 3).map(function (h) { return '<strong>' + esc(h[0]) + '</strong>'; }).join(', ') +

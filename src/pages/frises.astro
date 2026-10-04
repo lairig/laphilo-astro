@@ -57,6 +57,7 @@ type Jalon = { nom: string; couleur: string };
 type Carte = {
   titre: string; href: string; periode: string; nb: number; unite: string; accroche: string;
   portraits: [string, string | undefined][]; sous?: Sous[]; jalons?: Jalon[]; couleur?: string;
+  duo?: Carte; // seconde moitié d'une carte double (Occident | Reste du monde)
 };
 const carte = (it: Item, titre = court(it.name)): Carte => {
   const e = parUrl.get(it.href!);
@@ -92,13 +93,16 @@ const parTradition = hub((l) => l.href === '/courants/frise/islam-juif/');
 const parQuestion = hub((l) => l.href.includes('/monde--'));
 const premiereIdee = (t: string) => propre(t).split(/(?<=[.:])\s/)[0].replace(/\s*:$/, '.');
 
+/* Carte double : l'Occident et son pendant, « le reste du monde » (toutes les autres traditions) */
+/* Sans pastilles de thème : les sous-frises par thème sont dans « Une grande question » */
+const resteDuMonde = ori ? carteCourant(ori.links![0].href, 'Reste du monde', premiereIdee(ori.text)) : undefined;
 const cartesTraditions: Carte[] = [
-  ...(occ ? [carteCourant(occ.links![0].href, 'Occident', premiereIdee(occ.text), { sous: occ.links!.slice(1).map(lienSous), couleur: couleurGroupe.get('occident') })] : []),
-  ...(parTradition?.links ?? []).map((l) => {
+  ...(occ ? [carteCourant(occ.links![0].href, 'Occident', premiereIdee(occ.text), { couleur: couleurGroupe.get('occident'), duo: resteDuMonde })] : []),
+  /* Islam & judaïsme en dernier, après le Proche-Orient ancien (ordre de /frises/ seulement) */
+  ...(parTradition?.links ?? []).slice().sort((a, b) => Number(a.href.includes('/islam-juif/')) - Number(b.href.includes('/islam-juif/'))).map((l) => {
     const t = courantTraditionFrises.find((x) => x.slug === slug(l.href));
     return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { couleur: t ? couleurGroupe.get(t.groupe) : undefined }, t?.groupe);
   }),
-  ...(ori ? [carteCourant(ori.links![0].href, 'Toutes les autres traditions', premiereIdee(ori.text), { sous: ori.links!.slice(1).map(lienSous) })] : []),
 ];
 /* Une grande question : la frise toutes traditions, et en pastilles la même question côté Occident / autres traditions */
 const cartesQuestions: Carte[] = (parQuestion?.links ?? []).map((l) => {
@@ -114,10 +118,11 @@ type Porte = { id: string; icone: string; libelle: string; question: string; blo
 const portesPhilosophes: Porte[] = [
   {
     id: 'epoque', icone: '⌛', libelle: 'Une époque', question: 'Remonter le temps, période par période',
+    /* On remonte le temps : des contemporains jusqu'à l'Antiquité */
     blocs: [
-      { titre: "De l'Antiquité aux Lumières", cartes: groupe('Anciens').map((it) => carte(it)) },
-      { titre: "L'époque moderne", cartes: groupe('Modernes').map((it) => carte(it, court(it.name).replace(/^Modernes\s+/, ''))) },
       { titre: 'Les contemporains', cartes: groupe('Contemporains').map((it) => carte(it)) },
+      { titre: "L'époque moderne", cartes: groupe('Modernes').map((it) => carte(it, court(it.name).replace(/^Modernes\s+/, ''))) },
+      { titre: "Des Lumières à l'Antiquité", cartes: groupe('Anciens').map((it) => carte(it)).reverse() },
     ],
   },
   {
@@ -126,7 +131,8 @@ const portesPhilosophes: Porte[] = [
   },
   {
     id: 'tradition', icone: '✺', libelle: 'Une tradition', question: 'Les grandes traditions du monde, au-delà des frontières',
-    blocs: [{ cartes: [...groupe('Par grande tradition'), ...groupe('Par thème')].map((it) => carte(it)) }],
+    /* Le Proche-Orient ancien (rangé dans « Anciens ») est aussi l'une des grandes traditions */
+    blocs: [{ cartes: [...groupe('Anciens').filter((it) => it.href?.includes('proche-orient-ancien')), ...groupe('Par grande tradition'), ...groupe('Par thème')].map((it) => carte(it)) }],
   },
   {
     id: 'aujourdhui', icone: '●', libelle: "Un sujet d'aujourd'hui", question: 'Les philosophes vivants, par sujet de travail',
@@ -243,8 +249,10 @@ const description = `${nbFrises} frises chronologiques interactives de philosoph
             <>
               {b.titre && <h5 class="fr-bloc">{b.titre}</h5>}
               <ul class="fr-grille">
-                {b.cartes.map((c) => (
-                  <li class:list={['fr-carte', { 'fr-carte--c': c.couleur }]} style={c.couleur ? `--c:${c.couleur}` : undefined}>
+                {b.cartes.map((carte) => (
+                  <li class:list={['fr-carte', { 'fr-carte--c': carte.couleur && !carte.duo, 'fr-carte--duo': carte.duo }]} style={carte.couleur && !carte.duo ? `--c:${carte.couleur}` : undefined}>
+                  {(carte.duo ? [carte, carte.duo] : [carte]).map((c) => (
+                  <div class:list={{ 'fr-moitie': carte.duo, 'fr-carte--c': carte.duo && c.couleur }} style={carte.duo && c.couleur ? `--c:${c.couleur}` : undefined}>
                     {c.href
                       ? <a class="fr-carte-lien" href={c.href}><span class="fr-carte-titre">{c.titre}</span></a>
                       : <span class="fr-carte-titre">{c.titre}</span>}
@@ -269,6 +277,8 @@ const description = `${nbFrises} frises chronologiques interactives de philosoph
                       </span>
                     )}
                     {c.href && <span class="fr-carte-go" aria-hidden="true">→</span>}
+                  </div>
+                  ))}
                   </li>
                 ))}
               </ul>
@@ -395,6 +405,29 @@ const description = `${nbFrises} frises chronologiques interactives de philosoph
     background: rgba(255, 251, 236, .7); border: 1px solid rgba(139, 58, 15, .4); transition: background .2s, color .2s; }
   .fr-sous a:hover, .fr-sous a:focus-visible { background: #8b3a0f; color: #fff8e6; outline: none; }
   .fr-sous small { font-size: .78rem; opacity: .8; }
+
+  /* Carte double (Occident | Reste du monde) : deux moitiés cliquables chacune */
+  .fr-carte > div:not(.fr-moitie) { display: contents; }
+  .fr-carte--duo { padding: 0; flex-direction: row; }
+  .fr-moitie { position: relative; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: .5rem; padding: 1rem 1.1rem 1.05rem; border-radius: 4px; }
+  .fr-moitie + .fr-moitie { border-left: 1px dashed rgba(139, 58, 15, .35); }
+  .fr-moitie:hover .fr-carte-go { transform: translateX(3px); }
+  /* Sur ordinateur : toute une ligne, en version aplatie (méta sur une ligne, jalons sur une
+     ligne, accroche sur deux, pastilles plus petites) */
+  @media (min-width: 820px) {
+    .fr-carte--duo { grid-column: 1 / -1; }
+    .fr-moitie { gap: .35rem; padding: .85rem 1.2rem .9rem; }
+    .fr-moitie .fr-carte-meta { flex-direction: row; align-items: baseline; gap: .9rem; }
+    .fr-moitie .fr-jalons { flex-wrap: nowrap; overflow: hidden; white-space: nowrap; margin: .05rem 0;
+      -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+    .fr-moitie .fr-accroche { -webkit-line-clamp: 2; line-clamp: 2; }
+    .fr-moitie .fr-sous { gap: .35rem; margin-top: .2rem; }
+    .fr-moitie .fr-sous a { padding: .18rem .45rem; font-size: .76rem; }
+  }
+  @media (max-width: 819px) {
+    .fr-carte--duo { flex-direction: column; }
+    .fr-moitie + .fr-moitie { border-left: 0; border-top: 1px dashed rgba(139, 58, 15, .35); }
+  }
 
   .fr-hasard { margin: 2.6rem auto 0; max-width: 560px; text-align: center; }
   .fr-hasard p { margin: 0 0 1.1rem; font-style: italic; font-size: 1.05rem; color: #ead9a8; }

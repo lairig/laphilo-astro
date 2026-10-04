@@ -150,6 +150,14 @@ def url_relative(v):
     return s
 
 
+def image_presente(url):
+    """Portrait local absent de public/ (image pas encore fournie) : pas de
+    vignette plutôt qu'une image cassée ; il apparaîtra au prochain build-data."""
+    if url.startswith('/') and not os.path.exists(os.path.join(BASE, 'public', url.lstrip('/'))):
+        return ''
+    return url
+
+
 def normalize_header(s):
     s = unicodedata.normalize('NFD', str(s))
     s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
@@ -242,7 +250,7 @@ def lire_xlsx(nom_fichier):
             'text': wrap_dd(to_str(row[C['text']])),
             'yt_id': to_str(row[C['yt_id']]),
             'media_credit': to_str(row[C['media_credit']]),
-            'thumbnail': url_relative(row[C['thumbnail']]),
+            'thumbnail': image_presente(url_relative(row[C['thumbnail']])),
             'image_media': url_relative(row[C['image_media']]),
         }
 

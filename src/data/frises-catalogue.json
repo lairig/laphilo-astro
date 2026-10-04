@@ -219,10 +219,34 @@
           "href": "/philosophes/frise/americains/"
         },
         {
-          "name": "Autres Philosophes Modernes",
-          "tag": "1755 → 1950",
-          "text": "Frise rassemblant les philosophes occidentaux de la modernité, actifs entre 1755 et 1950, en excluant les traditions française, allemande, américaine et russe. Elle met en valeur des penseurs d'autres aires européennes, comme les philosophes écossais, britanniques, italiens, espagnols, danois ou néerlandais, afin de montrer la diversité des courants de cette période.",
-          "href": "/philosophes/frise/modernes/"
+          "name": "Philosophes Modernes d'Europe du Nord &amp; Centrale",
+          "tag": "1757 → 2026",
+          "text": "Du Royaume-Uni à la Pologne : Mill et Spencer, le tournant analytique de Russell, Moore et Anscombe ; Kierkegaard au Danemark ; à Vienne Bolzano, Wittgenstein, Popper, Buber et Jung ; Masaryk, Tarski, Lukács, Cioran et Zygmunt Bauman.",
+          "href": "/philosophes/frise/modernes-europe-nord-centrale/"
+        },
+        {
+          "name": "Philosophes Modernes d'Europe du Sud",
+          "tag": "1798 → 2026",
+          "text": "L'Italie de Leopardi, Gentile et Gramsci, l'Espagne d'Ortega y Gasset, de Santayana et de María Zambrano, jusqu'au Grec Cornelius Castoriadis et à son « imaginaire social ».",
+          "href": "/philosophes/frise/modernes-europe-sud/"
+        },
+        {
+          "name": "Philosophes Modernes d'Asie",
+          "tag": "1724 → 2021",
+          "text": "L'Asie face à l'Occident : la renaissance indienne de Ram Mohan Roy, Tagore et Vivekananda, Gandhi, Aurobindo et Ambedkar ; les réformateurs chinois Kang Youwei et Liang Qichao et le nouveau confucianisme ; l'école de Kyōto de Nishida ; la Corée du Silhak et du Donghak.",
+          "href": "/philosophes/frise/modernes-asie/"
+        },
+        {
+          "name": "Philosophes Modernes Islam &amp; Pensées du Sud",
+          "tag": "1703 → 2023",
+          "text": "La Nahda et le réformisme musulman d'al-Afghani, Abduh, Iqbal, Shariati et Arkoun ; l'Afrique, les Caraïbes et l'Amérique latine d'Amo, Bello, Firmin, Mariátegui, Senghor, Césaire, Fanon, Cheikh Anta Diop et Dussel.",
+          "href": "/philosophes/frise/modernes-islam-sud/"
+        },
+        {
+          "name": "Philosophes Modernes du Monde entier",
+          "tag": "1648 → 2026",
+          "text": "Toute l'époque moderne sur une seule frise, hors France : l'idéalisme allemand et Nietzsche, la philosophie analytique, la pensée russe, le pragmatisme américain, la renaissance indienne, la Nahda, la négritude et les pensées du Sud.",
+          "href": "/philosophes/frise/modernes-monde/"
         }
       ]
     },
@@ -395,12 +419,42 @@
           "tag": "-640 av. J.-C. → 1997",
           "text": "Frise de tous les philosophes grecs et byzantins, toutes époques confondues : des présocratiques Thalès et Héraclite à Socrate, Platon, Aristote et Épicure, jusqu'aux néoplatoniciens, aux penseurs de Byzance (Maxime le Confesseur, Palamas, Pléthon) et à Castoriadis.",
           "href": "/philosophes/frise/grecs-byzantins-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Indiens",
+          "tag": "-1900 av. J.-C. → 2026",
+          "text": "Frise des philosophes de l'Inde, toutes époques confondues : des sages des Upanishads (Yajnavalkya, Maitreyi, Gargi) au Bouddha et à Mahavira, de Nagarjuna et Shankara à Kabir et Mirabai, jusqu'à Tagore, Gandhi, Ambedkar et Amartya Sen.",
+          "href": "/philosophes/frise/indiens-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Chinois",
+          "tag": "-570 av. J.-C. → 2021",
+          "text": "Frise des philosophes chinois : Lao-tseu et Confucius, Mozi, Tchouang-tseu, Mencius et Han Fei, le bouddhisme de Xuanzang, le néoconfucianisme de Zhu Xi et de Wang Yangming, Wang Fuzhi et Dai Zhen, les réformateurs Kang Youwei et Liang Qichao, jusqu'au nouveau confucianisme de Feng Youlan et Mou Zongsan et à Li Zehou.",
+          "href": "/philosophes/frise/chinois-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Coréens",
+          "tag": "613 → 2026",
+          "text": "Frise des philosophes coréens : le bouddhisme de Wonhyo et de Jinul, le confucianisme de Yi Hwang et Yi I, l'« étude pratique » de Jeong Yak-yong, le Donghak, la pensée ssial de Ham Seok-heon, jusqu'à Byung-Chul Han.",
+          "href": "/philosophes/frise/coreens-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes Japonais",
+          "tag": "774 → 2026",
+          "text": "Frise des philosophes japonais : le bouddhisme de Kūkai, Shinran et Dōgen, le confucianisme d'Ogyū Sorai, l'« étude nationale » de Motoori Norinaga, l'école de Kyōto de Nishida et Nishitani, jusqu'à Kōjin Karatani.",
+          "href": "/philosophes/frise/japonais-toutes-epoques/"
         }
       ]
     },
     {
       "label": "Par grande tradition",
       "items": [
+        {
+          "name": "Tous les Philosophes d'Occident",
+          "tag": "-640 av. J.-C. → 2026",
+          "text": "La tradition occidentale sur une seule frise : des présocratiques à Platon et Aristote, d'Augustin et Thomas d'Aquin à Descartes, Spinoza et Kant, de Hegel, Marx et Nietzsche à Heidegger, Wittgenstein, Arendt, Beauvoir et aux penseurs d'aujourd'hui.",
+          "href": "/frises/penseurs-du-monde/?g=occident"
+        },
         {
           "name": "Tous les Philosophes de l'Inde &amp; du Monde Bouddhiste",
           "tag": "-1900 av. J.-C. → 2026",
@@ -430,6 +484,12 @@
           "tag": "947 → 2026",
           "text": "Frise des pensées d'Afrique, d'Amérique latine, des Caraïbes et des Amériques indigènes : de Quetzalcoatl et Nezahualcoyotl à Zera Yacob et Anton Wilhelm Amo, de Senghor, Césaire et Fanon à Cheikh Anta Diop, Mariátegui, Dussel et Achille Mbembe.",
           "href": "/philosophes/frise/pensees-du-sud-toutes-epoques/"
+        },
+        {
+          "name": "Tous les Philosophes de la Pensée Russe",
+          "tag": "1711 → 2026",
+          "text": "Née au XIXe siècle autour de l'identité de la Russie face à l'Europe : Lomonossov, les slavophiles et les occidentalistes, Herzen et Bakounine, Dostoïevski et Tolstoï, Soloviev, Berdiaev, Chestov, Florensky et Bakhtine, jusqu'aux penseurs d'aujourd'hui.",
+          "href": "/philosophes/frise/pensee-russe-toutes-epoques/"
         }
       ]
     },

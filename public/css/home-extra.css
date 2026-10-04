@@ -465,3 +465,17 @@
 
 /* 6e carte de la frise d'accueil (Les Philosophes d'aujourd'hui) : suite des délais de styles.css */
 .tl-node:nth-child(6) { animation-delay: 1s; }
+
+/* Devise de l'accueil en citation (2026-10-04) */
+.site-devise { margin: .9rem auto 0; max-width: 34rem; padding: 0 1rem; }
+.site-devise blockquote { margin: 0; }
+.site-devise blockquote p {
+  font-family: 'EB Garamond', serif; font-style: italic;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem); line-height: 1.35;
+  color: var(--parch-dark); text-wrap: balance; margin: 0;
+}
+.site-devise figcaption {
+  font-family: 'Cinzel', serif; font-size: clamp(.62rem, 1.2vw, .72rem);
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold, #c9a043); margin-top: .35rem; opacity: .85;
+}
