@@ -1,5 +1,9 @@
 """
-Éditeur local des fiches (data/frise-philosophes-*.xlsx).
+Éditeur local des fiches (data/frise-philosophes-*.xlsx) et des courants de pensée
+(data/frise-courant-pensee-*.xlsx), au choix par le sélecteur en haut de la page.
+Pour un courant : les philosophes rattachés (ceux dont la colonne Courant le cite) se
+rattachent ou se retirent depuis sa page, et un nouveau nom de courant est reporté dans
+leurs fiches.
 
 Lancement : double-clic sur « Editeur des fiches.bat » à la racine de laphilo-astro
 (ou : python scripts/editeur/serveur.py). La page s'ouvre dans le navigateur.
@@ -68,9 +72,13 @@ _cache = {}
 
 
 def chemin(fichier):
-    if fichier not in bd.PHILOSOPHE_FICHIERS:
+    if fichier not in bd.PHILOSOPHE_FICHIERS and fichier not in bd.COURANT_FICHIERS:
         raise ValueError(f'Fichier inconnu : {fichier}')
     return os.path.join(DATA, fichier + '.xlsx')
+
+
+def est_courant(fichier):
+    return fichier in bd.COURANT_FICHIERS
 
 
 def classeur(fichier):
@@ -123,7 +131,49 @@ def mesure_texte(h):
     return len(texte), len(liens)
 
 
-def liste_fiches():
+def decouper_courants(s):
+    return [x.strip() for x in str(s or '').replace('\xa0', ' ').split(';') if x.strip()]
+
+
+def rattaches():
+    """nom de courant -> [{f, l, nom, dates}] des philosophes qui le citent dans leur colonne Courant."""
+    out = {}
+    for f in bd.PHILOSOPHE_FICHIERS:
+        c = classeur(f)
+        for r, v in c['lignes'].items():
+            nom = valeur(c, v, 'nom')
+            for cour in decouper_courants(valeur(c, v, 'courant')) if nom else []:
+                out.setdefault(cour, []).append({'f': f, 'l': r, 'nom': str(nom), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
+                                                 'annee': bd.to_int(valeur(c, v, 'annee_naissance'))})
+    for L in out.values():
+        L.sort(key=lambda x: x['annee'] if x['annee'] is not None else 10 ** 9)
+    return out
+
+
+def liste_courants():
+    out = []
+    R = rattaches()
+    for f in bd.COURANT_FICHIERS:
+        c = classeur(f)
+        for r, v in c['lignes'].items():
+            nom = valeur(c, v, 'nom')
+            if not nom:
+                continue
+            photo_ok, _ = image_locale(valeur(c, v, 'image_media'))
+            lg, liens = mesure_texte(valeur(c, v, 'texte_html'))
+            out.append({
+                'lg': lg, 'liens': liens, 'courant': True,
+                'f': f, 'l': r, 'nom': str(nom), 'slug': bd.slugify(str(nom)), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
+                'groupe': valeur(c, v, 'groupe') or '', 'image': '', 'image_prevue': '',
+                'video': bool(valeur(c, v, 'youtube_id')), 'photo': bool(valeur(c, v, 'image_media')) and photo_ok,
+                'annee': bd.to_int(valeur(c, v, 'annee_naissance')), 'nb_phi': len(R.get(str(nom).strip(), [])),
+            })
+    return out
+
+
+def liste_fiches(type_='philosophes'):
+    if type_ == 'courants':
+        return liste_courants()
     out = []
     for f in bd.PHILOSOPHE_FICHIERS:
         c = classeur(f)
@@ -163,7 +213,55 @@ def lire_fiche(f, l):
     return {'photo': photo, 'photo_existe': photo_ok,
             'source_portrait': source_de(champs.get('Thumbnail_URL')), 'source_photo': source_de(champs.get('Image_media')),'f': f, 'l': l, 'slug': bd.slugify(str(champs.get('Nom', ''))), 'entetes': [h for h in c['entetes'] if h], 'champs': champs,
             'image_existe': existe, 'image': img, 'nat_defaut': bd.NAT_DEFAUT.get(f, ''),
-            'vivants': f in bd.FICHIERS_VIVANTS}
+            'vivants': f in bd.FICHIERS_VIVANTS, 'courant': est_courant(f),
+            'philosophes': rattaches().get(str(champs.get('Nom', '')).strip(), []) if est_courant(f) else []}
+
+
+# ── Courants : rattacher un philosophe, renommer partout ────────────────────
+def rattacher(courant, f, l, retirer=False):
+    """Ajoute (ou retire) le courant dans la colonne Courant d'un philosophe."""
+    if f not in bd.PHILOSOPHE_FICHIERS:
+        raise ValueError('Fichier de philosophe inconnu')
+    courant = (courant or '').strip()
+    c = classeur(f)
+    if l not in c['lignes']:
+        raise ValueError('Ligne introuvable')
+    h = next((h for h in c['entetes'] if norm(h) == 'courant'), None)
+    if not h:
+        raise ValueError(f'{f} n\'a pas de colonne Courant')
+    L = decouper_courants(valeur(c, c['lignes'][l], 'courant'))
+    if retirer:
+        L = [x for x in L if x != courant]
+    elif courant not in L:
+        L.append(courant)
+    return ecrire(f, l, {h: ' ; '.join(L)})
+
+
+def renommer_courant(ancien, nouveau):
+    """Remplace l'ancien nom de courant par le nouveau dans la colonne Courant de tous les philosophes."""
+    ancien, nouveau = ancien.strip(), nouveau.strip()
+    n = 0
+    for f in bd.PHILOSOPHE_FICHIERS:
+        c = classeur(f)
+        h = next((h for h in c['entetes'] if norm(h) == 'courant'), None)
+        if not h:
+            continue
+        col = get_column_letter(c['entetes'].index(h) + 1)
+        valeurs = {}
+        for r, v in c['lignes'].items():
+            L = decouper_courants(valeur(c, v, 'courant'))
+            if ancien in L:
+                valeurs[f'{col}{r}'] = ' ; '.join(nouveau if x == ancien else x for x in L)
+        if valeurs:
+            p = chemin(f)
+            with verrou:
+                if ouvert_dans_excel(p):
+                    raise PermissionError(f'{f}.xlsx est ouvert dans Excel : fermez-le, le renommage n\'est pas fini.')
+                sauvegarder(p)
+                set_cells(p, valeurs)
+                _cache.pop(f, None)
+            n += len(valeurs)
+    return n
 
 
 # ── Écriture ───────────────────────────────────────────────────────────────
@@ -339,9 +437,9 @@ def dates_affichees(n, m):
     return f'{f(n)} - {f(m)}' if n < 0 else f'{f(n)} – {f(m)}'
 
 
-def homonymes(nom):
+def homonymes(nom, type_='philosophes'):
     cle = bd.slugify(nom)
-    return [x for x in liste_fiches() if x['slug'] == cle]
+    return [x for x in liste_fiches(type_) if x['slug'] == cle]
 
 
 def creer_fiche(f, nom, annee, deces=None):
@@ -367,6 +465,10 @@ def creer_fiche(f, nom, annee, deces=None):
         'nationalite': bd.NAT_DEFAUT.get(f) or None,
         'groupe': GROUPE_PAR_FICHIER.get(f),
     }
+    if est_courant(f):  # un courant : une seule année (« 360 av. J.-C. »), groupe Occident pour le fichier occidental
+        valeurs_par_cle['groupe'] = 'occident' if f == 'frise-courant-pensee-occidental' else None
+        valeurs_par_cle['annee_deces'] = None
+        valeurs_par_cle['dates_affichage'] = f'{-n} av. J.-C.' if n < 0 else str(n)
     valeurs, styles = {}, {}
     for i, h in enumerate(c['entetes']):
         col = get_column_letter(i + 1)
@@ -589,8 +691,15 @@ def infos_audio(url):
 def codes():
     P = json.load(open(os.path.join(BASE, 'src', 'data', 'philosophes.json'), encoding='utf-8'))
     C = json.load(open(os.path.join(BASE, 'src', 'data', 'courants.json'), encoding='utf-8'))
+    branches_c = []
+    for c in C:
+        for b in c.get('branches', []):
+            if b not in branches_c:
+                branches_c.append(b)
     return {
         'fichiers': [{'f': f, 'label': lab} for f, (_, lab) in bd.PHILOSOPHE_FICHIERS.items()],
+        'fichiers_courants': [{'f': f, 'label': lab} for f, (_, lab) in bd.COURANT_FICHIERS.items()],
+        'branches_courants': sorted(branches_c, key=lambda b: bd.normalize_header(b)),
         'groupes': [{'code': k, 'label': v} for k, v in bd.GROUPES.items()],
         'branches': BRANCHES, 'traditions': TRADITIONS,
         'themes': [{'code': k, 'label': v} for k, v in bd.THEMES.items()],
@@ -627,7 +736,7 @@ def astro(*args):
                    capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
 
 
-def preparer_apercu(slug):
+def preparer_apercu(slug, type_='philosophes'):
     """Régénère les données si un xlsx a changé, (re)lance le site local, attend que la fiche réponde."""
     with verrou_apercu:
         json_phi = os.path.join(BASE, 'src', 'data', 'philosophes.json')
@@ -649,7 +758,7 @@ def preparer_apercu(slug):
             astro('--background')
             if 'site local redémarré' not in etapes:
                 etapes.append('site local lancé')
-        url = f'{SITE_LOCAL}/philosophes/{slug}/'
+        url = f'{SITE_LOCAL}/{"courants" if type_ == "courants" else "philosophes"}/{slug}/'
         import time
         for _ in range(90):
             try:
@@ -658,7 +767,7 @@ def preparer_apercu(slug):
                         return {'ok': True, 'url': url, 'message': ', '.join(etapes) or 'déjà à jour'}
             except urllib.error.HTTPError as e:
                 if e.code == 404:
-                    return {'ok': False, 'url': url, 'message': "Fiche introuvable sur le site local (nom modifié ? fiche nouvelle ?)"}
+                    return {'ok': False, 'url': url, 'message': "Page introuvable sur le site local (nom modifié ? fiche nouvelle ?)"}
             except Exception:
                 pass
             time.sleep(1)
@@ -671,7 +780,7 @@ PAGE_APERCU = '''<!doctype html><html lang="fr"><head><meta charset="utf-8"><tit
 @keyframes t{to{transform:rotate(360deg)}} small{color:#ead9a8;display:block;margin-top:.6rem;max-width:520px} pre{text-align:left;white-space:pre-wrap;font-size:.8rem;color:#ffb4a8}</style></head>
 <body><div><div class="r" id="r"></div><div id="m">Préparation de l'aperçu local…</div>
 <small>Si des fiches ont été modifiées, les données sont régénérées et le site local redémarré (10 à 30 secondes).</small><pre id="d"></pre></div>
-<script>fetch('/api/preparer?slug=__SLUG__').then(r=>r.json()).then(d=>{if(d.ok){location.replace(d.url)}else{
+<script>fetch('/api/preparer?slug=__SLUG__&type=__TYPE__').then(r=>r.json()).then(d=>{if(d.ok){location.replace(d.url)}else{
 document.getElementById('r').remove();document.getElementById('m').textContent='⚠ '+d.message;document.getElementById('d').textContent=d.detail||''}})
 .catch(e=>{document.getElementById('m').textContent='⚠ '+e})</script></body></html>'''
 
@@ -712,17 +821,19 @@ class Gestion(BaseHTTPRequestHandler):
                 if os.path.exists(p):
                     return self.envoyer(200, open(p, 'rb').read(), 'image/webp' if p.endswith('.webp') else 'image/jpeg')
                 return self.envoyer(404, {'erreur': 'image absente'})
-            if u.path.startswith('/apercu/'):
-                slug = re.sub(r'[^a-z0-9-]', '', u.path[len('/apercu/'):].strip('/'))
-                return self.envoyer(200, PAGE_APERCU.replace('__SLUG__', slug).encode('utf-8'), 'text/html; charset=utf-8')
+            if u.path.startswith('/apercu/'):  # /apercu/<slug>/ (philosophe) ou /apercu/courants/<slug>/
+                reste = u.path[len('/apercu/'):].strip('/')
+                type_ = 'courants' if reste.startswith('courants/') else 'philosophes'
+                slug = re.sub(r'[^a-z0-9-]', '', reste.split('/')[-1])
+                return self.envoyer(200, PAGE_APERCU.replace('__SLUG__', slug).replace('__TYPE__', type_).encode('utf-8'), 'text/html; charset=utf-8')
             if u.path == '/api/preparer':
-                return self.envoyer(200, preparer_apercu(re.sub(r'[^a-z0-9-]', '', q.get('slug', ''))))
+                return self.envoyer(200, preparer_apercu(re.sub(r'[^a-z0-9-]', '', q.get('slug', '')), q.get('type', 'philosophes')))
             if u.path == '/api/version':
                 return self.envoyer(200, {'version': VERSION})
             if u.path == '/api/codes':
                 return self.envoyer(200, codes())
             if u.path == '/api/fiches':
-                return self.envoyer(200, liste_fiches())
+                return self.envoyer(200, liste_fiches(q.get('type', 'philosophes')))
             if u.path == '/api/fiche':
                 return self.envoyer(200, lire_fiche(q['f'], int(q['l'])))
             if u.path == '/api/audio':
@@ -739,12 +850,23 @@ class Gestion(BaseHTTPRequestHandler):
             n = int(self.headers.get('Content-Length', 0))
             d = json.loads(self.rfile.read(n) or b'{}')
             if u.path == '/api/fiche':
+                renommes = 0
+                if est_courant(d['f']):  # nom de courant changé : les philosophes qui le citent suivent
+                    c = classeur(d['f'])
+                    h_nom = next((h for h in c['entetes'] if norm(h) == 'nom'), None)
+                    ancien = str(valeur(c, c['lignes'].get(int(d['l']), []), 'nom') or '').strip() if int(d['l']) in c['lignes'] else ''
+                    nouveau = str(d['changements'].get(h_nom, '')).strip() if h_nom in d['changements'] else ''
                 nb = ecrire(d['f'], int(d['l']), d['changements'])
+                if est_courant(d['f']) and ancien and nouveau and nouveau != ancien:
+                    renommes = renommer_courant(ancien, nouveau)
                 l = placer_ligne(d['f'], int(d['l']))
-                return self.envoyer(200, {'ok': True, 'cellules': nb, 'ligne': l, 'deplacee': l != int(d['l'])})
+                return self.envoyer(200, {'ok': True, 'cellules': nb, 'ligne': l, 'deplacee': l != int(d['l']), 'renommes': renommes})
+            if u.path == '/api/rattacher':
+                rattacher(d['courant'], d['f'], int(d['l']), d.get('retirer', False))
+                return self.envoyer(200, {'ok': True, 'philosophes': rattaches().get(d['courant'].strip(), [])})
             if u.path == '/api/nouvelle':
                 if not d.get('confirme'):
-                    h = homonymes(d.get('nom', ''))
+                    h = homonymes(d.get('nom', ''), 'courants' if est_courant(d['f']) else 'philosophes')
                     if h:
                         return self.envoyer(200, {'ok': False, 'homonymes': h})
                 l = creer_fiche(d['f'], d.get('nom'), d.get('annee'), d.get('deces'))

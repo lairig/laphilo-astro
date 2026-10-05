@@ -51,6 +51,8 @@ const courants = defineCollection({
     image_media: z.string().optional(),
     branches: z.array(z.string()).optional(),
     description: z.string().optional(),
+    /* Représentants mis en avant d'abord (noms exacts des fiches), colonne Figures_cles */
+    figures_cles: z.array(z.string()).optional(),
     /* Grande tradition du courant (mêmes codes que le groupe des philosophes),
        et traditions secondaires qu'il traverse */
     groupe: z.string().optional(),

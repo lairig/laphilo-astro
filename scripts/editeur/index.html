@@ -15,6 +15,16 @@
   header { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: #120a04; border-bottom: 1px solid #5c4318; }
   header h1 { margin: 0; font-size: 1.1rem; letter-spacing: .08em; color: var(--or); font-weight: normal; text-transform: uppercase; }
   header .espace { flex: 1; }
+  #modes { display: flex; border: 1px solid var(--or); border-radius: 5px; overflow: hidden; }
+  #modes button { border: 0; border-radius: 0; background: transparent; padding: .3rem .8rem; }
+  #modes button + button { border-left: 1px solid var(--or); }
+  #modes button.on { background: var(--or); color: #1a0f07; }
+  body.mode-courants .seulement-philo, body:not(.mode-courants) .seulement-courant { display: none !important; }
+  .rattache { display: flex; align-items: center; gap: .6rem; padding: .3rem 0; border-bottom: 1px solid #d8c48c; font-size: .92rem; }
+  .rattache span { flex: 1; }
+  .rattache a { color: var(--rouille); }
+  .rattache small { color: #6b4a22; }
+  .rattache button { padding: .1rem .5rem; font-size: .8rem; background: #fffbef; color: var(--encre); border-color: #b8923c; }
   button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--or); background: #3a2510; color: var(--parch); padding: .35rem .8rem; }
   button:hover { background: #57381a; }
   button.principal { background: var(--rouille); border-color: #c0662e; color: #fff8e6; }
@@ -134,6 +144,7 @@
 <body>
 <header>
   <h1>✦ Éditeur des fiches</h1>
+  <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
   <button id="btn-images" title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
@@ -148,6 +159,12 @@
       <input type="search" id="q" placeholder="Rechercher un nom…" autocomplete="off">
       <select id="f-fichier"><option value="">Tous les fichiers</option></select>
       <select id="f-groupe"><option value="">Toutes les traditions</option></select>
+      <select id="f-phi" class="seulement-courant" title="Philosophes dont la colonne Courant cite ce courant">
+        <option value="">Tous les rattachements</option>
+        <option value="0">Aucun philosophe rattaché</option>
+        <option value="1">Un seul philosophe</option>
+        <option value="2">Deux philosophes au plus</option>
+      </select>
       <select id="f-texte" title="Longueur de référence d'un texte : 1 600 caractères">
         <option value="">Tous les textes</option>
         <option value="enrichir">À enrichir (court ou sans lien)</option>
@@ -156,7 +173,7 @@
         <option value="sans-lien">Sans lien dans le texte</option>
       </select>
       <div class="cases">
-        <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
+        <label class="seulement-philo" style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 600 caractères, du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 600</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="La liste se replie à gauche dès qu'une fiche est ouverte ; le bouton ‹ › ou la bande de gauche la rouvre"><input type="checkbox" id="replier-auto"> Replier la liste à l'ouverture d'une fiche</label>
@@ -190,8 +207,14 @@ const api = async (url, corps) => {
 };
 const decouper = (s) => String(s || '').split(/\s*[;,]\s*/).map((x) => x.trim()).filter(Boolean);
 
-let CODES = null, FICHES = [], courante = null, initial = {}, image = null;
-const EN_LIGNE = 'https://laphilo.fr/philosophes/', LOCAL = 'http://localhost:4321/philosophes/';
+let CODES = null, FICHES = [], PHILOS = [], courante = null, initial = {}, image = null;
+/* Mode : fiches des philosophes ou des courants de pensée (mêmes outils, colonnes propres à chacun) */
+let MODE = 'philosophes';
+try { if (localStorage.getItem('editeur-mode') === 'courants') MODE = 'courants'; } catch (e) {}
+const COURANTS = () => MODE === 'courants';
+const enLigne = (slug) => `https://laphilo.fr/${COURANTS() ? 'courants' : 'philosophes'}/${slug}/`;
+const apercu = (slug) => `/apercu/${COURANTS() ? 'courants/' : ''}${slug}/`;
+const fichiersDuMode = () => (COURANTS() ? CODES.fichiers_courants : CODES.fichiers);
 
 /* ── Largeur de la colonne de gauche (glisser la poignée, mémorisée) ── */
 (() => {
@@ -251,7 +274,7 @@ function mesureTexte(h) {
 
 /* ── Liste ─────────────────────────────────────────────── */
 async function chargerListe(garderSelection = true) {
-  FICHES = await api('/api/fiches');
+  FICHES = await api('/api/fiches?type=' + MODE);
   // page plus récente que le serveur en marche (lancé avant une mise à jour de l'éditeur)
   if (FICHES.length && FICHES[0].lg === undefined) {
     FICHES.forEach((x) => { x.lg = Infinity; x.liens = 1; });
@@ -264,20 +287,24 @@ async function chargerListe(garderSelection = true) {
 }
 function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
-  const si = $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
+  const si = !COURANTS() && $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
+  const fp = COURANTS() ? $('#f-phi').value : '';
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
-    && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_REF));
+    && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_REF)
+    && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
   // filtre de texte : du plus court (le pire) au plus long
   L.sort(ft || fc ? (a, b) => a.lg - b.lg : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
-  $('#compte').textContent = `${L.length} fiche${L.length > 1 ? 's' : ''}`;
+  const mot = COURANTS() ? 'courant' : 'fiche';
+  $('#compte').textContent = `${L.length} ${mot}${L.length > 1 ? 's' : ''}`;
   $('#liste').innerHTML = L.map((x) => `<li data-f="${x.f}" data-l="${x.l}" class="${courante && courante.f === x.f && courante.l === x.l ? 'actif' : ''}">
-      ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span class="vide">?</span>'}
+      ${x.courant ? '' : x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span class="vide">?</span>'}
       <span class="nom"><b>${esc(x.nom)}</b><small>${esc(x.dates)}</small></span>
-      ${!x.image ? '<span class="pastille sans" title="Pas d’image">img</span>' : ''}
+      ${x.courant ? `<span class="pastille ${x.nb_phi === 0 ? 'sans' : x.nb_phi === 1 ? 'moyen' : ''}" title="Philosophes rattachés à ce courant">${x.nb_phi} phi</span>` : ''}
+      ${!x.courant && !x.image ? '<span class="pastille sans" title="Pas d’image">img</span>' : ''}
       ${!x.video && !x.photo ? '<span class="pastille sans" title="Ni vidéo ni grande photo">vid</span>' : ''}
       ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_REF ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
       ${!x.liens ? '<span class="pastille sans" title="Aucun lien dans le texte (hors Wikipédia du nom)">lien</span>' : ''}
-      <a class="ouvrir" href="/apercu/${x.slug}/" target="_blank" rel="noopener" title="Voir la fiche sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
+      <a class="ouvrir" href="${apercu(x.slug)}" target="_blank" rel="noopener" title="Voir la page sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
 }
 $('#liste').addEventListener('click', (e) => {
@@ -286,7 +313,30 @@ $('#liste').addEventListener('click', (e) => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   ouvrir(li.dataset.f, +li.dataset.l).then(() => { if ($('#replier-auto').checked) replierListe(true); });
 });
-['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
+
+/* ── Changer de mode (philosophes / courants) ──────────── */
+async function changerMode(m) {
+  if (m === MODE) return true;
+  if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return false;
+  MODE = m;
+  try { localStorage.setItem('editeur-mode', m); } catch (e) {}
+  appliquerMode();
+  courante = null; $('#formulaire').hidden = true; $('#formulaire').innerHTML = ''; $('#accueil').hidden = false;
+  $('#f-fichier').value = ''; $('#q').value = '';
+  await chargerListe();
+  return true;
+}
+function appliquerMode() {
+  document.body.classList.toggle('mode-courants', COURANTS());
+  document.querySelectorAll('#modes button').forEach((b) => b.classList.toggle('on', b.dataset.mode === MODE));
+  $('#f-fichier').innerHTML = '<option value="">Tous les fichiers</option>' + fichiersDuMode().map((x) => `<option value="${x.f}">${esc(x.label)}</option>`).join('');
+  $('#btn-nouvelle').textContent = COURANTS() ? '+ Nouveau courant' : '+ Nouvelle fiche';
+  $('#q').placeholder = COURANTS() ? 'Rechercher un courant…' : 'Rechercher un nom…';
+  $('#poignee .bande').textContent = COURANTS() ? 'Liste des courants' : 'Liste des fiches';
+  document.title = COURANTS() ? 'Éditeur des courants' : 'Éditeur des fiches';
+}
+document.querySelectorAll('#modes button').forEach((b) => (b.onclick = () => changerMode(b.dataset.mode)));
 
 /* ── Fiche ─────────────────────────────────────────────── */
 const COLS = {}; // norm -> entête réelle de la fiche ouverte
@@ -310,27 +360,36 @@ const v = (cle) => esc(courante.champs[champ(cle)] ?? '');
 const a = (cle) => (champ(cle) ? '' : 'hidden');
 
 function gabarit(d) {
-  const lab = CODES.fichiers.find((x) => x.f === d.f)?.label ?? d.f;
+  const lab = [...CODES.fichiers, ...CODES.fichiers_courants].find((x) => x.f === d.f)?.label ?? d.f;
+  const branches = d.courant ? CODES.branches_courants : CODES.branches;
   const nomImg = (d.image || '').replace(/^\/pho\//, '').replace(/-mini\.webp$/, '') ||
     String(d.champs[champ('nom')] || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   return `
   <div class="fiche">
     <div class="titre-fiche"><h2>${v('nom')}</h2><small>${esc(lab)} · ligne ${d.l}</small><span style="flex:1"></span>
       <button type="button" id="btn-trier" title="Remettre toutes les lignes de ce fichier dans l'ordre des années de naissance">Trier ce fichier par année</button>
-      <a class="bouton-lien" href="${EN_LIGNE}${d.slug}/" target="_blank" rel="noopener" title="La fiche publiée sur laphilo.fr">↗ Fiche en ligne</a>
-      <a class="bouton-lien" href="/apercu/${d.slug}/" target="_blank" rel="noopener" title="La fiche sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
+      <a class="bouton-lien" href="${enLigne(d.slug)}" target="_blank" rel="noopener" title="La page publiée sur laphilo.fr">↗ En ligne</a>
+      <a class="bouton-lien" href="${apercu(d.slug)}" target="_blank" rel="noopener" title="La page sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
 
     <section class="bloc"><h3>Identité</h3>
       <div class="grille">
         <label class="large">Nom<input type="text" data-c="nom" value="${v('nom')}"></label>
-        <label>Année de naissance<input type="text" data-c="annee_naissance" value="${v('annee_naissance')}" placeholder="ex. 1724 ou -384"></label>
-        <label>Année de décès<input type="text" data-c="annee_deces" value="${v('annee_deces')}" placeholder="vide si vivant"></label>
+        <label>${d.courant ? 'Année d’apparition' : 'Année de naissance'}<input type="text" data-c="annee_naissance" value="${v('annee_naissance')}" placeholder="ex. 1724 ou -384"></label>
+        ${d.courant ? '' : `<label>Année de décès<input type="text" data-c="annee_deces" value="${v('annee_deces')}" placeholder="vide si vivant"></label>`}
         <label>Dates affichées<div class="ligne"><input type="text" data-c="dates_affichage" value="${v('dates_affichage')}"><button type="button" id="btn-dates" title="Calculer à partir des années">↻</button></div></label>
       </div>
-      <p class="aide">Années avant J.-C. en négatif (-384) ; le bouton ↻ écrit « 384 A JC - 322 A JC » ou « 1724 – 1777 ».</p>
+      <p class="aide">${d.courant ? 'Années avant J.-C. en négatif (-360) ; le bouton ↻ écrit « 360 av. J.-C. » ou « 1968 ». La page du courant se place sur sa frise à cette année.'
+        : 'Années avant J.-C. en négatif (-384) ; le bouton ↻ écrit « 384 A JC - 322 A JC » ou « 1724 – 1777 ».'}</p>
+      ${d.courant ? '<p class="aide">Changer le nom renomme aussi le courant dans la colonne Courant de tous les philosophes rattachés.</p>' : ''}
     </section>
 
-    <section class="bloc"><h3>Photo (vignette)</h3>
+    ${d.courant ? `<section class="bloc"><h3>Philosophes rattachés (${d.philosophes.length})</h3>
+      <div id="rattaches">${rattachesHtml(d.philosophes)}</div>
+      <div class="ligne" style="margin-top:.6rem"><label>Rattacher un philosophe<input type="text" id="phi-ajout" list="dl-phi" placeholder="tapez un nom puis choisissez…"></label><button type="button" id="btn-rattacher">Rattacher</button></div>
+      <p class="aide">Écrit immédiatement le courant dans la colonne Courant du philosophe (sauvegarde faite avant). Cliquez un nom pour ouvrir sa fiche.</p>
+    </section>` : ''}
+
+    <section class="bloc" ${d.courant ? 'hidden' : ''}><h3>Photo (vignette)</h3>
       <div class="photo">
         <div class="vignettes">
           <div class="vignette"><div class="cadre" id="img-actuelle" style="${d.image_existe ? `background-image:url('${esc(d.image)}')` : ''}">${d.image_existe ? '' : 'aucune'}</div>actuelle</div>
@@ -381,7 +440,8 @@ function gabarit(d) {
         <label ${a('groupe')}>Grande tradition (Groupe)<select data-c="groupe"><option value="">—</option>${CODES.groupes.map((g) => `<option value="${g.code}" ${g.code === courante.champs[champ('groupe')] ? 'selected' : ''}>${esc(g.label)} (${g.code})</option>`).join('')}</select></label>
         <label ${a('importance')}>Importance<select data-c="importance">${[['', '1 (normale)'], ['2', '2 (importante)'], ['3', '3 (incontournable)']].map(([k, t]) => `<option value="${k}" ${String(courante.champs[champ('importance')] ?? '') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       </div>
-      <label ${a('branche')} style="margin-top:.7rem">Branches<div class="chips" data-multi="branche">${CODES.branches.map((b) => `<span class="chip" data-v="${b}">${b}</span>`).join('')}</div></label>
+      <label ${a('branche')} style="margin-top:.7rem">Branches<div class="chips" data-multi="branche">${branches.map((b) => `<span class="chip" data-v="${esc(b)}">${esc(b)}</span>`).join('')}</div></label>
+      <label ${a('figures_cles')} style="margin-top:.7rem">Figures clés (noms séparés par « ; », ex. PLATON;PLOTIN)<input type="text" data-c="figures_cles" value="${v('figures_cles')}"></label>
       <label ${a('traditions')} style="margin-top:.7rem">Traditions (étiquettes transversales)<div class="chips" data-multi="traditions">${CODES.traditions.map((b) => `<span class="chip" data-v="${b}">${b}</span>`).join('')}</div></label>
       <label ${a('themes')} style="margin-top:.7rem">Thèmes (philosophes vivants)<div class="chips" data-multi="themes">${CODES.themes.map((t) => `<span class="chip" data-v="${t.code}" title="${esc(t.label)}">${esc(t.label)}</span>`).join('')}</div></label>
       <label ${a('courant')} style="margin-top:.7rem">Courants<div class="chips" id="courants"></div>
@@ -420,7 +480,7 @@ function gabarit(d) {
 
     <details class="bloc" style="background:var(--parch);color:var(--encre);border-radius:6px;padding:.7rem 1rem;margin-bottom:1rem">
       <summary style="cursor:pointer;color:var(--rouille)">Autres colonnes</summary>
-      <div class="grille" style="margin-top:.6rem">${d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media'].includes(norm(h)))
+      <div class="grille" style="margin-top:.6rem">${d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media', 'figures_cles'].includes(norm(h)))
         .map((h) => `<label>${esc(h)}<input type="text" data-c="${norm(h)}" value="${esc(courante.champs[h] ?? '')}"></label>`).join('') || '<p class="aide">Aucune.</p>'}</div>
     </details>
 
@@ -439,7 +499,8 @@ function valeursFormulaire() {
     /* l'ordre déjà saisi dans le xlsx est conservé ; les nouvelles valeurs viennent à la suite */
     const choisis = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.v);
     const avant = decouper(initial[champ(el.dataset.multi)]).filter((x) => choisis.includes(x));
-    out[champ(el.dataset.multi)] = [...avant, ...choisis.filter((x) => !avant.includes(x))].join(' ; ');
+    // les courants s'écrivent « Éthique;Métaphysique », les philosophes « ethique ; metaphysique »
+    out[champ(el.dataset.multi)] = [...avant, ...choisis.filter((x) => !avant.includes(x))].join(courante.courant ? ';' : ' ; ');
   });
   if (champ('courant')) out[champ('courant')] = [...document.querySelectorAll('#courants .chip')].map((c) => c.dataset.v).join(' ; ');
   return out;
@@ -486,13 +547,17 @@ function brancher(d) {
   };
   // dates
   $('#btn-dates').onclick = () => {
-    const n = parseInt($('[data-c=annee_naissance]').value, 10), m = parseInt($('[data-c=annee_deces]').value, 10);
+    const n = parseInt($('[data-c=annee_naissance]').value, 10), m = parseInt($('[data-c=annee_deces]')?.value, 10);
     if (isNaN(n)) return;
-    const f = (y) => (y < 0 ? `${-y} A JC` : `${y}`);
-    $('[data-c=dates_affichage]').value = isNaN(m) ? f(n) : (n < 0 ? `${f(n)} - ${f(m)}` : `${f(n)} – ${f(m)}`);
+    if (d.courant) $('[data-c=dates_affichage]').value = n < 0 ? `${-n} av. J.-C.` : `${n}`;
+    else {
+      const f = (y) => (y < 0 ? `${-y} A JC` : `${y}`);
+      $('[data-c=dates_affichage]').value = isNaN(m) ? f(n) : (n < 0 ? `${f(n)} - ${f(m)}` : `${f(n)} – ${f(m)}`);
+    }
     marquer();
   };
   if (champ('texte_html')) brancherTexte(d);
+  if (d.courant) brancherRattaches();
   F.addEventListener('input', marquer);
   // vidéo : l'identifiant est extrait dès qu'on colle un lien
   $('#yt-lien').addEventListener('input', () => {
@@ -597,6 +662,54 @@ function brancher(d) {
   // boutons
   $('#btn-enr').onclick = enregistrer;
   $('#btn-annuler').onclick = () => ouvrir(courante.f, courante.l);
+}
+
+/* ── Courant : philosophes rattachés (colonne Courant de leur fiche) ── */
+const libelleFichier = (f) => CODES.fichiers.find((x) => x.f === f)?.label ?? f;
+const rattachesHtml = (L) => (L.length ? L.map((p) => `<div class="rattache"><span><a href="#" data-ouvrir-f="${p.f}" data-ouvrir-l="${p.l}">${esc(p.nom)}</a> <small>${esc(p.dates)} · ${esc(libelleFichier(p.f))}</small></span>
+    <button type="button" data-retirer-f="${p.f}" data-retirer-l="${p.l}" title="Retirer ce courant de la fiche du philosophe">✕ Retirer</button></div>`).join('')
+  : '<p class="aide">Aucun philosophe ne cite ce courant.</p>');
+const etiquettePhilo = (p) => `${p.nom} (${p.dates})`;
+/* le courant ouvert : son nom tel qu'enregistré dans le xlsx (celui que citent les philosophes) */
+const nomCourant = () => String(initial[champ('nom')] ?? '').trim();
+async function actionRattache(corps, ok) {
+  const d = courante;
+  if (String(valeursFormulaire()[champ('nom')]).trim() !== nomCourant()) { alert('Enregistrez d’abord le nouveau nom du courant.'); return; }
+  try {
+    const r = await api('/api/rattacher', { courant: nomCourant(), ...corps });
+    d.philosophes = r.philosophes;
+    if (courante !== d) return;
+    $('#rattaches').innerHTML = rattachesHtml(r.philosophes);
+    $('#rattaches').closest('section').querySelector('h3').textContent = `Philosophes rattachés (${r.philosophes.length})`;
+    const x = FICHES.find((y) => y.f === d.f && y.l === d.l); if (x) { x.nb_phi = r.philosophes.length; afficherListe(); }
+    message(ok, 'ok');
+  } catch (e) { message('⚠ ' + e.message, 'err'); }
+}
+/* clics écoutés une fois pour toutes sur le formulaire (il est redessiné à chaque ouverture) */
+$('#formulaire').addEventListener('click', async (e) => {
+  if (!courante?.courant) return;
+  const o = e.target.closest('[data-ouvrir-f]'), r = e.target.closest('[data-retirer-f]');
+  if (o) {
+    e.preventDefault();
+    if (await changerMode('philosophes')) await ouvrir(o.dataset.ouvrirF, +o.dataset.ouvrirL);
+  } else if (r) {
+    const p = courante.philosophes.find((x) => x.f === r.dataset.retirerF && x.l === +r.dataset.retirerL);
+    if (p && confirm(`Retirer « ${nomCourant()} » de la fiche de ${p.nom} ?`)) actionRattache({ f: p.f, l: p.l, retirer: true }, `✓ ${p.nom} n’est plus rattaché.`);
+  } else if (e.target.closest('#btn-rattacher')) {
+    const s = $('#phi-ajout').value.trim(); if (!s) return;
+    const p = PHILOS.find((x) => etiquettePhilo(x) === s) || PHILOS.filter((x) => norm(x.nom) === norm(s)).at(0);
+    if (!p) { alert('Choisissez un philosophe dans la liste proposée.'); return; }
+    if (courante.philosophes.some((x) => x.f === p.f && x.l === p.l)) { alert(`${p.nom} est déjà rattaché.`); return; }
+    $('#phi-ajout').value = '';
+    actionRattache({ f: p.f, l: p.l }, `✓ ${p.nom} rattaché à « ${nomCourant()} ».`);
+  }
+});
+async function brancherRattaches() {
+  // noms proposés dans « Rattacher un philosophe » (chargés une fois)
+  if (!PHILOS.length) PHILOS = await api('/api/fiches?type=philosophes');
+  let dl = $('#dl-phi');
+  if (!dl) { document.body.insertAdjacentHTML('beforeend', '<datalist id="dl-phi"></datalist>'); dl = $('#dl-phi'); }
+  if (dl.options.length !== PHILOS.length) dl.innerHTML = PHILOS.map((p) => `<option value="${esc(etiquettePhilo(p))}">${esc(libelleFichier(p.f))}</option>`).join('');
 }
 
 /* ── Texte : édition directe, liens, audio ───────────────── */
@@ -757,9 +870,13 @@ async function enregistrer() {
     message('Enregistrement…', 'info');
     const r = await api('/api/fiche', { f: courante.f, l: courante.l, changements: ch });
     Object.assign(initial, ch); Object.assign(courante.champs, ch);
-    if (r.deplacee) {
+    const renom = r.renommes ? ` Nom du courant remplacé dans ${r.renommes} fiche${r.renommes > 1 ? 's' : ''} de philosophe.` : '';
+    if (courante.courant && champ('nom') in ch) {  // nouveau nom : la liste des courants proposés aux philosophes suit
+      const n = String(ch[champ('nom')]).trim(); if (n && !CODES.courants.includes(n)) CODES.courants.push(n);
+    }
+    if (r.deplacee || r.renommes) {
       await ouvrir(courante.f, r.ligne);
-      message(`✓ Enregistré, et fiche replacée par année de naissance (ligne ${r.ligne}).`, 'ok');
+      message(r.deplacee ? `✓ Enregistré, et ${courante.courant ? 'courant replacé par année' : 'fiche replacée par année de naissance'} (ligne ${r.ligne}).${renom}` : `✓ Enregistré.${renom}`, 'ok');
     } else { marquer(); message(`✓ Enregistré (${r.cellules} cellule${r.cellules > 1 ? 's' : ''}).`, 'ok'); }
     chargerListe();
   } catch (e) { message('⚠ ' + e.message, 'err'); }
@@ -833,30 +950,34 @@ $('#btn-nouvelle').onclick = () => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   msgFenetre(''); fenetre.showModal();
   const ff = $('#f-fichier').value || courante?.f || '';
-  $('#fenetre-corps').innerHTML = `<h2>Nouvelle fiche</h2>
+  const C = COURANTS();
+  $('#fenetre-corps').innerHTML = `<h2>${C ? 'Nouveau courant de pensée' : 'Nouvelle fiche'}</h2>
     <div class="grille">
-      <label class="large">Fichier<select id="n-fichier">${CODES.fichiers.map((x) => `<option value="${x.f}" ${x.f === ff ? 'selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>
-      <label class="large">Nom (prénom puis NOM, comme les autres fiches)<input type="text" id="n-nom" placeholder="ex. Simone WEIL"></label>
-      <label>Année de naissance<input type="text" id="n-annee" placeholder="ex. 1909 ou -384"></label>
-      <label>Année de décès<input type="text" id="n-deces" placeholder="vide si vivant"></label>
+      <label class="large">Fichier<select id="n-fichier">${fichiersDuMode().map((x) => `<option value="${x.f}" ${x.f === ff ? 'selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>
+      ${C ? '<label class="large">Nom du courant<input type="text" id="n-nom" placeholder="ex. Madhyamaka"></label>'
+        : '<label class="large">Nom (prénom puis NOM, comme les autres fiches)<input type="text" id="n-nom" placeholder="ex. Simone WEIL"></label>'}
+      <label>${C ? 'Année d’apparition' : 'Année de naissance'}<input type="text" id="n-annee" placeholder="ex. 1909 ou -384"></label>
+      ${C ? '' : '<label>Année de décès<input type="text" id="n-deces" placeholder="vide si vivant"></label>'}
     </div>
-    <p class="aide">La ligne est créée avec la mise en forme des autres, rangée par année de naissance, puis la fiche s'ouvre pour être complétée.</p>
-    <p><button type="button" class="principal" id="btn-creer">Créer la fiche</button></p>`;
+    <p class="aide">${C ? 'Le fichier occidental reçoit les courants d’Occident ; l’autre fichier, ceux des autres traditions (choisissez ensuite la grande tradition dans « Classement »). '
+      : ''}La ligne est créée avec la mise en forme des autres, rangée par année, puis la fiche s'ouvre pour être complétée.</p>
+    <p><button type="button" class="principal" id="btn-creer">${C ? 'Créer le courant' : 'Créer la fiche'}</button></p>`;
   const creer = async (confirme = false) => {
-    const corps = { f: $('#n-fichier').value, nom: $('#n-nom').value, annee: $('#n-annee').value, deces: $('#n-deces').value, confirme };
+    const corps = { f: $('#n-fichier').value, nom: $('#n-nom').value, annee: $('#n-annee').value, deces: $('#n-deces')?.value ?? '', confirme };
     if (!corps.nom.trim() || !corps.annee.trim()) { msgFenetre('Indiquez au moins le nom et l’année de naissance.', 'aide err'); return; }
     try {
       msgFenetre('Création…');
       const r = await api('/api/nouvelle', corps);
+      if (r.ok && C) CODES.courants.push(corps.nom.trim());
       if (!r.ok && r.homonymes) {
-        const liste = r.homonymes.map((x) => `• ${x.nom} (${x.dates}) — ${CODES.fichiers.find((y) => y.f === x.f)?.label ?? x.f}`).join('\n');
+        const liste = r.homonymes.map((x) => `• ${x.nom} (${x.dates}) — ${fichiersDuMode().find((y) => y.f === x.f)?.label ?? x.f}`).join('\n');
         if (confirm(`Une fiche du même nom existe déjà :\n${liste}\n\nCréer quand même ?`)) return creer(true);
         msgFenetre(''); return;
       }
       fenetre.close();
       await chargerListe();
       await ouvrir(r.f, r.ligne);
-      message(`✓ Fiche créée (ligne ${r.ligne}). Complétez-la puis enregistrez.`, 'ok');
+      message(`✓ ${C ? 'Courant créé' : 'Fiche créée'} (ligne ${r.ligne}). Complétez-la puis enregistrez.`, 'ok');
     } catch (e) { msgFenetre('⚠ ' + e.message, 'aide err'); }
   };
   $('#btn-creer').onclick = () => creer();
@@ -876,7 +997,12 @@ $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
 /* ── Démarrage ─────────────────────────────────────────── */
 (async () => {
   CODES = await api('/api/codes');
-  $('#f-fichier').innerHTML += CODES.fichiers.map((x) => `<option value="${x.f}">${esc(x.label)}</option>`).join('');
+  if (!CODES.fichiers_courants) { // serveur lancé avant la mise à jour de l'éditeur : pas encore de courants
+    CODES.fichiers_courants = []; MODE = 'philosophes';
+    $('#modes').innerHTML = '<button type="button" title="Fermez la fenêtre noire de l’éditeur, puis relancez-le">Courants : relancez l’éditeur</button>';
+    $('#modes button').onclick = () => alert('L’éditeur a été mis à jour pendant qu’il tournait.\nFermez sa fenêtre noire (ou la fenêtre de l’éditeur), puis relancez-le avec l’icône « Éditeur LaPhilo ».');
+  }
+  appliquerMode();
   $('#f-groupe').innerHTML += CODES.groupes.map((x) => `<option value="${x.code}">${esc(x.label)}</option>`).join('');
   document.body.insertAdjacentHTML('beforeend',
     `<datalist id="dl-nat">${CODES.nationalites.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>` +
@@ -884,7 +1010,7 @@ $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
   majNbImages();
-  $('#etat-global').textContent = `${FICHES.length} fiches · ${CODES.fichiers.length} fichiers xlsx`;
+  $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
 </script>
 </body>
