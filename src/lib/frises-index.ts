@@ -65,6 +65,7 @@ const COULEUR_VIRTUELLE: Record<string, string> = {
   'monde-arabe-toutes-epoques': 'flag:arabe',
   'afrique-subsaharienne-toutes-epoques': 'flag:afrique',
   'asie-sud-est-toutes-epoques': 'flag:asie-se',
+  'caraibes-toutes-epoques': 'flag:caraibes',
 };
 function couleur(href: string): string {
   if (href.startsWith('/frises/')) return 'monde';

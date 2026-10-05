@@ -256,3 +256,16 @@ a.cross-link-badge:hover{background:rgba(180,130,20,.24);border-color:rgba(180,1
 
 /* Nationalité après les dates dans la barre de navigation des frises : sur mobile, sur sa propre ligne */
 @media(max-width:480px){.mh-nat{display:block}.mh-nat>span[aria-hidden]{display:none}}
+
+/* ── Panneau des liens (média ouvert à côté du texte) : bandeau compact sur une ligne ── */
+.link-drawer .drawer-header{padding:.5rem 3.4rem .5rem 1.2rem;min-height:0}
+.link-drawer .drawer-title{display:flex;align-items:baseline;gap:.6rem;min-width:0;line-height:1.2}
+.link-drawer .drawer-title>div:first-child{margin-bottom:0!important;flex:none}
+.link-drawer .drawer-label{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.95rem;color:#3d2410}
+.link-drawer .drawer-close{top:50%;right:.8rem;width:32px;height:32px;font-size:.85rem;transform:translateY(-50%)}
+.link-drawer .drawer-close:hover{transform:translateY(-50%) rotate(90deg)}
+@media (max-width:768px){
+  .link-drawer .drawer-header{padding:.35rem 3rem .35rem .9rem;min-height:42px;display:flex;align-items:center}
+  .link-drawer .drawer-label{font-size:.85rem;color:rgba(247,236,206,.92)}
+  .link-drawer .drawer-close{right:.5rem;width:36px;height:36px;font-size:.95rem}
+}

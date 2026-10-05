@@ -47,6 +47,7 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'monde-arabe-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
   'afrique-subsaharienne-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
   'asie-sud-est-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
+  'caraibes-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
   allemands: { defaultIndex: 20, scale_factor: 10 },
   americains: { defaultIndex: 18, scale_factor: 15 },
   russes: { defaultIndex: 40, scale_factor: 15 },

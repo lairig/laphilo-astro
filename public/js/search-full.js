@@ -38,13 +38,14 @@
     { v: 'coreen', fr: 'Coréens', grad: 'radial-gradient(circle,#cd2e3a 0 22%,#0047a0 22% 34%,#f7f4ea 36%)' },
     { v: 'japonais', fr: 'Japonais', grad: 'radial-gradient(circle,#bc002d 0 28%,#f7f4ea 30%)' },
     { v: 'afrique', fr: 'Afrique subsaharienne', grad: 'linear-gradient(180deg,#078930 33.3%,#fcdd09 33.3% 66.6%,#da121a 66.6%)' },
+    { v: 'caraibes', fr: 'Caraïbes', grad: 'linear-gradient(135deg,#00209f 50%,#f7f4ea 50% 60%,#009739 60%)' },
     { v: 'asie-se', fr: 'Asie du Sud-Est', grad: 'linear-gradient(180deg,#ce1126 50%,#f7f4ea 50%)' },
     { v: 'arabe', fr: 'Monde arabe', grad: 'linear-gradient(90deg,#ce1126 0 24%,transparent 24%),linear-gradient(180deg,#1a1a1a 33.3%,#f7f4ea 33.3% 66.6%,#007a3d 66.6%)' },
   ];
   var PHILO_COLOR_GROUPS = [
     /* Même découpage que la page /frises/ : pays, grandes traditions, thème */
     { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
-      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec', 'arabe', 'afrique', 'asie-se', 'indiens', 'chinois', 'coreen', 'japonais'] },
+      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec', 'arabe', 'afrique', 'caraibes', 'asie-se', 'indiens', 'chinois', 'coreen', 'japonais'] },
       { fr: 'Grande tradition', vide: 'Toutes les traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
     ] },
   ];
@@ -59,7 +60,7 @@
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
     'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
     'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
-    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'] },
+    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'] },
     'grec': { ou: [{ nats: ['Grecque', 'Byzantine', 'Arménienne'] }, { nats: ['Égyptienne', 'Syrienne'], groupe: 'occident' }] },
     'indien': { ou: [{ groupe: 'inde' }, { trad: 'inde' }] }, /* Inde et monde bouddhiste */
     'asie-est': { ou: [{ groupe: 'asie-est' }, { trad: 'asie-est' }] },
@@ -75,6 +76,8 @@
     'japonais': { nats: ['Japonaise'] },
     /* Afrique subsaharienne : mêmes nationalités que la frise afrique-subsaharienne-toutes-epoques */
     'afrique': { nats: ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Nigériane', 'Béninoise', 'Togolaise', 'Ivoirienne', 'Malienne', 'Burkinabè', 'Guinéenne', 'Bissau-Guinéenne', 'Nigérienne', 'Congolaise', 'Gabonaise', 'Rwandaise', 'Burundaise', 'Éthiopienne', 'Érythréenne', 'Kényane', 'Tanzanienne', 'Ougandaise', 'Somalienne', 'Sud-Africaine', 'Zimbabwéenne', 'Zambienne', 'Mozambicaine', 'Angolaise', 'Malgache'] },
+    /* Caraïbes : mêmes nationalités que la frise caraibes-toutes-epoques */
+    'caraibes': { nats: ['Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Guyanaise', 'Cubaine', 'Dominicaine', 'Portoricaine', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Sainte-Lucienne', 'Bahamienne'] },
     /* Asie du Sud-Est : mêmes nationalités que la frise asie-sud-est-toutes-epoques */
     'asie-se': { nats: ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise'] },
     /* Monde arabe : mêmes règles que la frise monde-arabe-toutes-epoques (src/data/virtual-frises.ts) */
@@ -106,6 +109,7 @@
     'coreen': { href: '/philosophes/frise/coreens-toutes-epoques/', fr: 'Voir la frise des philosophes coréens' },
     'japonais': { href: '/philosophes/frise/japonais-toutes-epoques/', fr: 'Voir la frise des philosophes japonais' },
     'afrique': { href: '/philosophes/frise/afrique-subsaharienne-toutes-epoques/', fr: "Voir la frise des philosophes d'Afrique subsaharienne" },
+    'caraibes': { href: '/philosophes/frise/caraibes-toutes-epoques/', fr: 'Voir la frise des penseurs des Caraïbes' },
     'asie-se': { href: '/philosophes/frise/asie-sud-est-toutes-epoques/', fr: "Voir la frise des penseurs d'Asie du Sud-Est" },
     'arabe': { href: '/philosophes/frise/monde-arabe-toutes-epoques/', fr: 'Voir la frise des philosophes du monde arabe' },
   };
@@ -129,7 +133,7 @@
     britannique: '40,70,160', italien: '0,146,70', 'europe-nord-centrale': '33,70,139', germanophone: '210,30,30',
     'arabo-persan': '35,159,64', africain: '224,100,20', hispanique: '198,11,30', femme: '142,68,173',
     'orient-ancien': '201,162,39', grec: '13,94,175', indien: '255,153,51', 'asie-est': '222,41,16', juif: '43,90,168',
-    indiens: '255,153,51', chinois: '222,41,16', coreen: '0,71,160', japonais: '188,0,45', arabe: '0,122,61', afrique: '7,137,48', 'asie-se': '206,17,38',
+    indiens: '255,153,51', chinois: '222,41,16', coreen: '0,71,160', japonais: '188,0,45', arabe: '0,122,61', afrique: '7,137,48', 'asie-se': '206,17,38', caraibes: '0,32,159',
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];

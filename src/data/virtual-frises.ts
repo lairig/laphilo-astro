@@ -24,7 +24,7 @@ const moderneHorsOccident = (p: PhilosopheData) => Number(p.year) >= 1700 && Num
 
 export const regionsContemporains: { slug: string; label: string; nats: string[] }[] = [
   { slug: 'contemporains-europe', label: 'Europe', nats: ['Britannique', 'Irlandaise', 'Allemande', 'Autrichienne', 'Suisse', 'Italienne', 'Espagnole', 'Portugaise', 'Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Polonaise', 'Tchèque', 'Slovaque', 'Hongroise', 'Roumaine', 'Bulgare', 'Slovène', 'Croate', 'Serbe', 'Grecque', 'Russe', 'Ukrainienne', 'Lettone', 'Lituanienne', 'Estonienne'] },
-  { slug: 'contemporains-ameriques', label: 'Amériques', nats: ['Américaine', 'Canadienne', 'Mexicaine', 'Argentine', 'Uruguayenne', 'Brésilienne', 'Chilienne', 'Colombienne', 'Péruvienne', 'Vénézuélienne', 'Cubaine', 'Haïtienne', 'Martiniquaise'] },
+  { slug: 'contemporains-ameriques', label: 'Amériques', nats: ['Américaine', 'Canadienne', 'Mexicaine', 'Argentine', 'Uruguayenne', 'Brésilienne', 'Chilienne', 'Colombienne', 'Péruvienne', 'Vénézuélienne', 'Cubaine', 'Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Dominicaine', 'Portoricaine'] },
   { slug: 'contemporains-afrique-moyen-orient', label: 'Afrique & Moyen-Orient', nats: ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Sud-Africaine', 'Nigériane', 'Congolaise', 'Ivoirienne', 'Béninoise', 'Kényane', 'Éthiopienne', 'Tunisienne', 'Marocaine', 'Algérienne', 'Égyptienne', 'Libanaise', 'Syrienne', 'Perse', 'Iranienne', 'Turque', 'Israélienne', 'Palestinienne', 'Irakienne'] },
   { slug: 'contemporains-asie-oceanie', label: 'Asie & Océanie', nats: ['Japonaise', 'Chinoise', 'Coréenne', 'Taïwanaise', 'Vietnamienne', 'Indienne', 'Pakistanaise', 'Bangladaise', 'Sri-lankaise', 'Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Australienne', 'Néo-zélandaise'] },
 ];
@@ -34,6 +34,9 @@ const NATS_AFRIQUE = ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Nigériane
 
 /* Nationalités d'Asie du Sud-Est (frise asie-sud-est-toutes-epoques ; même liste dans search-full.js) */
 const NATS_ASIE_SE = ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise'];
+
+/* Nationalités des Caraïbes (frise caraibes-toutes-epoques ; même liste dans search-full.js) */
+const NATS_CARAIBES = ['Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Guyanaise', 'Cubaine', 'Dominicaine', 'Portoricaine', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Sainte-Lucienne', 'Bahamienne'];
 
 /* Nationalités du monde arabe (frise monde-arabe-toutes-epoques ; même liste dans search-full.js) */
 const NATS_ARABES = ['Arabe', 'Égyptienne', 'Syrienne', 'Libanaise', 'Irakienne', 'Palestinienne', 'Jordanienne', 'Saoudienne', 'Yéménite', 'Marocaine', 'Algérienne', 'Tunisienne', 'Libyenne', 'Soudanaise', 'Mauritanienne'];
@@ -91,7 +94,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
-    match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne'].includes(p.nationalite ?? ''),
+    match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'].includes(p.nationalite ?? ''),
   },
   /* Colonne « Traditions » des xlsx (valeur « femme ») */
   'femmes-toutes-epoques': {
@@ -182,6 +185,11 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'asie-sud-est-toutes-epoques': {
     label: "Philosophes d'Asie du Sud-Est — toutes époques",
     match: (p) => NATS_ASIE_SE.includes(p.nationalite ?? ''),
+  },
+  /* Caraïbes : par nationalité (Antilles francophones, hispanophones et anglophones) */
+  'caraibes-toutes-epoques': {
+    label: 'Penseurs des Caraïbes — toutes époques',
+    match: (p) => NATS_CARAIBES.includes(p.nationalite ?? ''),
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {
