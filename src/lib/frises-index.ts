@@ -63,6 +63,7 @@ const COULEUR_VIRTUELLE: Record<string, string> = {
   'coreens-toutes-epoques': 'flag:coreen',
   'japonais-toutes-epoques': 'flag:japonais',
   'monde-arabe-toutes-epoques': 'flag:arabe',
+  'monde-persan-turc-toutes-epoques': 'flag:persan-turc',
   'afrique-subsaharienne-toutes-epoques': 'flag:afrique',
   'asie-sud-est-toutes-epoques': 'flag:asie-se',
   'caraibes-toutes-epoques': 'flag:caraibes',

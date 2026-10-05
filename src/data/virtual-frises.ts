@@ -38,6 +38,9 @@ const NATS_ASIE_SE = ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourie
 /* Nationalités des Caraïbes (frise caraibes-toutes-epoques ; même liste dans search-full.js) */
 const NATS_CARAIBES = ['Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Guyanaise', 'Cubaine', 'Dominicaine', 'Portoricaine', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Sainte-Lucienne', 'Bahamienne'];
 
+/* Nationalités du monde persan et turc, Asie centrale comprise (frise monde-persan-turc-toutes-epoques ; même liste dans search-full.js) */
+const NATS_PERSAN_TURC = ['Perse', 'Iranienne', 'Turque', 'Afghane', 'Ouzbèke', 'Tadjike', 'Turkmène', 'Kirghize', 'Kazakhe', 'Azerbaïdjanaise', 'Kurde'];
+
 /* Nationalités du monde arabe (frise monde-arabe-toutes-epoques ; même liste dans search-full.js) */
 const NATS_ARABES = ['Arabe', 'Égyptienne', 'Syrienne', 'Libanaise', 'Irakienne', 'Palestinienne', 'Jordanienne', 'Saoudienne', 'Yéménite', 'Marocaine', 'Algérienne', 'Tunisienne', 'Libyenne', 'Soudanaise', 'Mauritanienne'];
 
@@ -190,6 +193,11 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'caraibes-toutes-epoques': {
     label: 'Penseurs des Caraïbes — toutes époques',
     match: (p) => NATS_CARAIBES.includes(p.nationalite ?? ''),
+  },
+  /* Monde persan & turc : par nationalité, de l'Iran ancien à la Turquie et à l'Asie centrale */
+  'monde-persan-turc-toutes-epoques': {
+    label: 'Philosophes du monde persan et turc — toutes époques',
+    match: (p) => NATS_PERSAN_TURC.includes(p.nationalite ?? ''),
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {
