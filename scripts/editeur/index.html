@@ -22,10 +22,10 @@
   main { flex: 1; display: flex; min-height: 0; }
 
   /* Liste */
-  #gauche { width: 360px; display: flex; flex-direction: column; border-right: 1px solid #5c4318; background: var(--panneau); }
+  #gauche { width: 360px; min-width: 260px; max-width: 75vw; flex: none; display: flex; flex-direction: column; border-right: 1px solid #5c4318; background: var(--panneau); }
   #filtres { padding: .7rem; display: grid; gap: .45rem; border-bottom: 1px solid #4a3414; }
   #filtres input[type=search], #filtres select { width: 100%; padding: .4rem .5rem; border-radius: 4px; border: 1px solid #6b5020; background: #1d1208; color: var(--parch); font: inherit; }
-  #filtres .cases { display: flex; gap: 1rem; font-size: .9rem; }
+  #filtres .cases { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .9rem; }
   #compte { font-size: .85rem; color: var(--parch2); }
   #liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
   #liste li { display: flex; align-items: center; gap: .55rem; padding: .35rem .7rem; cursor: pointer; border-bottom: 1px solid #3a2810; }
@@ -42,9 +42,22 @@
   .bouton-lien { align-self: center; padding: .3rem .7rem; border: 1px solid var(--or); border-radius: 4px; color: var(--parch); text-decoration: none; font-size: .88rem; white-space: nowrap; }
   .bouton-lien:hover { background: #57381a; }
   .sans { color: #ffb4a8; border: 1px solid #b3261e; }
+  .moyen { color: #f3c879; border: 1px solid #c98a12; }
+  /* jauge de longueur du texte */
+  .mesure { display: flex; align-items: center; gap: .7rem; margin-top: .5rem; font-size: .88rem; }
+  .mesure .jauge { flex: none; width: 160px; height: 8px; border-radius: 4px; background: #e6d8b4; overflow: hidden; }
+  .mesure .jauge span { display: block; height: 100%; background: #2e7d32; }
+  .mesure[data-etat=proche] .jauge span { background: #c98a12; }
+  .mesure[data-etat=court] .jauge span { background: #b3261e; }
+  .mesure .manque { color: #b3261e; font-weight: 600; }
 
   /* Formulaire */
-  #droite { flex: 1; overflow-y: auto; padding: 1rem 1.4rem 4rem; }
+  /* poignée pour élargir la colonne de gauche */
+  #poignee { flex: none; width: 7px; margin-left: -4px; cursor: col-resize; position: relative; z-index: 2; }
+  #poignee::after { content: ''; position: absolute; inset: 0 2px; border-radius: 2px; transition: background .15s; }
+  #poignee:hover::after, body.redim #poignee::after { background: var(--or); }
+  body.redim { cursor: col-resize; user-select: none; }
+  #droite { flex: 1; min-width: 0; overflow-y: auto; padding: 1rem 1.4rem 4rem; }
   #accueil { margin: 3rem auto; max-width: 560px; color: var(--parch2); line-height: 1.6; }
   .fiche { max-width: 980px; margin: 0 auto; }
   .titre-fiche { display: flex; align-items: baseline; gap: 1rem; margin-bottom: .6rem; }
@@ -123,14 +136,23 @@
       <input type="search" id="q" placeholder="Rechercher un nom…" autocomplete="off">
       <select id="f-fichier"><option value="">Tous les fichiers</option></select>
       <select id="f-groupe"><option value="">Toutes les traditions</option></select>
+      <select id="f-texte" title="Longueur de référence d'un texte : 1 600 caractères">
+        <option value="">Tous les textes</option>
+        <option value="enrichir">À enrichir (court ou sans lien)</option>
+        <option value="court">Texte court (moins de 1 200 car.)</option>
+        <option value="sous">Sous la référence (moins de 1 600 car.)</option>
+        <option value="sans-lien">Sans lien dans le texte</option>
+      </select>
       <div class="cases">
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
+        <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 600 caractères, du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 600</label>
       </div>
       <span id="compte"></span>
     </div>
     <ul id="liste"></ul>
   </aside>
+  <div id="poignee" title="Glisser pour élargir ou réduire la liste (double-clic : largeur d’origine)"></div>
   <section id="droite">
     <div id="accueil">
       <p>Choisissez une fiche dans la liste à gauche.</p>
@@ -158,24 +180,71 @@ const decouper = (s) => String(s || '').split(/\s*[;,]\s*/).map((x) => x.trim())
 let CODES = null, FICHES = [], courante = null, initial = {}, image = null;
 const EN_LIGNE = 'https://laphilo.fr/philosophes/', LOCAL = 'http://localhost:4321/philosophes/';
 
+/* ── Largeur de la colonne de gauche (glisser la poignée, mémorisée) ── */
+(() => {
+  const g = $('#gauche'), p = $('#poignee'), CLE = 'editeur-largeur-liste';
+  try { const w = +localStorage.getItem(CLE); if (w) g.style.width = w + 'px'; } catch (e) {}
+  p.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); p.setPointerCapture(e.pointerId); document.body.classList.add('redim');
+    const x0 = e.clientX, w0 = g.offsetWidth;
+    const bouger = (ev) => { g.style.width = (w0 + ev.clientX - x0) + 'px'; };
+    const finir = () => {
+      document.body.classList.remove('redim'); p.removeEventListener('pointermove', bouger);
+      try { localStorage.setItem(CLE, g.offsetWidth); } catch (e) {}
+    };
+    p.addEventListener('pointermove', bouger);
+    p.addEventListener('pointerup', finir, { once: true });
+  });
+  p.addEventListener('dblclick', () => { g.style.width = ''; try { localStorage.removeItem(CLE); } catch (e) {} });
+})();
+
+/* ── Longueur des textes ───────────────────────────────── */
+const TEXTE_REF = 1600, TEXTE_COURT = 1200;
+const TEXTE_FILTRES = {
+  enrichir: (x) => x.lg < TEXTE_COURT || !x.liens,
+  court: (x) => x.lg < TEXTE_COURT,
+  sous: (x) => x.lg < TEXTE_REF,
+  'sans-lien': (x) => !x.liens,
+};
+/* même calcul que mesure_texte() dans serveur.py : texte lu sans balises ni audio ;
+   le lien Wikipédia du nom, en tête, n'est pas compté */
+function mesureTexte(h) {
+  h = String(h || '').replace(/<audio[\s\S]*?<\/audio>/gi, '');
+  const t = document.createElement('template'); t.innerHTML = h;
+  const liens = [...t.content.querySelectorAll('a[href]')].map((a) => a.getAttribute('href'));
+  if (liens.length && liens[0].includes('wikipedia.org')) liens.shift();
+  const txt = document.createElement('textarea'); txt.innerHTML = h.replace(/<[^>]+>/g, ' ');
+  return { lg: txt.value.replace(/\s+/g, ' ').trim().length, liens: liens.length };
+}
+
 /* ── Liste ─────────────────────────────────────────────── */
 async function chargerListe(garderSelection = true) {
   FICHES = await api('/api/fiches');
+  // page plus récente que le serveur en marche (lancé avant une mise à jour de l'éditeur)
+  if (FICHES.length && FICHES[0].lg === undefined) {
+    FICHES.forEach((x) => { x.lg = Infinity; x.liens = 1; });
+    $('#f-texte').disabled = $('#f-court').disabled = true;
+    $('#f-texte').title = 'Indisponible : fermez la fenêtre noire de l’éditeur puis relancez-le';
+    if (!chargerListe.prevenu) { chargerListe.prevenu = true; alert('L’éditeur a été mis à jour pendant qu’il tournait.\nFermez sa fenêtre noire (ou le navigateur), puis relancez-le avec l’icône « Éditeur LaPhilo ».'); }
+  }
   afficherListe();
   if (!garderSelection) return;
 }
 function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
-  const si = $('#f-sans-image').checked, sv = $('#f-sans-video').checked;
+  const si = $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
-    && (!si || !x.image) && (!sv || (!x.video && !x.photo)));
-  L.sort((a, b) => (a.annee ?? 0) - (b.annee ?? 0));
+    && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_REF));
+  // filtre de texte : du plus court (le pire) au plus long
+  L.sort(ft || fc ? (a, b) => a.lg - b.lg : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
   $('#compte').textContent = `${L.length} fiche${L.length > 1 ? 's' : ''}`;
   $('#liste').innerHTML = L.map((x) => `<li data-f="${x.f}" data-l="${x.l}" class="${courante && courante.f === x.f && courante.l === x.l ? 'actif' : ''}">
       ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span class="vide">?</span>'}
       <span class="nom"><b>${esc(x.nom)}</b><small>${esc(x.dates)}</small></span>
       ${!x.image ? '<span class="pastille sans" title="Pas d’image">img</span>' : ''}
       ${!x.video && !x.photo ? '<span class="pastille sans" title="Ni vidéo ni grande photo">vid</span>' : ''}
+      ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_REF ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
+      ${!x.liens ? '<span class="pastille sans" title="Aucun lien dans le texte (hors Wikipédia du nom)">lien</span>' : ''}
       <a class="ouvrir" href="/apercu/${x.slug}/" target="_blank" rel="noopener" title="Voir la fiche sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
 }
@@ -185,7 +254,7 @@ $('#liste').addEventListener('click', (e) => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   ouvrir(li.dataset.f, +li.dataset.l);
 });
-['#q', '#f-fichier', '#f-groupe', '#f-sans-image', '#f-sans-video'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court'].forEach((s) => $(s).addEventListener('input', afficherListe));
 
 /* ── Fiche ─────────────────────────────────────────────── */
 const COLS = {}; // norm -> entête réelle de la fiche ouverte
@@ -301,6 +370,7 @@ function gabarit(d) {
         </div>
         <div id="editeur-visuel" class="apercu-texte editable" contenteditable="true" spellcheck="true"></div>
         <textarea id="code-html" class="code" rows="16" hidden></textarea>
+        <div id="mesure-texte" class="mesure"><div class="jauge"><span></span></div><span class="mesure-txt"></span></div>
         <input type="hidden" data-c="texte_html" value="${v('texte_html')}">
         <p class="aide">Écrivez directement dans le texte. Pour un lien : sélectionnez les mots, puis 🔗 Lien. Cliquez dans un lien puis 🔗 pour le modifier. L'audio se règle dans le bloc suivant.</p>
       </div>
@@ -522,9 +592,20 @@ function brancherTexte(d) {
       ? `  <audio controls title="${esc(audio.titre)}"> <source src="${esc(audio.src)}" type="${type}" align="center"> </audio>` : '');
     marquer();
   };
+  /* jauge : longueur du texte par rapport à la référence et nombre de liens */
+  const mesurer = () => {
+    const m = mesureTexte(corps), etat = m.lg < TEXTE_COURT ? 'court' : m.lg < TEXTE_REF ? 'proche' : 'ok';
+    const boite = $('#mesure-texte'); boite.dataset.etat = etat;
+    boite.querySelector('.jauge span').style.width = Math.min(100, (m.lg / TEXTE_REF) * 100) + '%';
+    boite.querySelector('.mesure-txt').innerHTML =
+      `<b>${m.lg.toLocaleString('fr-FR')}</b> caractères / ${TEXTE_REF.toLocaleString('fr-FR')} de référence`
+      + (m.lg < TEXTE_REF ? ` — il manque environ ${(TEXTE_REF - m.lg).toLocaleString('fr-FR')} caractères` : ' ✓')
+      + ` · <span class="${m.liens ? '' : 'manque'}">${m.liens ? m.liens + ' lien' + (m.liens > 1 ? 's' : '') + ' dans le texte' : 'aucun lien dans le texte (hors Wikipédia du nom)'}</span>`;
+  };
+  mesurer();
   document.execCommand('defaultParagraphSeparator', false, 'p');
-  visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); });
-  code.addEventListener('input', () => { corps = code.value; visuel.innerHTML = corps; composer(); });
+  visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); mesurer(); });
+  code.addEventListener('input', () => { corps = code.value; visuel.innerHTML = corps; composer(); mesurer(); });
   /* coller du texte brut, sans la mise en forme de la page d'origine */
   visuel.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
 

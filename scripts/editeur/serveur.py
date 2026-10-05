@@ -16,6 +16,7 @@ Lancement : double-clic sur « Editeur des fiches.bat » à la racine de laphilo
 import base64
 import datetime
 import glob
+import html
 import importlib.util
 import io
 import json
@@ -111,6 +112,17 @@ def image_locale(url):
     return bool(s), s
 
 
+def mesure_texte(h):
+    """Longueur du texte lu (sans balises ni bloc audio, espaces réduits) et nombre de liens
+    complémentaires (le lien Wikipédia du nom, en tête, n'est pas compté). Même calcul que mesureTexte() dans index.html."""
+    h = re.sub(r'<audio.*?</audio>', '', str(h or ''), flags=re.S | re.I)
+    liens = re.findall(r'<a\s[^>]*?href="([^"]*)"', h, flags=re.I)
+    if liens and 'wikipedia.org' in liens[0]:
+        liens = liens[1:]
+    texte = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', h))).strip()
+    return len(texte), len(liens)
+
+
 def liste_fiches():
     out = []
     for f in bd.PHILOSOPHE_FICHIERS:
@@ -121,7 +133,9 @@ def liste_fiches():
                 continue
             existe, img = image_locale(valeur(c, v, 'thumbnail_url'))
             photo_ok, _ = image_locale(valeur(c, v, 'image_media'))
+            lg, liens = mesure_texte(valeur(c, v, 'texte_html'))
             out.append({
+                'lg': lg, 'liens': liens,
                 'f': f, 'l': r, 'nom': str(nom), 'slug': bd.slugify(str(nom)), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
                 'groupe': valeur(c, v, 'groupe') or '', 'image': img if existe else '',
                 'image_prevue': img, 'video': bool(valeur(c, v, 'youtube_id')),
