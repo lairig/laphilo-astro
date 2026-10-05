@@ -76,7 +76,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   /* Benelux, Scandinavie, Europe centrale */
   'europe-nord-centrale-toutes-epoques': {
     label: "Philosophes d'Europe du Nord et centrale — toutes époques",
-    match: (p) => ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne'].includes(p.nationalite ?? ''),
+    match: (p) => ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne', 'Ukrainienne'].includes(p.nationalite ?? ''),
   },
   'germanophones-toutes-epoques': {
     label: 'Philosophes germanophones — toutes époques',

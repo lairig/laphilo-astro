@@ -56,7 +56,7 @@
     russe: { nats: ['Russe'] },
     britannique: { ou: [{ nats: ['Britannique', 'Canadienne', 'Australienne', 'Irlandaise', 'Néo-zélandaise'] }, { nats: ['Sud-Africaine'], groupe: 'occident' }] },
     italien: { nats: ['Italienne', 'Romaine'] },
-    'europe-nord-centrale': { nats: ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne'] },
+    'europe-nord-centrale': { nats: ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne', 'Ukrainienne'] },
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
     'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
     'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
