@@ -21,7 +21,7 @@ const period = (tag?: string) =>
 /* Libellés courts : « Tous les Philosophes d'Asie de l'Est » → « Asie de l'Est » */
 const clean = (name: string) => {
   const s = name
-    .replace(/^(Tous les|Toutes les)\s+/, '')
+    .replace(/^(Tous les|Toutes les|Toute la)\s+/, '')
     .replace(/^Philosophes\s+/, '')
     .replace(/^(Modernes|Contemporains)\s+/, '')
     .replace(/^vivants\s*:\s*/i, '')

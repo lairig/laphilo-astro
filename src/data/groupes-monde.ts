@@ -31,10 +31,6 @@ export const groupesMonde: GroupeMonde[] = [
     description: "Chine, Corée, Japon et Vietnam : confucianisme, taoïsme et bouddhisme zen, autour de l'harmonie, de la vertu et de la voie.",
   },
   {
-    id: 'asie-se', label: "L'Asie du Sud-Est insulaire", court: 'Asie du Sud-Est', color: '#e3a3c0',
-    description: "Indonésie, Malaisie, Philippines : héritage hindou-bouddhiste, islam soufi et pensée anticoloniale.",
-  },
-  {
     id: 'sud', label: 'Les pensées du Sud et de la décolonisation', court: 'Pensées du Sud', color: '#93b84c',
     description: "Afrique subsaharienne, Amériques latine et indigène, Caraïbes : identité, communauté, libération, créolisation.",
   },

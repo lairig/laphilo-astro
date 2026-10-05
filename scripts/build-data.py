@@ -85,7 +85,6 @@ GROUPES = {
     'islam-juif':    'Le monde islamique et juif',
     'inde':          "L'Inde et le monde bouddhiste du Sud",
     'asie-est':      "L'Asie de l'Est",
-    'asie-se':       "L'Asie du Sud-Est insulaire",
     'sud':           'Les pensées du Sud et de la décolonisation',
     'russe':         'La pensée russe',
     'orient-ancien': 'Le Proche-Orient ancien',

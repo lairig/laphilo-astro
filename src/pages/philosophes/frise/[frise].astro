@@ -98,6 +98,8 @@ const seoTitles: Record<string, string> = {
   'coreens-toutes-epoques': 'Philosophes coréens : frise chronologique',
   'japonais-toutes-epoques': 'Philosophes japonais : frise chronologique',
   'monde-arabe-toutes-epoques': 'Philosophes du monde arabe : frise chronologique',
+  'afrique-subsaharienne-toutes-epoques': "Philosophes d'Afrique subsaharienne : frise",
+  'asie-sud-est-toutes-epoques': "Philosophes d'Asie du Sud-Est : frise chronologique",
   ...Object.fromEntries(themesVivants.map((t) => [friseDuTheme(t.code), t.seoTitle])),
 };
 const title = `${seoTitles[frise as string] ?? label} | LaPhilo.fr`;

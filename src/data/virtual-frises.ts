@@ -29,6 +29,12 @@ export const regionsContemporains: { slug: string; label: string; nats: string[]
   { slug: 'contemporains-asie-oceanie', label: 'Asie & Océanie', nats: ['Japonaise', 'Chinoise', 'Coréenne', 'Taïwanaise', 'Vietnamienne', 'Indienne', 'Pakistanaise', 'Bangladaise', 'Sri-lankaise', 'Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Australienne', 'Néo-zélandaise'] },
 ];
 
+/* Nationalités d'Afrique subsaharienne (frise afrique-subsaharienne-toutes-epoques ; même liste dans search-full.js) */
+const NATS_AFRIQUE = ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Nigériane', 'Béninoise', 'Togolaise', 'Ivoirienne', 'Malienne', 'Burkinabè', 'Guinéenne', 'Bissau-Guinéenne', 'Nigérienne', 'Congolaise', 'Gabonaise', 'Rwandaise', 'Burundaise', 'Éthiopienne', 'Érythréenne', 'Kényane', 'Tanzanienne', 'Ougandaise', 'Somalienne', 'Sud-Africaine', 'Zimbabwéenne', 'Zambienne', 'Mozambicaine', 'Angolaise', 'Malgache'];
+
+/* Nationalités d'Asie du Sud-Est (frise asie-sud-est-toutes-epoques ; même liste dans search-full.js) */
+const NATS_ASIE_SE = ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise'];
+
 /* Nationalités du monde arabe (frise monde-arabe-toutes-epoques ; même liste dans search-full.js) */
 const NATS_ARABES = ['Arabe', 'Égyptienne', 'Syrienne', 'Libanaise', 'Irakienne', 'Palestinienne', 'Jordanienne', 'Saoudienne', 'Yéménite', 'Marocaine', 'Algérienne', 'Tunisienne', 'Libyenne', 'Soudanaise', 'Mauritanienne'];
 
@@ -130,7 +136,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   /* Époque moderne hors Occident (nés de 1700 à 1935, hors frises des contemporains) */
   'modernes-asie': {
     label: "Philosophes modernes d'Asie",
-    match: (p) => moderneHorsOccident(p) && ['inde', 'asie-est', 'asie-se'].includes(p.groupe ?? ''),
+    match: (p) => moderneHorsOccident(p) && ['inde', 'asie-est'].includes(p.groupe ?? ''),
   },
   'modernes-islam-sud': {
     label: 'Philosophes modernes : islam et pensées du Sud',
@@ -140,7 +146,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'modernes-monde': {
     label: 'Philosophes modernes du monde entier (hors France)',
     match: (p) => ['allemands', 'russes', 'americains', 'modernes'].includes(p.frise_source)
-      || (moderneHorsOccident(p) && (['inde', 'asie-est', 'asie-se', 'sud'].includes(p.groupe ?? '')
+      || (moderneHorsOccident(p) && (['inde', 'asie-est', 'sud'].includes(p.groupe ?? '')
         || (p.groupe === 'islam-juif' && !(p.traditions ?? []).includes('juive')))),
   },
   /* Pays d'Asie (nationalité) : en plus des grandes traditions Inde et Asie de l'Est */
@@ -166,6 +172,16 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'monde-arabe-toutes-epoques': {
     label: 'Philosophes du monde arabe — toutes époques',
     match: (p) => (p.groupe === 'islam-juif' && NATS_ARABES.includes(p.nationalite ?? '')) || p.name === 'Edward SAÏD',
+  },
+  /* Afrique subsaharienne : par nationalité, quelle que soit la tradition (Appiah, Benatar compris) */
+  'afrique-subsaharienne-toutes-epoques': {
+    label: "Philosophes d'Afrique subsaharienne — toutes époques",
+    match: (p) => NATS_AFRIQUE.includes(p.nationalite ?? ''),
+  },
+  /* Asie du Sud-Est : par nationalité, quelle que soit la tradition (bouddhisme, islam, pensées du Sud, Vietnam) */
+  'asie-sud-est-toutes-epoques': {
+    label: "Philosophes d'Asie du Sud-Est — toutes époques",
+    match: (p) => NATS_ASIE_SE.includes(p.nationalite ?? ''),
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {
