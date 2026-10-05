@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Éditeur des fiches</title>
+<style>
+  :root {
+    --fond: #1a0f07; --panneau: #2a1a0c; --parch: #f6ecd0; --parch2: #ead9a8; --encre: #2b1d0e;
+    --or: #d4a843; --rouille: #8b3a0f; --vert: #2e7d32; --rouge: #b3261e; --gris: #7a6a55;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, 'EB Garamond', serif; background: var(--fond); color: var(--parch); height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: #120a04; border-bottom: 1px solid #5c4318; }
+  header h1 { margin: 0; font-size: 1.1rem; letter-spacing: .08em; color: var(--or); font-weight: normal; text-transform: uppercase; }
+  header .espace { flex: 1; }
+  button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--or); background: #3a2510; color: var(--parch); padding: .35rem .8rem; }
+  button:hover { background: #57381a; }
+  button.principal { background: var(--rouille); border-color: #c0662e; color: #fff8e6; }
+  button.principal:hover { background: #a8481a; }
+  button:disabled { opacity: .45; cursor: default; }
+  main { flex: 1; display: flex; min-height: 0; }
+
+  /* Liste */
+  #gauche { width: 360px; display: flex; flex-direction: column; border-right: 1px solid #5c4318; background: var(--panneau); }
+  #filtres { padding: .7rem; display: grid; gap: .45rem; border-bottom: 1px solid #4a3414; }
+  #filtres input[type=search], #filtres select { width: 100%; padding: .4rem .5rem; border-radius: 4px; border: 1px solid #6b5020; background: #1d1208; color: var(--parch); font: inherit; }
+  #filtres .cases { display: flex; gap: 1rem; font-size: .9rem; }
+  #compte { font-size: .85rem; color: var(--parch2); }
+  #liste { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+  #liste li { display: flex; align-items: center; gap: .55rem; padding: .35rem .7rem; cursor: pointer; border-bottom: 1px solid #3a2810; }
+  #liste li:hover { background: #3a2510; }
+  #liste li.actif { background: #5a3a14; }
+  #liste img, #liste .vide { width: 30px; height: 36px; object-fit: cover; border-radius: 3px; flex: none; background: #3d2a12; }
+  #liste .vide { display: grid; place-items: center; font-size: .7rem; color: var(--gris); border: 1px dashed #6b5020; }
+  #liste .nom { flex: 1; min-width: 0; }
+  #liste .nom b { display: block; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #liste .nom small { color: var(--parch2); opacity: .8; }
+  .pastille { font-size: .7rem; padding: 0 .3rem; border-radius: 3px; }
+  #liste .ouvrir { flex: none; padding: .1rem .4rem; border-radius: 4px; color: var(--or); text-decoration: none; font-size: 1rem; }
+  #liste .ouvrir:hover { background: var(--rouille); color: #fff8e6; }
+  .bouton-lien { align-self: center; padding: .3rem .7rem; border: 1px solid var(--or); border-radius: 4px; color: var(--parch); text-decoration: none; font-size: .88rem; white-space: nowrap; }
+  .bouton-lien:hover { background: #57381a; }
+  .sans { color: #ffb4a8; border: 1px solid #b3261e; }
+
+  /* Formulaire */
+  #droite { flex: 1; overflow-y: auto; padding: 1rem 1.4rem 4rem; }
+  #accueil { margin: 3rem auto; max-width: 560px; color: var(--parch2); line-height: 1.6; }
+  .fiche { max-width: 980px; margin: 0 auto; }
+  .titre-fiche { display: flex; align-items: baseline; gap: 1rem; margin-bottom: .6rem; }
+  .titre-fiche h2 { margin: 0; color: var(--or); font-weight: normal; }
+  .titre-fiche small { color: var(--parch2); }
+  section.bloc { background: linear-gradient(165deg, var(--parch) 0%, var(--parch2) 100%); color: var(--encre); border-radius: 6px; padding: .9rem 1rem 1rem; margin-bottom: 1rem; border-left: 4px solid var(--or); }
+  section.bloc h3 { margin: 0 0 .7rem; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--rouille); }
+  .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .6rem .9rem; }
+  label { display: flex; flex-direction: column; gap: .2rem; font-size: .82rem; color: #5c3d1e; }
+  label.large { grid-column: 1 / -1; }
+  input[type=text], input[type=number], select, textarea { font: inherit; font-size: .95rem; padding: .35rem .45rem; border-radius: 4px; border: 1px solid #b8923c; background: #fffbef; color: var(--encre); width: 100%; }
+  textarea { resize: vertical; }
+  textarea.code { font-family: Consolas, monospace; font-size: .82rem; min-height: 200px; }
+  .ligne { display: flex; gap: .5rem; align-items: end; }
+  .ligne > label { flex: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .chip { border: 1px solid #b8923c; background: #fffbef; color: var(--encre); border-radius: 999px; padding: .15rem .6rem; font-size: .85rem; cursor: pointer; user-select: none; }
+  .chip.on { background: var(--rouille); border-color: var(--rouille); color: #fff8e6; }
+  .chip .x { margin-left: .35rem; opacity: .7; }
+  .aide { font-size: .8rem; color: #6b4a22; margin: .35rem 0 0; }
+  .modifie { outline: 2px solid #e09a3a; outline-offset: 1px; }
+
+  /* Photo */
+  .photo { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
+  .vignettes { display: flex; gap: .8rem; }
+  .vignette { width: 100px; text-align: center; font-size: .75rem; color: #5c3d1e; }
+  .vignette .cadre { width: 100px; height: 120px; border-radius: 4px; border: 1px solid #b8923c; background: #efe0b4 center/cover no-repeat; display: grid; place-items: center; color: var(--gris); }
+  #depot, .depot { border: 2px dashed #b8923c; border-radius: 6px; padding: 1rem; text-align: center; color: #6b4a22; cursor: pointer; background: #fffbef; }
+  #depot.survol, .depot.survol { background: #f3e2b0; border-color: var(--rouille); }
+  canvas#apercu { display: none; }
+
+  /* Vidéo, aperçu */
+    .apercu-texte { background: #fffbef; border: 1px solid #b8923c; border-radius: 4px; padding: .6rem .9rem; line-height: 1.55; max-height: 360px; overflow: auto; }
+  .apercu-texte a { color: var(--rouille); }
+  .apercu-texte.editable { max-height: 520px; min-height: 180px; font-size: 1rem; outline: none; }
+  .apercu-texte.editable:focus { box-shadow: 0 0 0 2px #e09a3a; }
+  .apercu-texte p { margin: 0 0 .7rem; }
+  .barre-outils { display: flex; gap: .35rem; margin-bottom: .4rem; }
+  .barre-outils button { background: #fffbef; color: var(--encre); border-color: #b8923c; padding: .2rem .6rem; }
+  .barre-outils button:hover { background: #f3e2b0; }
+  .barre-outils button.on { background: var(--rouille); color: #fff8e6; }
+  .deux { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+  /* Barre d'enregistrement + messages */
+  #barre { position: sticky; bottom: 0; display: flex; gap: .8rem; align-items: center; padding: .7rem 1rem; background: #120a04ee; border-top: 1px solid #5c4318; margin: 1rem -1.4rem -4rem; }
+  #message { flex: 1; font-size: .92rem; }
+  .ok { color: #9fe0a2; } .err { color: #ffb4a8; } .info { color: var(--parch2); }
+  dialog#fenetre { width: min(860px, 94vw); max-height: 86vh; padding: 1rem 1.2rem; border: 1px solid var(--or); border-radius: 8px;
+    background: linear-gradient(165deg, var(--parch) 0%, var(--parch2) 100%); color: var(--encre); }
+  dialog#fenetre::backdrop { background: rgba(10, 5, 2, .7); }
+  #fenetre-corps { max-height: 68vh; overflow: auto; }
+  #fenetre h2 { margin: 0 0 .6rem; color: var(--rouille); font-weight: normal; font-size: 1.15rem; }
+  .fenetre-pied { display: flex; gap: .6rem; align-items: center; margin-top: .8rem; }
+  .fenetre-pied .aide { flex: 1; }
+  .ligne-img { display: grid; grid-template-columns: auto 60px 1fr; gap: .7rem; align-items: center; padding: .35rem 0; border-bottom: 1px solid #d8c48c; }
+  .ligne-img img { width: 60px; height: 70px; object-fit: contain; background: #efe0b4; border-radius: 3px; }
+  .domaines { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .avis { margin: .5rem 0 0; padding: .45rem .7rem; border-radius: 4px; background: #fff3cf; border: 1px solid #e0b44a; font-size: .88rem; display: flex; gap: .6rem; align-items: center; }
+  #rapport { white-space: pre-wrap; font-family: Consolas, monospace; font-size: .8rem; background: #120a04; border: 1px solid #5c4318; border-radius: 4px; padding: .6rem; max-height: 40vh; overflow: auto; display: none; margin: 0 1rem .6rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>✦ Éditeur des fiches</h1>
+  <span class="info" id="etat-global"></span>
+  <span class="espace"></span>
+  <button id="btn-images" title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
+  <button id="btn-domaines" title="Sites qui refusent de s'afficher dans le panneau latéral : ouverts en petite fenêtre">Sites en fenêtre</button>
+  <button id="btn-build" title="Relance build-data : régénère les données du site et liste les erreurs de saisie">Vérifier les données</button>
+</header>
+<pre id="rapport"></pre>
+<main>
+  <aside id="gauche">
+    <div id="filtres">
+      <button type="button" class="principal" id="btn-nouvelle">+ Nouvelle fiche</button>
+      <input type="search" id="q" placeholder="Rechercher un nom…" autocomplete="off">
+      <select id="f-fichier"><option value="">Tous les fichiers</option></select>
+      <select id="f-groupe"><option value="">Toutes les traditions</option></select>
+      <div class="cases">
+        <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
+        <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
+      </div>
+      <span id="compte"></span>
+    </div>
+    <ul id="liste"></ul>
+  </aside>
+  <section id="droite">
+    <div id="accueil">
+      <p>Choisissez une fiche dans la liste à gauche.</p>
+      <p>Astuce : cochez <b>Sans image</b> ou <b>Sans vidéo</b> pour voir ce qu'il reste à remplir.</p>
+      <p>Les modifications sont écrites directement dans les fichiers xlsx (une copie de sauvegarde est faite à chaque fois). Rien n'est publié : on publie ensuite comme d'habitude.</p>
+    </div>
+    <div id="formulaire" hidden></div>
+  </section>
+</main>
+<canvas id="apercu" width="100" height="120"></canvas>
+<dialog id="fenetre"><div id="fenetre-corps"></div><div class="fenetre-pied"><span id="fenetre-msg" class="aide"></span><button type="button" id="fenetre-fermer">Fermer</button></div></dialog>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = (h) => String(h || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/ /g, '_');
+const api = async (url, corps) => {
+  const r = await fetch(url, corps ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) } : {});
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.erreur || 'Erreur');
+  return d;
+};
+const decouper = (s) => String(s || '').split(/\s*[;,]\s*/).map((x) => x.trim()).filter(Boolean);
+
+let CODES = null, FICHES = [], courante = null, initial = {}, image = null;
+const EN_LIGNE = 'https://laphilo.fr/philosophes/', LOCAL = 'http://localhost:4321/philosophes/';
+
+/* ── Liste ─────────────────────────────────────────────── */
+async function chargerListe(garderSelection = true) {
+  FICHES = await api('/api/fiches');
+  afficherListe();
+  if (!garderSelection) return;
+}
+function afficherListe() {
+  const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
+  const si = $('#f-sans-image').checked, sv = $('#f-sans-video').checked;
+  const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
+    && (!si || !x.image) && (!sv || (!x.video && !x.photo)));
+  L.sort((a, b) => (a.annee ?? 0) - (b.annee ?? 0));
+  $('#compte').textContent = `${L.length} fiche${L.length > 1 ? 's' : ''}`;
+  $('#liste').innerHTML = L.map((x) => `<li data-f="${x.f}" data-l="${x.l}" class="${courante && courante.f === x.f && courante.l === x.l ? 'actif' : ''}">
+      ${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy">` : '<span class="vide">?</span>'}
+      <span class="nom"><b>${esc(x.nom)}</b><small>${esc(x.dates)}</small></span>
+      ${!x.image ? '<span class="pastille sans" title="Pas d’image">img</span>' : ''}
+      ${!x.video && !x.photo ? '<span class="pastille sans" title="Ni vidéo ni grande photo">vid</span>' : ''}
+      <a class="ouvrir" href="/apercu/${x.slug}/" target="_blank" rel="noopener" title="Voir la fiche sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
+    </li>`).join('');
+}
+$('#liste').addEventListener('click', (e) => {
+  if (e.target.closest('a.ouvrir')) return; // la flèche ouvre la fiche dans un nouvel onglet
+  const li = e.target.closest('li'); if (!li) return;
+  if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+  ouvrir(li.dataset.f, +li.dataset.l);
+});
+['#q', '#f-fichier', '#f-groupe', '#f-sans-image', '#f-sans-video'].forEach((s) => $(s).addEventListener('input', afficherListe));
+
+/* ── Fiche ─────────────────────────────────────────────── */
+const COLS = {}; // norm -> entête réelle de la fiche ouverte
+const champ = (cle) => COLS[cle];
+
+async function ouvrir(f, l) {
+  const d = await api(`/api/fiche?f=${encodeURIComponent(f)}&l=${l}`);
+  courante = d; image = null;
+  Object.keys(COLS).forEach((k) => delete COLS[k]);
+  d.entetes.forEach((h) => { COLS[norm(h)] = h; });
+  initial = { ...d.champs };
+  $('#accueil').hidden = true;
+  const F = $('#formulaire'); F.hidden = false;
+  F.innerHTML = gabarit(d);
+  brancher(d);
+  afficherListe();
+  $('#droite').scrollTop = 0;
+}
+
+const v = (cle) => esc(courante.champs[champ(cle)] ?? '');
+const a = (cle) => (champ(cle) ? '' : 'hidden');
+
+function gabarit(d) {
+  const lab = CODES.fichiers.find((x) => x.f === d.f)?.label ?? d.f;
+  const nomImg = (d.image || '').replace(/^\/pho\//, '').replace(/-mini\.webp$/, '') ||
+    String(d.champs[champ('nom')] || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `
+  <div class="fiche">
+    <div class="titre-fiche"><h2>${v('nom')}</h2><small>${esc(lab)} · ligne ${d.l}</small><span style="flex:1"></span>
+      <button type="button" id="btn-trier" title="Remettre toutes les lignes de ce fichier dans l'ordre des années de naissance">Trier ce fichier par année</button>
+      <a class="bouton-lien" href="${EN_LIGNE}${d.slug}/" target="_blank" rel="noopener" title="La fiche publiée sur laphilo.fr">↗ Fiche en ligne</a>
+      <a class="bouton-lien" href="/apercu/${d.slug}/" target="_blank" rel="noopener" title="La fiche sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
+
+    <section class="bloc"><h3>Identité</h3>
+      <div class="grille">
+        <label class="large">Nom<input type="text" data-c="nom" value="${v('nom')}"></label>
+        <label>Année de naissance<input type="text" data-c="annee_naissance" value="${v('annee_naissance')}" placeholder="ex. 1724 ou -384"></label>
+        <label>Année de décès<input type="text" data-c="annee_deces" value="${v('annee_deces')}" placeholder="vide si vivant"></label>
+        <label>Dates affichées<div class="ligne"><input type="text" data-c="dates_affichage" value="${v('dates_affichage')}"><button type="button" id="btn-dates" title="Calculer à partir des années">↻</button></div></label>
+      </div>
+      <p class="aide">Années avant J.-C. en négatif (-384) ; le bouton ↻ écrit « 384 A JC - 322 A JC » ou « 1724 – 1777 ».</p>
+    </section>
+
+    <section class="bloc"><h3>Photo (vignette)</h3>
+      <div class="photo">
+        <div class="vignettes">
+          <div class="vignette"><div class="cadre" id="img-actuelle" style="${d.image_existe ? `background-image:url('${esc(d.image)}')` : ''}">${d.image_existe ? '' : 'aucune'}</div>actuelle</div>
+          <div class="vignette"><div class="cadre" id="img-nouvelle">—</div>nouvelle</div>
+        </div>
+        <div>
+          <div id="depot">Glissez une image ici (jpg, png, webp…)<br>ou <u>cliquez pour choisir un fichier</u><input type="file" id="fichier-img" accept="image/*" hidden></div>
+          <div class="grille" style="margin-top:.6rem">
+            <label>Nom du fichier<div class="ligne"><input type="text" id="nom-img" value="${esc(nomImg)}"><span style="white-space:nowrap">-mini.webp</span></div></label>
+            <label>Cadrage vertical<input type="range" id="cadrage" min="0" max="100" value="15"></label>
+          </div>
+          <div class="ligne" style="margin-top:.6rem"><button type="button" class="principal" id="btn-img" disabled>Enregistrer la photo</button><span id="msg-img" class="aide"></span></div>
+          <label style="flex-direction:row;align-items:center;gap:.4rem;margin-top:.4rem"><input type="checkbox" id="recadrer" checked> Recadrer et réduire (décochez pour une image déjà prête, ≤ 160 px)</label>
+          ${d.source_portrait ? `<div class="avis">Le portrait attendu existe dans pho-jpg : <b>${esc(d.source_portrait.source)}</b><button type="button" class="principal" data-importer="portrait">Importer</button></div>` : ''}
+          <p class="aide">${d.image && !d.image_existe ? `Image prévue mais absente : <b>${esc(d.image)}</b>. ` : ''}L'image est recadrée en portrait, réduite à 100×120 et enregistrée dans public/pho/.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloc"><h3>Vidéo ou grande photo</h3>
+      <div class="grille">
+        <label class="large">Lien YouTube ou identifiant<div class="ligne"><input type="text" id="yt-lien" value="${v('youtube_id')}" placeholder="collez le lien de la vidéo"><button type="button" id="btn-yt">Vérifier</button></div></label>
+        <label class="large">Crédit<input type="text" data-c="credit_media" value="${v('credit_media')}" placeholder="&quot;Titre de la vidéo&quot; par Chaîne"></label>
+        <input type="hidden" data-c="youtube_id" value="${v('youtube_id')}">
+      </div>
+      <div id="yt-retour" class="aide"></div>
+      <div class="video-apercu" id="yt-apercu">${miniature(d.champs[champ('youtube_id')])}</div>
+
+      <div ${a('image_media')} style="margin-top:1rem;padding-top:.8rem;border-top:1px dashed #b8923c">
+        <h3 style="margin-bottom:.5rem">Pas de vidéo ? Une grande photo à la place</h3>
+        <div class="photo">
+          <div class="vignette" style="width:auto"><div class="cadre" id="photo-actuelle" style="width:220px;height:150px;background-size:contain;${d.photo_existe ? `background-image:url('${esc(d.photo)}')` : ''}">${d.photo_existe ? '' : 'aucune'}</div></div>
+          <div>
+            <label>Nom de la photo (dans public/photo/)<div class="ligne"><input type="text" id="photo-nom" list="dl-photo" value="${esc((d.photo || '').replace(/^\/photo\//, '').replace(/\.webp$/, ''))}" placeholder="ex. hordjedef"><span style="white-space:nowrap">.webp</span></div></label>
+            <input type="hidden" data-c="image_media" value="${v('image_media')}">
+            <div id="depot-photo" class="depot" style="margin-top:.5rem">Ou glissez une nouvelle grande photo ici / <u>cliquez</u><input type="file" id="fichier-photo" accept="image/*" hidden></div>
+            <div class="ligne" style="margin-top:.5rem"><button type="button" class="principal" id="btn-photo" disabled>Enregistrer la grande photo</button><span id="msg-photo" class="aide"></span></div>
+            ${d.source_photo ? `<div class="avis">La grande photo attendue existe dans pho-jpg : <b>${esc(d.source_photo.source)}</b><button type="button" class="principal" data-importer="photo">Importer</button></div>` : ''}
+            <p class="aide">Affichée sur la fiche à la place de la vidéo quand il n'y en a pas (non recadrée, 400 px de haut au plus).${d.photo && !d.photo_existe ? ` Photo prévue mais absente : <b>${esc(d.photo)}</b>.` : ''}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloc"><h3>Classement</h3>
+      <div class="grille">
+        <label ${a('nationalite')}>Nationalité<input type="text" data-c="nationalite" list="dl-nat" value="${v('nationalite')}" placeholder="${esc(d.nat_defaut)}"></label>
+        <label ${a('groupe')}>Grande tradition (Groupe)<select data-c="groupe"><option value="">—</option>${CODES.groupes.map((g) => `<option value="${g.code}" ${g.code === courante.champs[champ('groupe')] ? 'selected' : ''}>${esc(g.label)} (${g.code})</option>`).join('')}</select></label>
+        <label ${a('importance')}>Importance<select data-c="importance">${[['', '1 (normale)'], ['2', '2 (importante)'], ['3', '3 (incontournable)']].map(([k, t]) => `<option value="${k}" ${String(courante.champs[champ('importance')] ?? '') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      </div>
+      <label ${a('branche')} style="margin-top:.7rem">Branches<div class="chips" data-multi="branche">${CODES.branches.map((b) => `<span class="chip" data-v="${b}">${b}</span>`).join('')}</div></label>
+      <label ${a('traditions')} style="margin-top:.7rem">Traditions (étiquettes transversales)<div class="chips" data-multi="traditions">${CODES.traditions.map((b) => `<span class="chip" data-v="${b}">${b}</span>`).join('')}</div></label>
+      <label ${a('themes')} style="margin-top:.7rem">Thèmes (philosophes vivants)<div class="chips" data-multi="themes">${CODES.themes.map((t) => `<span class="chip" data-v="${t.code}" title="${esc(t.label)}">${esc(t.label)}</span>`).join('')}</div></label>
+      <label ${a('courant')} style="margin-top:.7rem">Courants<div class="chips" id="courants"></div>
+        <div class="ligne" style="margin-top:.35rem"><input type="text" id="courant-ajout" list="dl-cour" placeholder="ajouter un courant…"><button type="button" id="btn-courant">Ajouter</button></div></label>
+    </section>
+
+    <section class="bloc"><h3>Textes</h3>
+      <label class="large" ${a('description')}>Description courte (une ligne)<input type="text" data-c="description" value="${v('description')}"></label>
+      <div ${a('texte_html')} style="margin-top:.8rem">
+        <div class="barre-outils">
+          <button type="button" data-cmd="bold" title="Gras"><b>G</b></button>
+          <button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
+          <button type="button" id="btn-lien" title="Sélectionnez des mots puis cliquez ici">🔗 Lien</button>
+          <button type="button" id="btn-sans-lien" title="Retirer le lien du texte sélectionné">Retirer le lien</button>
+          <button type="button" data-cmd="undo" title="Annuler la dernière frappe">↶</button>
+          <span style="flex:1"></span>
+          <button type="button" id="btn-code" title="Voir et modifier le code HTML">‹/› Code HTML</button>
+        </div>
+        <div id="editeur-visuel" class="apercu-texte editable" contenteditable="true" spellcheck="true"></div>
+        <textarea id="code-html" class="code" rows="16" hidden></textarea>
+        <input type="hidden" data-c="texte_html" value="${v('texte_html')}">
+        <p class="aide">Écrivez directement dans le texte. Pour un lien : sélectionnez les mots, puis 🔗 Lien. Cliquez dans un lien puis 🔗 pour le modifier. L'audio se règle dans le bloc suivant.</p>
+      </div>
+    </section>
+
+    <section class="bloc" ${a('texte_html')}><h3>Audio (France Culture…)</h3>
+      <div class="grille">
+        <label class="large">Lien de l'émission (page France Culture) ou du fichier audio<div class="ligne"><input type="text" id="audio-lien" placeholder="https://www.radiofrance.fr/franceculture/podcasts/…"><button type="button" id="btn-audio">Vérifier</button><button type="button" id="btn-audio-suppr" title="Retirer l'audio de la fiche">Retirer</button></div></label>
+        <label class="large">Titre affiché<input type="text" id="audio-titre" placeholder="Titre de l'émission par France Culture"></label>
+      </div>
+      <div id="audio-retour" class="aide"></div>
+      <div id="audio-lecteur" style="margin-top:.5rem"></div>
+      <p class="aide">Le lecteur s'affiche en bas de la fiche sur le site.</p>
+    </section>
+
+    <details class="bloc" style="background:var(--parch);color:var(--encre);border-radius:6px;padding:.7rem 1rem;margin-bottom:1rem">
+      <summary style="cursor:pointer;color:var(--rouille)">Autres colonnes</summary>
+      <div class="grille" style="margin-top:.6rem">${d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media'].includes(norm(h)))
+        .map((h) => `<label>${esc(h)}<input type="text" data-c="${norm(h)}" value="${esc(courante.champs[h] ?? '')}"></label>`).join('') || '<p class="aide">Aucune.</p>'}</div>
+    </details>
+
+    <div id="barre"><span id="message" class="info"></span><button type="button" id="btn-annuler">Annuler les modifications</button><button type="button" class="principal" id="btn-enr">Enregistrer</button></div>
+  </div>`;
+}
+
+/* Aperçu vidéo : la miniature YouTube, cliquable (un lecteur intégré ne marche pas depuis une adresse locale) */
+const miniature = (id) => (id ? `<a href="https://www.youtube.com/watch?v=${esc(id)}" target="_blank" rel="noopener" title="Voir sur YouTube"><img src="https://i.ytimg.com/vi/${esc(id)}/mqdefault.jpg" alt="" style="width:320px;border-radius:4px;margin-top:.5rem;display:block"></a>` : '');
+
+function valeursFormulaire() {
+  const out = {};
+  document.querySelectorAll('#formulaire [data-c]').forEach((el) => { if (champ(el.dataset.c)) out[champ(el.dataset.c)] = el.value; });
+  document.querySelectorAll('#formulaire [data-multi]').forEach((el) => {
+    if (!champ(el.dataset.multi)) return;
+    /* l'ordre déjà saisi dans le xlsx est conservé ; les nouvelles valeurs viennent à la suite */
+    const choisis = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.v);
+    const avant = decouper(initial[champ(el.dataset.multi)]).filter((x) => choisis.includes(x));
+    out[champ(el.dataset.multi)] = [...avant, ...choisis.filter((x) => !avant.includes(x))].join(' ; ');
+  });
+  if (champ('courant')) out[champ('courant')] = [...document.querySelectorAll('#courants .chip')].map((c) => c.dataset.v).join(' ; ');
+  return out;
+}
+const pareil = (h, x) => {
+  const y = initial[h] ?? '';
+  if (['branche', 'traditions', 'themes', 'courant'].includes(norm(h))) return decouper(x).join(';') === decouper(y).join(';');
+  return String(x).trim() === String(y).trim();
+};
+function changements() {
+  const out = {};
+  for (const [h, x] of Object.entries(valeursFormulaire())) if (!pareil(h, x)) out[h] = x;
+  return out;
+}
+const modifications = () => courante && Object.keys(changements()).length > 0;
+function marquer() {
+  const ch = changements();
+  document.querySelectorAll('#formulaire [data-c]').forEach((el) => el.classList.toggle('modifie', champ(el.dataset.c) in ch));
+  document.querySelectorAll('#formulaire [data-multi]').forEach((el) => el.classList.toggle('modifie', champ(el.dataset.multi) in ch));
+  $('#courants')?.classList.toggle('modifie', champ('courant') in ch);
+  const n = Object.keys(ch).length;
+  message(n ? `${n} champ${n > 1 ? 's' : ''} modifié${n > 1 ? 's' : ''}, non enregistré${n > 1 ? 's' : ''}` : '', 'info');
+}
+function message(t, cls = 'info') { const m = $('#message'); if (m) { m.textContent = t; m.className = cls; } }
+
+function brancher(d) {
+  const F = $('#formulaire');
+  // multi-choix
+  F.querySelectorAll('[data-multi]').forEach((el) => {
+    const pris = decouper(d.champs[champ(el.dataset.multi)]);
+    el.querySelectorAll('.chip').forEach((c) => { c.classList.toggle('on', pris.includes(c.dataset.v)); c.onclick = () => { c.classList.toggle('on'); marquer(); }; });
+  });
+  // courants
+  const dessinerCourants = (liste) => {
+    $('#courants').innerHTML = liste.map((c) => `<span class="chip on" data-v="${esc(c)}">${esc(c)}<span class="x">✕</span></span>`).join('');
+    $('#courants').querySelectorAll('.chip').forEach((c) => (c.onclick = () => { c.remove(); marquer(); }));
+  };
+  dessinerCourants(decouper(d.champs[champ('courant')]));
+  $('#btn-courant').onclick = () => {
+    const x = $('#courant-ajout').value.trim(); if (!x) return;
+    if (!CODES.courants.includes(x) && !confirm(`« ${x} » n'est pas un courant existant : build-data le signalera. L'ajouter quand même ?`)) return;
+    dessinerCourants([...[...document.querySelectorAll('#courants .chip')].map((c) => c.dataset.v), x]);
+    $('#courant-ajout').value = ''; marquer();
+  };
+  // dates
+  $('#btn-dates').onclick = () => {
+    const n = parseInt($('[data-c=annee_naissance]').value, 10), m = parseInt($('[data-c=annee_deces]').value, 10);
+    if (isNaN(n)) return;
+    const f = (y) => (y < 0 ? `${-y} A JC` : `${y}`);
+    $('[data-c=dates_affichage]').value = isNaN(m) ? f(n) : (n < 0 ? `${f(n)} - ${f(m)}` : `${f(n)} – ${f(m)}`);
+    marquer();
+  };
+  if (champ('texte_html')) brancherTexte(d);
+  F.addEventListener('input', marquer);
+  // vidéo : l'identifiant est extrait dès qu'on colle un lien
+  $('#yt-lien').addEventListener('input', () => {
+    const s = $('#yt-lien').value.trim();
+    const m = /^[\w-]{11}$/.test(s) ? [0, s] : s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([\w-]{11})/);
+    $('[data-c=youtube_id]').value = m ? m[1] : s === '' ? '' : $('[data-c=youtube_id]').value;
+    marquer();
+  });
+  $('#btn-yt').onclick = async () => {
+    const r = $('#yt-retour'); r.textContent = 'Vérification…'; r.className = 'aide';
+    try {
+      const y = await api('/api/youtube?url=' + encodeURIComponent($('#yt-lien').value));
+      if (y.id) {
+        $('[data-c=youtube_id]').value = y.id; $('#yt-lien').value = y.id;
+        $('#yt-apercu').innerHTML = miniature(y.id);
+      }
+      if (!y.ok) { r.textContent = '⚠ ' + y.message; r.className = 'aide err'; }
+      else {
+        r.innerHTML = `✓ ${esc(y.titre)} <i>— ${esc(y.chaine)}</i>${y.message ? ' (' + esc(y.message) + ')' : ''}`;
+        const cr = $('[data-c=credit_media]');
+        if (y.credit && (!cr.value || confirm(`Remplacer le crédit par :\n${y.credit}`))) cr.value = y.credit;
+      }
+      marquer();
+    } catch (e) { r.textContent = e.message; r.className = 'aide err'; }
+  };
+  // grande photo (Image_media)
+  if (champ('image_media')) {
+    const nomPhoto = $('#photo-nom'), cache = $('[data-c=image_media]'), apercuPhoto = $('#photo-actuelle');
+    const majPhoto = () => {
+      const n = nomPhoto.value.trim().replace(/\.webp$/, '');
+      cache.value = n ? 'https://www.laphilo.fr/photo/' + n + '.webp' : '';
+      const existe = CODES.photos.includes(n);
+      apercuPhoto.style.backgroundImage = existe ? `url('/photo/${n}.webp')` : '';
+      apercuPhoto.textContent = existe ? '' : (n ? 'absente' : 'aucune');
+      marquer();
+    };
+    nomPhoto.addEventListener('input', majPhoto);
+    let photo = null;
+    const dp = $('#depot-photo'), fp = $('#fichier-photo');
+    const lirePhoto = (fichier) => {
+      const lect = new FileReader();
+      lect.onload = () => {
+        photo = lect.result; apercuPhoto.style.backgroundImage = `url(${photo})`; apercuPhoto.textContent = '';
+        if (!nomPhoto.value.trim()) nomPhoto.value = $('#nom-img').value;
+        $('#btn-photo').disabled = false; $('#msg-photo').textContent = '';
+      };
+      lect.readAsDataURL(fichier);
+    };
+    dp.onclick = () => fp.click();
+    dp.ondragover = (e) => { e.preventDefault(); dp.classList.add('survol'); };
+    dp.ondragleave = () => dp.classList.remove('survol');
+    dp.ondrop = (e) => { e.preventDefault(); dp.classList.remove('survol'); if (e.dataTransfer.files[0]) lirePhoto(e.dataTransfer.files[0]); };
+    fp.onchange = () => fp.files[0] && lirePhoto(fp.files[0]);
+    $('#btn-photo').onclick = async () => {
+      const m = $('#msg-photo');
+      try {
+        m.textContent = 'Enregistrement…'; m.className = 'aide';
+        const r = await api('/api/photo', { f: courante.f, l: courante.l, nom: nomPhoto.value.trim(), data: photo });
+        const n = r.photo.replace(/^\/photo\//, '').replace(/\.webp$/, '');
+        if (!CODES.photos.includes(n)) { CODES.photos.push(n); $('#dl-photo').insertAdjacentHTML('beforeend', `<option value="${esc(n)}">`); }
+        nomPhoto.value = n;
+        initial[champ('image_media')] = 'https://www.laphilo.fr' + r.photo; courante.champs[champ('image_media')] = initial[champ('image_media')];
+        cache.value = initial[champ('image_media')];
+        apercuPhoto.style.backgroundImage = `url('${r.photo}?t=${Date.now()}')`;
+        m.textContent = '✓ Grande photo enregistrée : ' + r.photo; m.className = 'aide ok';
+        $('#btn-photo').disabled = true; photo = null; marquer(); chargerListe();
+      } catch (e) { m.textContent = '⚠ ' + e.message; m.className = 'aide err'; }
+    };
+  }
+  // photo
+  const depot = $('#depot'), input = $('#fichier-img');
+  depot.onclick = () => input.click();
+  depot.ondragover = (e) => { e.preventDefault(); depot.classList.add('survol'); };
+  depot.ondragleave = () => depot.classList.remove('survol');
+  depot.ondrop = (e) => { e.preventDefault(); depot.classList.remove('survol'); if (e.dataTransfer.files[0]) lireImage(e.dataTransfer.files[0]); };
+  input.onchange = () => input.files[0] && lireImage(input.files[0]);
+  $('#cadrage').oninput = dessinerApercu;
+  $('#btn-trier').onclick = async () => {
+    try {
+      const s = await api('/api/trier', { f: courante.f, simuler: true });
+      if (!s.lignes) { message('Ce fichier est déjà dans l’ordre des années.', 'ok'); return; }
+      if (modifications()) { alert('Enregistrez ou annulez d’abord vos modifications.'); return; }
+      if (!confirm(`${s.lignes} lignes vont changer de place pour suivre l'ordre des années de naissance. Une sauvegarde est faite avant. Continuer ?`)) return;
+      const nom = courante.champs[champ('nom')];
+      await api('/api/trier', { f: courante.f });
+      await chargerListe();
+      const x = FICHES.find((y) => y.f === courante.f && y.nom === String(nom));
+      if (x) await ouvrir(x.f, x.l);
+      message(`✓ Fichier trié : ${s.lignes} lignes replacées.`, 'ok');
+    } catch (e) { message('⚠ ' + e.message, 'err'); }
+  };
+  $('#recadrer').onchange = dessinerApercu;
+  $('#formulaire').querySelectorAll('[data-importer]').forEach((b) => (b.onclick = async () => {
+    const x = b.dataset.importer === 'portrait' ? d.source_portrait : d.source_photo;
+    try {
+      const r = await api('/api/images-importer', { images: [x] });
+      if (!r.ok) throw new Error(r.erreurs.join(' ; '));
+      await chargerListe(); majNbImages(); ouvrir(courante.f, courante.l);
+    } catch (e) { alert('Import impossible : ' + e.message); }
+  }));
+  $('#btn-img').onclick = enregistrerImage;
+  // boutons
+  $('#btn-enr').onclick = enregistrer;
+  $('#btn-annuler').onclick = () => ouvrir(courante.f, courante.l);
+}
+
+/* ── Texte : édition directe, liens, audio ───────────────── */
+const AUDIO_RE = /<audio[\s\S]*?<\/audio>/i;
+function brancherTexte(d) {
+  const complet = String(d.champs[champ('texte_html')] ?? '');
+  const bloc = complet.match(AUDIO_RE);
+  let corps = bloc ? complet.replace(bloc[0], '').replace(/\s+$/, '') : complet;
+  let audio = { src: '', titre: '' };
+  if (bloc) {
+    const t = document.createElement('template'); t.innerHTML = bloc[0];
+    const el = t.content.querySelector('audio');
+    audio = { src: el?.querySelector('source')?.getAttribute('src') || el?.getAttribute('src') || '', titre: el?.getAttribute('title') || '' };
+  }
+  const visuel = $('#editeur-visuel'), code = $('#code-html'), cache = $('[data-c=texte_html]');
+  visuel.innerHTML = corps; code.value = corps;
+  $('#audio-lien').value = audio.src; $('#audio-titre').value = audio.titre;
+  const lecteur = () => { $('#audio-lecteur').innerHTML = audio.src ? `<audio controls preload="none" src="${esc(audio.src)}" style="width:100%;max-width:520px"></audio>` : ''; };
+  lecteur();
+
+  /* Texte enregistré = le corps + le bloc audio (au format lu par le site) ; recomposé seulement après une modification */
+  const composer = () => {
+    const type = /\.m4a(\?|$)/i.test(audio.src) ? 'audio/mp4' : 'audio/mpeg';
+    cache.value = corps.replace(/\s+$/, '') + (audio.src
+      ? `  <audio controls title="${esc(audio.titre)}"> <source src="${esc(audio.src)}" type="${type}" align="center"> </audio>` : '');
+    marquer();
+  };
+  document.execCommand('defaultParagraphSeparator', false, 'p');
+  visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); });
+  code.addEventListener('input', () => { corps = code.value; visuel.innerHTML = corps; composer(); });
+  /* coller du texte brut, sans la mise en forme de la page d'origine */
+  visuel.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
+
+  const barre = $('.barre-outils');
+  barre.addEventListener('mousedown', (e) => { const b = e.target.closest('button'); if (b && b.id !== 'btn-code') e.preventDefault(); });
+  barre.querySelectorAll('[data-cmd]').forEach((b) => (b.onclick = () => { visuel.focus(); document.execCommand(b.dataset.cmd); }));
+  const lienSelection = () => {
+    const n = getSelection().anchorNode;
+    return n && visuel.contains(n) ? (n.nodeType === 1 ? n : n.parentElement).closest('a') : null;
+  };
+  $('#btn-lien').onclick = () => {
+    const s = getSelection();
+    if (!s.rangeCount || !visuel.contains(s.anchorNode)) { alert('Sélectionnez d’abord des mots dans le texte.'); return; }
+    const existant = lienSelection();
+    if (!existant && s.isCollapsed) { alert('Sélectionnez les mots qui porteront le lien.'); return; }
+    const url = prompt('Adresse du lien (collez-la ici) :', existant?.getAttribute('href') || 'https://');
+    if (!url || url === 'https://') return;
+    let a = existant;
+    if (a && s.isCollapsed) a.setAttribute('href', url);
+    else {
+      document.execCommand('createLink', false, url);
+      a = lienSelection() || [...visuel.querySelectorAll('a')].filter((x) => x.getAttribute('href') === url).pop();
+    }
+    if (a) {
+      const wiki = /wikipedia\.org/.test(url);
+      const titre = wiki ? (/\/\/fr\./.test(url) ? ' Wikipedia' : ' Wikipedia (en)')
+        : prompt('Titre affiché au survol (facultatif, ex. titre de la vidéo) :', a.getAttribute('title') || '');
+      if (titre) a.setAttribute('title', titre); else a.removeAttribute('title');
+    }
+    visuel.dispatchEvent(new Event('input'));
+  };
+  $('#btn-sans-lien').onclick = () => {
+    const a = lienSelection();
+    if (a && getSelection().isCollapsed) a.replaceWith(...a.childNodes); else document.execCommand('unlink');
+    visuel.dispatchEvent(new Event('input'));
+  };
+  $('#btn-code').onclick = () => {
+    const voirCode = code.hidden;
+    code.hidden = !voirCode; visuel.hidden = voirCode;
+    $('#btn-code').classList.toggle('on', voirCode);
+    barre.querySelectorAll('button:not(#btn-code)').forEach((b) => (b.disabled = voirCode));
+  };
+
+  /* audio */
+  /* Lien de la page de l'émission : fichier audio et titre retrouvés et remplis automatiquement */
+  const chercherAudio = async () => {
+    const r = $('#audio-retour'); r.textContent = 'Recherche du fichier audio et du titre…'; r.className = 'aide';
+    try {
+      const x = await api('/api/audio?url=' + encodeURIComponent($('#audio-lien').value));
+      if (!x.ok) { r.textContent = '⚠ ' + x.message; r.className = 'aide err'; return; }
+      audio.src = x.src; $('#audio-lien').value = x.src;
+      if (x.titre) { $('#audio-titre').value = x.titre; audio.titre = x.titre; }
+      else audio.titre = $('#audio-titre').value;
+      r.textContent = x.titre ? '✓ Fichier audio et titre remplis automatiquement : écoutez-le ci-dessous (le titre reste modifiable).'
+        : '✓ Fichier audio trouvé. Titre introuvable : saisissez-le (ex. « Titre de l’émission par France Culture »).';
+      r.className = 'aide ok';
+      lecteur(); composer();
+    } catch (e) { r.textContent = '⚠ ' + e.message; r.className = 'aide err'; }
+  };
+  $('#btn-audio').onclick = chercherAudio;
+  let attente = null;
+  $('#audio-lien').addEventListener('input', () => {
+    const s = $('#audio-lien').value.trim();
+    clearTimeout(attente);
+    if (/\.(mp3|m4a)(\?|$)/i.test(s)) {
+      audio.src = s; lecteur(); composer();
+      if (!$('#audio-titre').value.trim()) { $('#audio-retour').textContent = 'Lien direct vers le fichier : le titre n’y figure pas. Collez plutôt le lien de la page de l’émission pour qu’il soit rempli, ou saisissez-le.'; $('#audio-retour').className = 'aide'; }
+    } else if (/^https?:\/\/\S+\.\S+/i.test(s)) attente = setTimeout(chercherAudio, 600); // dès qu'un lien de page est collé
+  });
+  $('#audio-titre').addEventListener('input', () => { audio.titre = $('#audio-titre').value; if (audio.src) composer(); });
+  $('#btn-audio-suppr').onclick = () => {
+    audio = { src: '', titre: '' }; $('#audio-lien').value = ''; $('#audio-titre').value = ''; $('#audio-retour').textContent = '';
+    lecteur(); composer();
+  };
+}
+
+/* ── Photo ─────────────────────────────────────────────── */
+function lireImage(fichier) {
+  const lect = new FileReader();
+  lect.onload = () => {
+    const im = new Image();
+    im.onload = () => { image = { data: lect.result, im }; $('#recadrer').checked = Math.max(im.width, im.height) > 160; dessinerApercu(); $('#btn-img').disabled = false; $('#msg-img').textContent = ''; };
+    im.src = lect.result;
+  };
+  lect.readAsDataURL(fichier);
+}
+function dessinerApercu() {
+  if (!image) return;
+  if (!$('#recadrer').checked) { const n = $('#img-nouvelle'); n.style.backgroundImage = `url(${image.data})`; n.style.backgroundSize = 'contain'; n.textContent = ''; return; }
+  $('#img-nouvelle').style.backgroundSize = '';
+  const c = $('#apercu'), ctx = c.getContext('2d'), im = image.im, cible = 5 / 6;
+  let sx = 0, sy = 0, sw = im.width, sh = im.height;
+  if (sw / sh > cible) { sw = Math.round(sh * cible); sx = Math.round((im.width - sw) / 2); }
+  else { sh = Math.round(sw / cible); sy = Math.round((im.height - sh) * $('#cadrage').value / 100); }
+  ctx.clearRect(0, 0, 100, 120); ctx.drawImage(im, sx, sy, sw, sh, 0, 0, 100, 120);
+  const n = $('#img-nouvelle'); n.style.backgroundImage = `url(${c.toDataURL()})`; n.textContent = '';
+}
+async function enregistrerImage() {
+  const m = $('#msg-img');
+  try {
+    m.textContent = 'Enregistrement…';
+    const r = await api('/api/image', { f: courante.f, l: courante.l, nom: $('#nom-img').value, data: image.data, cadrage: $('#cadrage').value / 100, tel_quel: !$('#recadrer').checked });
+    m.textContent = '✓ Photo enregistrée : ' + r.image; m.className = 'aide ok';
+    const act = $('#img-actuelle'); act.style.backgroundImage = `url('${r.image}?t=${Date.now()}')`; act.textContent = '';
+    initial[champ('thumbnail_url')] = 'https://www.laphilo.fr' + r.image;
+    courante.champs[champ('thumbnail_url')] = initial[champ('thumbnail_url')];
+    $('#btn-img').disabled = true; image = null;
+    chargerListe();
+  } catch (e) { m.textContent = '⚠ ' + e.message; m.className = 'aide err'; }
+}
+
+/* ── Enregistrer ───────────────────────────────────────── */
+async function enregistrer() {
+  const ch = changements();
+  if (!Object.keys(ch).length) { message('Rien à enregistrer.', 'info'); return; }
+  try {
+    message('Enregistrement…', 'info');
+    const r = await api('/api/fiche', { f: courante.f, l: courante.l, changements: ch });
+    Object.assign(initial, ch); Object.assign(courante.champs, ch);
+    if (r.deplacee) {
+      await ouvrir(courante.f, r.ligne);
+      message(`✓ Enregistré, et fiche replacée par année de naissance (ligne ${r.ligne}).`, 'ok');
+    } else { marquer(); message(`✓ Enregistré (${r.cellules} cellule${r.cellules > 1 ? 's' : ''}).`, 'ok'); }
+    chargerListe();
+  } catch (e) { message('⚠ ' + e.message, 'err'); }
+}
+window.addEventListener('beforeunload', (e) => { if (modifications()) { e.preventDefault(); e.returnValue = ''; } });
+document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 's' && courante) { e.preventDefault(); enregistrer(); } });
+
+/* ── Fenêtres : images en attente, sites en fenêtre ─────── */
+const fenetre = $('#fenetre');
+$('#fenetre-fermer').onclick = () => fenetre.close();
+const msgFenetre = (t, cls = 'aide') => { $('#fenetre-msg').textContent = t; $('#fenetre-msg').className = cls; };
+
+async function majNbImages() {
+  try { const r = await api('/api/images-attente'); $('#nb-images').textContent = r.images.length ? `(${r.images.length})` : ''; return r; }
+  catch { return null; }
+}
+$('#btn-images').onclick = async () => {
+  msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Recherche des images…</p>'; fenetre.showModal();
+  const r = await majNbImages();
+  if (!r) { $('#fenetre-corps').innerHTML = '<p>Erreur de lecture.</p>'; return; }
+  $('#fenetre-corps').innerHTML = `<h2>Images en attente</h2>
+    <p class="aide">Les jpg de <b>${esc(r.dossier)}</b> dont une fiche attend la version webp. Ils sont convertis tels quels (sans recadrage) et rangés dans public/pho/ ou public/photo/.</p>
+    ${r.images.length ? r.images.map((x, i) => `<label class="ligne-img"><input type="checkbox" data-i="${i}" checked>
+        <img src="/source/${encodeURI(x.source)}" alt=""><span><b>${esc(x.source)}</b> → ${esc(x.cible)}<br><small>${esc(x.genre)} · ${esc(x.fiches.join(', '))}</small></span></label>`).join('')
+      : '<p><b>Aucune image à convertir.</b> Déposez vos jpg dans pho-jpg avec le nom attendu par la fiche (ex. wonhyo-mini.jpg).</p>'}
+    ${r.images.length ? '<p style="margin-top:.8rem"><button type="button" class="principal" id="btn-convertir">Convertir les images cochées</button></p>' : ''}
+    <details style="margin-top:.8rem"><summary>Images attendues sans fichier dans pho-jpg (${r.sans_source.length})</summary>
+      <p class="aide">${r.sans_source.map((x) => `${esc(x.nom)} → <b>${esc(x.attendu.replace(/\.webp$/, '.jpg'))}</b>`).join(' · ')}</p></details>`;
+  const b = $('#btn-convertir');
+  if (b) b.onclick = async () => {
+    const choix = [...document.querySelectorAll('#fenetre-corps [data-i]:checked')].map((c) => r.images[+c.dataset.i]);
+    if (!choix.length) return;
+    b.disabled = true; msgFenetre('Conversion…');
+    const res = await api('/api/images-importer', { images: choix });
+    msgFenetre(res.ok ? `✓ ${res.faites.length} image(s) converties.` : '⚠ ' + res.erreurs.join(' ; '), res.ok ? 'aide ok' : 'aide err');
+    await chargerListe(); majNbImages();
+    if (courante) ouvrir(courante.f, courante.l);
+  };
+};
+
+$('#btn-domaines').onclick = async () => {
+  msgFenetre(''); fenetre.showModal();
+  let liste = await api('/api/domaines');
+  const dessiner = () => {
+    $('#fenetre-corps').innerHTML = `<h2>Sites ouverts en petite fenêtre</h2>
+      <p class="aide">Certains sites refusent de s'afficher dans le panneau latéral des fiches : leurs liens s'ouvrent alors dans une petite fenêtre. Collez un lien ou un nom de site pour l'ajouter ; cliquez sur ✕ pour le retirer.</p>
+      <div class="ligne" style="margin:.6rem 0"><input type="text" id="domaine-ajout" placeholder="ex. https://www.exemple.fr/article ou exemple.fr"><button type="button" class="principal" id="btn-domaine-ajout">Ajouter</button></div>
+      <div class="domaines">${liste.map((x) => `<span class="chip on" data-d="${esc(x)}">${esc(x)}<span class="x">✕</span></span>`).join('')}</div>
+      <p class="aide" style="margin-top:.6rem">${liste.length} sites. Le changement sera visible sur le site après publication.</p>`;
+    const enregistrer = async (nouvelle) => {
+      try { const r = await api('/api/domaines', { domaines: nouvelle }); liste = r.domaines; dessiner(); msgFenetre('✓ Enregistré.', 'aide ok'); }
+      catch (e) { msgFenetre('⚠ ' + e.message, 'aide err'); }
+    };
+    $('#fenetre-corps').querySelectorAll('[data-d]').forEach((c) => (c.onclick = () => {
+      if (confirm(`Retirer ${c.dataset.d} ?`)) enregistrer(liste.filter((x) => x !== c.dataset.d));
+    }));
+    const ajouter = () => {
+      const v = $('#domaine-ajout').value.trim(); if (!v) return;
+      const dom = v.replace(/^https?:\/\//i, '').split('/')[0].replace(/^www\./i, '').toLowerCase();
+      if (liste.includes(dom)) { msgFenetre(`${dom} est déjà dans la liste.`); return; }
+      enregistrer([...liste, dom]);
+    };
+    $('#btn-domaine-ajout').onclick = ajouter;
+    $('#domaine-ajout').onkeydown = (e) => { if (e.key === 'Enter') ajouter(); };
+  };
+  dessiner();
+};
+
+/* ── Nouvelle fiche ────────────────────────────────────── */
+$('#btn-nouvelle').onclick = () => {
+  if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+  msgFenetre(''); fenetre.showModal();
+  const ff = $('#f-fichier').value || courante?.f || '';
+  $('#fenetre-corps').innerHTML = `<h2>Nouvelle fiche</h2>
+    <div class="grille">
+      <label class="large">Fichier<select id="n-fichier">${CODES.fichiers.map((x) => `<option value="${x.f}" ${x.f === ff ? 'selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>
+      <label class="large">Nom (prénom puis NOM, comme les autres fiches)<input type="text" id="n-nom" placeholder="ex. Simone WEIL"></label>
+      <label>Année de naissance<input type="text" id="n-annee" placeholder="ex. 1909 ou -384"></label>
+      <label>Année de décès<input type="text" id="n-deces" placeholder="vide si vivant"></label>
+    </div>
+    <p class="aide">La ligne est créée avec la mise en forme des autres, rangée par année de naissance, puis la fiche s'ouvre pour être complétée.</p>
+    <p><button type="button" class="principal" id="btn-creer">Créer la fiche</button></p>`;
+  const creer = async (confirme = false) => {
+    const corps = { f: $('#n-fichier').value, nom: $('#n-nom').value, annee: $('#n-annee').value, deces: $('#n-deces').value, confirme };
+    if (!corps.nom.trim() || !corps.annee.trim()) { msgFenetre('Indiquez au moins le nom et l’année de naissance.', 'aide err'); return; }
+    try {
+      msgFenetre('Création…');
+      const r = await api('/api/nouvelle', corps);
+      if (!r.ok && r.homonymes) {
+        const liste = r.homonymes.map((x) => `• ${x.nom} (${x.dates}) — ${CODES.fichiers.find((y) => y.f === x.f)?.label ?? x.f}`).join('\n');
+        if (confirm(`Une fiche du même nom existe déjà :\n${liste}\n\nCréer quand même ?`)) return creer(true);
+        msgFenetre(''); return;
+      }
+      fenetre.close();
+      await chargerListe();
+      await ouvrir(r.f, r.ligne);
+      message(`✓ Fiche créée (ligne ${r.ligne}). Complétez-la puis enregistrez.`, 'ok');
+    } catch (e) { msgFenetre('⚠ ' + e.message, 'aide err'); }
+  };
+  $('#btn-creer').onclick = () => creer();
+  setTimeout(() => $('#n-nom').focus(), 50);
+};
+
+/* ── Vérifier les données (build-data) ─────────────────── */
+$('#btn-build').onclick = async () => {
+  const b = $('#btn-build'), r = $('#rapport');
+  b.disabled = true; b.textContent = 'Vérification…'; r.style.display = 'block'; r.textContent = 'build-data en cours…';
+  try { const d = await api('/api/build', {}); r.textContent = d.resume; }
+  catch (e) { r.textContent = e.message; }
+  b.disabled = false; b.textContent = 'Vérifier les données';
+};
+$('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
+
+/* ── Démarrage ─────────────────────────────────────────── */
+(async () => {
+  CODES = await api('/api/codes');
+  $('#f-fichier').innerHTML += CODES.fichiers.map((x) => `<option value="${x.f}">${esc(x.label)}</option>`).join('');
+  $('#f-groupe').innerHTML += CODES.groupes.map((x) => `<option value="${x.code}">${esc(x.label)}</option>`).join('');
+  document.body.insertAdjacentHTML('beforeend',
+    `<datalist id="dl-nat">${CODES.nationalites.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>` +
+    `<datalist id="dl-cour">${CODES.courants.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>` +
+    `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
+  await chargerListe();
+  majNbImages();
+  $('#etat-global').textContent = `${FICHES.length} fiches · ${CODES.fichiers.length} fichiers xlsx`;
+})();
+</script>
+</body>
+</html>
