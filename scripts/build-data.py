@@ -171,6 +171,9 @@ def slugify(name):
     s = unicodedata.normalize('NFD', name)
     s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
     s = s.lower()
+    # lettres liées ou barrées que NFD ne décompose pas (« Arne NÆSS » -> arne-naess)
+    for a, b in (('æ', 'ae'), ('œ', 'oe'), ('ø', 'o'), ('ß', 'ss'), ('đ', 'd'), ('ł', 'l'), ('ı', 'i')):
+        s = s.replace(a, b)
     s = re.sub(r'[^a-z0-9]+', '-', s)
     s = re.sub(r'-+', '-', s).strip('-')
     return s

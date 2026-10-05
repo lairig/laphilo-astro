@@ -109,7 +109,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'grecs-byzantins-toutes-epoques': {
     label: 'Philosophes grecs et byzantins — toutes époques',
     /* + Arméniens, et néoplatoniciens d'Égypte et de Syrie qui écrivaient en grec (groupe occident) */
-    match: (p) => ['Grecque', 'Byzantine', 'Arménienne'].includes(p.nationalite ?? '')
+    match: (p) => ['Grecque', 'Byzantine', 'Arménienne', 'Géorgienne'].includes(p.nationalite ?? '')
       || (['Égyptienne', 'Syrienne'].includes(p.nationalite ?? '') && p.groupe === 'occident'),
   },
   /* Colonne « Groupe » : Inde, Tibet, Sri Lanka, Asie du Sud-Est continentale (remplace « Indiens ») */

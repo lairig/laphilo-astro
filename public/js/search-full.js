@@ -61,7 +61,7 @@
     'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
     'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'] },
-    'grec': { ou: [{ nats: ['Grecque', 'Byzantine', 'Arménienne'] }, { nats: ['Égyptienne', 'Syrienne'], groupe: 'occident' }] },
+    'grec': { ou: [{ nats: ['Grecque', 'Byzantine', 'Arménienne', 'Géorgienne'] }, { nats: ['Égyptienne', 'Syrienne'], groupe: 'occident' }] },
     'indien': { ou: [{ groupe: 'inde' }, { trad: 'inde' }] }, /* Inde et monde bouddhiste */
     'asie-est': { ou: [{ groupe: 'asie-est' }, { trad: 'asie-est' }] },
     /* Pas une nationalité : colonne « Traditions » des xlsx */
