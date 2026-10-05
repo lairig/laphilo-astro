@@ -611,9 +611,10 @@
           ? '<img src="/favicon.svg" alt="" class="phi-result-thumb" style="object-fit:contain;padding:3px;">'
           : (p.t ? '<img src="' + p.t + '" alt="" class="phi-result-thumb" loading="lazy" onerror="this.style.display=\'none\'">'
             : '<span class="phi-result-thumb phi-result-thumb--ph"></span>');
-        var href = p.u + '?p=' + encodeURIComponent(p.n);
-        /* Courant filtré par thème : la frise s'ouvre sur l'onglet correspondant */
-        if (p.y === 'courant' && _filters.curBranchGroup) href += '&g=' + encodeURIComponent(_filters.curBranchGroup);
+        /* Courant filtré par thème : il s'ouvre dans la sous-frise de ce thème
+           (les onglets de thème ont été retirés des frises complètes) */
+        var href = (p.y === 'courant' && _filters.curBranchGroup ? '/courants/frise/' + _filters.curBranchGroup + '/' : p.u)
+          + '?p=' + encodeURIComponent(p.n);
         var descRow = p.desc ? '<span class="phi-card-desc">' + p.desc + '</span>' : '';
 
         if (isCourantItem) {

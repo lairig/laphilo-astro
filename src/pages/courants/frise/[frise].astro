@@ -7,7 +7,7 @@ import BackButton from '../../../components/BackButton.astro';
 import FriseFooter from '../../../components/FriseFooter.astro';
 import { plainText } from '../../../lib/seo';
 import { getCollection } from 'astro:content';
-import { courantFriseConfig, courantFriseDefaut, courantBranchGroups, courantFriseSlugs, courantsDeLaFrise, libelleFriseCourant } from '../../../data/frise-engine-config';
+import { courantFriseConfig, courantFriseDefaut, courantFriseSlugs, courantsDeLaFrise, libelleFriseCourant } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
 
 export async function getStaticPaths() {
@@ -97,14 +97,6 @@ const jsonLd = [
   <h1>{label}</h1>
   <p set:html={description} />
   <div class="header-rule"></div>
-  {(frise === 'occidental' || frise === 'oriental') && (
-    <div class="frise-branch-filters" id="friseBranchFilters" role="group" aria-label="Filtrer par thème">
-      <button type="button" class="fbf-btn fbf-btn--active" data-branches="[]">Tout</button>
-      {courantBranchGroups.filter((group) => group.source === frise).map((group) => (
-        <button type="button" class="fbf-btn" data-group={group.slug} data-branches={JSON.stringify(group.branches)}>{group.shortLabel}</button>
-      ))}
-    </div>
-  )}
 </header>
 
 <section class="ff-index" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
@@ -149,37 +141,6 @@ const jsonLd = [
 
 <script src="/js/slide-media.js" defer></script>
 <script src="/js/frise-engine.js?v=20260930" defer></script>
-
-{(frise === 'occidental' || frise === 'oriental') && (
-  <script>
-    (function () {
-      var wrap = document.getElementById('friseBranchFilters');
-      if (!wrap) return;
-      var btns = wrap.querySelectorAll('.fbf-btn');
-
-      function apply(btn) {
-        btns.forEach(function (b) { b.classList.remove('fbf-btn--active'); });
-        btn.classList.add('fbf-btn--active');
-        var branches = JSON.parse(btn.dataset.branches);
-        window._frise.applyBranchFilter(branches);
-      }
-
-      btns.forEach(function (btn) {
-        btn.addEventListener('click', function () { apply(btn); });
-      });
-
-      /* frise-engine.js est chargé en defer juste avant : window._frise
-         peut ne pas encore exister au premier clic si l'utilisateur est
-         très rapide ou sur connexion lente ; on attend qu'il apparaisse. */
-      var tries = 0;
-      (function waitForEngine() {
-        if (window._frise && window._frise.applyBranchFilter) return;
-        if (++tries > 100) return;
-        setTimeout(waitForEngine, 50);
-      })();
-    })();
-  </script>
-)}
 
 </body>
 </html>
