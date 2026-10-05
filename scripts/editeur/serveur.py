@@ -696,6 +696,8 @@ class Gestion(BaseHTTPRequestHandler):
         try:
             if u.path in ('/', '/index.html'):
                 return self.envoyer(200, open(os.path.join(ICI, 'index.html'), 'rb').read(), 'text/html; charset=utf-8')
+            if u.path == '/favicon.ico':  # icône de la fenêtre et de la barre des tâches
+                return self.envoyer(200, open(os.path.join(ICI, 'editeur.ico'), 'rb').read(), 'image/x-icon')
             if u.path.startswith('/source/'):
                 p = os.path.normpath(os.path.join(SOURCES_IMAGES, urllib.parse.unquote(u.path[len('/source/'):])))
                 if p.startswith(os.path.normpath(SOURCES_IMAGES)) and os.path.exists(p):
@@ -779,6 +781,26 @@ class Gestion(BaseHTTPRequestHandler):
             return self.envoyer(400, {'erreur': f'{e.__class__.__name__} : {e}'})
 
 
+def ouvrir_fenetre(adresse):
+    """Ouvre l'éditeur comme une application : fenêtre Edge (ou Chrome) en mode « app », sans barre d'adresse
+    ni onglets, avec son icône dans la barre des tâches. Son profil à part retient la taille et la position.
+    Option --navigateur : onglet du navigateur habituel (comme avant). L'adresse reste utilisable dans tout navigateur."""
+    if '--navigateur' not in sys.argv:
+        pf = [os.environ.get(v, '') for v in ('ProgramFiles(x86)', 'ProgramFiles', 'LOCALAPPDATA')]
+        candidats = [os.path.join(b, r) for b in pf if b for r in (
+            r'Microsoft\Edge\Application\msedge.exe', r'Google\Chrome\Application\chrome.exe')]
+        exe = next((c for c in candidats if os.path.exists(c)), None)
+        if exe:
+            profil = os.path.join(os.environ.get('LOCALAPPDATA', ICI), 'LaPhilo', 'editeur-fenetre')
+            try:
+                subprocess.Popen([exe, f'--app={adresse}', f'--user-data-dir={profil}', '--window-size=1500,950',
+                                  '--no-first-run', '--no-default-browser-check'])
+                return
+            except OSError:
+                pass
+    webbrowser.open(adresse)
+
+
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     if '--port' in sys.argv:  # pour un essai à côté d'un éditeur déjà ouvert
@@ -796,7 +818,7 @@ if __name__ == '__main__':
         except Exception:
             meme = False
         if meme:
-            webbrowser.open(adresse)
+            ouvrir_fenetre(adresse)
             sys.exit(0)
         try:
             urllib.request.urlopen(urllib.request.Request(adresse + 'api/arret', data=b'{}', method='POST'), timeout=3)
@@ -812,11 +834,11 @@ if __name__ == '__main__':
                 serveur = None
         if serveur is None:
             print("Un ancien éditeur est encore ouvert : fermez sa fenêtre noire, puis relancez.")
-            webbrowser.open(adresse)
+            ouvrir_fenetre(adresse)
             sys.exit(1)
     print(f'Éditeur des fiches : {adresse}  (fermez cette fenêtre pour arrêter)')
     if '--sans-navigateur' not in sys.argv:
-        threading.Timer(0.8, lambda: webbrowser.open(adresse)).start()
+        threading.Timer(0.8, lambda: ouvrir_fenetre(adresse)).start()
     try:
         serveur.serve_forever()
     except KeyboardInterrupt:
