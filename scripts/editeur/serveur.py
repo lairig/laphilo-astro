@@ -656,10 +656,56 @@ def infos_youtube(s):
         return {'ok': True, 'id': vid, 'titre': titre, 'chaine': chaine,
                 'credit': f'"{titre}" par {chaine}' if chaine else titre}
     except urllib.error.HTTPError as e:
-        msg = 'Vidéo introuvable ou privée' if e.code == 404 else "L'intégration de cette vidéo est désactivée par son auteur" if e.code == 401 else f'Erreur YouTube {e.code}'
+        msg = ('Vidéo introuvable ou supprimée' if e.code in (400, 404) else
+               "Vidéo privée, ou intégration désactivée par son auteur : elle ne s'affichera pas sur le site" if e.code in (401, 403) else
+               f'Erreur YouTube {e.code}')
         return {'ok': False, 'id': vid, 'message': msg}
     except Exception as e:  # pas de connexion…
         return {'ok': True, 'id': vid, 'titre': '', 'chaine': '', 'credit': '', 'message': f'Vérification impossible ({e.__class__.__name__})'}
+
+
+# ── Liens du texte : vérification d'une adresse (Wikipédia, YouTube, autre site) ──
+def infos_lien(url):
+    """{'ok': True/False/None (doute), 'genre', 'titre' (titre proposé pour l'attribut title), 'message'}"""
+    url = (url or '').strip()
+    if id_youtube(url) and re.search(r'youtu\.?be', url):
+        y = infos_youtube(url)
+        titre = f"{y.get('titre', '')} par {y['chaine']}" if y.get('chaine') else y.get('titre', '')
+        return {'ok': y['ok'], 'genre': 'youtube', 'titre': titre, 'message': y.get('message', '')}
+    m = re.match(r'https?://([a-z-]+)\.(?:m\.)?wikipedia\.org/wiki/([^#?]+)', url)
+    if m:
+        lang, page = m.groups()
+        api = f'https://{lang}.wikipedia.org/api/rest_v1/page/summary/' + urllib.parse.quote(urllib.parse.unquote(page), safe='')
+        try:
+            req = urllib.request.Request(api, headers={'User-Agent': 'laphilo-editeur/1.0 (contact@laphilo.fr)'})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                d = json.load(r)
+            titre = ' Wikipedia' if lang == 'fr' else f' Wikipedia ({lang})'
+            if d.get('type') == 'disambiguation':
+                return {'ok': None, 'genre': 'wikipedia', 'titre': titre, 'message': "page d'homonymie : choisir la bonne page"}
+            canon = d.get('titles', {}).get('normalized', '')
+            return {'ok': True, 'genre': 'wikipedia', 'titre': titre, 'message': f'« {canon} »' if canon else ''}
+        except urllib.error.HTTPError as e:
+            return {'ok': False if e.code == 404 else None, 'genre': 'wikipedia', 'titre': '',
+                    'message': 'page introuvable' if e.code == 404 else f'Wikipédia répond {e.code}'}
+        except Exception as e:
+            return {'ok': None, 'genre': 'wikipedia', 'titre': '', 'message': f'vérification impossible ({e.__class__.__name__})'}
+    if not url.startswith('http'):
+        return {'ok': False, 'genre': 'autre', 'titre': '', 'message': "l'adresse ne commence pas par http"}
+    for methode in ('HEAD', 'GET'):
+        try:
+            req = urllib.request.Request(url, method=methode, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return {'ok': True, 'genre': 'autre', 'titre': '', 'message': ''}
+        except urllib.error.HTTPError as e:
+            if methode == 'HEAD' and e.code in (403, 405, 429, 501):
+                continue  # certains sites refusent HEAD : on réessaie en GET
+            return {'ok': False if e.code in (404, 410) else None, 'genre': 'autre', 'titre': '',
+                    'message': f'page introuvable ({e.code})' if e.code in (404, 410) else f'le site répond {e.code} (il refuse peut-être les vérifications automatiques)'}
+        except Exception as e:
+            if methode == 'HEAD':
+                continue
+            return {'ok': None, 'genre': 'autre', 'titre': '', 'message': f'vérification impossible ({e.__class__.__name__})'}
 
 
 # ── Audio France Culture (lien de la page de l'émission ou du fichier) ──────
@@ -838,6 +884,8 @@ class Gestion(BaseHTTPRequestHandler):
                 return self.envoyer(200, lire_fiche(q['f'], int(q['l'])))
             if u.path == '/api/audio':
                 return self.envoyer(200, infos_audio(q.get('url', '')))
+            if u.path == '/api/lien':
+                return self.envoyer(200, infos_lien(q.get('url', '')))
             if u.path == '/api/youtube':
                 return self.envoyer(200, infos_youtube(q.get('url', '')))
             return self.envoyer(404, {'erreur': 'introuvable'})

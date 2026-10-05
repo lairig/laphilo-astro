@@ -61,6 +61,30 @@
   .mesure[data-etat=proche] .jauge span { background: #c98a12; }
   .mesure[data-etat=court] .jauge span { background: #b3261e; }
   .mesure .manque { color: #b3261e; font-weight: 600; }
+  /* liste des liens du texte, sous la jauge */
+  .liens-texte { margin-top: .6rem; border: 1px solid #d8c48c; border-radius: 5px; background: #fffbef; font-size: .86rem; }
+  .liens-texte .lt-tete { display: flex; align-items: center; gap: .5rem; padding: .4rem .6rem; border-bottom: 1px solid #e6d6a6; color: #5c3d1e; }
+  .liens-texte .lt-tete b { flex: 1; font-weight: 600; }
+  .liens-texte button { padding: .12rem .5rem; font-size: .8rem; background: #fffbef; color: var(--encre); border-color: #b8923c; }
+  .liens-texte button:hover { background: #f3e2b0; }
+  .liens-texte ol { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; }
+  .liens-texte li { display: grid; grid-template-columns: 1.6rem 5.6rem 1fr auto; gap: .2rem .5rem; align-items: start; padding: .35rem .6rem; border-bottom: 1px solid #efe3bf; }
+  .liens-texte li:last-child { border-bottom: 0; }
+  .liens-texte .lt-n { color: #9a7a4a; text-align: right; }
+  .liens-texte .lt-genre { font-size: .72rem; text-align: center; padding: .05rem .3rem; border-radius: 3px; background: #efe0b4; color: #5c3d1e; }
+  .liens-texte .lt-genre[data-g=youtube] { background: #f6d2cc; color: #8e1d12; }
+  .liens-texte .lt-genre[data-g=wikipedia] { background: #dfe6ef; color: #23415f; }
+  .liens-texte .lt-genre[data-g=radio] { background: #e3d9f2; color: #4a2f78; }
+  .liens-texte .lt-corps { min-width: 0; line-height: 1.35; }
+  .liens-texte .lt-mots { font-weight: 600; color: var(--encre); }
+  .liens-texte .lt-titre { color: #5c3d1e; }
+  .liens-texte .lt-titre.vide { color: #b3261e; font-style: italic; }
+  .liens-texte .lt-url { display: block; color: #8a7350; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .liens-texte .lt-etat { display: block; font-size: .78rem; }
+  .liens-texte .lt-etat.ok { color: #2e7d32; } .liens-texte .lt-etat.err { color: #b3261e; } .liens-texte .lt-etat.doute { color: #a5650b; }
+  .liens-texte .lt-act { display: flex; gap: .25rem; flex-wrap: wrap; justify-content: flex-end; }
+  .liens-texte .lt-vide { padding: .5rem .6rem; color: #8a7350; font-style: italic; }
+  #editeur-visuel ::selection { background: #ffd666; }
 
   /* Formulaire */
   /* poignée pour élargir la colonne de gauche */
@@ -124,7 +148,8 @@
   .deux { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
 
   /* Barre d'enregistrement + messages */
-  #barre { position: sticky; bottom: 0; display: flex; gap: .8rem; align-items: center; padding: .7rem 1rem; background: #120a04ee; border-top: 1px solid #5c4318; margin: 1rem -1.4rem -4rem; }
+  /* barre d'enregistrement : à la fin de la fiche, sous le dernier bloc (Ctrl+S enregistre de partout) */
+  #barre { display: flex; gap: .8rem; align-items: center; padding: .8rem 1rem; margin-top: 1.5rem; background: #120a04; border: 1px solid #5c4318; border-radius: 6px; }
   #message { flex: 1; font-size: .92rem; }
   .ok { color: #9fe0a2; } .err { color: #ffb4a8; } .info { color: var(--parch2); }
   dialog#fenetre { width: min(860px, 94vw); max-height: 86vh; padding: 1rem 1.2rem; border: 1px solid var(--or); border-radius: 8px;
@@ -176,7 +201,7 @@
         <label class="seulement-philo" style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 600 caractères, du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 600</label>
-        <label style="flex-direction:row;align-items:center;color:inherit" title="La liste se replie à gauche dès qu'une fiche est ouverte ; le bouton ‹ › ou la bande de gauche la rouvre"><input type="checkbox" id="replier-auto"> Replier la liste à l'ouverture d'une fiche</label>
+        <label style="flex-direction:row;align-items:center;color:inherit" title="Textes sans aucun lien (le lien Wikipédia du nom, en tête, ne compte pas)"><input type="checkbox" id="f-sans-lien"> Sans lien dans le texte</label>
       </div>
       <span id="compte"></span>
     </div>
@@ -238,8 +263,8 @@ const fichiersDuMode = () => (COURANTS() ? CODES.fichiers_courants : CODES.fichi
   });
 })();
 
-/* ── Liste repliable (bouton ‹ ›, bande de gauche, option « replier à l'ouverture d'une fiche ») ── */
-const CLE_REPLIEE = 'editeur-liste-repliee', CLE_AUTO = 'editeur-replier-auto';
+/* ── Liste repliable (bouton ‹ › ou bande de gauche) ── */
+const CLE_REPLIEE = 'editeur-liste-repliee';
 function replierListe(oui) {
   document.body.classList.toggle('liste-repliee', oui);
   const b = $('#replier'); b.textContent = oui ? '›' : '‹'; b.title = oui ? 'Afficher la liste' : 'Replier la liste';
@@ -247,9 +272,7 @@ function replierListe(oui) {
 }
 $('#replier').addEventListener('click', (e) => { e.stopPropagation(); replierListe(!document.body.classList.contains('liste-repliee')); });
 $('#poignee').addEventListener('click', () => { if (document.body.classList.contains('liste-repliee')) replierListe(false); });
-$('#replier-auto').addEventListener('change', () => { try { localStorage.setItem(CLE_AUTO, $('#replier-auto').checked ? '1' : ''); } catch (e) {} });
 try {
-  $('#replier-auto').checked = !!localStorage.getItem(CLE_AUTO);
   if (localStorage.getItem(CLE_REPLIEE)) replierListe(true);
 } catch (e) {}
 
@@ -288,10 +311,11 @@ async function chargerListe(garderSelection = true) {
 function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
   const si = !COURANTS() && $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
+  const sl = $('#f-sans-lien').checked;
   const fp = COURANTS() ? $('#f-phi').value : '';
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
     && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_REF)
-    && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
+    && (!sl || !x.liens) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
   // filtre de texte : du plus court (le pire) au plus long
   L.sort(ft || fc ? (a, b) => a.lg - b.lg : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
   const mot = COURANTS() ? 'courant' : 'fiche';
@@ -311,9 +335,9 @@ $('#liste').addEventListener('click', (e) => {
   if (e.target.closest('a.ouvrir')) return; // la flèche ouvre la fiche dans un nouvel onglet
   const li = e.target.closest('li'); if (!li) return;
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
-  ouvrir(li.dataset.f, +li.dataset.l).then(() => { if ($('#replier-auto').checked) replierListe(true); });
+  ouvrir(li.dataset.f, +li.dataset.l);
 });
-['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
 
 /* ── Changer de mode (philosophes / courants) ──────────── */
 async function changerMode(m) {
@@ -463,6 +487,7 @@ function gabarit(d) {
         <div id="editeur-visuel" class="apercu-texte editable" contenteditable="true" spellcheck="true"></div>
         <textarea id="code-html" class="code" rows="16" hidden></textarea>
         <div id="mesure-texte" class="mesure"><div class="jauge"><span></span></div><span class="mesure-txt"></span></div>
+        <div id="liens-texte" class="liens-texte"></div>
         <input type="hidden" data-c="texte_html" value="${v('texte_html')}">
         <p class="aide">Écrivez directement dans le texte. Pour un lien : sélectionnez les mots, puis 🔗 Lien. Cliquez dans un lien puis 🔗 pour le modifier. L'audio se règle dans le bloc suivant.</p>
       </div>
@@ -714,6 +739,7 @@ async function brancherRattaches() {
 
 /* ── Texte : édition directe, liens, audio ───────────────── */
 const AUDIO_RE = /<audio[\s\S]*?<\/audio>/i;
+const ETATS_LIENS = new Map(); // adresse -> résultat de la dernière vérification (gardé d'une fiche à l'autre)
 function brancherTexte(d) {
   const complet = String(d.champs[champ('texte_html')] ?? '');
   const bloc = complet.match(AUDIO_RE);
@@ -748,9 +774,91 @@ function brancherTexte(d) {
       + ` · <span class="${m.liens ? '' : 'manque'}">${m.liens ? m.liens + ' lien' + (m.liens > 1 ? 's' : '') + ' dans le texte' : 'aucun lien dans le texte (hors Wikipédia du nom)'}</span>`;
   };
   mesurer();
+
+  /* ── Liste des liens du texte : type, mots, titre, adresse, vérification, actions ── */
+  const genreLien = (h) => {
+    if (/youtu\.?be/.test(h)) return ['youtube', 'YouTube'];
+    const w = h.match(/\/\/([a-z-]+)\.(?:m\.)?wikipedia\.org/);
+    if (w) return ['wikipedia', w[1] === 'fr' ? 'Wikipédia' : `Wikipédia (${w[1]})`];
+    if (/radiofrance|franceculture/.test(h)) return ['radio', 'Radio France'];
+    return ['autre', h.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] || 'adresse ?'];
+  };
+  const liensVisuel = () => [...visuel.querySelectorAll('a')];
+  const listerLiens = () => {
+    const L = liensVisuel(), boite = $('#liens-texte');
+    const ytSansTitre = L.filter((a) => /youtu\.?be/.test(a.getAttribute('href') || '') && !(a.getAttribute('title') || '').trim()).length;
+    boite.innerHTML = `<div class="lt-tete"><b>${L.length ? `Liens du texte (${L.length})` : 'Aucun lien dans le texte'}</b>`
+      + (ytSansTitre ? `<button type="button" data-lt="yt-titres" title="Récupère sur YouTube le titre et la chaîne des vidéos dont le lien n'a pas de titre">Titres YouTube manquants (${ytSansTitre})</button>` : '')
+      + (L.length ? '<button type="button" data-lt="verifier" title="Vérifie que chaque page existe : Wikipédia, YouTube et autres sites">Vérifier les liens</button>' : '') + '</div>'
+      /* adresses collées en clair dans le texte (pas des liens) : à transformer en lien ou à supprimer */
+      + ((visuel.textContent.match(/https?:\/\/[^\s<>"«»]+/g) || []).map((u) => `<div class="lt-vide" style="color:#b3261e;font-style:normal">⚠ Adresse écrite en clair dans le texte (ce n'est pas un lien) : <b>${esc(u)}</b></div>`).join(''))
+      + (L.length ? '<ol>' + L.map((a, i) => {
+        const h = a.getAttribute('href') || '', t = (a.getAttribute('title') || '').trim(), [g, lib] = genreLien(h), e = ETATS_LIENS.get(h);
+        return `<li data-i="${i}"><span class="lt-n">${i + 1}</span><span class="lt-genre" data-g="${g}">${esc(lib)}</span>
+          <span class="lt-corps"><span class="lt-mots">${esc(a.textContent.trim() || '(sans mots)')}</span>${i === 0 && g === 'wikipedia' ? ' <small>(lien du nom)</small>' : ''}
+            · <span class="lt-titre ${t ? '' : 'vide'}" title="Titre affiché au survol, et en tête du panneau sur le site">${t ? esc(t) : 'sans titre'}</span>
+            <span class="lt-url" title="${esc(h)}">${esc(decodeURIComponent(h.replace(/^https?:\/\/(www\.)?/, '')).slice(0, 140))}</span>
+            ${e ? `<span class="lt-etat ${e.ok === true ? 'ok' : e.ok === false ? 'err' : 'doute'}">${e.ok === true ? '✓ page trouvée' : e.ok === false ? '✗' : '?'} ${esc(e.message || '')}</span>` : ''}</span>
+          <span class="lt-act"><button type="button" data-lt="voir" title="Montrer ce lien dans le texte">Repérer</button>
+            <a class="bouton-lien" style="padding:.12rem .5rem;font-size:.8rem;color:var(--encre);border-color:#b8923c" href="${esc(h)}" target="_blank" rel="noopener" title="Ouvrir dans un nouvel onglet">↗</a>
+            <button type="button" data-lt="modifier" title="Changer l'adresse ou le titre">Modifier</button>
+            <button type="button" data-lt="retirer" title="Retirer le lien (les mots restent)">Retirer</button></span></li>`;
+      }).join('') + '</ol>' : '<div class="lt-vide">Pour ajouter un lien : sélectionnez des mots dans le texte, puis 🔗 Lien.</div>');
+  };
+  const apresLien = () => visuel.dispatchEvent(new Event('input'));
+  const titreAuto = async (a) => {  // titre d'un lien YouTube : « Titre de la vidéo par Chaîne »
+    const r = await api('/api/lien?url=' + encodeURIComponent(a.getAttribute('href')));
+    ETATS_LIENS.set(a.getAttribute('href'), r);
+    if (r.titre) a.setAttribute('title', r.titre);
+    return r;
+  };
+  $('#liens-texte').onclick = async (ev) => {
+    const b = ev.target.closest('button[data-lt]'); if (!b) return;
+    const a = liensVisuel()[+b.closest('li')?.dataset.i];
+    if (b.dataset.lt === 'voir' && a) {
+      if (!code.hidden) $('#btn-code').click();
+      /* sélection des mots du lien (rien n'est ajouté au texte) */
+      a.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      visuel.focus({ preventScroll: true });
+      const r = document.createRange(); r.selectNodeContents(a);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    } else if (b.dataset.lt === 'modifier' && a) {
+      const url = prompt('Adresse du lien :', a.getAttribute('href') || '');
+      if (url === null) return;
+      if (url.trim()) a.setAttribute('href', url.trim());
+      if (/youtu\.?be/.test(url) && confirm('Remplir le titre automatiquement depuis YouTube (titre de la vidéo et chaîne) ?')) {
+        b.disabled = true; try { await titreAuto(a); } catch (e) { alert(e.message); }
+      } else {
+        const t = prompt('Titre affiché au survol (vide pour aucun) :', a.getAttribute('title') || '');
+        if (t !== null) { if (t.trim()) a.setAttribute('title', t); else a.removeAttribute('title'); }
+      }
+      apresLien();
+    } else if (b.dataset.lt === 'retirer' && a) {
+      if (!confirm(`Retirer le lien « ${a.textContent.trim()} » ? Les mots restent dans le texte.`)) return;
+      a.replaceWith(...a.childNodes); apresLien();
+    } else if (b.dataset.lt === 'yt-titres') {
+      b.disabled = true; b.textContent = 'Recherche des titres…';
+      for (const x of liensVisuel().filter((x) => /youtu\.?be/.test(x.getAttribute('href') || '') && !(x.getAttribute('title') || '').trim())) {
+        try { await titreAuto(x); } catch (e) { /* vidéo introuvable : signalée dans la liste */ }
+      }
+      apresLien();
+    } else if (b.dataset.lt === 'verifier') {
+      b.disabled = true;
+      const L = liensVisuel();
+      for (let i = 0; i < L.length; i++) {
+        b.textContent = `Vérification ${i + 1} / ${L.length}…`;
+        const h = L[i].getAttribute('href') || '';
+        try { ETATS_LIENS.set(h, await api('/api/lien?url=' + encodeURIComponent(h))); }
+        catch (e) { ETATS_LIENS.set(h, { ok: null, message: e.message }); }
+      }
+      listerLiens();
+    }
+  };
+  listerLiens();
+
   document.execCommand('defaultParagraphSeparator', false, 'p');
-  visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); mesurer(); });
-  code.addEventListener('input', () => { corps = code.value; visuel.innerHTML = corps; composer(); mesurer(); });
+  visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); mesurer(); listerLiens(); });
+  code.addEventListener('input', () => { corps = code.value; visuel.innerHTML = corps; composer(); mesurer(); listerLiens(); });
   /* coller du texte brut, sans la mise en forme de la page d'origine */
   visuel.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData.getData('text/plain')); });
 
@@ -774,10 +882,21 @@ function brancherTexte(d) {
       document.execCommand('createLink', false, url);
       a = lienSelection() || [...visuel.querySelectorAll('a')].filter((x) => x.getAttribute('href') === url).pop();
     }
+    if (a && /youtu\.?be/.test(url)) {
+      /* vidéo YouTube : titre et chaîne remplis automatiquement (« Titre par Chaîne ») */
+      visuel.dispatchEvent(new Event('input'));
+      message('Recherche du titre de la vidéo sur YouTube…', 'info');
+      titreAuto(a).then((r) => {
+        if (!r.titre) { const t = prompt((r.message ? r.message + '\n' : '') + 'Titre affiché au survol :', a.getAttribute('title') || ''); if (t) a.setAttribute('title', t); }
+        message(r.ok ? `✓ Titre de la vidéo : ${a.getAttribute('title') || ''}` : '⚠ ' + (r.message || 'vidéo introuvable'), r.ok ? 'ok' : 'err');
+        visuel.dispatchEvent(new Event('input'));
+      }).catch((e) => message('⚠ ' + e.message, 'err'));
+      return;
+    }
     if (a) {
-      const wiki = /wikipedia\.org/.test(url);
-      const titre = wiki ? (/\/\/fr\./.test(url) ? ' Wikipedia' : ' Wikipedia (en)')
-        : prompt('Titre affiché au survol (facultatif, ex. titre de la vidéo) :', a.getAttribute('title') || '');
+      const m = url.match(/\/\/([a-z-]+)\.(?:m\.)?wikipedia\.org/);
+      const titre = m ? (m[1] === 'fr' ? ' Wikipedia' : ` Wikipedia (${m[1]})`)
+        : prompt('Titre affiché au survol (facultatif) :', a.getAttribute('title') || '');
       if (titre) a.setAttribute('title', titre); else a.removeAttribute('title');
     }
     visuel.dispatchEvent(new Event('input'));
