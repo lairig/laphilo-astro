@@ -44,6 +44,7 @@ export const philosopheFriseConfig: Record<string, FriseEngineConfig> = {
   'chinois-toutes-epoques': { defaultIndex: 1, scale_factor: 8 },
   'coreens-toutes-epoques': { defaultIndex: 1, scale_factor: 8 },
   'japonais-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
+  'monde-arabe-toutes-epoques': { defaultIndex: 0, scale_factor: 8 },
   allemands: { defaultIndex: 20, scale_factor: 10 },
   americains: { defaultIndex: 18, scale_factor: 15 },
   russes: { defaultIndex: 40, scale_factor: 15 },

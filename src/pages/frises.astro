@@ -59,7 +59,11 @@ type Carte = {
   portraits: [string, string | undefined][]; sous?: Sous[]; jalons?: Jalon[]; couleur?: string;
   duo?: Carte; // seconde moitié d'une carte double (Occident | Reste du monde)
 };
-const carte = (it: Item, titre = court(it.name)): Carte => {
+/* Titres de carte choisis à la main quand le nom court tiré du catalogue ne convient pas */
+const TITRES_CARTES: Record<string, string> = {
+  '/philosophes/frise/pensee-juive-toutes-epoques/': 'Pensée juive', // plutôt que « Juifs »
+};
+const carte = (it: Item, titre = TITRES_CARTES[it.href ?? ''] ?? court(it.name)): Carte => {
   const e = parUrl.get(it.href!);
   return { titre, href: it.href!, periode: periode(e), nb: e?.nb ?? 0, unite: 'penseurs', accroche: accroche(it), portraits: (e?.v ?? []).slice(0, 4) };
 };

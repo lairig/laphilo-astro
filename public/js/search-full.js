@@ -37,11 +37,12 @@
     { v: 'chinois', fr: 'Chinois', grad: 'radial-gradient(circle at 28% 30%,#ffde00 0 14%,transparent 16%),#de2910' },
     { v: 'coreen', fr: 'Coréens', grad: 'radial-gradient(circle,#cd2e3a 0 22%,#0047a0 22% 34%,#f7f4ea 36%)' },
     { v: 'japonais', fr: 'Japonais', grad: 'radial-gradient(circle,#bc002d 0 28%,#f7f4ea 30%)' },
+    { v: 'arabe', fr: 'Monde arabe', grad: 'linear-gradient(90deg,#ce1126 0 24%,transparent 24%),linear-gradient(180deg,#1a1a1a 33.3%,#f7f4ea 33.3% 66.6%,#007a3d 66.6%)' },
   ];
   var PHILO_COLOR_GROUPS = [
     /* Même découpage que la page /frises/ : pays, grandes traditions, thème */
     { fr: 'Par tradition', accent: '#8b3a0f', lignes: [
-      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec', 'indiens', 'chinois', 'coreen', 'japonais'] },
+      { fr: 'Pays', vide: 'Tous les pays', items: ['france', 'germanophone', 'britannique', 'italien', 'europe-nord-centrale', 'hispanique', 'americain', 'russe', 'grec', 'arabe', 'indiens', 'chinois', 'coreen', 'japonais'] },
       { fr: 'Grande tradition', vide: 'Toutes les traditions', items: ['orient-ancien', 'indien', 'asie-est', 'juif', 'arabo-persan', 'africain'] },
     ] },
   ];
@@ -70,6 +71,8 @@
     'chinois': { nats: ['Chinoise'] },
     'coreen': { nats: ['Coréenne'] },
     'japonais': { nats: ['Japonaise'] },
+    /* Monde arabe : mêmes règles que la frise monde-arabe-toutes-epoques (src/data/virtual-frises.ts) */
+    'arabe': { ou: [{ groupe: 'islam-juif', nats: ['Arabe', 'Égyptienne', 'Syrienne', 'Libanaise', 'Irakienne', 'Palestinienne', 'Jordanienne', 'Saoudienne', 'Yéménite', 'Marocaine', 'Algérienne', 'Tunisienne', 'Libyenne', 'Soudanaise', 'Mauritanienne'] }, { noms: ['Edward SAÏD'] }] },
   };
   function pillValue(v) {
     return TRADITION_RULES[v] ? 'trad:' + v : v;
@@ -96,6 +99,7 @@
     'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: 'Voir la frise des philosophes chinois' },
     'coreen': { href: '/philosophes/frise/coreens-toutes-epoques/', fr: 'Voir la frise des philosophes coréens' },
     'japonais': { href: '/philosophes/frise/japonais-toutes-epoques/', fr: 'Voir la frise des philosophes japonais' },
+    'arabe': { href: '/philosophes/frise/monde-arabe-toutes-epoques/', fr: 'Voir la frise des philosophes du monde arabe' },
   };
   /* Sujets de travail des philosophes vivants : mêmes codes que
      src/data/themes-vivants.ts (champ th de l'index, frise « vivants-<code> ») */
@@ -117,7 +121,7 @@
     britannique: '40,70,160', italien: '0,146,70', 'europe-nord-centrale': '33,70,139', germanophone: '210,30,30',
     'arabo-persan': '35,159,64', africain: '224,100,20', hispanique: '198,11,30', femme: '142,68,173',
     'orient-ancien': '201,162,39', grec: '13,94,175', indien: '255,153,51', 'asie-est': '222,41,16', juif: '43,90,168',
-    indiens: '255,153,51', chinois: '222,41,16', coreen: '0,71,160', japonais: '188,0,45',
+    indiens: '255,153,51', chinois: '222,41,16', coreen: '0,71,160', japonais: '188,0,45', arabe: '0,122,61',
   };
   function colorDef(v) {
     return COLOR_FILTERS.filter(function (c) { return c.v === v; })[0];

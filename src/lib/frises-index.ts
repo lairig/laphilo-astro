@@ -62,6 +62,7 @@ const COULEUR_VIRTUELLE: Record<string, string> = {
   'chinois-toutes-epoques': 'flag:chinois',
   'coreens-toutes-epoques': 'flag:coreen',
   'japonais-toutes-epoques': 'flag:japonais',
+  'monde-arabe-toutes-epoques': 'flag:arabe',
 };
 function couleur(href: string): string {
   if (href.startsWith('/frises/')) return 'monde';

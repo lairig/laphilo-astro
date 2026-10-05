@@ -29,6 +29,9 @@ export const regionsContemporains: { slug: string; label: string; nats: string[]
   { slug: 'contemporains-asie-oceanie', label: 'Asie & Océanie', nats: ['Japonaise', 'Chinoise', 'Coréenne', 'Taïwanaise', 'Vietnamienne', 'Indienne', 'Pakistanaise', 'Bangladaise', 'Sri-lankaise', 'Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Australienne', 'Néo-zélandaise'] },
 ];
 
+/* Nationalités du monde arabe (frise monde-arabe-toutes-epoques ; même liste dans search-full.js) */
+const NATS_ARABES = ['Arabe', 'Égyptienne', 'Syrienne', 'Libanaise', 'Irakienne', 'Palestinienne', 'Jordanienne', 'Saoudienne', 'Yéménite', 'Marocaine', 'Algérienne', 'Tunisienne', 'Libyenne', 'Soudanaise', 'Mauritanienne'];
+
 export interface VirtualFrise {
   label: string;
   match: (p: PhilosopheData) => boolean;
@@ -156,6 +159,13 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'japonais-toutes-epoques': {
     label: 'Philosophes japonais — toutes époques',
     match: (p) => p.nationalite === 'Japonaise',
+  },
+  /* Monde arabe : nationalités arabes dans la tradition islamique (Groupe islam-juif), ce qui
+     écarte l'Égypte pharaonique et les néoplatoniciens grecs de Syrie ; plus Edward Saïd,
+     Palestinien de naissance. Même règle que la pastille « Monde arabe » de la recherche. */
+  'monde-arabe-toutes-epoques': {
+    label: 'Philosophes du monde arabe — toutes époques',
+    match: (p) => (p.groupe === 'islam-juif' && NATS_ARABES.includes(p.nationalite ?? '')) || p.name === 'Edward SAÏD',
   },
   /* Colonne « Traditions » des xlsx (valeur « juive »), quelle que soit la nationalité */
   'pensee-juive-toutes-epoques': {
