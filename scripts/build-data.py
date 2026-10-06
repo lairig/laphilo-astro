@@ -219,6 +219,10 @@ def lire_xlsx(nom_fichier):
         'groupe':       cols.get('groupe'),
         'importance':   cols.get('importance'),
         'themes':       cols.get('themes'),
+        # courants : mouvement ou position, famille (ou grande question), courants parents
+        'nature':       cols.get('nature'),
+        'famille':      cols.get('famille'),
+        'issu_de':      cols.get('issu_de'),
     }
 
     entrees = []
@@ -291,6 +295,19 @@ def lire_xlsx(nom_fichier):
                 figures = [x.strip() for x in v.split(';') if x.strip()]
                 if figures:
                     entry['figures_cles'] = figures
+
+        for cle in ('nature', 'famille'):
+            if C[cle] is not None:
+                v = to_str(row[C[cle]]) if C[cle] < len(row) else ''
+                if v:
+                    entry[cle] = v.strip()
+
+        if C['issu_de'] is not None:
+            v = to_str(row[C['issu_de']]) if C['issu_de'] < len(row) else ''
+            if v:
+                parents = [x.strip() for x in v.split(';') if x.strip()]
+                if parents:
+                    entry['issu_de'] = parents
 
         if C['traditions'] is not None:
             v = to_str(row[C['traditions']]) if C['traditions'] < len(row) else ''
@@ -411,6 +428,17 @@ def verifier(philosophes, courants):
         for t in c.get('traditions', []):
             if t not in GROUPES:
                 alertes.append(f"courant {c['name']} ({ou}) : tradition « {t} » inconnue (codes de groupe : {', '.join(GROUPES)})")
+    # Familles : Nature = mouvement ou position, Issu_de = noms exacts d'autres courants
+    noms_courants = {c['name'] for c in courants}
+    for c in courants:
+        ou = f"{c['_fichier']}.xlsx"
+        if c.get('nature') and c['nature'] not in ('mouvement', 'position'):
+            alertes.append(f"courant {c['name']} ({ou}) : nature « {c['nature']} » inconnue (mouvement ou position)")
+        if c.get('nature') and not c.get('famille'):
+            alertes.append(f"courant {c['name']} ({ou}) : famille manquante")
+        for p in c.get('issu_de', []):
+            if p not in noms_courants:
+                alertes.append(f"courant {c['name']} ({ou}) : « issu de » {p} n'est pas un courant connu")
     return alertes
 
 

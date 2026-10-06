@@ -395,7 +395,7 @@ function gabarit(d) {
   const nomImg = (d.image || '').replace(/^\/pho\//, '').replace(/-mini\.webp$/, '') ||
     String(d.champs[champ('nom')] || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   // colonnes sans champ dédié : le bloc « Autres colonnes » n'apparaît que s'il y en a
-  const autres = d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media', 'figures_cles'].includes(norm(h)));
+  const autres = d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media', 'figures_cles', 'nature', 'famille', 'issu_de'].includes(norm(h)));
   return `
   <div class="fiche">
     <div class="titre-fiche"><h2>${v('nom')}</h2><small>${esc(lab)} · ligne ${d.l}</small><span style="flex:1"></span>
@@ -474,6 +474,11 @@ function gabarit(d) {
       </div>
       <label ${a('branche')} style="margin-top:.7rem">Branches<div class="chips" data-multi="branche">${branches.map((b) => `<span class="chip" data-v="${esc(b)}">${esc(b)}</span>`).join('')}</div></label>
       <label ${a('figures_cles')} style="margin-top:.7rem">Figures clés (noms séparés par « ; », ex. PLATON;PLOTIN)<input type="text" data-c="figures_cles" value="${v('figures_cles')}"></label>
+      <div class="grille" style="margin-top:.7rem${champ('famille') ? '' : ';display:none'}">
+        <label ${a('nature')}>Nature<select data-c="nature">${[['', '—'], ['mouvement', 'Mouvement (école, époque)'], ['position', 'Position (réponse à une grande question)']].map(([k, t]) => `<option value="${k}" ${(courante.champs[champ('nature')] ?? '') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+        <label class="large" ${a('famille')}>Famille (ou grande question, pour une position)<input type="text" data-c="famille" list="dl-fam" value="${v('famille')}" placeholder="choisir dans la liste ou en créer une"></label>
+        <label class="large" ${a('issu_de')}>Issu de (courants parents, noms exacts séparés par « ; »)<input type="text" data-c="issu_de" list="dl-cour" value="${v('issu_de')}" placeholder="ex. Platonisme;Stoïcisme"></label>
+      </div>
       <label ${a('traditions')} style="margin-top:.7rem">Traditions (étiquettes transversales)<div class="chips" data-multi="traditions">${CODES.traditions.map((b) => `<span class="chip" data-v="${b}">${b}</span>`).join('')}</div></label>
       <label ${a('themes')} style="margin-top:.7rem">Thèmes (philosophes vivants)<div class="chips" data-multi="themes">${CODES.themes.map((t) => `<span class="chip" data-v="${t.code}" title="${esc(t.label)}">${esc(t.label)}</span>`).join('')}</div></label>
       <label ${a('courant')} style="margin-top:.7rem">Courants<div class="chips" id="courants"></div>
@@ -1131,6 +1136,7 @@ $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
   document.body.insertAdjacentHTML('beforeend',
     `<datalist id="dl-nat">${CODES.nationalites.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>` +
     `<datalist id="dl-cour">${CODES.courants.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>` +
+    `<datalist id="dl-fam">${Object.entries(CODES.familles || {}).flatMap(([n, l]) => l.map((f) => `<option value="${esc(f)}" label="${n}">`)).join('')}</datalist>` +
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
   majNbImages();

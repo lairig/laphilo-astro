@@ -57,6 +57,11 @@ const courants = defineCollection({
        et traditions secondaires qu'il traverse */
     groupe: z.string().optional(),
     traditions: z.array(z.string()).optional(),
+    /* Familles : « mouvement » (école historique) ou « position » (réponse à une grande question),
+       sa famille ou sa question, et les courants dont il est issu (noms exacts) */
+    nature: z.enum(['mouvement', 'position']).optional(),
+    famille: z.string().optional(),
+    issu_de: z.array(z.string()).optional(),
     frise_source: z.string(),
     frise_label: z.string(),
   }),

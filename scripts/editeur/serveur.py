@@ -750,6 +750,9 @@ def codes():
         'branches': BRANCHES, 'traditions': TRADITIONS,
         'themes': [{'code': k, 'label': v} for k, v in bd.THEMES.items()],
         'courants': sorted({c['name'] for c in C}, key=str.lower),
+        # familles déjà utilisées, par nature (mouvement : familles historiques ; position : grandes questions)
+        'familles': {n: sorted({c['famille'] for c in C if c.get('nature') == n and c.get('famille')}, key=str.lower)
+                     for n in ('mouvement', 'position')},
         'photos': sorted(os.path.splitext(n)[0] for n in os.listdir(PHOTO) if n.endswith('.webp')),
         'nationalites': sorted({p.get('nationalite') for p in P if p.get('nationalite')}),
     }
