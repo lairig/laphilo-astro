@@ -155,6 +155,21 @@ const cartesQuestions: Carte[] = (parQuestion?.links ?? []).map((l) => {
   return carteCourant(l.href, propre(l.label), descriptions[slug(l.href)] ?? '', { sous });
 });
 
+/* Familles et débats : deux cartes vers /familles-de-pensee/ (colonnes Nature et Famille des courants) */
+const famillesDe = (nature: string) => [...new Set(courantsTous.filter((c) => c.data.nature === nature && c.data.famille).map((c) => c.data.famille!))];
+const premiere = Math.min(...courantsTous.map((c) => c.data.year));
+const jalonsFamilles: Jalon[] = [
+  ['Socrate et ses héritiers', 'occident'], ['Bouddhismes', 'inde'], ['Confucianismes', 'asie-est'], ['Philosophie et mystique de l’islam', 'islam-juif'],
+].map(([nom, g]) => ({ nom, couleur: couleurGroupe.get(g) ?? '#b8860b' }));
+const jalonsDebats: Jalon[] = ['Le réel est-il un ou multiple ?', 'Sommes-nous libres ?', 'Dieu, les dieux ou aucun ?', 'Que pouvons-nous connaître ?']
+  .map((nom) => ({ nom, couleur: '#b8860b' }));
+const cartesFamilles: Carte[] = [
+  { titre: 'Les familles de pensée', href: '/familles-de-pensee/', periode: `${an(premiere)} → aujourd'hui`, nb: famillesDe('mouvement').length, unite: 'familles',
+    accroche: 'Les courants rangés en lignées : d’où vient chaque école, ce qu’elle a fait naître, de la Grèce à l’Inde et à la Chine.', portraits: [], jalons: jalonsFamilles },
+  { titre: 'Les grands débats', href: '/familles-de-pensee/#debats', periode: '', nb: famillesDe('position').length, unite: 'questions',
+    accroche: 'Monisme ou dualisme, libre arbitre ou déterminisme, Dieu ou aucun dieu : les réponses qui traversent les siècles.', portraits: [], jalons: jalonsDebats },
+];
+
 type Porte = { id: string; icone: string; libelle: string; question: string; blocs: { titre?: string; cartes: Carte[] }[] };
 const portesPhilosophes: Porte[] = [
   {
@@ -188,6 +203,10 @@ const portesCourants: Porte[] = [
   {
     id: 'courants-question', icone: '❖', libelle: 'Une grande question', question: 'Toutes les traditions réunies autour d’une même question',
     blocs: [{ cartes: cartesQuestions }],
+  },
+  {
+    id: 'courants-familles', icone: '❦', libelle: 'Familles et débats', question: 'Les courants rangés par familles, et les grandes questions qui les opposent',
+    blocs: [{ cartes: cartesFamilles }],
   },
 ];
 const espaces = [
