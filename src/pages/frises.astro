@@ -61,6 +61,10 @@ type Carte = {
 /* Titres de carte choisis à la main quand le nom court tiré du catalogue ne convient pas */
 const TITRES_CARTES: Record<string, string> = {
   '/philosophes/frise/pensee-juive-toutes-epoques/': 'Pensée juive', // plutôt que « Juifs »
+  /* L'Occident en trois frises (titres courts : le nom complet passe sous la flèche) */
+  '/philosophes/frise/occident-antiquite-age-classique/': "Occident, de l'Antiquité à 1700",
+  '/philosophes/frise/occident-lumieres-1900/': 'Occident, des Lumières à 1900',
+  '/philosophes/frise/occident-xxe-aujourdhui/': "Occident, depuis 1900",
 };
 const carte = (it: Item, titre = TITRES_CARTES[it.href ?? ''] ?? court(it.name)): Carte => {
   const e = parUrl.get(it.href!);

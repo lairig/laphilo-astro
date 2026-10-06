@@ -53,7 +53,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'francais-toutes-epoques': {
     label: 'Philosophes français — toutes époques',
     /* + les Suisses francophones (exclus des germanophones) */
-    match: (p) => p.nationalite === 'Française' || ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'].includes(p.name),
+    match: (p) => p.nationalite === 'Française' || ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'].includes(p.name),
   },
   'allemands-toutes-epoques': {
     label: 'Philosophes allemands — toutes époques',
@@ -83,7 +83,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'germanophones-toutes-epoques': {
     label: 'Philosophes germanophones — toutes époques',
-    match: (p) => ['Allemande', 'Autrichienne', 'Suisse'].includes(p.nationalite ?? '') && !['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'].includes(p.name),
+    match: (p) => ['Allemande', 'Autrichienne', 'Suisse'].includes(p.nationalite ?? '') && !['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'].includes(p.name),
   },
   /* Colonne « Groupe » (islam-juif), sans les penseurs juifs qui ont leur propre frise ; remplace « arabo-persans » */
   'monde-islamique-toutes-epoques': {
@@ -203,6 +203,20 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   'pensee-juive-toutes-epoques': {
     label: 'Philosophes juifs — toutes époques',
     match: (p) => (p.traditions ?? []).includes('juive'),
+  },
+  /* L'Occident (colonne Groupe) en trois frises par année de naissance, à la place de la
+     frise du monde filtrée sur l'Occident (≈ 900 penseurs, trop lourde ; 2026-10-06) */
+  'occident-antiquite-age-classique': {
+    label: "Philosophes d'Occident, de l'Antiquité à l'Âge classique",
+    match: (p) => p.groupe === 'occident' && p.year < 1700,
+  },
+  'occident-lumieres-1900': {
+    label: "Philosophes d'Occident, des Lumières à 1900",
+    match: (p) => p.groupe === 'occident' && p.year >= 1700 && p.year < 1900,
+  },
+  'occident-xxe-aujourdhui': {
+    label: "Philosophes d'Occident, du XXe siècle à aujourd'hui",
+    match: (p) => p.groupe === 'occident' && p.year >= 1900,
   },
   ...Object.fromEntries(
     regionsContemporains.map((r): [string, VirtualFrise] => [

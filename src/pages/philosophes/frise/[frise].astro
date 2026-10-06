@@ -102,6 +102,9 @@ const seoTitles: Record<string, string> = {
   'afrique-subsaharienne-toutes-epoques': "Philosophes d'Afrique subsaharienne : frise",
   'asie-sud-est-toutes-epoques': "Philosophes d'Asie du Sud-Est : frise chronologique",
   'caraibes-toutes-epoques': 'Penseurs des Caraïbes : frise chronologique',
+  'occident-antiquite-age-classique': "Philosophes d'Occident, de l'Antiquité à l'Âge classique : frise",
+  'occident-lumieres-1900': "Philosophes d'Occident, des Lumières à 1900 : frise",
+  'occident-xxe-aujourdhui': "Philosophes d'Occident, du XXe siècle à aujourd'hui : frise",
   ...Object.fromEntries(themesVivants.map((t) => [friseDuTheme(t.code), t.seoTitle])),
 };
 const title = titreSeo(seoTitles[frise as string] ?? label);

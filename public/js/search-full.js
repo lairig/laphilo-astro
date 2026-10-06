@@ -51,14 +51,14 @@
     ] },
   ];
   var TRADITION_RULES = {
-    france: { ou: [{ nats: ['Française'] }, { noms: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] }] },
+    france: { ou: [{ nats: ['Française'] }, { noms: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'] }] },
     allemand: { nats: ['Allemande'] },
     americain: { nats: ['Américaine'] },
     russe: { nats: ['Russe'] },
     britannique: { ou: [{ nats: ['Britannique', 'Canadienne', 'Australienne', 'Irlandaise', 'Néo-zélandaise'] }, { nats: ['Sud-Africaine'], groupe: 'occident' }] },
     italien: { nats: ['Italienne', 'Romaine'] },
     'europe-nord-centrale': { nats: ['Belge', 'Néerlandaise', 'Luxembourgeoise', 'Danoise', 'Suédoise', 'Norvégienne', 'Finlandaise', 'Islandaise', 'Tchèque', 'Polonaise', 'Hongroise', 'Roumaine', 'Slovène', 'Slovaque', 'Croate', 'Serbe', 'Bulgare', 'Lettone', 'Lituanienne', 'Estonienne', 'Ukrainienne'] },
-    'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN'] },
+    'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'] },
     'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
     'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
     'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'] },

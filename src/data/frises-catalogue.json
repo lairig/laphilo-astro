@@ -480,10 +480,22 @@
       "label": "Par grande tradition",
       "items": [
         {
-          "name": "Tous les Philosophes d'Occident",
-          "tag": "-640 av. J.-C. → 2026",
-          "text": "La tradition occidentale sur une seule frise : des présocratiques à Platon et Aristote, d'Augustin et Thomas d'Aquin à Descartes, Spinoza et Kant, de Hegel, Marx et Nietzsche à Heidegger, Wittgenstein, Arendt, Beauvoir et aux penseurs d'aujourd'hui.",
-          "href": "/frises/penseurs-du-monde/?g=occident"
+          "name": "Philosophes d'Occident, de l'Antiquité à l'Âge classique",
+          "tag": "-640 av. J.-C. → 1699",
+          "text": "La tradition occidentale des présocratiques à la fin du XVIIe siècle : Platon et Aristote, les stoïciens et les épicuriens, Augustin, Thomas d'Aquin et Ockham, Érasme et Montaigne, Descartes, Pascal, Spinoza, Locke et Leibniz.",
+          "href": "/philosophes/frise/occident-antiquite-age-classique/"
+        },
+        {
+          "name": "Philosophes d'Occident, des Lumières à 1900",
+          "tag": "1700 → 1899",
+          "text": "La tradition occidentale des Lumières au tournant du XXe siècle : Hume, Rousseau et Kant, Hegel, Kierkegaard, Marx et Mill, Nietzsche, Bergson, Husserl, Russell, Wittgenstein et Heidegger.",
+          "href": "/philosophes/frise/occident-lumieres-1900/"
+        },
+        {
+          "name": "Philosophes d'Occident, du XXe siècle à aujourd'hui",
+          "tag": "1900 → 2026",
+          "text": "La tradition occidentale depuis 1900 : Sartre, Arendt et Beauvoir, Lévi-Strauss, Foucault, Derrida et Deleuze, Rawls et Habermas, jusqu'aux philosophes vivants.",
+          "href": "/philosophes/frise/occident-xxe-aujourdhui/"
         },
         {
           "name": "Tous les Philosophes de l'Inde &amp; du Monde Bouddhiste",
