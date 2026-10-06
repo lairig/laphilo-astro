@@ -73,6 +73,7 @@ LaPhilo.fr propose des frises chronologiques interactives couvrant ${philosophes
 - [Recherche](${url('/recherche/')}) : recherche par nom, filtres par époque, nationalité, branche, courant
 - [Définition de la philosophie](${url('/definition/')}) : les 7 grandes branches et les branches spécialisées
 - [Histoire des courants de pensée](${url('/histoire-des-courants/')}) : les grandes familles d'idées, par période
+- [Familles de pensée et grands débats](${url('/familles-de-pensee/')}) : les courants rangés par famille (filiations) et les positions rangées par grande question
 - [Les philosophes d'aujourd'hui](${url('/philosophes-d-aujourd-hui/')}) : les penseurs vivants, par sujet de travail et par région du monde
 - [Les philosophes anciens](${url('/histoire-des-philosophes/')}) : des présocratiques aux grandes figures du XXᵉ siècle
 - [Les frises](${url('/frises/')}) : toutes les frises chronologiques, par époque, pays, tradition, sujet ou courant

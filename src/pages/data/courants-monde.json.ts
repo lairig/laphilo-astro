@@ -5,7 +5,8 @@ import { getCollection } from 'astro:content';
    /frises/tableau-des-courants/).
    courants : [id, nom, année, date affichée, groupe, traditions secondaires,
      branches, description, vidéo YouTube, frise (occidental | oriental),
-     représentants (indices dans philosophes, du plus ancien au plus récent)]
+     représentants (indices dans philosophes, du plus ancien au plus récent),
+     nature (m = mouvement, p = position), famille (ou grande question), parents (id des courants « issu de »)]
    philosophes : [id, nom, année, date affichée, groupe, vignette, frise, vivant]
    Seuls les philosophes rattachés à au moins un courant sont repris ; « vivant »
    = fiche de philosophe en activité (colonne Thèmes renseignée). */
@@ -25,6 +26,7 @@ export const GET: APIRoute = async () => {
     }
   }
 
+  const idParNom = new Map(courants.map((c) => [c.data.name, c.id]));
   const json = {
     courants: courants
       .slice()
@@ -34,6 +36,8 @@ export const GET: APIRoute = async () => {
         (c.data.traditions ?? []).join(';'), (c.data.branches ?? []).join(';'),
         c.data.description ?? '', c.data.yt_id ?? '', c.data.frise_source,
         reps.get(c.data.name) ?? [],
+        c.data.nature ? c.data.nature[0] : '', c.data.famille ?? '',
+        (c.data.issu_de ?? []).map((n) => idParNom.get(n)).filter(Boolean),
       ]),
     philosophes: philosophes.map((p) => [
       p.id, p.data.name, p.data.year, p.data.display_date, p.data.groupe ?? '',

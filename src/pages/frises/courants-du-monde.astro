@@ -35,7 +35,7 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
   <SeoHead title={title} description={description} path="/frises/courants-du-monde/" ariane={[['Les frises', '/frises/'], ["La Frise des courants", '/frises/courants-du-monde/']]} />
   <Fonts />
   <link rel="preload" href="/data/courants-monde.json" as="fetch" crossorigin />
-  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261002b" />
+  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261006" />
   <style is:global>
     :root {
       --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce;
@@ -115,6 +115,20 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
     body.selection .item.proche .nom { color: var(--gold); }
     .item.choisi .nom, body.selection .item.choisi .nom { color: var(--c); font-weight: 700; }
     .item.choisi::before { box-shadow: 0 0 8px var(--c); }
+    /* Lignée du courant choisi (ancêtres et descendants, colonne Issu_de) : noms éclairés, liens courbes */
+    body.selection .item.lignee .nom { color: var(--parch); font-weight: 600; }
+    body.selection .item.lignee::before { box-shadow: 0 0 6px var(--c); }
+    #liens { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; overflow: visible; }
+    .item { z-index: 2; }
+    #liens path { fill: none; stroke: rgba(212,168,67,.55); stroke-width: 1.4; }
+    #liens path.direct { stroke: rgba(240,205,120,.95); stroke-width: 2; }
+    /* Filtre « une famille » (?famille=…) */
+    .famille-bandeau { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; justify-content: center; margin: .2rem auto .5rem;
+      max-width: 900px; padding: .45rem 1rem; border: 1px solid rgba(212,168,67,.4); border-radius: 6px; background: rgba(212,168,67,.08); }
+    .famille-bandeau[hidden] { display: none; }
+    .famille-bandeau .fb-type { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+    .famille-bandeau .fb-nom { font-size: 1.15rem; font-style: italic; color: var(--parch); }
+    .famille-bandeau small { color: var(--parch-dim); font-size: .9rem; }
     /* Représentants du courant choisi : trait ouvert depuis sa naissance, un point par philosophe */
     .reps { position: relative; height: 34px; border-top: 1px dashed rgba(212,168,67,.25); }
     .reps-titre { position: sticky; left: 0; display: inline-block; font-size: .82rem; font-style: italic; color: var(--parch-dim);
@@ -195,6 +209,10 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
     </div>
   </div>
   <p class="aide" id="aide"></p>
+  <div class="famille-bandeau" id="famille-bandeau" hidden>
+    <span class="fb-type" id="fb-type">Famille</span><span class="fb-nom" id="fb-nom"></span><small id="fb-n"></small>
+    <button class="btn" type="button" id="fb-tout">✕ Toute la frise</button>
+  </div>
 
   <div id="scroller">
     <p id="chargement">Chargement de la frise…</p>
@@ -202,6 +220,7 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
       <div class="axe" id="axe"></div>
       <div id="fonds"></div>
       <div id="couloirs"></div>
+      <svg id="liens" aria-hidden="true"></svg>
       <div id="curseur"><span></span></div>
     </div>
   </div>
@@ -212,7 +231,7 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
   <FriseFooter />
   <div id="marge-bulle" aria-hidden="true"></div>
 
-  <script src="/js/courants-panneau.js?v=20261002d" is:inline></script>
+  <script src="/js/courants-panneau.js?v=20261006" is:inline></script>
   <script is:inline define:vars={{ GROUPES }}>
   (() => {
     const Y0 = -3000, Y1 = 2030, KMAX = 60;
@@ -237,19 +256,24 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
 
     let DATA = [], PHILOS = [], parId = {}, parGroupe = {};
     let actifs = ids.slice(), k = 0.4, choisi = null, periode = null;
+    let famille = ''; // filtre « une famille » (ou une grande question) : ?famille=…
+    let lig = null;   // lignée du courant choisi : { membres, liens }
 
     const x = (y) => (y - Y0) * k;
     const an = (y) => (y < 0 ? `${-y} av. J.-C.` : String(y));
     const mesure = document.createElement('canvas').getContext('2d');
     const largeurNom = (n) => { mesure.font = '600 15px "EB Garamond", Georgia, serif'; return mesure.measureText(n).width + 34; };
     const PC = matchMedia('(hover: hover) and (pointer: fine)').matches;
-    if (!PC) $('aide').textContent = 'Faites glisser la frise, pincez-la ou utilisez + et − pour zoomer. Touchez un courant pour voir ses représentants.';
+    $('aide').textContent = PC
+      ? 'Cliquez sur un courant : ses représentants s’affichent, et des liens le relient aux courants dont il est issu et à ceux qu’il a fait naître.'
+      : 'Faites glisser la frise, pincez-la ou utilisez + et − pour zoomer. Touchez un courant pour voir ses représentants et sa filiation.';
 
     function majUrl() {
       const u = new URL(location.href);
       u.search = '';
+      if (famille) u.searchParams.set('famille', famille);
       if (periode) u.searchParams.set('periode', periode);
-      if (actifs.length !== ids.length) u.searchParams.set('g', actifs.join(','));
+      if (!famille && actifs.length !== ids.length) u.searchParams.set('g', actifs.join(','));
       if (choisi) u.searchParams.set('p', choisi);
       window.setBascule(choisi, '');
       history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
@@ -301,10 +325,12 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
 
     /* Chaque courant n'occupe que la place de son nom, à sa naissance. Les plus
        représentés d'abord, chacun dans la première piste libre ; plus on zoome,
-       plus un couloir peut compter de pistes. Le courant choisi garde sa place. */
+       plus un couloir peut compter de pistes. Le courant choisi garde sa place,
+       puis les courants de sa lignée, pour que les liens les rejoignent. */
     const maxPistes = () => (k < 1.5 ? 8 : k < 6 ? 14 : 30);
+    const priorite = (d) => (d.id === choisi ? 2 : lig && lig.membres[d.id] ? 1 : 0);
     function placer(items) {
-      const tri = items.slice().sort((a, b) => (b.id === choisi) - (a.id === choisi) || b.reps.length - a.reps.length || a.y - b.y);
+      const tri = items.slice().sort((a, b) => priorite(b) - priorite(a) || b.reps.length - a.reps.length || a.y - b.y);
       const pistes = Array.from({ length: maxPistes() }, () => []);
       const places = [];
       for (const d of tri) {
@@ -321,8 +347,10 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
       dessinerAxe();
       couloirs.innerHTML = '';
       const sel = choisi && parId[choisi];
+      lig = sel ? CourantsPanneau.lignee(choisi) : null;
       for (const gid of actifs) {
         const items = parGroupe[gid] || [];
+        if (famille && !items.length) continue;
         const places = placer(items);
         const c = document.createElement('div');
         c.className = 'couloir';
@@ -343,6 +371,35 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
       }
       compterMasques();
       appliquerSelection();
+      tracerLiens();
+    }
+
+    /* Liens courbes parent → enfant entre les courants affichés de la lignée du courant choisi ;
+       les liens qui touchent le courant choisi sont plus marqués */
+    function tracerLiens() {
+      const svg = $('liens');
+      if (!lig) { svg.innerHTML = ''; return; }
+      svg.setAttribute('width', monde.offsetWidth);
+      svg.setAttribute('height', monde.offsetHeight);
+      const m = monde.getBoundingClientRect();
+      const point = (id) => {
+        const el = couloirs.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return [r.left - m.left, r.bottom - m.top - 7];
+      };
+      const vus = new Set();
+      svg.innerHTML = lig.liens.map(([p, e]) => {
+        if (vus.has(p + '>' + e)) return '';
+        vus.add(p + '>' + e);
+        const a = point(p), b = point(e);
+        if (!a || !b) return '';
+        const dx = Math.max(30, Math.abs(b[0] - a[0]) / 2);
+        // sur une même ligne, le lien passe en arc au-dessus des noms au lieu de les barrer
+        const arc = Math.abs(b[1] - a[1]) < 12 ? Math.min(34, 10 + Math.abs(b[0] - a[0]) / 8) : 0;
+        const direct = p === choisi || e === choisi ? ' class="direct"' : '';
+        return `<path${direct} d="M${a[0]},${a[1]} C${a[0] + dx},${a[1] - arc} ${b[0] - dx},${b[1] - arc} ${b[0]},${b[1]}"/>`;
+      }).join('');
     }
 
     /* Trait ouvert de la naissance du courant jusqu'à aujourd'hui, et un point
@@ -381,12 +438,46 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
       couloirs.querySelectorAll('.item').forEach((el) => {
         const d = parId[el.dataset.id];
         el.classList.toggle('choisi', d.id === choisi);
+        el.classList.toggle('lignee', d.id !== choisi && !!lig.membres[d.id]);
         el.classList.toggle('proche', d.id !== choisi && d.reps.some((i) => mine.has(i)));
       });
       if (PC) { if (bulleOuverte) positionnerBulle(); } else remplirPanneau();
     }
 
-    const actionsPanneau = { choisir: (id) => choisir(id, true), fermer: () => deselectionner() };
+    const actionsPanneau = { choisir: (id) => choisir(id, true), fermer: () => deselectionner(), famille: (f) => voirFamille(f, true) };
+
+    /* ── Une famille (ou une grande question) seule : ses courants, dans leurs couloirs,
+       cadrés sur sa période ; « Toute la frise » revient à l'ensemble ── */
+    function regrouper() {
+      parGroupe = {};
+      for (const c of DATA) if (!famille || c.fam === famille) (parGroupe[c.g] ||= []).push(c);
+      GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${(parGroupe[g.id] || []).length})`; });
+    }
+    function voirFamille(f, cadrer) {
+      const membres = f ? DATA.filter((c) => c.fam === f) : [];
+      famille = membres.length ? f : '';
+      regrouper();
+      const bandeau = $('famille-bandeau');
+      bandeau.hidden = !famille;
+      if (famille) {
+        $('fb-type').textContent = membres[0].nat === 'p' ? 'Une grande question' : 'Une famille';
+        $('fb-nom').textContent = famille;
+        $('fb-n').textContent = `${membres.length} ${membres[0].nat === 'p' ? 'réponses' : 'courants'}`;
+        setActifs(ids.filter((g) => parGroupe[g]));
+        if (choisi && !membres.some((c) => c.id === choisi)) { choisi = null; fermerBulle(); }
+        if (cadrer) {
+          periode = null;
+          const ans = membres.map((c) => c.y), de = Math.min(...ans), a = Math.max(...ans);
+          const marge = Math.max(60, (a - de) * 0.12);
+          zoomer(scroller.clientWidth / (a - de + 2 * marge + 120), (de + a) / 2 + 40);
+        }
+      } else {
+        setActifs(ids);
+        if (cadrer) dessiner();
+      }
+      majChips(); majUrl();
+    }
+    $('fb-tout').onclick = () => voirFamille('', true);
     function deselectionner() { choisi = null; fermerBulle(); dessiner(); majUrl(); }
     function remplirPanneau() {
       panneau.innerHTML = CourantsPanneau.html(choisi);
@@ -465,8 +556,12 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
     function choisir(id, centrer, defiler = true) {
       const d = parId[id];
       if (!d) return;
+      // un courant hors de la famille affichée : on revient à toute la frise
+      if (famille && d.fam !== famille) voirFamille('', false);
       choisi = id;
-      if (!actifs.includes(d.g)) setActifs([...actifs, d.g]);
+      // son couloir et ceux de ses parents et enfants directs, pour que les liens se voient
+      const voisins = [d, ...d.par.map((i) => parId[i]), ...d.enf.map((i) => parId[i])].filter(Boolean).map((c) => c.g);
+      if (voisins.some((g) => !actifs.includes(g) && parGroupe[g])) setActifs([...actifs, ...voisins.filter((g) => parGroupe[g])]);
       fermerBulle();
       dessiner();
       if (centrer) scroller.scrollTo({ left: x(d.y) - scroller.clientWidth / 3, behavior: 'smooth' });
@@ -591,21 +686,22 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
         DATA = d.courants.filter((c) => G[c.g]);
         PHILOS = d.philosophes;
         parId = d.parId;
-        for (const c of DATA) (parGroupe[c.g] ||= []).push(c);
-        GROUPES.forEach((g) => { const el = $('n-' + g.id); if (el) el.textContent = `(${(parGroupe[g.id] || []).length})`; });
+        regrouper();
         $('chargement').remove();
         monde.hidden = false;
         largeur = scroller.clientWidth;
 
         const q = new URLSearchParams(location.search);
-        const p = q.get('p'), per = q.get('periode'), g = q.get('g');
+        const p = q.get('p'), per = q.get('periode'), g = q.get('g'), fam = q.get('famille');
         if (g) setActifs(g.split(','));
+        if (fam && DATA.some((c) => c.fam === fam)) voirFamille(fam, !per);
         if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        else if (famille) { /* déjà cadrée sur la famille */ }
         // Vue de départ : de l'âge axial au haut Moyen Âge (1 100 ans ; 600 sur petit écran)
         else if (scroller.clientWidth < 700) zoomer(scroller.clientWidth / 600, -300);
         else zoomer(scroller.clientWidth / 1100, -100);
         if (p && parId[p]) {
-          if (!per) k = Math.min(KMAX, Math.max(kMin(), scroller.clientWidth / 900));
+          if (!per && !famille) k = Math.min(KMAX, Math.max(kMin(), scroller.clientWidth / 900));
           choisir(p, true, false);
         } else dessiner();
         majChips();

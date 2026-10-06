@@ -77,7 +77,7 @@ const description = "De quoi débattait-on à chaque époque ? Les courants de t
   <SeoHead title={title} description={description} path="/frises/tableau-des-courants/" ariane={[['Les frises', '/frises/'], ["Le Tableau des courants", '/frises/tableau-des-courants/']]} />
   <Fonts />
   <link rel="preload" href="/data/courants-monde.json" as="fetch" crossorigin />
-  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261002b" />
+  <link rel="stylesheet" href="/css/courants-panneau.css?v=20261006" />
   <style is:global>
     :root { --bg: #160d05; --panel: #22140a; --line: rgba(212,168,67,.18); --parch: #f7ecce; --parch-dim: #c9b48a; --gold: #d4a843; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -239,7 +239,7 @@ const description = "De quoi débattait-on à chaque époque ? Les courants de t
 
   <FriseFooter />
 
-  <script src="/js/courants-panneau.js?v=20261002d" is:inline></script>
+  <script src="/js/courants-panneau.js?v=20261006" is:inline></script>
   <script is:inline define:vars={{ GROUPES }}>
   (() => {
     const $ = (id) => document.getElementById(id);

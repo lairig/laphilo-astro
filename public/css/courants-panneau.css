@@ -25,6 +25,19 @@
 .cp-frise { flex: none; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
   color: var(--gold); text-decoration: none; border: 1px solid var(--line); font-size: .95rem; }
 .cp-frise:hover { border-color: var(--gold); background: rgba(212,168,67,.12); }
+/* Famille et filiation (colonnes Famille, Issu_de) : la famille ouvre la frise filtrée,
+   chaque courant parent ou enfant se choisit sur place */
+.cp-famille, .cp-filiation { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .45rem; margin-top: .7rem; }
+.cp-famille span, .cp-filiation span { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold); min-width: 10.5rem; }
+.cp-famille a { color: var(--parch); font-style: italic; font-size: 1.02rem; text-decoration: underline; text-decoration-color: rgba(212,168,67,.5);
+  text-underline-offset: 3px; }
+.cp-famille a:hover { color: var(--gold); }
+.cp-filiation { margin-top: .4rem; }
+.cp-lien { font-family: inherit; font-size: .92rem; cursor: pointer; color: var(--parch); background: rgba(247,236,206,.04);
+  border: 1px solid var(--line); border-left: 3px solid var(--g); border-radius: 3px; padding: .08rem .5rem; }
+.cp-lien:hover, .cp-lien:focus-visible { border-color: var(--g); color: var(--g); }
 @media (max-width: 640px) {
   .cp-reps { grid-template-columns: 1fr; max-height: none; }
+  .cp-famille span, .cp-filiation span { min-width: 0; width: 100%; }
 }
