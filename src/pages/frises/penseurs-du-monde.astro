@@ -343,7 +343,7 @@ const description = "Toutes les traditions philosophiques sur un même axe du te
       u.search = '';
       if (periode) u.searchParams.set('periode', periode);
       const def = periode ? PERIODES.find((p) => p.id === periode).g : DEFAUT;
-      if (actifs.join() !== def.filter((g) => G[g]).join()) u.searchParams.set('g', actifs.join(','));
+      if (actifs.join() !== ids.filter((g) => def.includes(g)).join()) u.searchParams.set('g', actifs.join(','));
       if (genre) u.searchParams.set(genre, '1');
       if (vivants) u.searchParams.set('vivants', '1');
       if (choisi) u.searchParams.set('p', choisi);
@@ -377,11 +377,13 @@ const description = "Toutes les traditions philosophiques sur un même axe du te
       zonePeriodes.append(b);
     });
 
-    function allerPeriode(id) {
+    /* Les traditions d'une période ne servent qu'à l'ouverture (lien ?periode=…) ;
+       un clic sur une période ne fait que changer d'époque et garde les traditions choisies */
+    function allerPeriode(id, depart = false) {
       const p = PERIODES.find((q) => q.id === id);
       if (!p) return;
       periode = id;
-      setActifs(p.g);
+      if (depart) setActifs(p.g); else majChips();
       zoomer(scroller.clientWidth / (p.a - p.de), (p.de + p.a) / 2);
       majUrl();
     }
@@ -759,7 +761,7 @@ const description = "Toutes les traditions philosophiques sur un même axe du te
 
         const q = new URLSearchParams(location.search);
         const p = q.get('p'), per = q.get('periode'), g = q.get('g');
-        if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per);
+        if (per && PERIODES.some((x) => x.id === per)) allerPeriode(per, true);
         else if (vivants) voirVivants();
         // Vue de départ : l'Antiquité, 1 000 ans sur ordinateur (portraits affichés), 600 ans sur
         // petit écran ; on fait ensuite glisser la frise vers les époques suivantes
@@ -771,7 +773,7 @@ const description = "Toutes les traditions philosophiques sur un même axe du te
           if (!per) { k = Math.min(KMAX, scroller.clientWidth / Math.max(d.e - d.y + 400, 200)); }
           choisir(p, true, false);
         } else dessiner();
-        majChips();
+        majChips(); majUrl();
       })
       .catch(() => { $('chargement').textContent = 'La frise n’a pas pu être chargée. Rechargez la page.'; });
   })();

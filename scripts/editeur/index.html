@@ -103,7 +103,8 @@
   #poignee .bande { display: none; }
   body.liste-repliee #poignee .bande { display: block; position: absolute; top: 3rem; left: 50%; transform: translateX(-50%); writing-mode: vertical-rl;
     color: var(--or); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
-  #droite { flex: 1; min-width: 0; overflow-y: auto; padding: 1rem 1.4rem 4rem; }
+  #droite { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  #defile { flex: 1; min-height: 0; overflow-y: auto; padding: 1rem 1.4rem 1.5rem; }
   #accueil { margin: 3rem auto; max-width: 560px; color: var(--parch2); line-height: 1.6; }
   .fiche { max-width: 980px; margin: 0 auto; }
   .titre-fiche { display: flex; align-items: baseline; gap: 1rem; margin-bottom: .6rem; }
@@ -148,8 +149,9 @@
   .deux { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
 
   /* Barre d'enregistrement + messages */
-  /* barre d'enregistrement : à la fin de la fiche, sous le dernier bloc (Ctrl+S enregistre de partout) */
-  #barre { display: flex; gap: .8rem; align-items: center; padding: .8rem 1rem; margin-top: 1.5rem; background: #120a04; border: 1px solid #5c4318; border-radius: 6px; }
+  /* barre d'enregistrement : bandeau collé au bas de la fenêtre, hors de la zone qui défile (Ctrl+S enregistre de partout) */
+  #barre { flex: none; display: flex; gap: .8rem; align-items: center; padding: .6rem 1.4rem; background: #120a04; border-top: 1px solid #5c4318; }
+  #barre[hidden] { display: none; }
   #message { flex: 1; font-size: .92rem; }
   .ok { color: #9fe0a2; } .err { color: #ffb4a8; } .info { color: var(--parch2); }
   dialog#fenetre { width: min(860px, 94vw); max-height: 86vh; padding: 1rem 1.2rem; border: 1px solid var(--or); border-radius: 8px;
@@ -209,12 +211,15 @@
   </aside>
   <div id="poignee" title="Glisser pour élargir ou réduire la liste (double-clic : largeur d’origine)"><button type="button" id="replier" title="Replier la liste">‹</button><span class="bande">Liste des fiches</span></div>
   <section id="droite">
+   <div id="defile">
     <div id="accueil">
       <p>Choisissez une fiche dans la liste à gauche.</p>
       <p>Astuce : cochez <b>Sans image</b> ou <b>Sans vidéo</b> pour voir ce qu'il reste à remplir.</p>
       <p>Les modifications sont écrites directement dans les fichiers xlsx (une copie de sauvegarde est faite à chaque fois). Rien n'est publié : on publie ensuite comme d'habitude.</p>
     </div>
     <div id="formulaire" hidden></div>
+   </div>
+    <div id="barre" hidden><span id="message" class="info"></span><button type="button" id="btn-annuler">Annuler les modifications</button><button type="button" class="principal" id="btn-enr">Enregistrer</button></div>
   </section>
 </main>
 <canvas id="apercu" width="100" height="120"></canvas>
@@ -346,7 +351,7 @@ async function changerMode(m) {
   MODE = m;
   try { localStorage.setItem('editeur-mode', m); } catch (e) {}
   appliquerMode();
-  courante = null; $('#formulaire').hidden = true; $('#formulaire').innerHTML = ''; $('#accueil').hidden = false;
+  courante = null; $('#formulaire').hidden = true; $('#formulaire').innerHTML = ''; $('#accueil').hidden = false; $('#barre').hidden = true; message('');
   $('#f-fichier').value = ''; $('#q').value = '';
   await chargerListe();
   return true;
@@ -375,9 +380,10 @@ async function ouvrir(f, l) {
   $('#accueil').hidden = true;
   const F = $('#formulaire'); F.hidden = false;
   F.innerHTML = gabarit(d);
+  $('#barre').hidden = false; message('');
   brancher(d);
   afficherListe();
-  $('#droite').scrollTop = 0;
+  $('#defile').scrollTop = 0;
 }
 
 const v = (cle) => esc(courante.champs[champ(cle)] ?? '');
@@ -388,6 +394,8 @@ function gabarit(d) {
   const branches = d.courant ? CODES.branches_courants : CODES.branches;
   const nomImg = (d.image || '').replace(/^\/pho\//, '').replace(/-mini\.webp$/, '') ||
     String(d.champs[champ('nom')] || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  // colonnes sans champ dédié : le bloc « Autres colonnes » n'apparaît que s'il y en a
+  const autres = d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media', 'figures_cles'].includes(norm(h)));
   return `
   <div class="fiche">
     <div class="titre-fiche"><h2>${v('nom')}</h2><small>${esc(lab)} · ligne ${d.l}</small><span style="flex:1"></span>
@@ -503,13 +511,10 @@ function gabarit(d) {
       <p class="aide">Le lecteur s'affiche en bas de la fiche sur le site.</p>
     </section>
 
-    <details class="bloc" style="background:var(--parch);color:var(--encre);border-radius:6px;padding:.7rem 1rem;margin-bottom:1rem">
-      <summary style="cursor:pointer;color:var(--rouille)">Autres colonnes</summary>
-      <div class="grille" style="margin-top:.6rem">${d.entetes.filter((h) => !['annee_naissance', 'annee_deces', 'dates_affichage', 'nom', 'texte_html', 'youtube_id', 'credit_media', 'thumbnail_url', 'nationalite', 'branche', 'courant', 'description', 'traditions', 'groupe', 'importance', 'themes', 'image_media', 'figures_cles'].includes(norm(h)))
-        .map((h) => `<label>${esc(h)}<input type="text" data-c="${norm(h)}" value="${esc(courante.champs[h] ?? '')}"></label>`).join('') || '<p class="aide">Aucune.</p>'}</div>
-    </details>
-
-    <div id="barre"><span id="message" class="info"></span><button type="button" id="btn-annuler">Annuler les modifications</button><button type="button" class="principal" id="btn-enr">Enregistrer</button></div>
+    ${autres.length ? `<details class="bloc" style="background:var(--parch);color:var(--encre);border-radius:6px;padding:.7rem 1rem;margin-bottom:1rem">
+      <summary style="cursor:pointer;color:var(--rouille)">Autres colonnes (${autres.length})</summary>
+      <div class="grille" style="margin-top:.6rem">${autres.map((h) => `<label>${esc(h)}<input type="text" data-c="${norm(h)}" value="${esc(courante.champs[h] ?? '')}"></label>`).join('')}</div>
+    </details>` : ''}
   </div>`;
 }
 
