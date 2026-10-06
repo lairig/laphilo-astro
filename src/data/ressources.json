@@ -1,0 +1,51 @@
+{
+  "_note": "Ressources de /ressources/ (2026-10-06). Les nombres (« dans N fiches ») sont calculés à la construction du site à partir des fiches : domaines des liens des textes, émissions des podcasts (numéro dans l'adresse du fichier audio), chaîne du crédit vidéo (« … par Chaîne »). alias = autres écritures de la même chaîne dans les crédits.",
+  "lire": [
+    { "nom": "Wikipédia", "icone": "W", "couleur": "#ffffff", "texte": "#111111", "url": "https://fr.wikipedia.org", "domaines": ["fr.wikipedia.org", "en.wikipedia.org", "es.wikipedia.org", "de.wikipedia.org", "it.wikipedia.org", "ko.wikipedia.org", "tr.wikipedia.org", "pt.wikipedia.org"], "desc": "L'encyclopédie libre : source principale des biographies, des dates et des chronologies, et premier lien de chaque fiche." },
+    { "nom": "Persée", "icone": "P", "couleur": "#5c3a1e", "texte": "#ffffff", "url": "https://www.persee.fr", "domaines": ["persee.fr"], "desc": "Revues et ouvrages universitaires numérisés, en accès libre : articles de référence cités dans les textes." }
+  ],
+  "lireAussi": [
+    { "nom": "La Vie des idées", "url": "https://laviedesidees.fr", "domaines": ["laviedesidees.fr"] },
+    { "nom": "Le Maitron", "url": "https://maitron.fr", "domaines": ["maitron.fr"], "precision": "dictionnaire du mouvement ouvrier" },
+    { "nom": "OpenEdition", "url": "https://www.openedition.org", "domaines": ["books.openedition.org", "journals.openedition.org"] },
+    { "nom": "Nonfiction", "url": "https://www.nonfiction.fr", "domaines": ["nonfiction.fr"] },
+    { "nom": "Remacle", "url": "https://remacle.org", "domaines": ["remacle.org"], "precision": "textes de l'Antiquité traduits" },
+    { "nom": "Wikisource", "url": "https://fr.wikisource.org", "domaines": ["fr.wikisource.org"] },
+    { "nom": "Érudit", "url": "https://www.erudit.org", "domaines": ["erudit.org"] },
+    { "nom": "Philosophie Magazine", "url": "https://www.philomag.com", "domaines": ["philomag.com"] },
+    { "nom": "L'Encyclopédie philosophique", "url": "https://encyclo-philo.fr", "domaines": ["encyclo-philo.fr"] },
+    { "nom": "The Conversation", "url": "https://theconversation.com/fr", "domaines": ["theconversation.com"] },
+    { "nom": "Cairn", "url": "https://www.cairn.info", "domaines": ["cairn.info"] },
+    { "nom": "HAL", "url": "https://hal.science", "domaines": ["hal.science"], "precision": "archive ouverte de la recherche" }
+  ],
+  "emissions": [
+    { "id": "10467", "nom": "Avec philosophie", "precision": "anciennement Les Chemins de la philosophie", "url": "https://www.radiofrance.fr/franceculture/podcasts/avec-philosophie" },
+    { "id": "13915", "nom": "Les Nuits de France Culture", "precision": "archives de l'INA et de la radio", "url": "https://www.radiofrance.fr/franceculture/podcasts/les-nuits-de-france-culture" },
+    { "id": "18755", "nom": "L'actu des idées", "url": "https://www.radiofrance.fr/recherche?term=L%27actu%20des%20id%C3%A9es" },
+    { "id": "10073", "nom": "Questions d'islam", "url": "https://www.radiofrance.fr/franceculture/podcasts/questions-d-islam" },
+    { "id": "17362", "nom": "Avoir raison avec…", "url": "https://www.radiofrance.fr/franceculture/podcasts/avoir-raison-avec" },
+    { "id": "11189", "nom": "Hors-champs", "url": "https://www.radiofrance.fr/franceculture/podcasts/hors-champs" },
+    { "id": "12360", "nom": "Les Midis de Culture", "url": "https://www.radiofrance.fr/franceculture/podcasts/les-midis-de-culture" }
+  ],
+  "chaines": [
+    { "nom": "VIS PHILO", "url": "https://www.youtube.com/@VIS_PHILOSOPHER", "logo": "/photo/logo-visphilo.webp", "desc": "Courtes présentations des philosophes et de leurs idées (en anglais)." },
+    { "nom": "Culture Philo", "alias": ["Alain Bajomée"], "url": "https://www.youtube.com/@alainbajomee", "logo": "/photo/logo-culturephilo.webp", "desc": "Randonnée philosophique sur quelques-uns des sentiers de la réflexion, par Alain Bajomée." },
+    { "nom": "See Hear Say Learn", "url": "https://www.youtube.com/@SeeHearSayLearn", "desc": "Présentations de philosophes, souvent méconnus, et de leurs concepts (en anglais)." },
+    { "nom": "Voyages Endormis", "url": "https://www.youtube.com/@VoyagesEndormis", "logo": "/photo/logo-voyagesendormis.webp", "desc": "Histoires et récits historiques à des fins éducatives et culturelles." },
+    { "nom": "Coursitout", "url": "https://www.youtube.com/@Coursitout", "desc": "Cours en vidéo sur les grands auteurs et leurs œuvres." },
+    { "nom": "Librairie Mollat", "url": "https://www.youtube.com/@LibrairieMollatBordeaux", "desc": "Entretiens avec les auteurs, enregistrés à la librairie Mollat de Bordeaux." },
+    { "nom": "Philosophie Analytique", "url": "https://www.youtube.com/@PhilosophieAnalytique", "logo": "/photo/logo-philo-analytique.webp", "desc": "Les thèmes de la philosophie analytique, ses concepts et son histoire." },
+    { "nom": "Le Précepteur", "url": "https://www.youtube.com/@Le_Precepteur", "logo": "/photo/logo-precepteur.webp", "desc": "La philosophie pour tous : les grands auteurs expliqués pas à pas." },
+    { "nom": "Closer To Truth", "url": "https://www.youtube.com/@CloserToTruthTV", "desc": "Entretiens avec des philosophes et des scientifiques sur les grandes questions (en anglais)." },
+    { "nom": "Ego Non", "url": "https://www.youtube.com/@egonon5710", "desc": "Présentations de penseurs et de courants intellectuels (en anglais)." },
+    { "nom": "Le Savoir Partagé", "url": "https://www.youtube.com/@leSavoirPartag%C3%A9", "desc": "Vidéos de vulgarisation sur les grandes notions et les grands courants." },
+    { "nom": "Andrea Cirla", "url": "https://www.youtube.com/@AndreaCirla", "desc": "Présentations des grands philosophes et de leurs œuvres." },
+    { "nom": "Philosophy Overdose", "url": "https://www.youtube.com/@Philosophy_Overdose", "desc": "Archives d'entretiens et de conférences de grands philosophes (en anglais)." },
+    { "nom": "Rien ne veut rien dire", "url": "https://www.youtube.com/@rienneveutriendire", "desc": "La philosophie et les idées racontées simplement." },
+    { "nom": "Essence des Livres", "url": "https://www.youtube.com/@essencedeslivres", "desc": "Résumés des grands livres de philosophie." },
+    { "nom": "Monsieur Phi", "url": "https://www.youtube.com/@MonsieurPhi", "desc": "Philosophie, logique et sciences, avec rigueur et humour." },
+    { "nom": "Parole de Philosophe", "url": "https://www.youtube.com/@paroledephilosophe", "logo": "/photo/logo-parolephilo.webp", "desc": "Toute la philosophie, accessible à tous." },
+    { "nom": "Kosmos", "url": "https://www.youtube.com/@Kosmos-philosophie", "logo": "/photo/logo-kosmos.webp", "desc": "Faire sortir la philosophie des salles de classe." }
+  ],
+  "medias": ["France Culture", "France 24", "France Inter", "Arte", "Ina Culture", "Brut", "TED"]
+}

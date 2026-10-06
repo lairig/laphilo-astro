@@ -1,9 +1,66 @@
 ---
+/* Ressources utilisées (refaite le 2026-10-06) : ce que lisent, écoutent et regardent les fiches.
+   Liste et descriptions : src/data/ressources.json ; les nombres sont calculés ici à partir des
+   fiches (liens des textes, podcasts France Culture, chaînes des vidéos), ils suivent donc le site. */
+import { getCollection } from 'astro:content';
 import Favicons from '../components/Favicons.astro';
 import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import R from '../data/ressources.json';
+
+const fiches = [...(await getCollection('philosophes')), ...(await getCollection('courants'))];
+const nf = (n: number) => n.toLocaleString('fr-FR');
+
+/* Liens des textes, par domaine */
+const parDomaine = new Map<string, number>();
+let nbLiens = 0;
+for (const f of fiches) {
+  for (const [, url] of f.data.text.matchAll(/href="(https?:\/\/[^"]+)"/g)) {
+    nbLiens++;
+    try {
+      const d = new URL(url).hostname.replace(/^www\./, '');
+      parDomaine.set(d, (parDomaine.get(d) ?? 0) + 1);
+    } catch { /* adresse invalide : ignorée */ }
+  }
+}
+const liens = (domaines: string[]) => domaines.reduce((s, d) => s + (parDomaine.get(d) ?? 0), 0);
+const lire = R.lire.map((r) => ({ ...r, n: liens(r.domaines) }));
+const lireAussi = R.lireAussi.map((r) => ({ ...r, n: liens(r.domaines) })).filter((r) => r.n > 0).sort((a, b) => b.n - a.n);
+
+/* Podcasts : numéro d'émission dans l'adresse du fichier audio (…/podcast09/10467-…) */
+const parEmission = new Map<string, number>();
+let nbAudios = 0;
+for (const f of fiches) {
+  for (const [, src] of f.data.text.matchAll(/<audio[\s\S]*?src="([^"]+)"/g)) {
+    nbAudios++;
+    const id = src.match(/podcast09\/(\d+)-/)?.[1] ?? '';
+    parEmission.set(id, (parEmission.get(id) ?? 0) + 1);
+  }
+}
+const emissions = R.emissions.map((e) => ({ ...e, n: parEmission.get(e.id) ?? 0 })).filter((e) => e.n > 0).sort((a, b) => b.n - a.n);
+
+/* Vidéos : chaîne lue dans le crédit « "Titre" par Chaîne » */
+const chaineDe = (credit?: string) => (credit ?? '')
+  .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&')
+  .match(/\bpar\s+(.+?)\s*$/)?.[1]
+  ?.replace(/^[\s"'«»]+|[\s"'«».]+$/g, '').toLowerCase() ?? '';
+const videos = fiches.filter((f) => f.data.yt_id);
+const chaines = R.chaines.map((c) => {
+  const noms = [c.nom, ...(c.alias ?? [])].map((x) => x.toLowerCase());
+  const siennes = videos.filter((f) => noms.includes(chaineDe(f.data.media_credit)));
+  // vidéo d'exemple : celle de la fiche la plus importante, puis la plus ancienne
+  const ex = siennes.slice().sort((a, b) => ((b.data as any).importance ?? 1) - ((a.data as any).importance ?? 1) || a.data.year - b.data.year)[0];
+  return { ...c, n: siennes.length, video: ex?.data.yt_id, exemple: ex?.data.name };
+}).filter((c) => c.n > 0);
+const ordre = (c: { nom: string; n: number }) => (c.nom === 'Parole de Philosophe' || c.nom === 'Kosmos' ? -1 : c.n);
+chaines.sort((a, b) => ordre(b) - ordre(a));
+const medias = R.medias.map((m) => ({ nom: m, n: videos.filter((f) => chaineDe(f.data.media_credit) === m.toLowerCase()).length })).filter((m) => m.n > 0);
+const nbChaines = new Set(videos.map((f) => chaineDe(f.data.media_credit)).filter(Boolean)).size;
+
+const title = 'Ressources utilisées | LaPhilo.fr';
+const description = 'Les sources de LaPhilo.fr : Wikipédia, Persée, les podcasts de France Culture et les chaînes YouTube de philosophie les plus utilisées.';
 ---
 
 <html lang="fr">
@@ -12,17 +69,36 @@ import SeoHead from '../components/SeoHead.astro';
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <GoatCounter />
-  <title>Ressources utilisées | LaPhilo.fr</title>
-  <meta name="description" content="Les sources des frises et des contenus de LaPhilo.fr : Wikipédia, France Culture, Persée et chaînes YouTube de philosophie." />
-  <SeoHead
-    title="Ressources utilisées | LaPhilo.fr"
-    description="Les sources des frises et des contenus de LaPhilo.fr : Wikipédia, France Culture, Persée et chaînes YouTube de philosophie."
-    path="/ressources/"
-  />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/ressources/" ariane={[['Ressources utilisées', '/ressources/']]} />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+  <style>
+    .res-chiffres { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: 0 0 1.4rem; }
+    .res-chiffre { text-align: center; padding: .7rem .4rem; border: 1px solid rgba(180,130,20,.3); border-radius: 6px; background: rgba(255,255,255,.04); }
+    .res-chiffre b { display: block; font-family: 'Cinzel', serif; font-size: 1.35rem; color: var(--rust, #8b3a0f); }
+    .res-chiffre span { font-size: .78rem; color: var(--ink-light); line-height: 1.3; display: block; }
+    .res-titre { margin: 1.8rem 0 .7rem; font-family: 'Cinzel', serif; font-size: .95rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rust, #8b3a0f); }
+    .res-titre:first-of-type { margin-top: .4rem; }
+    .res-n { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .04em; color: var(--rust, #8b3a0f); white-space: nowrap; }
+    .res-icone { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; border: 1px solid rgba(180,130,20,.35); }
+    .res-aussi { margin: .2rem 0 0; font-size: .82rem; line-height: 1.7; color: var(--ink-light); }
+    .res-aussi a { color: var(--ink); text-decoration: none; border-bottom: 1px solid rgba(139,58,15,.3); }
+    .res-aussi a:hover { color: var(--rust, #8b3a0f); }
+    .res-aussi small { color: var(--rust, #8b3a0f); font-size: .72rem; }
+    .res-emissions { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .3rem; }
+    .res-emissions li { display: flex; justify-content: space-between; gap: .8rem; align-items: baseline; font-size: .82rem; padding: .25rem 0; border-bottom: 1px dotted rgba(180,130,20,.3); }
+    .res-emissions a { color: var(--ink); text-decoration: none; }
+    .res-emissions a:hover { color: var(--rust, #8b3a0f); text-decoration: underline; }
+    .res-emissions small { color: var(--ink-light); font-style: italic; }
+    .res-merci { margin-top: 1.6rem; font-size: .83rem; line-height: 1.7; color: var(--ink-light); font-style: italic; }
+    .soc-res-vlogo--vide { display: none; }
+    @media (max-width: 640px) { .res-chiffres { grid-template-columns: repeat(2, 1fr); } }
+  </style>
 </head>
 <body>
 
@@ -37,177 +113,80 @@ import SeoHead from '../components/SeoHead.astro';
     </a>
   </div>
   <h1 class="site-title">Ressources Utilisées</h1>
-  <p class="site-subtitle">Sources et outils qui nourrissent LaPhilo.fr</p>
+  <p class="site-subtitle">Ce que lisent, écoutent et regardent les fiches</p>
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
 <main class="definition-page">
 <div class="soc-page-wrap">
-  <p class="soc-res-intro">Sources et outils ayant contribué à la construction des frises et des contenus de LaPhilo.fr. Les vidéos YouTube ne se chargent qu'au clic.</p>
+  <p class="soc-res-intro">Les {nf(fiches.length)} fiches de LaPhilo.fr s'appuient sur des sources ouvertes et gratuites. Voici les plus utilisées, avec le nombre de fois où elles servent sur le site. Les vidéos YouTube ne se chargent qu'au clic.</p>
 
-  <div class="soc-res-list">
-
-    <div class="soc-res-row">
-      <div class="soc-res-icon-w">W</div>
-      <div class="soc-res-body">
-        <div class="soc-res-name">Wikipédia</div>
-        <div class="soc-res-desc">Encyclopédie libre — source principale des biographies et chronologies.</div>
-      </div>
-      <a href="https://fr.wikipedia.org" target="_blank" rel="noopener" class="parch-link soc-res-link">Visiter →</a>
-    </div>
-
-    <div class="soc-res-row">
-      <div class="soc-res-icon-fc">FC</div>
-      <div class="soc-res-body">
-        <div class="soc-res-name">France Culture</div>
-        <div class="soc-res-desc">Les chemins de la philosophie — podcasts de référence.</div>
-      </div>
-      <a href="https://www.radiofrance.fr/franceculture/podcasts/les-chemins-de-la-philosophie" target="_blank" rel="noopener" class="parch-link soc-res-link">Écouter →</a>
-    </div>
-
-    <div class="soc-res-row">
-      <div class="soc-res-icon-p">P</div>
-      <div class="soc-res-body">
-        <div class="soc-res-name">Persée</div>
-        <div class="soc-res-desc">Portail de revues et ouvrages académiques numérisés — accès libre.</div>
-      </div>
-      <a href="https://www.persee.fr" target="_blank" rel="noopener" class="parch-link soc-res-link">Consulter →</a>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="kw17fGL-Xdc">
-          <img src="https://img.youtube.com/vi/kw17fGL-Xdc/mqdefault.jpg" alt="Parole de Philosophe" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-parolephilo.webp" alt="Parole de Philosophe" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Parole de Philosophe</div>
-            <div class="soc-res-vdesc">Toute la philosophie, accessible à tous — podcasts de philosophie.</div>
-          </div>
-          <a href="https://www.youtube.com/@paroledephilosophe" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="FuE8c7EZOGs">
-          <img src="https://img.youtube.com/vi/FuE8c7EZOGs/mqdefault.jpg" alt="Voyages Endormis" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-voyagesendormis.webp" alt="Voyages Endormis" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Voyages Endormis</div>
-            <div class="soc-res-vdesc">Histoires et récits historiques à des fins éducatives et culturelles.</div>
-          </div>
-          <a href="https://www.youtube.com/@VoyagesEndormis" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="yiHMPFMCUvo">
-          <img src="https://img.youtube.com/vi/yiHMPFMCUvo/mqdefault.jpg" alt="KOSMOS" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-kosmos.webp" alt="KOSMOS" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">KOSMOS</div>
-            <div class="soc-res-vdesc">Faire sortir la philosophie des salles de classe — podcasts de philosophie.</div>
-          </div>
-          <a href="https://www.youtube.com/@Kosmos-philosophie" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="9uarj9PtCy0">
-          <img src="https://img.youtube.com/vi/9uarj9PtCy0/mqdefault.jpg" alt="Philosophie Analytique" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-voyagesendormis.webp" alt="Philo analytique" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Philosophie Analytique</div>
-            <div class="soc-res-vdesc">Présentation des thèmes de la philosophie analytique, ses concepts, son histoire.</div>
-          </div>
-          <a href="https://www.youtube.com/@PhilosophieAnalytique" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="QUBiUR_rizA">
-          <img src="https://img.youtube.com/vi/QUBiUR_rizA/mqdefault.jpg" alt="Culture Philo" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-culturephilo.webp" alt="Culture Philo" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Culture Philo</div>
-            <div class="soc-res-vdesc">Randonnée philosophique sur quelques-uns des sentiers de la réflexion.</div>
-          </div>
-          <a href="https://www.youtube.com/@alainbajomee" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="BJIM41TnDHI">
-          <img src="https://img.youtube.com/vi/BJIM41TnDHI/mqdefault.jpg" alt="Le Précepteur" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-precepteur.webp" alt="Le Précepteur" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Le Précepteur</div>
-            <div class="soc-res-vdesc">Philosophie pour tous — podcasts de philosophie.</div>
-          </div>
-          <a href="https://www.youtube.com/@Le_Precepteur" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="soc-res-video">
-      <div class="soc-res-video-inner">
-        <div class="soc-res-vthumb soc-yt-wrap" data-ytid="mPXQVcVkUso">
-          <img src="https://img.youtube.com/vi/mPXQVcVkUso/mqdefault.jpg" alt="Vis Philo" loading="lazy" />
-          <button class="soc-res-vthumb-btn" aria-label="Lire la vidéo">
-            <span class="soc-play-btn--sm">▶</span>
-          </button>
-        </div>
-        <div class="soc-res-vinfo">
-          <img src="/photo/logo-visphilo.webp" alt="Vis Philo" loading="lazy" class="soc-res-vlogo" />
-          <div class="soc-res-vmeta">
-            <div class="soc-res-vname">Vis Philo</div>
-            <div class="soc-res-vdesc">Vulgarisation des philosophes et leurs idées (anglais).</div>
-          </div>
-          <a href="https://www.youtube.com/@VIS_PHILOSOPHER" target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
-        </div>
-      </div>
-    </div>
-
+  <div class="res-chiffres">
+    <div class="res-chiffre"><b>{nf(nbLiens)}</b><span>liens dans les textes</span></div>
+    <div class="res-chiffre"><b>{nf(lire[0].n)}</b><span>vers Wikipédia</span></div>
+    <div class="res-chiffre"><b>{nf(nbAudios)}</b><span>podcasts France Culture</span></div>
+    <div class="res-chiffre"><b>{nf(videos.length)}</b><span>vidéos, de {nf(nbChaines)} chaînes</span></div>
   </div>
+
+  <h2 class="res-titre">Lire</h2>
+  <div class="soc-res-list">
+    {lire.map((r) => (
+      <div class="soc-res-row">
+        <div class="res-icone" style={`background:${r.couleur};color:${r.texte}`}>{r.icone}</div>
+        <div class="soc-res-body">
+          <div class="soc-res-name">{r.nom} <span class="res-n">· {nf(r.n)} liens</span></div>
+          <div class="soc-res-desc">{r.desc}</div>
+        </div>
+        <a href={r.url} target="_blank" rel="noopener" class="parch-link soc-res-link">Visiter →</a>
+      </div>
+    ))}
+  </div>
+  <p class="res-aussi">Et aussi : {lireAussi.map((r, i) => (
+    <>{i > 0 && ', '}<a href={r.url} target="_blank" rel="noopener">{r.nom}</a>{r.precision && ` (${r.precision})`} <small>{r.n}</small></>
+  ))}.</p>
+
+  <h2 class="res-titre">Écouter</h2>
+  <div class="soc-res-list">
+    <div class="soc-res-row">
+      <div class="res-icone" style="background:#003189;color:#fff">FC</div>
+      <div class="soc-res-body">
+        <div class="soc-res-name">France Culture <span class="res-n">· {nf(nbAudios)} podcasts</span></div>
+        <div class="soc-res-desc">Les podcasts placés en bas des fiches viennent tous de France Culture. Les émissions les plus présentes :</div>
+        <ul class="res-emissions">
+          {emissions.map((e) => (
+            <li><span><a href={e.url} target="_blank" rel="noopener">{e.nom}</a>{e.precision && <small> · {e.precision}</small>}</span><span class="res-n">{e.n}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="res-titre">Regarder</h2>
+  <div class="soc-res-list">
+    {chaines.map((c) => (
+      <div class="soc-res-video">
+        <div class="soc-res-video-inner">
+          {c.video && (
+            <div class="soc-res-vthumb soc-yt-wrap" data-ytid={c.video}>
+              <img src={`https://img.youtube.com/vi/${c.video}/mqdefault.jpg`} alt={`${c.nom} : ${c.exemple}`} loading="lazy" />
+              <button class="soc-res-vthumb-btn" aria-label={`Lire la vidéo de ${c.nom} sur ${c.exemple}`}><span class="soc-play-btn--sm">▶</span></button>
+            </div>
+          )}
+          <div class="soc-res-vinfo">
+            {c.logo && <img src={c.logo} alt="" loading="lazy" class="soc-res-vlogo" />}
+            <div class="soc-res-vmeta">
+              <div class="soc-res-vname">{c.nom} <span class="res-n">· {c.n} vidéo{c.n > 1 ? 's' : ''}</span></div>
+              <div class="soc-res-vdesc">{c.desc}</div>
+            </div>
+            <a href={c.url} target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+  <p class="res-aussi">Et des vidéos de médias : {medias.map((m, i) => <>{i > 0 && ', '}{m.nom} <small>{m.n}</small></>)}.</p>
+
+  <p class="res-merci">Merci à toutes celles et ceux qui écrivent, enregistrent et filment pour partager la philosophie librement : sans eux, ce site n'existerait pas.</p>
 </div>
 </main>
 
