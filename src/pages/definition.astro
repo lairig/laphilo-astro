@@ -414,7 +414,7 @@ const specialisees: {
           <div class="acc-text" set:html={b.text} />
           <div class="acc-audio">
             <span class="acc-audio-lbl">France Culture</span>
-            <audio controls title={b.audioTitle}>
+            <audio controls preload="none" title={b.audioTitle}>
               <source src={b.audioSrc} type="audio/mpeg" />
             </audio>
           </div>

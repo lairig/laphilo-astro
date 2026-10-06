@@ -85,6 +85,9 @@ const description = "Les courants de pensée de toutes les traditions sur un mê
     #scroller.drag { cursor: grabbing; user-select: none; }
     #scroller.zoom-glisse, #scroller.zoom-glisse * { cursor: ns-resize !important; user-select: none; }
     #chargement { padding: 3rem 16px; text-align: center; color: var(--parch-dim); font-style: italic; }
+    /* Pendant le chargement, la place de la frise (7 couloirs) est réservée : le pied de page
+       n'est pas repoussé à l'arrivée des données (décalage de mise en page) */
+    #scroller:has(#chargement) { min-height: 100vh; }
     #monde { position: relative; }
     .axe { position: relative; height: 44px; border-bottom: 1px solid var(--line); background: rgba(22,13,5,.92); z-index: 3; }
     .epoque { position: absolute; top: 0; height: 18px; font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .12em;

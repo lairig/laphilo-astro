@@ -68,6 +68,7 @@ const { racine, placeholder, label } = Astro.props;
   .arb details[open] > summary::before { transform: rotate(90deg); }
   .arb .feuille { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .5rem; padding: .22rem 0 .22rem 1rem; }
   .arb .nom { font-family: 'EB Garamond', serif; font-size: 1.05rem; color: #f7ecce; text-decoration: none; }
+  .arb a.nom { display: inline-block; padding: .14rem 0; } /* zone tactile d'au moins 24 px */
   .arb a.nom:hover, .arb a.nom:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; outline: none; }
   .arb .branche > summary > .nom { font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .06em; color: #d4a843; }
   .arb .racine > summary > .nom { font-size: 1rem; }

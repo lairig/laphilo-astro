@@ -167,7 +167,7 @@ const cartes = items.map((it) => {
               {it.audio && (
                 <div class="acc-audio">
                   <span class="acc-audio-lbl">France Culture</span>
-                  <audio controls title={it.audio.title}>
+                  <audio controls preload="none" title={it.audio.title}>
                     <source src={it.audio.src} type="audio/mpeg" />
                   </audio>
                 </div>

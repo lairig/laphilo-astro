@@ -391,7 +391,12 @@
       '<a class="phi-philo-frise-link phi-cur-frise-link" href="#" hidden></a>' +
       '</details>' +
       /* Onglets Philosophes et Courants : la Frise et le Tableau correspondants, toujours en avant */
-      '<div class="phi-duo" hidden></div>' +
+      /* Rempli d'emblée (penseurs, l'onglet par défaut) : il ne pousse pas la liste à l'arrivée des données
+         (décalage de mise en page) ; renderDuo() l'ajuste ensuite à l'onglet */
+      '<div class="phi-duo"><span class="phi-duo-ico" aria-hidden="true">◈</span>' +
+      '<span class="phi-duo-txt"><strong>Frise et tableau des penseurs</strong><span>Toutes les traditions côte à côte</span></span>' +
+      '<span class="phi-duo-btns"><a class="phi-duo-btn" href="/frises/penseurs-du-monde/">⟷ La frise</a>' +
+      '<a class="phi-duo-btn phi-duo-btn--sec" href="/frises/tableau-des-penseurs/">▦ Le tableau</a></span></div>' +
       /* Barre de tri, juste au-dessus de la liste */
       '<div class="phi-toolbar">' +
       '<div class="phi-toolbar-group">' +
