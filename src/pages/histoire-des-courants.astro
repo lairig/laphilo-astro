@@ -24,7 +24,9 @@ const { intro, items } = data as {
 const introHtml = intro
   .replace(/\s*style="[^"]*"/g, '')
   .replace('<p>', '<p class="intro-drop-cap">')
-  .replaceAll('<p>', '<p class="intro-body">');
+  .replaceAll('<p>', '<p class="intro-body">')
+  /* Accès à la page des familles, visible sur tous les écrans (le sommaire n'apparaît que sur téléphone) */
+  + '<p class="intro-body">Pour voir comment ces courants s’enchaînent et se répondent d’une tradition à l’autre, découvrez <a href="/familles-de-pensee/">les familles de pensée et les grands débats</a>.</p>';
 
 /* Sections : titre, chapeau et ancre, comme les deux groupes de /definition/ */
 const SECTIONS: Record<string, { id: string; titre: string; nav: string; chapeau: string[]; frise: string; friseLabel: string }> = {
