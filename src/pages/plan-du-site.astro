@@ -1,116 +1,133 @@
 ---
+/* Plan du site en arbre (validé le 2026-10-06) : tout le site sous forme d'arborescence
+   qu'on déplie, avec un champ de recherche qui filtre l'arbre et ouvre les branches trouvées.
+   Feuilles : les pages, les frises (catalogue de /frises/ : une frise ajoutée au catalogue
+   apparaît ici automatiquement), les familles de courants, et toutes les fiches
+   (philosophes par tradition, courants par famille). */
+import { getCollection } from 'astro:content';
 import Favicons from '../components/Favicons.astro';
 import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import catalogue from '../data/frises-catalogue.json';
+import { groupesMonde } from '../data/groupes-monde';
 
-/* Plan du site : rubriques compactes, empilées en colonnes (sans trous).
-   Les frises viennent du catalogue de /frises/ : une frise ajoutée au
-   catalogue apparaît ici automatiquement, dans la rubrique de son groupe. */
-type Link = { label: string; href: string; note?: string };
-type Group = { title?: string; links: Link[] };
-type Block = { id: string; col: 1 | 2 | 3; title: string; nav: string; groups: Group[] };
+type Noeud = { label: string; href?: string; note?: string; enfants?: Noeud[]; ouvert?: boolean; fiche?: boolean };
 
 const groups: any[] = catalogue.groups;
 const byLabel = (label: string): any[] => groups.find((g) => g.label === label)?.items ?? [];
-/* « -650 av. J.-C. → 500 » → « 650 av. J.-C. → 500 » ; pas de date pour « Toutes époques » ou « en activité » */
 const period = (tag?: string) =>
   tag && !['Toutes époques', 'en activité'].includes(tag) ? tag.replace(/-(\d+ av)/g, '$1') : undefined;
-/* Libellés courts : « Tous les Philosophes d'Asie de l'Est » → « Asie de l'Est » */
 const clean = (name: string) => {
-  const s = name
+  const s = name.replace(/&amp;/g, '&')
     .replace(/^(Tous les|Toutes les|Toute la)\s+/, '')
     .replace(/^Philosophes\s+/, '')
     .replace(/^(Modernes|Contemporains)\s+/, '')
     .replace(/^vivants\s*:\s*/i, '')
-    .replace(/^(d'|de l'|du |des )/, '')
-    .replace(/ &amp; (du |de la |d')/, ' &amp; ');
+    .replace(/^(d'|de l'|du |des )/, '');
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
-const frise = (it: any, label?: string): Link => ({ label: label ?? clean(it.name), href: it.href, note: period(it.tag) });
-/* « Autres Philosophes Modernes / Contemporains » → « Autres pays » */
-const autres = (it: any) => frise(it, /^Autres/.test(it.name) ? 'Autres pays' : undefined);
+const frise = (it: any, label?: string): Noeud => ({ label: label ?? clean(it.name), href: it.href, note: period(it.tag) });
+const an = (y: number) => (y < 0 ? `${-y} av. J.-C.` : String(y));
 
+const philosophes = (await getCollection('philosophes')).slice().sort((a, b) => a.data.year - b.data.year);
+const courants = (await getCollection('courants')).slice().sort((a, b) => a.data.year - b.data.year);
 const monde = byLabel('La Frise des Penseurs du Monde')[0];
 const mondeLien = (label: string) => monde.links.find((l: any) => l.label === label)?.href ?? '/frises/penseurs-du-monde/';
-const courant = (it: any): Group => ({
-  title: it.name.replace(/^La /, ''),
-  links: it.links.map((l: any) => ({ label: l.label, href: l.href })),
-});
 
-const blocks: Block[] = [
-  {
-    id: 'site', col: 1, nav: 'Le site', title: 'Le site',
-    groups: [
-      { title: 'Commencer', links: [
-        { label: 'Accueil', href: '/' },
-        { label: 'Nouveau ici ?', href: '/bienvenue/' },
-        { label: 'C’est quoi la philosophie ?', href: '/definition/' },
-      ] },
-      { title: 'Comprendre', links: [
-        { label: 'Histoire des philosophes', href: '/histoire-des-philosophes/' },
-        { label: 'Histoire des courants de pensée', href: '/histoire-des-courants/' },
-        { label: 'Familles de pensée et grands débats', href: '/familles-de-pensee/' },
-      ] },
-      { title: 'Trouver', links: [
-        { label: 'Recherche', href: '/recherche/', note: 'philosophes, courants, frises' },
-        { label: 'Toutes les frises', href: '/frises/', note: 'présentées' },
-        ...byLabel('Par thème').map((it) => frise(it, 'Pensée féminine')),
-      ] },
-      { title: 'À propos', links: [
-        { label: 'Pourquoi ce site', href: '/pourquoi/' },
-        { label: 'Ressources utilisées', href: '/ressources/' },
-        { label: 'Échanges & contact', href: '/echanges/' },
-        { label: 'Musique Lairig', href: '/lairig/' },
-      ] },
-    ],
-  },
-  {
-    id: 'monde', col: 1, nav: 'Frise du monde', title: 'Frise complète du monde',
-    groups: [
-      { links: [
+/* Philosophes : par grande tradition, du plus ancien au plus récent */
+const philosophesParTradition: Noeud[] = groupesMonde
+  .map((g) => ({
+    label: g.label, note: `${philosophes.filter((p) => p.data.groupe === g.id).length} fiches`,
+    enfants: philosophes.filter((p) => p.data.groupe === g.id)
+      .map((p) => ({ label: p.data.name, href: `/philosophes/${p.id}/`, note: p.data.display_date, fiche: true })),
+  }))
+  .filter((n) => n.enfants.length);
+
+/* Courants : familles (mouvements) dans leur tradition majoritaire, puis grands débats (positions) */
+const parFamille = new Map<string, typeof courants>();
+for (const c of courants) {
+  if (!c.data.famille) continue;
+  if (!parFamille.has(c.data.famille)) parFamille.set(c.data.famille, []);
+  parFamille.get(c.data.famille)!.push(c);
+}
+const ficheCourant = (c: (typeof courants)[number]): Noeud => ({ label: c.data.name, href: `/courants/${c.id}/`, note: c.data.display_date, fiche: true });
+const lienFamille = (f: string) => `/frises/courants-du-monde/?famille=${encodeURIComponent(f)}`;
+const familles = [...parFamille.entries()].filter(([, m]) => m[0].data.nature === 'mouvement').map(([nom, m]) => {
+  const compte = new Map<string, number>();
+  m.forEach((c) => compte.set(c.data.groupe ?? '', (compte.get(c.data.groupe ?? '') ?? 0) + 1));
+  return { nom, membres: m, tradition: [...compte.entries()].sort((a, b) => b[1] - a[1])[0][0] };
+});
+const famillesParTradition: Noeud[] = groupesMonde
+  .map((g) => ({
+    label: g.label,
+    enfants: familles.filter((f) => f.tradition === g.id).sort((a, b) => a.membres[0].data.year - b.membres[0].data.year)
+      .map((f) => ({ label: f.nom, href: lienFamille(f.nom), note: `${f.membres.length} courants`, enfants: f.membres.map(ficheCourant) })),
+  }))
+  .filter((n) => n.enfants.length);
+const debats: Noeud[] = [...parFamille.entries()].filter(([, m]) => m[0].data.nature === 'position')
+  .map(([q, m]) => ({ label: q, href: lienFamille(q), note: `${m.length} réponses`, enfants: m.map(ficheCourant) }));
+const courantsCatalogue = byLabel('Les Courants de Pensée');
+
+const arbre: Noeud = {
+  label: 'LaPhilo.fr', href: '/', ouvert: true,
+  enfants: [
+    { label: 'Commencer', ouvert: true, enfants: [
+      { label: 'Accueil', href: '/' },
+      { label: 'Nouveau ici ?', href: '/bienvenue/' },
+      { label: 'C’est quoi la philosophie ?', href: '/definition/' },
+    ] },
+    { label: 'Comprendre', ouvert: true, enfants: [
+      { label: 'Histoire des philosophes', href: '/histoire-des-philosophes/' },
+      { label: 'Histoire des courants de pensée', href: '/histoire-des-courants/' },
+      { label: 'Familles de pensée et grands débats', href: '/familles-de-pensee/' },
+    ] },
+    { label: 'Les philosophes', note: `${philosophes.length} fiches`, enfants: [
+      { label: 'Le monde entier', enfants: [
         { label: 'Frise des penseurs du monde', href: mondeLien("Vue d'ensemble"), note: period(monde.tag) },
-        { label: 'Tableau des penseurs', href: '/frises/tableau-des-penseurs/', note: 'qui pensait quoi, et où' },
-        { label: 'Les femmes dans l’histoire', href: mondeLien('Femmes uniquement'), note: period(byLabel('Par thème')[0]?.tag) },
+        { label: 'Tableau des penseurs', href: '/frises/tableau-des-penseurs/' },
+        { label: 'Les femmes dans l’histoire', href: mondeLien('Femmes uniquement') },
+        ...[['Âge axial', '650 → 150 av. J.-C.'], ["Âge d'or islamique", '750 → 1300'], ['XIXᵉ siècle', '1780 → 1950']]
+          .map(([l, note]) => ({ label: `Période : ${l}`, href: mondeLien(l), note })),
       ] },
-      { title: 'Grandes périodes', links: /* dates des préréglages de /frises/penseurs-du-monde/ */
-        [['Âge axial', '650 av. J.-C. → 150 av. J.-C.'], ["Âge d'or islamique", '750 → 1300'], ['XIXᵉ siècle', '1780 → 1950']]
-          .map(([l, note]) => ({ label: l, href: mondeLien(l), note })) },    ],
-  },
-  {
-    id: 'courants', col: 2, nav: 'Courants', title: 'Courants de pensée',
-    groups: byLabel('Les Courants de Pensée').map(courant),
-  },
-  {
-    id: 'traditions', col: 2, nav: 'Par tradition', title: 'Philosophes par tradition',
-    groups: [
-      { title: 'Grandes traditions, toutes époques', links: byLabel('Par grande tradition').map((it) => frise(it)) },
-    ],
-  },
-  {
-    id: 'pays', col: 2, nav: 'Par pays', title: 'Philosophes par pays',
-    groups: [{ title: 'Toutes époques', links: byLabel('Par pays').map((it) => frise(it)) }],
-  },
-  {
-    id: 'aujourdhui', col: 3, nav: 'Aujourd’hui', title: 'Philosophes d’aujourd’hui',
-    groups: [
-      { links: [{ label: 'Les philosophes d’aujourd’hui', href: '/philosophes-d-aujourd-hui/', note: 'par sujet et par région' }] },
-      { title: 'Contemporains', links: byLabel('Contemporains').map(autres) },
-      { title: 'Vivants, par sujet de travail', links: byLabel('Vivants par sujet de travail').map((it) => frise(it)) },
-    ],
-  },
-  {
-    id: 'epoques', col: 3, nav: 'Par époque', title: 'Philosophes par époque',
-    groups: [
-      /* du plus récent (en haut) au plus ancien (Proche-Orient ancien tout en bas) */
-      { title: 'Époque moderne', links: [...byLabel('Modernes')].sort((a, b) => parseInt(b.tag) - parseInt(a.tag)).map(autres) },
-      { title: 'Renaissance, Moyen Âge, Antiquité', links: byLabel('Anciens').map((it) => frise(it)).reverse() },
-    ],
-  },
-];
-const description = "Plan du site LaPhilo.fr : toutes les frises chronologiques des philosophes et des courants de pensée, par époque, pays et tradition, et toutes les pages.";
+      { label: 'Par époque', enfants: [
+        { label: 'Contemporains', enfants: byLabel('Contemporains').map((it) => frise(it)) },
+        { label: 'Époque moderne', enfants: [...byLabel('Modernes')].sort((a, b) => parseInt(b.tag) - parseInt(a.tag)).map((it) => frise(it)) },
+        { label: 'Renaissance, Moyen Âge, Antiquité', enfants: byLabel('Anciens').map((it) => frise(it)).reverse() },
+      ] },
+      { label: 'Par pays', enfants: byLabel('Par pays').map((it) => frise(it)) },
+      { label: 'Par grande tradition', enfants: [...byLabel('Par grande tradition'), ...byLabel('Par thème')].map((it) => frise(it)) },
+      { label: 'Aujourd’hui', enfants: [
+        { label: 'Les philosophes d’aujourd’hui', href: '/philosophes-d-aujourd-hui/' },
+        ...byLabel('Vivants par sujet de travail').map((it) => frise(it)),
+      ] },
+      { label: 'Toutes les fiches, par tradition', enfants: philosophesParTradition },
+    ] },
+    { label: 'Les courants de pensée', note: `${courants.length} fiches`, enfants: [
+      { label: 'Frise des courants du monde', href: '/frises/courants-du-monde/' },
+      { label: 'Tableau des courants', href: '/frises/tableau-des-courants/' },
+      { label: 'Frises par tradition et par question', enfants: courantsCatalogue.map((it: any) => ({
+        label: it.name.replace(/^La /, '').replace(/&amp;/g, '&'),
+        enfants: it.links.map((l: any) => ({ label: l.label.replace(/&amp;/g, '&'), href: l.href })),
+      })) },
+      { label: 'Les familles de pensée', href: '/familles-de-pensee/', note: `${familles.length} familles`, enfants: famillesParTradition },
+      { label: 'Les grands débats', href: '/familles-de-pensee/#debats', note: `${debats.length} questions`, enfants: debats },
+    ] },
+    { label: 'Trouver', enfants: [
+      { label: 'Recherche', href: '/recherche/', note: 'philosophes, courants, frises' },
+      { label: 'Toutes les frises', href: '/frises/' },
+    ] },
+    { label: 'À propos', enfants: [
+      { label: 'Pourquoi ce site', href: '/pourquoi/' },
+      { label: 'Ressources utilisées', href: '/ressources/' },
+      { label: 'Échanges & contact', href: '/echanges/' },
+      { label: 'Musique Lairig', href: '/lairig/' },
+    ] },
+  ],
+};
+const nbFiches = philosophes.length + courants.length;
+const description = "Plan du site LaPhilo.fr en arbre : toutes les pages, les frises et les fiches des philosophes et des courants de pensée, avec une recherche.";
 ---
 
 <html lang="fr">
@@ -126,114 +143,85 @@ const description = "Plan du site LaPhilo.fr : toutes les frises chronologiques 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    .pds { max-width: 1180px; margin: 0 auto; padding: 0 1rem 2.5rem; }
-    .pds-hero { padding-bottom: 1rem; }
+    .arb { max-width: 900px; margin: 0 auto; padding: 0 16px 3rem; }
+    .arb-recherche { position: sticky; top: 0; z-index: 5; padding: .8rem 0 .7rem; background: linear-gradient(#1a0f07 80%, transparent); }
+    .arb-champ { display: flex; gap: .5rem; align-items: center; }
+    .arb-champ input { flex: 1; min-width: 0; padding: .65rem .9rem; border-radius: 6px; border: 1px solid rgba(212,168,67,.5);
+      background: rgba(30,18,8,.9); color: #f7ecce; font: 1.1rem 'EB Garamond', serif; }
+    .arb-champ input:focus { outline: none; border-color: #d4a843; box-shadow: 0 0 0 2px rgba(212,168,67,.25); }
+    .arb-champ button { padding: .55rem .8rem; border-radius: 6px; border: 1px solid rgba(212,168,67,.4); background: rgba(30,18,8,.8);
+      color: #d4a843; font: .66rem 'Cinzel', serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+    .arb-champ button:hover { border-color: #d4a843; color: #f7ecce; }
+    .arb-etat { margin: .45rem 0 0; font-style: italic; color: #c9a96e; font-size: .95rem; min-height: 1.3em; }
 
-    /* Sommaire : accès direct à chaque rubrique */
-    .pds-sommaire { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin: 0 0 1.6rem; padding: 0; list-style: none; }
-    .pds-sommaire a {
-      display: inline-block; padding: .35rem .8rem; border-radius: 999px; text-decoration: none;
-      font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase;
-      color: #d4a843; border: 1px solid rgba(212, 168, 67, .4); background: rgba(30, 18, 8, .6);
-    }
-    .pds-sommaire a:hover, .pds-sommaire a:focus-visible { background: rgba(180, 130, 20, .2); border-color: #d4a843; color: #f7ecce; outline: none; }
-    /* Utile seulement quand les rubriques sont sur une colonne (mobile) */
-    @media (min-width: 900px) { .pds-sommaire { display: none; } }
-
-    /* 3 colonnes fixes (champ col de chaque rubrique) ; une seule sur mobile */
-    .pds-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 1.1rem; align-items: start; }
-    @media (max-width: 899px) { .pds-grid { grid-template-columns: 1fr; } }
-    .pds-block {
-      display: block; width: 100%; margin: 0 0 1.1rem;
-      padding: .9rem 1.1rem .7rem;
-      background: rgba(30, 18, 8, .75);
-      border: 1px solid rgba(212, 168, 67, .35); border-top: 3px solid #d4a843;
-      border-radius: 6px;
-      scroll-margin-top: 1rem;
-    }
-    .pds-block h2 {
-      margin: 0 0 .3rem;
-      font-family: 'Cinzel', serif; font-size: .88rem; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #d4a843;
-    }
-    .pds-block h3 {
-      margin: .65rem 0 .1rem; padding-bottom: .2rem;
-      font-family: 'Cinzel', serif; font-size: .62rem; font-weight: 400; letter-spacing: .12em;
-      text-transform: uppercase; color: #c9a96e;
-      border-bottom: 1px solid rgba(212, 168, 67, .22);
-    }
-    .pds-block h2 + h3 { margin-top: .4rem; }
-    .pds-block ul { margin: 0; padding: 0; list-style: none; }
-    .pds-block li + li { border-top: 1px solid rgba(212, 168, 67, .08); }
-    .pds-block a {
-      display: flex; justify-content: space-between; align-items: baseline; gap: .8rem;
-      padding: .3rem .2rem;
-      font-family: 'EB Garamond', serif; font-size: 1.04rem; line-height: 1.25;
-      color: #f7ecce; text-decoration: none;
-    }
-    .pds-block a:hover, .pds-block a:focus-visible { color: #fff; background: rgba(180, 130, 20, .15); outline: none; }
-    .pds-block a:hover .pds-label { text-decoration: underline; text-underline-offset: 3px; }
-    .pds-note { flex-shrink: 0; font-size: .84rem; font-style: italic; color: #c9a96e; white-space: nowrap; }
-
-    @media (max-width: 480px) {
-      .pds-block { padding: .8rem .9rem .6rem; }
-      .pds-block a { padding: .5rem .2rem; }
-      .pds-note { font-size: .8rem; }
-    }
+    /* L'arbre : des traits relient chaque branche à son parent */
+    .arb ul { list-style: none; margin: 0; padding: 0 0 0 1.35rem; }
+    .arb > nav > ul { padding-left: 0; }
+    .arb li { position: relative; }
+    .arb ul ul > li::before { content: ''; position: absolute; left: -.95rem; top: 0; bottom: 0; border-left: 1px solid rgba(212,168,67,.28); }
+    .arb ul ul > li:last-child::before { bottom: auto; height: 1.05rem; }
+    .arb ul ul > li::after { content: ''; position: absolute; left: -.95rem; top: 1.05rem; width: .75rem; border-top: 1px solid rgba(212,168,67,.28); }
+    .arb summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: .5rem; padding: .28rem 0; }
+    .arb summary::-webkit-details-marker { display: none; }
+    .arb summary::before { content: '▸'; flex: none; width: 1rem; color: #d4a843; transition: transform .15s; display: inline-block; }
+    .arb details[open] > summary::before { transform: rotate(90deg); }
+    .arb .feuille { display: flex; align-items: baseline; gap: .5rem; padding: .22rem 0 .22rem 1rem; }
+    .arb .nom { font-family: 'EB Garamond', serif; font-size: 1.05rem; color: #f7ecce; text-decoration: none; }
+    .arb a.nom:hover, .arb a.nom:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; outline: none; }
+    .arb .branche > summary > .nom { font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .06em; color: #d4a843; }
+    .arb .racine > summary > .nom { font-size: 1rem; }
+    .arb .note { font-size: .85rem; font-style: italic; color: #a8916a; white-space: nowrap; }
+    .arb .fiche .nom { font-size: 1rem; color: #e8dcbc; }
+    .arb mark { background: #d4a843 !important; color: #1a0f07 !important; border-radius: 2px; padding: 0 1px; }
+    .arb .cache { display: none; }
+    .arb-essai { margin: 0 auto 1rem; max-width: 900px; padding: .5rem 16px 0; text-align: center; font-style: italic; color: #c9a96e; }
+    @media (max-width: 480px) { .arb ul { padding-left: 1rem; } .arb .note { display: none; } }
   </style>
 </head>
 <body>
 
 <a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
 
-<main class="pds">
+<header class="site-header">
+  <div class="sitemap-switcher">
+    <BackButton />
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
+  <h1 class="site-title">Plan du site</h1>
+  <p class="site-subtitle">Tout le site en arbre</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
 
-  <header class="site-header pds-hero">
-    <div class="sitemap-switcher">
-      <BackButton />
-      <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
-        <span class="sitemap-flag" aria-hidden="true">⌂</span>
-        <span class="sitemap-text">Accueil</span>
-      </a>
+<main class="arb">
+  <div class="arb-recherche">
+    <div class="arb-champ">
+      <input type="search" id="q" placeholder={`Chercher une page, une frise ou l’une des ${nbFiches} fiches…`} aria-label="Chercher dans le plan du site" autocomplete="off" />
+      <button type="button" id="tout-ouvrir">Tout ouvrir</button>
+      <button type="button" id="tout-fermer">Replier</button>
     </div>
-    <h1 class="site-title">Plan du site</h1>
-    <div class="header-rule" aria-hidden="true"></div>
-  </header>
-
-  <nav aria-label="Rubriques du plan du site">
-    <ul class="pds-sommaire">
-      {blocks.map((b) => <li><a href={`#${b.id}`}>{b.nav}</a></li>)}
-    </ul>
-  </nav>
-
-  <div class="pds-grid">
-    {[1, 2, 3].map((c) => (
-    <div class="pds-col">
-    {blocks.filter((b) => b.col === c).map((b) => (
-      <section class="pds-block" id={b.id}>
-        <h2>{b.title}</h2>
-        {b.groups.map((g) => (
-          <>
-            {g.title && <h3>{g.title}</h3>}
-            <ul>
-              {g.links.map((l) => (
-                <li>
-                  <a href={l.href}>
-                    <span class="pds-label" set:html={l.label} />
-                    {l.note && <span class="pds-note">{l.note}</span>}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </>
-        ))}
-      </section>
-    ))}
-    </div>
-    ))}
+    <p class="arb-etat" id="etat" aria-live="polite"></p>
   </div>
 
-
+  <nav aria-label="Plan du site">
+    <ul>
+      {(function rendu(n: Noeud, profondeur: number): any {
+        const nom = n.href ? <a class="nom" href={n.href}>{n.label}</a> : <span class="nom">{n.label}</span>;
+        const note = n.note && <span class="note">{n.note}</span>;
+        if (!n.enfants?.length) return <li class:list={['feuille', { fiche: n.fiche }]}>{nom}{note}</li>;
+        return (
+          <li>
+            <details class:list={['branche', { racine: profondeur === 0 }]} open={n.ouvert || profondeur === 0}>
+              <summary>{nom}{note}</summary>
+              <ul>{n.enfants.map((e) => rendu(e, profondeur + 1))}</ul>
+            </details>
+          </li>
+        );
+      })(arbre, 0)}
+    </ul>
+  </nav>
 </main>
 
 <footer class="site-footer">
@@ -250,6 +238,54 @@ const description = "Plan du site LaPhilo.fr : toutes les frises chronologiques 
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
+<script is:inline>
+  (() => {
+    const q = document.getElementById('q'), etat = document.getElementById('etat');
+    const arbre = document.querySelector('.arb nav');
+    const sans = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const feuilles = [...arbre.querySelectorAll('li')].map((li) => {
+      const el = li.querySelector(':scope > .nom, :scope > details > summary > .nom');
+      return { li, el, texte: el.textContent, cle: sans(el.textContent) };
+    });
+    const details = [...arbre.querySelectorAll('details')];
+    const ouvertsAuDepart = details.map((d) => d.open);
+    const surligner = (f, mot) => {
+      if (!mot) { f.el.textContent = f.texte; return; }
+      const i = f.cle.indexOf(mot);
+      f.el.innerHTML = '';
+      f.el.append(f.texte.slice(0, i), Object.assign(document.createElement('mark'), { textContent: f.texte.slice(i, i + mot.length) }), f.texte.slice(i + mot.length));
+    };
+    let minuterie;
+    function filtrer() {
+      const mot = sans(q.value.trim());
+      if (mot.length < 2) {
+        feuilles.forEach((f) => { f.li.classList.remove('cache'); surligner(f, ''); });
+        details.forEach((d, i) => (d.open = ouvertsAuDepart[i]));
+        etat.textContent = mot.length ? 'Tapez au moins deux lettres.' : '';
+        return;
+      }
+      feuilles.forEach((f) => f.li.classList.add('cache'));
+      let n = 0;
+      for (const f of feuilles) {
+        if (!f.cle.includes(mot)) continue;
+        n++;
+        surligner(f, mot);
+        // la branche trouvée reste visible avec ses ancêtres, ouverts
+        for (let p = f.li; p && p !== arbre; p = p.parentElement) {
+          if (p.tagName === 'LI') p.classList.remove('cache');
+          if (p.tagName === 'DETAILS') p.open = true;
+        }
+        // une branche trouvée montre aussi son contenu
+        f.li.querySelectorAll('li').forEach((li) => li.classList.remove('cache'));
+      }
+      feuilles.forEach((f) => { if (!f.cle.includes(mot)) surligner(f, ''); });
+      etat.textContent = n ? `${n} résultat${n > 1 ? 's' : ''}` : 'Aucun résultat.';
+    }
+    q.addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(filtrer, 120); });
+    document.getElementById('tout-ouvrir').onclick = () => details.forEach((d) => (d.open = true));
+    document.getElementById('tout-fermer').onclick = () => { q.value = ''; filtrer(); details.forEach((d, i) => (d.open = i === 0)); };
+  })();
+</script>
 <script src="/js/home-main.js" defer></script>
 <script src="/js/home-portraits.js" defer></script>
 
