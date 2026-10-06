@@ -9,6 +9,7 @@ import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
 import R from '../data/ressources.json';
+import ADRESSES from '../data/chaines-youtube.json';
 
 const fiches = [...(await getCollection('philosophes')), ...(await getCollection('courants'))];
 const nf = (n: number) => n.toLocaleString('fr-FR');
@@ -54,6 +55,34 @@ const chaines = R.chaines.map((c) => {
   const ex = siennes.slice().sort((a, b) => ((b.data as any).importance ?? 1) - ((a.data as any).importance ?? 1) || a.data.year - b.data.year)[0];
   return { ...c, n: siennes.length, video: ex?.data.yt_id, exemple: ex?.data.name };
 }).filter((c) => c.n > 0);
+
+/* Chaînes ajoutées d'elles-mêmes : au moins SEUIL vidéos sur le site, absentes de ressources.json
+   (ni chaîne, ni alias, ni média). Nom = l'écriture la plus fréquente dans les crédits ; adresse
+   trouvée par scripts/build-data.py (src/data/chaines-youtube.json), sinon une recherche YouTube. */
+const SEUIL = 5;
+const connues = new Set([...R.chaines.flatMap((c) => [c.nom, ...(c.alias ?? [])]), ...R.medias].map((x) => x.toLowerCase()));
+const parCle = new Map<string, typeof videos>();
+for (const f of videos) {
+  const k = chaineDe(f.data.media_credit);
+  if (k && !connues.has(k)) parCle.set(k, [...(parCle.get(k) ?? []), f]);
+}
+const ecriture = (credits: string[]) => {
+  const n = new Map<string, number>();
+  for (const c of credits) {
+    const nom = c.replace(/&quot;/g, '"').match(/\bpar\s+(.+?)\s*$/)?.[1]?.replace(/^[\s"'«»]+|[\s"'«».]+$/g, '') ?? '';
+    if (nom) n.set(nom, (n.get(nom) ?? 0) + 1);
+  }
+  return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+};
+for (const [k, siennes] of parCle) {
+  if (siennes.length < SEUIL) continue;
+  const ex = siennes.slice().sort((a, b) => ((b.data as any).importance ?? 1) - ((a.data as any).importance ?? 1) || a.data.year - b.data.year)[0];
+  const nom = ecriture(siennes.map((f) => f.data.media_credit ?? ''));
+  chaines.push({
+    nom, desc: '', n: siennes.length, video: ex.data.yt_id, exemple: ex.data.name,
+    url: (ADRESSES as Record<string, { url?: string }>)[k]?.url ?? `https://www.youtube.com/results?search_query=${encodeURIComponent(nom)}`,
+  } as (typeof chaines)[number]);
+}
 const ordre = (c: { nom: string; n: number }) => (c.nom === 'Parole de Philosophe' || c.nom === 'Kosmos' ? -1 : c.n);
 chaines.sort((a, b) => ordre(b) - ordre(a));
 const medias = R.medias.map((m) => ({ nom: m, n: videos.filter((f) => chaineDe(f.data.media_credit) === m.toLowerCase()).length })).filter((m) => m.n > 0);
@@ -176,7 +205,7 @@ const description = 'Les sources de LaPhilo.fr : Wikipédia, Persée, les podcas
             {c.logo && <img src={c.logo} alt="" loading="lazy" class="soc-res-vlogo" />}
             <div class="soc-res-vmeta">
               <div class="soc-res-vname">{c.nom} <span class="res-n">· {c.n} vidéo{c.n > 1 ? 's' : ''}</span></div>
-              <div class="soc-res-vdesc">{c.desc}</div>
+              {c.desc && <div class="soc-res-vdesc">{c.desc}</div>}
             </div>
             <a href={c.url} target="_blank" rel="noopener" class="parch-link soc-res-vlink">Voir →</a>
           </div>

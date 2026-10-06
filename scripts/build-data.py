@@ -442,6 +442,56 @@ def verifier(philosophes, courants):
     return alertes
 
 
+CHAINES_SEUIL = 5   # une chaîne apparaît d'elle-même sur /ressources/ à partir de 5 vidéos
+
+
+def cle_chaine(credit):
+    """Chaîne d'un crédit vidéo « "Titre" par Chaîne », en minuscules, sans guillemets ni point final
+    (même règle que chaineDe() dans src/pages/ressources.astro)."""
+    c = (credit or '').replace('&quot;', '"').replace('&#39;', "'").replace('&apos;', "'").replace('&amp;', '&')
+    m = re.search(r'\bpar\s+(.+?)\s*$', c, re.S)
+    return re.sub(r'^[\s"\'«»]+|[\s"\'«».]+$', '', m.group(1)).lower() if m else ''
+
+
+def chaines_youtube(fiches):
+    """Adresse YouTube des chaînes assez utilisées pour figurer sur /ressources/ : demandée une fois à
+    YouTube (oEmbed d'une de leurs vidéos) et gardée dans src/data/chaines-youtube.json. Sans réseau,
+    rien n'est bloqué : la page renvoie alors vers une recherche YouTube du nom de la chaîne."""
+    import collections, urllib.request
+    chemin = os.path.join(DATA_DIR, 'chaines-youtube.json')
+    try:
+        cache = json.load(open(chemin, encoding='utf-8'))
+    except (OSError, ValueError):
+        cache = {}
+    try:
+        res = json.load(open(os.path.join(DATA_DIR, 'ressources.json'), encoding='utf-8'))
+        connues = {n.lower() for c in res.get('chaines', []) for n in [c['nom'], *c.get('alias', [])]}
+        connues |= {m.lower() for m in res.get('medias', [])}
+    except (OSError, ValueError):
+        connues = set()
+    videos = collections.defaultdict(list)
+    for f in fiches:
+        if f.get('yt_id') and cle_chaine(f.get('media_credit')):
+            videos[cle_chaine(f.get('media_credit'))].append(f['yt_id'])
+    a_chercher = [k for k, v in videos.items() if len(v) >= CHAINES_SEUIL and k not in connues and not (cache.get(k) or {}).get('url')]
+    if not a_chercher:
+        return
+    print(f'\n  Chaînes YouTube à partir de {CHAINES_SEUIL} vidéos, adresse demandée à YouTube : {len(a_chercher)}')
+    for k in a_chercher[:15]:
+        for vid in videos[k][:2]:
+            try:
+                req = urllib.request.Request(f'https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={vid}&format=json',
+                                             headers={'User-Agent': 'laphilo-build-data'})
+                d = json.load(urllib.request.urlopen(req, timeout=8))
+                cache[k] = {'url': d.get('author_url'), 'nom_youtube': d.get('author_name')}
+                print(f'    {k} → {cache[k]["url"]}')
+                break
+            except Exception:
+                continue
+    with open(chemin, 'w', encoding='utf-8') as fh:
+        json.dump(dict(sorted(cache.items())), fh, ensure_ascii=False, indent=1)
+
+
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     print('\n=== Génération des données Astro depuis les xlsx ===\n')
@@ -465,3 +515,5 @@ if __name__ == '__main__':
     print(f'=== Vérifications : {len(alertes)} point(s) à relire ===')
     for a in alertes:
         print(f'  - {a}')
+
+    chaines_youtube(DERNIERES.get('philosophes.json', []) + DERNIERES.get('courants.json', []))
