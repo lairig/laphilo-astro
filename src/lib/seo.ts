@@ -7,6 +7,28 @@ export const SITE_NAME = 'LaPhilo.fr';
 
 export const withBrand = (title: string) => `${title} | ${SITE_NAME}`;
 
+/* Limites de Google et de Bing : titre ≤ 60 caractères, description 25 à 155 */
+export const TITRE_MAX = 60;
+export const DESCRIPTION_MAX = 155;
+/** Le premier titre candidat qui tient, sinon le dernier coupé au dernier mot entier. */
+const premierQuiTient = (candidats: string[]) =>
+  candidats.find((t) => t.length <= TITRE_MAX) ?? clip(candidats[candidats.length - 1], TITRE_MAX);
+
+/** Titre de page ≤ 60 caractères : on raccourcit pas à pas (parenthèses, « de toutes les époques »,
+    « frise chronologique » → « frise »), avec « | LaPhilo.fr » tant que la place le permet. */
+export function titreSeo(texte: string): string {
+  const v1 = texte.replace(/\s*\([^)]*\)/g, '');
+  const v2 = v1.replace(/ (de toutes les époques|et de tous les pays|de toutes les époques et de tous les pays)/g, '');
+  const v3 = v2.replace(/ : frise chronologique$/, ' : frise');
+  return premierQuiTient([texte, v1, v2, v3].flatMap((v) => [withBrand(v), v]));
+}
+
+/** Description ≤ 155 caractères : sans le libellé répété en tête s'il fait déborder, puis coupée au dernier mot. */
+export function descriptionSeo(libelle: string, texte: string): string {
+  const avec = texte.toLowerCase().startsWith(libelle.toLowerCase()) ? texte : `${libelle} — ${texte}`;
+  return clip(avec.length <= DESCRIPTION_MAX ? avec : texte, DESCRIPTION_MAX);
+}
+
 /* Noms dont les capitales ne se déduisent pas automatiquement. */
 const NAME_FIXES: Record<string, string> = {
   'MC-GINN': 'McGinn',
@@ -27,6 +49,9 @@ export function prettyName(name: string): string {
   return words
     .map((word, i) => {
       if (NAME_FIXES[word]) return NAME_FIXES[word];
+      // « d'HOLBACH », « d'ACQUASPARTA » : particule en minuscule, nom en capitales
+      const part = word.match(/^([dl]')(\p{Lu}[\p{Lu}-]+)$/u);
+      if (part) return part[1] + part[2].split('-').map(capitalize).join('-');
       // Seuls les mots entièrement en capitales sont retouchés.
       if (word !== word.toUpperCase() || !/\p{L}{2}/u.test(word)) return word;
       // Numéro de règne (Jean XXIII), jamais en tête : « LI Zehou » est un nom.
@@ -37,7 +62,9 @@ export function prettyName(name: string): string {
         .map((part) =>
           part
             .split("'")
-            .map((seg, j, segs) => (j === 0 && segs.length > 1 && seg.length === 1 && i > 0 ? seg.toLowerCase() : capitalize(seg)))
+            .map((seg, j, segs) => (j === 0 && segs.length > 1 && seg.length === 1 && i > 0 ? seg.toLowerCase()
+              // après une apostrophe interne (« ASH'ARI ») : minuscule ; « O'NEILL », « D'AQUIN » gardent la capitale
+              : j > 0 && segs[j - 1].length > 1 ? seg.toLowerCase() : capitalize(seg)))
             .join("'")
         )
         .join('-');
@@ -97,9 +124,8 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export function philosopheSeo(p: PhilosopheData) {
   const name = prettyName(p.name);
   const head = `${name} ${lifeDates(p.year, p.end_year)}`;
-  // « vie et pensée » seulement si le titre reste court (Google coupe vers 60 car.).
-  const long = withBrand(`${head} : vie et pensée`);
-  const title = long.length <= 65 ? long : withBrand(head);
+  // Du plus complet au plus court : « vie et pensée » et la marque seulement s'ils tiennent.
+  const title = premierQuiTient([withBrand(`${head} : vie et pensée`), withBrand(head), head, withBrand(name), name]);
 
   // On n'annonce que les médias réellement présents sur la fiche.
   const video = Boolean(p.yt_id);
@@ -108,9 +134,9 @@ export function philosopheSeo(p: PhilosopheData) {
   const suffix = ` Sa vie et sa pensée${media}.`;
   const summary = p.description ? sentence(p.description) : '';
   const description = summary
-    ? `${head} : ${lowerFirst(clip(summary, 160 - head.length - 3 - suffix.length))}${suffix}`
+    ? `${head} : ${lowerFirst(clip(summary, DESCRIPTION_MAX - head.length - 3 - suffix.length))}${suffix}`
     : `${head} :${suffix.toLowerCase()}`;
-  return { name, title, description };
+  return { name, title, description: clip(description, DESCRIPTION_MAX) };
 }
 
 interface CourantData {
@@ -120,19 +146,24 @@ interface CourantData {
 }
 
 export function courantSeo(c: CourantData, philosophes: string[]) {
-  // Du plus complet au plus court, on garde le premier qui tient en 65 caractères.
-  const candidates = [
-    ...(philosophes.length ? [`${c.name} : définition et philosophes`] : []),
+  // Du plus complet au plus court, on garde le premier qui tient en 60 caractères.
+  const title = premierQuiTient([
+    ...(philosophes.length ? [withBrand(`${c.name} : définition et philosophes`)] : []),
+    withBrand(`${c.name} : définition`),
     `${c.name} : définition`,
+    withBrand(c.name),
     c.name,
-  ].map(withBrand);
-  const title = candidates.find((t) => t.length <= 65) ?? candidates[candidates.length - 1];
+  ]);
   const summary = c.description ? sentence(c.description) : '';
-  const names = philosophes.slice(0, 3).map(prettyName).join(', ');
-  const who = philosophes.length ? ` Philosophes : ${names}${philosophes.length > 3 ? '…' : '.'}` : '';
+  // Trois représentants au plus, moins si la description y perdrait trop (au moins 70 caractères de résumé)
   const head = `${c.name} (${c.display_date.trim()})`;
+  const qui = (n: number) => (n && philosophes.length
+    ? ` Philosophes : ${philosophes.slice(0, n).map(prettyName).join(', ')}${philosophes.length > n ? '…' : '.'}` : '');
+  let n = Math.min(3, philosophes.length);
+  while (n > 0 && summary && DESCRIPTION_MAX - head.length - 3 - qui(n).length < 70) n--;
+  const who = qui(n);
   const description = summary
-    ? `${head} : ${lowerFirst(clip(summary, 160 - head.length - 3 - who.length))}${who}`
+    ? `${head} : ${lowerFirst(clip(summary, DESCRIPTION_MAX - head.length - 3 - who.length))}${who}`
     : `${head} :${who}`;
-  return { title, description };
+  return { title, description: clip(description, DESCRIPTION_MAX) };
 }

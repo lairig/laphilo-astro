@@ -5,7 +5,7 @@ import GoatCounter from '../../../components/GoatCounter.astro';
 import SeoHead from '../../../components/SeoHead.astro';
 import BackButton from '../../../components/BackButton.astro';
 import FriseFooter from '../../../components/FriseFooter.astro';
-import { plainText } from '../../../lib/seo';
+import { plainText, titreSeo, descriptionSeo } from '../../../lib/seo';
 import { getCollection } from 'astro:content';
 import { courantFriseConfig, courantFriseDefaut, courantFriseSlugs, courantsDeLaFrise, libelleFriseCourant } from '../../../data/frise-engine-config';
 import friseDescriptions from '../../../data/frise-descriptions.json';
@@ -37,8 +37,8 @@ const description = (friseDescriptions as Record<string, string>)[frise as strin
 const descriptionText = description.replace(/<[^>]+>/g, '');
 /* Pas de « Philosophes médiévaux — Philosophes médiévaux (…) » : le libellé
    n'est ajouté que si le texte ne commence pas déjà par lui. */
-const metaDescription = descriptionText.toLowerCase().startsWith(label.toLowerCase()) ? descriptionText : `${label} — ${descriptionText}`;
-const title = `${label} | LaPhilo.fr`;
+const metaDescription = descriptionSeo(label, descriptionText);
+const title = titreSeo(label);
 const path = `/courants/frise/${frise}/`;
 const jsonLd = [
   {
