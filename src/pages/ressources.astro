@@ -64,16 +64,17 @@ const importance = (v: Video) => ((v.fiche.data as any).importance ?? 1);
 /* vidéo d'exemple : de préférence une vidéo principale, de la fiche la plus importante, puis la plus ancienne */
 const exemple = (vs: Video[]) => vs.filter((v) => v.yt).sort((a, b) => Number(b.principale) - Number(a.principale)
   || importance(b) - importance(a) || a.fiche.data.year - b.fiche.data.year)[0];
-/* Seules les chaînes d'au moins SEUIL vidéos sont affichées (demandé le 2026-10-06), qu'elles soient dans ressources.json ou non */
-const SEUIL = 10;
+/* Classement : les PREMIERES chaînes qui ont le plus de vidéos (demandé le 2026-10-06), qu'elles soient dans
+   ressources.json ou non ; il évolue tout seul avec les vidéos ajoutées */
+const PREMIERES = 15;
 const de = (noms: string[]) => { const k = new Set(noms.map(cleDe)); return videos.filter((v) => k.has(v.cle)); };
 const chaines = R.chaines.map((c) => {
   const siennes = de([c.nom, ...(c.alias ?? [])]);
   const ex = exemple(siennes);
   return { ...c, n: siennes.length, video: ex?.yt, exemple: ex?.fiche.data.name };
-}).filter((c) => c.n >= SEUIL);
+}).filter((c) => c.n > 0);
 
-/* Chaînes ajoutées d'elles-mêmes : au moins SEUIL vidéos sur le site, absentes de ressources.json
+/* Chaînes candidates hors ressources.json : toutes, le classement ne garde que les meilleures. Absentes de ressources.json
    (ni chaîne, ni alias, ni média). Nom = l'écriture la plus fréquente ; adresse trouvée par
    scripts/build-data.py (src/data/chaines-youtube.json), sinon une recherche YouTube. */
 
@@ -86,7 +87,6 @@ const ecriture = (vs: Video[]) => {
   return [...n.entries()].sort((a, b) => b[1] - a[1])[0][0];
 };
 for (const [k, siennes] of parCle) {
-  if (siennes.length < SEUIL) continue;
   const ex = exemple(siennes);
   const nom = ecriture(siennes);
   chaines.push({
@@ -94,7 +94,8 @@ for (const [k, siennes] of parCle) {
     url: (ADRESSES as Record<string, { url?: string }>)[k]?.url ?? `https://www.youtube.com/results?search_query=${encodeURIComponent(nom)}`,
   } as (typeof chaines)[number]);
 }
-chaines.sort((a, b) => b.n - a.n);
+chaines.sort((a, b) => b.n - a.n || a.nom.localeCompare(b.nom, 'fr'));
+chaines.splice(PREMIERES);
 const medias = R.medias.map((m) => ({ nom: m, n: de([m]).length })).filter((m) => m.n > 0).sort((a, b) => b.n - a.n);
 const nbChaines = new Set(videos.map((v) => v.cle).filter(Boolean)).size;
 

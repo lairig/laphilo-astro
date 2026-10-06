@@ -1,4 +1,8 @@
 {
+ "abc penser": {
+  "url": "https://www.youtube.com/@abcpenser",
+  "nom_youtube": "abc penser"
+ },
  "artesquieu": {
   "url": "https://www.youtube.com/@Artesquieu89",
   "nom_youtube": "Artesquieu"
@@ -6,6 +10,10 @@
  "baglis tv": {
   "url": "https://www.youtube.com/@BAGLISTV-gp",
   "nom_youtube": "BAGLIS TV"
+ },
+ "bibiclo": {
+  "url": "https://www.youtube.com/@Bibiclo",
+  "nom_youtube": "Bibiclo"
  },
  "darina metreveli": {
   "url": "https://www.youtube.com/@darinametreveli",
@@ -15,9 +23,21 @@
   "url": "https://www.youtube.com/@eclairbrut",
   "nom_youtube": "ÉCLAIR BRUT"
  },
+ "ecole de la liberte": {
+  "url": "https://www.youtube.com/@ecoledelaliberte",
+  "nom_youtube": "Ecole de la Liberté"
+ },
  "editions m-editer": {
   "url": "https://www.youtube.com/@EditionsM-Editer",
   "nom_youtube": "Editions M-Editer"
+ },
+ "foolish musings": {
+  "url": "https://www.youtube.com/@FoolishMusings",
+  "nom_youtube": "Foolish Musings"
+ },
+ "histoire et mythologie en bd": {
+  "url": "https://www.youtube.com/@histoireetmythologie",
+  "nom_youtube": "Histoire et Mythologie en BD"
  },
  "jtgrandtour": {
   "url": "https://www.youtube.com/@jtgrandtour4115",

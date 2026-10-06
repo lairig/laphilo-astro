@@ -442,7 +442,7 @@ def verifier(philosophes, courants):
     return alertes
 
 
-CHAINES_SEUIL = 10  # une chaîne apparaît d'elle-même sur /ressources/ à partir de 10 vidéos (principales ou liens des textes)
+CHAINES_CLASSEMENT = 20  # /ressources/ affiche les 15 chaînes qui ont le plus de vidéos : on connaît d'avance l'adresse des 20 premières
 
 
 def cle_chaine(credit):
@@ -491,10 +491,11 @@ def chaines_youtube(fiches):
         for k, vid in videos_de(f):
             if k and vid:
                 videos[k].append(vid)
-    a_chercher = [k for k, v in videos.items() if len(v) >= CHAINES_SEUIL and k not in connues and not (cache.get(k) or {}).get('url')]
+    classement = sorted((k for k in videos if k not in connues), key=lambda k: -len(videos[k]))[:CHAINES_CLASSEMENT]
+    a_chercher = [k for k in classement if not (cache.get(k) or {}).get('url')]
     if not a_chercher:
         return
-    print(f'\n  Chaînes YouTube à partir de {CHAINES_SEUIL} vidéos, adresse demandée à YouTube : {len(a_chercher)}')
+    print(f'\n  Chaînes YouTube parmi les {CHAINES_CLASSEMENT} premières, adresse demandée à YouTube : {len(a_chercher)}')
     for k in a_chercher[:15]:
         for vid in videos[k][:2]:
             try:
