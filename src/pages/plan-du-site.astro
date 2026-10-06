@@ -10,10 +10,11 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import Arbre from '../components/Arbre.astro';
+import type { Noeud } from '../lib/arbre';
 import catalogue from '../data/frises-catalogue.json';
 import { groupesMonde } from '../data/groupes-monde';
 
-type Noeud = { label: string; href?: string; note?: string; enfants?: Noeud[]; ouvert?: boolean; fiche?: boolean };
 
 const groups: any[] = catalogue.groups;
 const byLabel = (label: string): any[] => groups.find((g) => g.label === label)?.items ?? [];
@@ -142,41 +143,6 @@ const description = "Plan du site LaPhilo.fr en arbre : toutes les pages, les fr
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <style>
-    .arb { max-width: 900px; margin: 0 auto; padding: 0 16px 3rem; }
-    .arb-recherche { position: sticky; top: 0; z-index: 5; padding: .8rem 0 .7rem; background: linear-gradient(#1a0f07 80%, transparent); }
-    .arb-champ { display: flex; gap: .5rem; align-items: center; }
-    .arb-champ input { flex: 1; min-width: 0; padding: .65rem .9rem; border-radius: 6px; border: 1px solid rgba(212,168,67,.5);
-      background: rgba(30,18,8,.9); color: #f7ecce; font: 1.1rem 'EB Garamond', serif; }
-    .arb-champ input:focus { outline: none; border-color: #d4a843; box-shadow: 0 0 0 2px rgba(212,168,67,.25); }
-    .arb-champ button { padding: .55rem .8rem; border-radius: 6px; border: 1px solid rgba(212,168,67,.4); background: rgba(30,18,8,.8);
-      color: #d4a843; font: .66rem 'Cinzel', serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
-    .arb-champ button:hover { border-color: #d4a843; color: #f7ecce; }
-    .arb-etat { margin: .45rem 0 0; font-style: italic; color: #c9a96e; font-size: .95rem; min-height: 1.3em; }
-
-    /* L'arbre : des traits relient chaque branche à son parent */
-    .arb ul { list-style: none; margin: 0; padding: 0 0 0 1.35rem; }
-    .arb > nav > ul { padding-left: 0; }
-    .arb li { position: relative; }
-    .arb ul ul > li::before { content: ''; position: absolute; left: -.95rem; top: 0; bottom: 0; border-left: 1px solid rgba(212,168,67,.28); }
-    .arb ul ul > li:last-child::before { bottom: auto; height: 1.05rem; }
-    .arb ul ul > li::after { content: ''; position: absolute; left: -.95rem; top: 1.05rem; width: .75rem; border-top: 1px solid rgba(212,168,67,.28); }
-    .arb summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: .5rem; padding: .28rem 0; }
-    .arb summary::-webkit-details-marker { display: none; }
-    .arb summary::before { content: '▸'; flex: none; width: 1rem; color: #d4a843; transition: transform .15s; display: inline-block; }
-    .arb details[open] > summary::before { transform: rotate(90deg); }
-    .arb .feuille { display: flex; align-items: baseline; gap: .5rem; padding: .22rem 0 .22rem 1rem; }
-    .arb .nom { font-family: 'EB Garamond', serif; font-size: 1.05rem; color: #f7ecce; text-decoration: none; }
-    .arb a.nom:hover, .arb a.nom:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; outline: none; }
-    .arb .branche > summary > .nom { font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .06em; color: #d4a843; }
-    .arb .racine > summary > .nom { font-size: 1rem; }
-    .arb .note { font-size: .85rem; font-style: italic; color: #a8916a; white-space: nowrap; }
-    .arb .fiche .nom { font-size: 1rem; color: #e8dcbc; }
-    .arb mark { background: #d4a843 !important; color: #1a0f07 !important; border-radius: 2px; padding: 0 1px; }
-    .arb .cache { display: none; }
-    .arb-essai { margin: 0 auto 1rem; max-width: 900px; padding: .5rem 16px 0; text-align: center; font-style: italic; color: #c9a96e; }
-    @media (max-width: 480px) { .arb ul { padding-left: 1rem; } .arb .note { display: none; } }
-  </style>
 </head>
 <body>
 
@@ -195,33 +161,8 @@ const description = "Plan du site LaPhilo.fr en arbre : toutes les pages, les fr
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="arb">
-  <div class="arb-recherche">
-    <div class="arb-champ">
-      <input type="search" id="q" placeholder={`Chercher une page, une frise ou l’une des ${nbFiches} fiches…`} aria-label="Chercher dans le plan du site" autocomplete="off" />
-      <button type="button" id="tout-ouvrir">Tout ouvrir</button>
-      <button type="button" id="tout-fermer">Replier</button>
-    </div>
-    <p class="arb-etat" id="etat" aria-live="polite"></p>
-  </div>
-
-  <nav aria-label="Plan du site">
-    <ul>
-      {(function rendu(n: Noeud, profondeur: number): any {
-        const nom = n.href ? <a class="nom" href={n.href}>{n.label}</a> : <span class="nom">{n.label}</span>;
-        const note = n.note && <span class="note">{n.note}</span>;
-        if (!n.enfants?.length) return <li class:list={['feuille', { fiche: n.fiche }]}>{nom}{note}</li>;
-        return (
-          <li>
-            <details class:list={['branche', { racine: profondeur === 0 }]} open={n.ouvert || profondeur === 0}>
-              <summary>{nom}{note}</summary>
-              <ul>{n.enfants.map((e) => rendu(e, profondeur + 1))}</ul>
-            </details>
-          </li>
-        );
-      })(arbre, 0)}
-    </ul>
-  </nav>
+<main>
+  <Arbre racine={arbre} label="Plan du site" placeholder={`Chercher une page, une frise ou l’une des ${nbFiches} fiches…`} />
 </main>
 
 <footer class="site-footer">
@@ -238,54 +179,6 @@ const description = "Plan du site LaPhilo.fr en arbre : toutes les pages, les fr
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
-<script is:inline>
-  (() => {
-    const q = document.getElementById('q'), etat = document.getElementById('etat');
-    const arbre = document.querySelector('.arb nav');
-    const sans = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-    const feuilles = [...arbre.querySelectorAll('li')].map((li) => {
-      const el = li.querySelector(':scope > .nom, :scope > details > summary > .nom');
-      return { li, el, texte: el.textContent, cle: sans(el.textContent) };
-    });
-    const details = [...arbre.querySelectorAll('details')];
-    const ouvertsAuDepart = details.map((d) => d.open);
-    const surligner = (f, mot) => {
-      if (!mot) { f.el.textContent = f.texte; return; }
-      const i = f.cle.indexOf(mot);
-      f.el.innerHTML = '';
-      f.el.append(f.texte.slice(0, i), Object.assign(document.createElement('mark'), { textContent: f.texte.slice(i, i + mot.length) }), f.texte.slice(i + mot.length));
-    };
-    let minuterie;
-    function filtrer() {
-      const mot = sans(q.value.trim());
-      if (mot.length < 2) {
-        feuilles.forEach((f) => { f.li.classList.remove('cache'); surligner(f, ''); });
-        details.forEach((d, i) => (d.open = ouvertsAuDepart[i]));
-        etat.textContent = mot.length ? 'Tapez au moins deux lettres.' : '';
-        return;
-      }
-      feuilles.forEach((f) => f.li.classList.add('cache'));
-      let n = 0;
-      for (const f of feuilles) {
-        if (!f.cle.includes(mot)) continue;
-        n++;
-        surligner(f, mot);
-        // la branche trouvée reste visible avec ses ancêtres, ouverts
-        for (let p = f.li; p && p !== arbre; p = p.parentElement) {
-          if (p.tagName === 'LI') p.classList.remove('cache');
-          if (p.tagName === 'DETAILS') p.open = true;
-        }
-        // une branche trouvée montre aussi son contenu
-        f.li.querySelectorAll('li').forEach((li) => li.classList.remove('cache'));
-      }
-      feuilles.forEach((f) => { if (!f.cle.includes(mot)) surligner(f, ''); });
-      etat.textContent = n ? `${n} résultat${n > 1 ? 's' : ''}` : 'Aucun résultat.';
-    }
-    q.addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(filtrer, 120); });
-    document.getElementById('tout-ouvrir').onclick = () => details.forEach((d) => (d.open = true));
-    document.getElementById('tout-fermer').onclick = () => { q.value = ''; filtrer(); details.forEach((d, i) => (d.open = i === 0)); };
-  })();
-</script>
 <script src="/js/home-main.js" defer></script>
 <script src="/js/home-portraits.js" defer></script>
 

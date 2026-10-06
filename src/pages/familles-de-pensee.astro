@@ -1,56 +1,65 @@
 ---
-/* Les familles de pensée et les grands débats : tous les courants rangés par famille
-   (colonnes Nature, Famille, Issu_de des xlsx de courants), famille par famille dans
-   sa tradition, puis les positions rangées par grande question.
-   Chaque famille : ses courants (fiches), d'où elle vient, et un accès à la Frise des
-   courants du monde filtrée sur elle (?famille=…). */
+/* Les familles de pensée et les grands débats, en arbre (composant Arbre, comme le plan du site ;
+   validé le 2026-10-06) : chaque tradition › ses familles de courants (colonnes Nature, Famille,
+   Issu_de des xlsx de courants) › leurs courants, avec « issu de : … » ; puis les grands débats ›
+   questions › positions, avec leur description. Le nom d'une famille ou d'une question ouvre
+   la Frise des courants du monde filtrée sur elle (?famille=…). */
 import { getCollection } from 'astro:content';
 import Favicons from '../components/Favicons.astro';
 import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+import Arbre from '../components/Arbre.astro';
+import type { Noeud } from '../lib/arbre';
 import { groupesMonde } from '../data/groupes-monde';
 
 const courants = (await getCollection('courants')).slice().sort((a, b) => a.data.year - b.data.year);
-const parNom = new Map(courants.map((c) => [c.data.name, c]));
 const an = (y: number) => (y < 0 ? `${-y} av. J.-C.` : String(y));
 const lienFrise = (f: string) => `/frises/courants-du-monde/?famille=${encodeURIComponent(f)}`;
+const issu = (c: (typeof courants)[number]) => (c.data.issu_de?.length ? `issu de : ${c.data.issu_de.join(', ')}` : undefined);
 
-type Membre = (typeof courants)[number];
-const parFamille = new Map<string, Membre[]>();
+const parFamille = new Map<string, typeof courants>();
 for (const c of courants) {
   if (!c.data.famille) continue;
   if (!parFamille.has(c.data.famille)) parFamille.set(c.data.famille, []);
   parFamille.get(c.data.famille)!.push(c);
 }
+/* Une famille de mouvements est rangée dans la tradition de la majorité de ses courants */
+const familles = [...parFamille.entries()].filter(([, m]) => m[0].data.nature === 'mouvement').map(([nom, m]) => {
+  const compte = new Map<string, number>();
+  m.forEach((c) => compte.set(c.data.groupe ?? '', (compte.get(c.data.groupe ?? '') ?? 0) + 1));
+  return { nom, membres: m, tradition: [...compte.entries()].sort((a, b) => b[1] - a[1])[0][0] };
+});
+const debats = [...parFamille.entries()].filter(([, m]) => m[0].data.nature === 'position')
+  .sort((a, b) => a[1][0].data.year - b[1][0].data.year);
 
-/* Une famille de mouvements : sa tradition = celle de la majorité de ses courants ;
-   « vient de » = les courants parents extérieurs à la famille */
-const familles = [...parFamille.entries()]
-  .filter(([, m]) => m[0].data.nature === 'mouvement')
-  .map(([nom, membres]) => {
-    const compte = new Map<string, number>();
-    for (const m of membres) compte.set(m.data.groupe ?? '', (compte.get(m.data.groupe ?? '') ?? 0) + 1);
-    const tradition = [...compte.entries()].sort((a, b) => b[1] - a[1])[0][0];
-    const aussi = [...compte.keys()].filter((g) => g !== tradition);
-    const dedans = new Set(membres.map((m) => m.data.name));
-    const sources = [...new Set(membres.flatMap((m) => m.data.issu_de ?? []).filter((n) => !dedans.has(n)))]
-      .map((n) => parNom.get(n)).filter((c) => c !== undefined);
-    return { nom, membres, tradition, aussi, sources, de: membres[0].data.year, a: membres[membres.length - 1].data.year };
-  })
-  .sort((a, b) => a.de - b.de);
-
-const traditions = groupesMonde
-  .map((g) => ({ ...g, familles: familles.filter((f) => f.tradition === g.id) }))
-  .filter((t) => t.familles.length);
-const G = Object.fromEntries(groupesMonde.map((g) => [g.id, g]));
-
-/* Les grands débats : les positions, rangées par question */
-const debats = [...parFamille.entries()]
-  .filter(([, m]) => m[0].data.nature === 'position')
-  .map(([question, positions]) => ({ question, positions }))
-  .sort((a, b) => a.positions[0].data.year - b.positions[0].data.year);
+const racine: Noeud = {
+  label: 'Les familles de pensée', ouvert: true,
+  enfants: [
+    ...groupesMonde.map((g) => {
+      const fs = familles.filter((f) => f.tradition === g.id).sort((a, b) => a.membres[0].data.year - b.membres[0].data.year);
+      return {
+        label: g.label, id: g.id, ouvert: true, note: `${fs.length} famille${fs.length > 1 ? 's' : ''}`,
+        enfants: fs.map((f) => ({
+          label: f.nom, href: lienFrise(f.nom),
+          note: `${an(f.membres[0].data.year)} → ${an(f.membres[f.membres.length - 1].data.year)} · ${f.membres.length} courants`,
+          enfants: f.membres.map((c) => ({ label: c.data.name, href: `/courants/${c.id}/`, note: c.data.display_date, detail: issu(c), fiche: true })),
+        })),
+      };
+    }).filter((t) => t.enfants.length),
+    {
+      label: 'Les grands débats', id: 'debats', ouvert: true, note: `${debats.length} questions`,
+      enfants: debats.map(([q, positions]) => ({
+        label: q, href: lienFrise(q), note: `${positions.length} réponses`,
+        enfants: positions.map((p) => ({
+          label: p.data.name, href: `/courants/${p.id}/`,
+          detail: p.data.description ? p.data.description.charAt(0).toUpperCase() + p.data.description.slice(1).replace(/\.$/, '') : undefined, fiche: true,
+        })),
+      })),
+    },
+  ],
+};
 
 const nbFamilles = familles.length;
 const title = 'Familles de pensée et grands débats | LaPhilo.fr';
@@ -95,67 +104,12 @@ const description = `Les courants de pensée du monde rangés en ${nbFamilles} f
 <main class="definition-page def-page">
   <div class="intro-text-col">
     <p class="intro-drop-cap">Aucun courant de pensée ne naît seul. Le stoïcisme hérite du cynisme, le marxisme des jeunes hégéliens, le zen du bouddhisme du Grand Véhicule et du taoïsme. Pour s'y retrouver parmi les {courants.length} courants du site, on peut les ranger en {nbFamilles} <strong>familles</strong>, des lignées d'écoles qui se répondent, se prolongent ou se combattent.</p>
-    <p class="intro-body">D'autres « -ismes » ne sont pas des écoles mais des <strong>réponses</strong> qu'on retrouve à toutes les époques : on est moniste ou dualiste, déterministe ou partisan du libre arbitre, depuis l'Antiquité. Ils sont rassemblés plus bas autour des {debats.length} <a href="#debats">grands débats</a> qui les opposent.</p>
-    <p class="intro-body">Chaque famille s'ouvre sur la <a href="/frises/courants-du-monde/">Frise des courants du monde</a>, où l'on voit, en choisissant un courant, d'où il vient et ce qu'il a fait naître.</p>
-  </div>
-
-  <nav class="def-sommaire" aria-label="Sur cette page">
-    {traditions.map((t) => <a href={`#${t.id}`}>{t.court}</a>)}
-    <a href="#debats">Les grands débats</a>
-  </nav>
-
-  {traditions.map((t, i) => (
-    <>
-      {i > 0 && (
-        <div class="drawer-intro-sep def-sep" aria-hidden="true">
-          <span class="drawer-intro-sep-line"></span>
-          <span class="drawer-intro-sep-ornament">✦</span>
-          <span class="drawer-intro-sep-line"></span>
-        </div>
-      )}
-      <h2 class="def-titre" id={t.id}>{t.label}</h2>
-      <div class="fam-grille">
-        {t.familles.map((f) => (
-          <article class="fam-carte" style={`--c:${t.color}`}>
-            <h3>{f.nom}</h3>
-            <p class="fam-meta">
-              {an(f.de)} → {an(f.a)} · {f.membres.length} courants
-              {f.aussi.length > 0 && <> · aussi : {f.aussi.map((g) => G[g]?.court ?? g).join(', ')}</>}
-            </p>
-            {f.sources.length > 0 && (
-              <p class="fam-sources">Vient de : {f.sources.map((s, j) => <>{j > 0 && ', '}<a href={`/courants/${s.id}/`}>{s.data.name}</a></>)}</p>
-            )}
-            <p class="fam-courants">
-              {f.membres.map((m, j) => <>{j > 0 && <span class="fam-pt"> · </span>}<a href={`/courants/${m.id}/`}>{m.data.name}</a></>)}
-            </p>
-            <a class="fam-frise" href={lienFrise(f.nom)}>Voir la famille sur la frise →</a>
-          </article>
-        ))}
-      </div>
-    </>
-  ))}
-
-  <div class="drawer-intro-sep def-sep" aria-hidden="true">
-    <span class="drawer-intro-sep-line"></span>
-    <span class="drawer-intro-sep-ornament">✦</span>
-    <span class="drawer-intro-sep-line"></span>
-  </div>
-  <h2 class="def-titre" id="debats">Les grands débats</h2>
-  <p class="def-chapeau">Des réponses qui traversent les siècles : chacune a sa fiche, et la frise les montre côte à côte.</p>
-  <div class="fam-grille">
-    {debats.map((d) => (
-      <article class="fam-carte fam-debat">
-        <h3>{d.question}</h3>
-        <ul class="fam-positions">
-          {d.positions.map((p) => (
-            <li><a href={`/courants/${p.id}/`}>{p.data.name}</a>{p.data.description && <> : {p.data.description.replace(/\.$/, '')}</>}</li>
-          ))}
-        </ul>
-        <a class="fam-frise" href={lienFrise(d.question)}>Voir les réponses sur la frise →</a>
-      </article>
-    ))}
+    <p class="intro-body">D'autres « -ismes » ne sont pas des écoles mais des <strong>réponses</strong> qu'on retrouve à toutes les époques : on est moniste ou dualiste, déterministe ou partisan du libre arbitre, depuis l'Antiquité. Ils sont rassemblés à la fin de l'arbre, autour des {debats.length} <a href="#debats">grands débats</a> qui les opposent.</p>
+    <p class="intro-body">Ouvrez une famille pour voir ses courants et d'où ils viennent. Le nom d'une famille ou d'une question ouvre la <a href="/frises/courants-du-monde/">Frise des courants du monde</a>, où l'on voit, en choisissant un courant, d'où il vient et ce qu'il a fait naître.</p>
   </div>
 </main>
+
+<Arbre racine={racine} label="Familles de pensée et grands débats" placeholder="Chercher une famille, un courant ou une question…" />
 
 <footer class="site-footer">
   <nav class="footer-social-nav" aria-label="Lien Social">
@@ -176,30 +130,6 @@ const description = `Les courants de pensée du monde rangés en ${nbFamilles} f
 </footer>
 
 <script src="/js/home-main.js" defer></script>
-
-<style>
-  .fam-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 1rem; margin: 0 auto 1rem; }
-  .fam-carte { display: flex; flex-direction: column; gap: .45rem; padding: 1rem 1.1rem 1.05rem; border-radius: 6px;
-    background: linear-gradient(160deg, #f8eed2 0%, #ecdcae 100%); border: 1px solid rgba(184, 146, 60, .6);
-    border-top: 3px solid var(--c, #8b3a0f); color: #3a2410; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
-  .fam-carte h3 { margin: 0; font-family: 'Cinzel', serif; font-size: .95rem; letter-spacing: .04em; color: #6b2a0a; line-height: 1.3; }
-  .fam-meta { margin: 0; font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; color: #8a6a3a; }
-  .fam-sources { margin: 0; font-style: italic; font-size: .95rem; color: #5c3d1e; }
-  .fam-courants { margin: 0; font-size: 1.02rem; line-height: 1.5; flex: 1; }
-  .fam-carte a:not(.fam-frise) { color: #3a2410; text-decoration: none; border-bottom: 1px solid rgba(139, 58, 15, .3); }
-  .fam-carte a:not(.fam-frise):hover { color: #8b3a0f; border-bottom-color: #8b3a0f; }
-  .fam-pt { color: #b8923c; }
-  .fam-frise { align-self: flex-start; margin-top: .3rem; padding: .32rem .75rem; border-radius: 4px; text-decoration: none;
-    font-family: 'Cinzel', serif; font-size: .64rem; font-weight: 700; letter-spacing: .04em; color: #fff8e6;
-    background: linear-gradient(150deg, #c05a20 0%, #8b3a0f 100%); border: 1px solid #7a3210; }
-  .fam-frise:hover { filter: brightness(1.1); }
-  .fam-debat { --c: #8b3a0f; }
-  .fam-positions { margin: 0; padding: 0; list-style: none; display: grid; gap: .35rem; flex: 1; font-size: .98rem; line-height: 1.35; }
-  .fam-positions a { font-weight: 600; }
-  @media (max-width: 640px) {
-    .fam-frise { padding: .55rem .8rem; }
-  }
-</style>
 
 </body>
 </html>
