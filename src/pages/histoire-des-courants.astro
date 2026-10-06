@@ -41,7 +41,7 @@ const SECTIONS: Record<string, { id: string; titre: string; nav: string; chapeau
   'Pensée Orientale': {
     id: 'orientale', titre: 'La pensée orientale', nav: 'Pensée orientale',
     chapeau: [
-      'De l’Inde védique au Japon de l’école de Kyōto, en passant par la Chine, l’Islam, l’Afrique et les Amériques : d’autres chemins vers les mêmes questions.',
+      'De l’Inde védique au Japon de l’école de Kyōto, de la pensée juive à la Russie, en passant par la Chine, l’Islam, l’Afrique et les Amériques : d’autres chemins vers les mêmes questions.',
       'Ouvrez un courant pour sa présentation et une vidéo, puis retrouvez-le sur la frise des courants.',
     ],
     frise: '/courants/frise/oriental/', friseLabel: 'La frise des autres traditions du monde',
@@ -70,6 +70,14 @@ const EPOQUE_CARTE: Record<string, [string, string]> = {
   'Maât, Ubuntu & philosophies africaines': ['orient-ancien', 'Egypte antique'],
   'Shintoïsme, Zen & École de Kyōto': ['asie-est', 'Shintoïsme'],
   'Pensées mésoaméricaines & autochtones': ['sud', 'Mysticisme mésoaméricain'],
+  /* cartouches des familles ajoutés le 2026-10-06 */
+  'Ésotérismes & gnoses': ['orient-ancien', 'Hermétisme'],
+  "L'Inde moderne : de Ram Mohan Roy à Ambedkar": ['inde', 'Brahmoïsme'],
+  'La pensée juive': ['islam-juif', 'Herméneutique juive'],
+  "Réveils de l'islam : Nahda & réformisme": ['islam-juif', 'Fondamentalisme'],
+  'La pensée russe': ['russe', 'Slavophilisme'],
+  'Négritude, anticolonialisme & pensée décoloniale': ['sud', 'Anticolonialisme'],
+  'Théologies & philosophies de la libération': ['sud', 'Théologie de la libération'],
 };
 const lienEpoque = (nom: string) => {
   const e = EPOQUE_CARTE[nom];
