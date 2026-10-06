@@ -28,4 +28,6 @@ const css = faces
 ---
 <link rel="preload" href="/fonts/eb-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin />
+{/* Police du grand titre (h1) : préchargée aussi, c'est souvent le premier gros élément affiché */}
+{(!faces || faces.includes('Cinzel Decorative 700')) && <link rel="preload" href="/fonts/cinzel-decorative-700-latin.woff2" as="font" type="font/woff2" crossorigin />}
 <style is:inline set:html={css}></style>
