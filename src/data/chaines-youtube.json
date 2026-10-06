@@ -1,7 +1,39 @@
 {
+ "artesquieu": {
+  "url": "https://www.youtube.com/@Artesquieu89",
+  "nom_youtube": "Artesquieu"
+ },
+ "baglis tv": {
+  "url": "https://www.youtube.com/@BAGLISTV-gp",
+  "nom_youtube": "BAGLIS TV"
+ },
+ "darina metreveli": {
+  "url": "https://www.youtube.com/@darinametreveli",
+  "nom_youtube": "Darina Metreveli"
+ },
+ "eclair brut": {
+  "url": "https://www.youtube.com/@eclairbrut",
+  "nom_youtube": "ÉCLAIR BRUT"
+ },
+ "editions m-editer": {
+  "url": "https://www.youtube.com/@EditionsM-Editer",
+  "nom_youtube": "Editions M-Editer"
+ },
+ "jtgrandtour": {
+  "url": "https://www.youtube.com/@jtgrandtour4115",
+  "nom_youtube": "Jtgrandtour"
+ },
+ "kto tv": {
+  "url": "https://www.youtube.com/@ktotv",
+  "nom_youtube": "KTO TV"
+ },
  "kurious": {
   "url": "https://www.youtube.com/@kuriousofficiel",
   "nom_youtube": "Kurious"
+ },
+ "michel onfray": {
+  "url": "https://www.youtube.com/channel/UCHHwvhu-4Tg97TVHMY-8DIQ",
+  "nom_youtube": "Michel Onfray - Topic"
  },
  "modern day stoic": {
   "url": "https://www.youtube.com/@ModernDayStoic-b3j",
@@ -10,5 +42,33 @@
  "mystica": {
   "url": "https://www.youtube.com/@mystica-resumonsca",
   "nom_youtube": "MYSTICA"
+ },
+ "philosopher friends": {
+  "url": "https://www.youtube.com/@stycrs",
+  "nom_youtube": "stay curious radio"
+ },
+ "philosophytoons": {
+  "url": "https://www.youtube.com/@PhilosophyToons",
+  "nom_youtube": "PhilosophyToons"
+ },
+ "politikon": {
+  "url": "https://www.youtube.com/@Politikon_",
+  "nom_youtube": "Politikon"
+ },
+ "radio j": {
+  "url": "https://www.youtube.com/@RadioJFrance",
+  "nom_youtube": "Radio J"
+ },
+ "resonances": {
+  "url": "https://www.youtube.com/@Resonances",
+  "nom_youtube": "Résonance[s]"
+ },
+ "rfi": {
+  "url": "https://www.youtube.com/@RFI_Fr",
+  "nom_youtube": "RFI"
+ },
+ "spiritual quest": {
+  "url": "https://www.youtube.com/@Spiritual-Quest",
+  "nom_youtube": "Spiritual Quest"
  }
 }

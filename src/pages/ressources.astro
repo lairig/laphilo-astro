@@ -42,51 +42,61 @@ for (const f of fiches) {
 }
 const emissions = R.emissions.map((e) => ({ ...e, n: parEmission.get(e.id) ?? 0 })).filter((e) => e.n > 0).sort((a, b) => b.n - a.n);
 
-/* Vidéos : chaîne lue dans le crédit « "Titre" par Chaîne » */
-const chaineDe = (credit?: string) => (credit ?? '')
-  .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&')
-  .match(/\bpar\s+(.+?)\s*$/)?.[1]
-  ?.replace(/^[\s"'«»]+|[\s"'«».]+$/g, '').toLowerCase() ?? '';
-const videos = fiches.filter((f) => f.data.yt_id);
+/* Vidéos : la vidéo principale de chaque fiche (crédit « "Titre" par Chaîne ») ET les liens YouTube
+   des textes (titre du lien « Titre par Chaîne », rempli par l'éditeur). La chaîne est comparée sans
+   majuscules, accents ni guillemets (« le precepteur » = « Le Précepteur ») ; même règle que
+   cle_chaine() dans scripts/build-data.py. */
+const decode = (s: string) => s.replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, '&');
+const nomDe = (titre?: string) => decode(titre ?? '').match(/\bpar\s+(.+?)\s*$/s)?.[1]?.replace(/^[\s"'«»]+|[\s"'«».]+$/g, '') ?? '';
+const cleDe = (nom: string) => nom.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+type Video = { cle: string; nom: string; yt: string; fiche: (typeof fiches)[number]; principale: boolean };
+const videos: Video[] = [];
+for (const f of fiches) {
+  if (f.data.yt_id) { const nom = nomDe(f.data.media_credit); videos.push({ cle: cleDe(nom), nom, yt: f.data.yt_id, fiche: f, principale: true }); }
+  for (const [tag] of f.data.text.matchAll(/<a\b[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*"[^>]*>/g)) {
+    const href = tag.match(/href="([^"]+)"/)![1].replace(/&amp;/g, '&');
+    const yt = href.match(/[?&]v=([\w-]{11})/)?.[1] ?? href.match(/youtu\.be\/([\w-]{11})/)?.[1] ?? '';
+    const nom = nomDe(tag.match(/title="([^"]*)"/)?.[1]);
+    videos.push({ cle: cleDe(nom), nom, yt, fiche: f, principale: false });
+  }
+}
+const importance = (v: Video) => ((v.fiche.data as any).importance ?? 1);
+/* vidéo d'exemple : de préférence une vidéo principale, de la fiche la plus importante, puis la plus ancienne */
+const exemple = (vs: Video[]) => vs.filter((v) => v.yt).sort((a, b) => Number(b.principale) - Number(a.principale)
+  || importance(b) - importance(a) || a.fiche.data.year - b.fiche.data.year)[0];
+/* Seules les chaînes d'au moins SEUIL vidéos sont affichées (demandé le 2026-10-06), qu'elles soient dans ressources.json ou non */
+const SEUIL = 10;
+const de = (noms: string[]) => { const k = new Set(noms.map(cleDe)); return videos.filter((v) => k.has(v.cle)); };
 const chaines = R.chaines.map((c) => {
-  const noms = [c.nom, ...(c.alias ?? [])].map((x) => x.toLowerCase());
-  const siennes = videos.filter((f) => noms.includes(chaineDe(f.data.media_credit)));
-  // vidéo d'exemple : celle de la fiche la plus importante, puis la plus ancienne
-  const ex = siennes.slice().sort((a, b) => ((b.data as any).importance ?? 1) - ((a.data as any).importance ?? 1) || a.data.year - b.data.year)[0];
-  return { ...c, n: siennes.length, video: ex?.data.yt_id, exemple: ex?.data.name };
-}).filter((c) => c.n > 0);
+  const siennes = de([c.nom, ...(c.alias ?? [])]);
+  const ex = exemple(siennes);
+  return { ...c, n: siennes.length, video: ex?.yt, exemple: ex?.fiche.data.name };
+}).filter((c) => c.n >= SEUIL);
 
 /* Chaînes ajoutées d'elles-mêmes : au moins SEUIL vidéos sur le site, absentes de ressources.json
-   (ni chaîne, ni alias, ni média). Nom = l'écriture la plus fréquente dans les crédits ; adresse
-   trouvée par scripts/build-data.py (src/data/chaines-youtube.json), sinon une recherche YouTube. */
-const SEUIL = 5;
-const connues = new Set([...R.chaines.flatMap((c) => [c.nom, ...(c.alias ?? [])]), ...R.medias].map((x) => x.toLowerCase()));
-const parCle = new Map<string, typeof videos>();
-for (const f of videos) {
-  const k = chaineDe(f.data.media_credit);
-  if (k && !connues.has(k)) parCle.set(k, [...(parCle.get(k) ?? []), f]);
-}
-const ecriture = (credits: string[]) => {
+   (ni chaîne, ni alias, ni média). Nom = l'écriture la plus fréquente ; adresse trouvée par
+   scripts/build-data.py (src/data/chaines-youtube.json), sinon une recherche YouTube. */
+
+const connues = new Set([...R.chaines.flatMap((c) => [c.nom, ...(c.alias ?? [])]), ...R.medias].map(cleDe));
+const parCle = new Map<string, Video[]>();
+for (const v of videos) if (v.cle && !connues.has(v.cle)) parCle.set(v.cle, [...(parCle.get(v.cle) ?? []), v]);
+const ecriture = (vs: Video[]) => {
   const n = new Map<string, number>();
-  for (const c of credits) {
-    const nom = c.replace(/&quot;/g, '"').match(/\bpar\s+(.+?)\s*$/)?.[1]?.replace(/^[\s"'«»]+|[\s"'«».]+$/g, '') ?? '';
-    if (nom) n.set(nom, (n.get(nom) ?? 0) + 1);
-  }
-  return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+  for (const v of vs) n.set(v.nom, (n.get(v.nom) ?? 0) + 1);
+  return [...n.entries()].sort((a, b) => b[1] - a[1])[0][0];
 };
 for (const [k, siennes] of parCle) {
   if (siennes.length < SEUIL) continue;
-  const ex = siennes.slice().sort((a, b) => ((b.data as any).importance ?? 1) - ((a.data as any).importance ?? 1) || a.data.year - b.data.year)[0];
-  const nom = ecriture(siennes.map((f) => f.data.media_credit ?? ''));
+  const ex = exemple(siennes);
+  const nom = ecriture(siennes);
   chaines.push({
-    nom, desc: '', n: siennes.length, video: ex.data.yt_id, exemple: ex.data.name,
+    nom, desc: '', n: siennes.length, video: ex?.yt, exemple: ex?.fiche.data.name,
     url: (ADRESSES as Record<string, { url?: string }>)[k]?.url ?? `https://www.youtube.com/results?search_query=${encodeURIComponent(nom)}`,
   } as (typeof chaines)[number]);
 }
-const ordre = (c: { nom: string; n: number }) => (c.nom === 'Parole de Philosophe' || c.nom === 'Kosmos' ? -1 : c.n);
-chaines.sort((a, b) => ordre(b) - ordre(a));
-const medias = R.medias.map((m) => ({ nom: m, n: videos.filter((f) => chaineDe(f.data.media_credit) === m.toLowerCase()).length })).filter((m) => m.n > 0);
-const nbChaines = new Set(videos.map((f) => chaineDe(f.data.media_credit)).filter(Boolean)).size;
+chaines.sort((a, b) => b.n - a.n);
+const medias = R.medias.map((m) => ({ nom: m, n: de([m]).length })).filter((m) => m.n > 0).sort((a, b) => b.n - a.n);
+const nbChaines = new Set(videos.map((v) => v.cle).filter(Boolean)).size;
 
 const title = 'Ressources utilisées | LaPhilo.fr';
 const description = 'Les sources de LaPhilo.fr : Wikipédia, Persée, les podcasts de France Culture et les chaînes YouTube de philosophie les plus utilisées.';
@@ -154,7 +164,7 @@ const description = 'Les sources de LaPhilo.fr : Wikipédia, Persée, les podcas
     <div class="res-chiffre"><b>{nf(nbLiens)}</b><span>liens dans les textes</span></div>
     <div class="res-chiffre"><b>{nf(lire[0].n)}</b><span>vers Wikipédia</span></div>
     <div class="res-chiffre"><b>{nf(nbAudios)}</b><span>podcasts France Culture</span></div>
-    <div class="res-chiffre"><b>{nf(videos.length)}</b><span>vidéos, de {nf(nbChaines)} chaînes</span></div>
+    <div class="res-chiffre"><b>{nf(videos.length)}</b><span>vidéos YouTube, de {nf(nbChaines)} chaînes</span></div>
   </div>
 
   <h2 class="res-titre">Lire</h2>

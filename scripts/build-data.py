@@ -442,15 +442,32 @@ def verifier(philosophes, courants):
     return alertes
 
 
-CHAINES_SEUIL = 5   # une chaîne apparaît d'elle-même sur /ressources/ à partir de 5 vidéos
+CHAINES_SEUIL = 10  # une chaîne apparaît d'elle-même sur /ressources/ à partir de 10 vidéos (principales ou liens des textes)
 
 
 def cle_chaine(credit):
-    """Chaîne d'un crédit vidéo « "Titre" par Chaîne », en minuscules, sans guillemets ni point final
-    (même règle que chaineDe() dans src/pages/ressources.astro)."""
+    """Chaîne d'un crédit vidéo ou d'un titre de lien « "Titre" par Chaîne » : sans guillemets ni point final,
+    sans majuscules ni accents (même règle que nomDe()/cleDe() dans src/pages/ressources.astro)."""
     c = (credit or '').replace('&quot;', '"').replace('&#39;', "'").replace('&apos;', "'").replace('&amp;', '&')
     m = re.search(r'\bpar\s+(.+?)\s*$', c, re.S)
-    return re.sub(r'^[\s"\'«»]+|[\s"\'«».]+$', '', m.group(1)).lower() if m else ''
+    if not m:
+        return ''
+    nom = re.sub(r'^[\s"\'«»]+|[\s"\'«».]+$', '', m.group(1))
+    nom = ''.join(ch for ch in unicodedata.normalize('NFD', nom) if not unicodedata.combining(ch))
+    return re.sub(r'\s+', ' ', nom.lower()).strip()
+
+
+def videos_de(fiche):
+    """(chaîne, identifiant YouTube) de la vidéo principale et des liens YouTube du texte d'une fiche."""
+    out = []
+    if fiche.get('yt_id'):
+        out.append((cle_chaine(fiche.get('media_credit')), fiche['yt_id']))
+    for tag in re.findall(r'<a\b[^>]*href="https?://(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*"[^>]*>', fiche.get('text') or ''):
+        href = re.search(r'href="([^"]+)"', tag).group(1).replace('&amp;', '&')
+        vid = re.search(r'[?&]v=([\w-]{11})', href) or re.search(r'youtu\.be/([\w-]{11})', href)
+        titre = re.search(r'title="([^"]*)"', tag)
+        out.append((cle_chaine(titre.group(1) if titre else ''), vid.group(1) if vid else ''))
+    return out
 
 
 def chaines_youtube(fiches):
@@ -465,14 +482,15 @@ def chaines_youtube(fiches):
         cache = {}
     try:
         res = json.load(open(os.path.join(DATA_DIR, 'ressources.json'), encoding='utf-8'))
-        connues = {n.lower() for c in res.get('chaines', []) for n in [c['nom'], *c.get('alias', [])]}
-        connues |= {m.lower() for m in res.get('medias', [])}
+        connues = {cle_chaine('par ' + n) for c in res.get('chaines', []) for n in [c['nom'], *c.get('alias', [])]}
+        connues |= {cle_chaine('par ' + m) for m in res.get('medias', [])}
     except (OSError, ValueError):
         connues = set()
     videos = collections.defaultdict(list)
     for f in fiches:
-        if f.get('yt_id') and cle_chaine(f.get('media_credit')):
-            videos[cle_chaine(f.get('media_credit'))].append(f['yt_id'])
+        for k, vid in videos_de(f):
+            if k and vid:
+                videos[k].append(vid)
     a_chercher = [k for k, v in videos.items() if len(v) >= CHAINES_SEUIL and k not in connues and not (cache.get(k) or {}).get('url')]
     if not a_chercher:
         return
