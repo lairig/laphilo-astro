@@ -28,26 +28,60 @@ const introHtml = intro
   /* Accès à la page des familles, visible sur tous les écrans (le sommaire n'apparaît que sur téléphone) */
   + '<p class="intro-body">Pour voir comment ces courants s’enchaînent et se répondent d’une tradition à l’autre, découvrez <a href="/familles-de-pensee/">les familles de pensée et les grands débats</a>.</p>';
 
-/* Sections : titre, chapeau et ancre, comme les deux groupes de /definition/ */
-const SECTIONS: Record<string, { id: string; titre: string; nav: string; chapeau: string[]; frise: string; friseLabel: string }> = {
-  'Pensée Occidentale': {
-    id: 'occidentale', titre: 'La pensée occidentale', nav: 'Pensée occidentale',
-    chapeau: [
-      'De la Grèce antique à nos jours, une longue conversation où chaque école répond à celle qui l’a précédée.',
-      'Ouvrez un courant pour sa présentation, une vidéo et un podcast, puis retrouvez-le sur la frise des courants.',
-    ],
-    frise: '/courants/frise/occidental/', friseLabel: 'La frise de la pensée occidentale',
+/* Les cartouches rangés par grande tradition (les mêmes que les frises des courants, /courants/frise/<frise>/),
+   l'Occident découpé en quatre époques. Chaque cartouche du JSON doit figurer une fois et une seule (vérifié au build). */
+type Tradition = { id: string; titre: string; nav: string; chapeau: string; frise: string; groupes: { titre?: string; cartes: string[] }[] };
+const TRADITIONS: Tradition[] = [
+  {
+    id: 'orient-ancien', titre: 'Le Proche-Orient ancien', nav: 'Orient ancien', frise: 'orient-ancien',
+    chapeau: 'Mésopotamie, Égypte et Iran : les premières sagesses écrites, des Instructions de Shuruppak à Zarathoustra.',
+    groupes: [{ cartes: ['Proche-Orient ancien & Iran'] }],
   },
-  'Pensée Orientale': {
-    id: 'orientale', titre: 'La pensée orientale', nav: 'Pensée orientale',
-    chapeau: [
-      'De l’Inde védique au Japon de l’école de Kyōto, de la pensée juive à la Russie, en passant par la Chine, l’Islam, l’Afrique et les Amériques : d’autres chemins vers les mêmes questions.',
-      'Ouvrez un courant pour sa présentation et une vidéo, puis retrouvez-le sur la frise des courants.',
+  {
+    id: 'occident', titre: 'L’Occident', nav: 'Occident', frise: 'occidental',
+    chapeau: 'De la Grèce antique à nos jours, une longue conversation où chaque école répond à celle qui l’a précédée.',
+    groupes: [
+      { titre: 'L’Antiquité', cartes: ['Philosophie présocratique — Cosmogonie', 'Philosophie classique — Sophisme', 'Philosophie hellénistique'] },
+      { titre: 'Moyen Âge et Renaissance', cartes: ['Philosophie médiévale', 'Philosophie de la Renaissance', 'Ésotérismes & gnoses'] },
+      { titre: 'Les Temps modernes', cartes: ['Philosophie des Lumières', 'Pensées économiques & libertariennes', 'Philosophie du XIXesiècle', 'Pensée chrétienne moderne'] },
+      { titre: 'XX<sup>e</sup> – XXI<sup>e</sup> siècle', cartes: ['Philosophie contemporaine', "Psychanalyse & sciences de l'esprit", 'Luttes & éthiques contemporaines', 'Technique, transhumanisme & nouveaux réalismes'] },
     ],
-    frise: '/courants/frise/oriental/', friseLabel: 'La frise des autres traditions du monde',
   },
-};
-const sections = Array.from(new Set(items.map((it) => it.section)));
+  {
+    id: 'inde', titre: 'L’Inde', nav: 'Inde', frise: 'inde',
+    chapeau: 'Des Védas à Gandhi et Ambedkar : le Soi, la souffrance et la libération, en débat entre hindous, bouddhistes et jaïns.',
+    groupes: [{ cartes: ['Védas & Upanishads', 'Les six écoles hindoues (Darśanas)', 'Hindouismes de dévotion', 'Bouddhisme & Jaïnisme', "L'Inde moderne : de Ram Mohan Roy à Ambedkar"] }],
+  },
+  {
+    id: 'asie-est', titre: 'L’Asie de l’Est', nav: 'Asie de l’Est', frise: 'asie-est',
+    chapeau: 'Chine, Corée et Japon : l’harmonie de la société et de la nature, de Confucius et Laozi à l’école de Kyōto.',
+    groupes: [{ cartes: ['Confucianisme & Néoconfucianisme', 'Taoïsme', 'Légisme & Mohisme', 'Shintoïsme, Zen & École de Kyōto'] }],
+  },
+  {
+    id: 'islam-juif', titre: 'L’Islam et la pensée juive', nav: 'Islam et judaïsme', frise: 'islam-juif',
+    chapeau: 'Deux traditions du Livre, nourries de philosophie grecque : la raison face à la révélation, de Bagdad à Cordoue, du Talmud à Levinas.',
+    groupes: [{ cartes: ['La pensée juive', 'La Falsafa — philosophie rationaliste islamique', "Kalâm & soufisme : théologie et mystique de l'islam", "Réveils de l'islam : Nahda & réformisme"] }],
+  },
+  {
+    id: 'russie', titre: 'La Russie', nav: 'Russie', frise: 'russe',
+    chapeau: 'Entre l’Europe et l’Asie, une pensée passionnée par la question de son propre destin.',
+    groupes: [{ cartes: ['La pensée russe'] }],
+  },
+  {
+    id: 'afrique-ameriques', titre: 'L’Afrique et les Amériques', nav: 'Afrique et Amériques', frise: 'sud',
+    chapeau: 'Sagesses africaines et amérindiennes, puis pensées de la libération face à la colonisation.',
+    groupes: [{ cartes: ['Maât, Ubuntu & philosophies africaines', 'Pensées mésoaméricaines & autochtones', 'Négritude, anticolonialisme & pensée décoloniale', 'Théologies & philosophies de la libération'] }],
+  },
+];
+{
+  const places = TRADITIONS.flatMap((t) => t.groupes.flatMap((g) => g.cartes));
+  const noms = items.map((it) => it.name);
+  const manquants = noms.filter((n) => !places.includes(n));
+  const inconnus = places.filter((n) => !noms.includes(n));
+  const doubles = places.filter((n, i) => places.indexOf(n) !== i);
+  if (manquants.length || inconnus.length || doubles.length)
+    throw new Error(`histoire-des-courants : cartouches non rangés ${manquants}, inconnus ${inconnus}, en double ${doubles}`);
+}
 
 /* Un seul accès par cartouche : la frise à fiches de sa tradition (/courants/frise/<slug>/),
    ouverte sur le premier courant de l'époque (?p = nom exact du courant) */
@@ -108,17 +142,17 @@ const cartes = items.map((it) => {
   <Favicons />
   <GoatCounter />
   <title>Histoire des courants de pensée du monde | LaPhilo.fr</title>
-  <meta name="description" content="Des présocratiques au structuralisme, des Upanishads au bouddhisme zen : les grandes familles de pensée occidentales et orientales expliquées par période." />
+  <meta name="description" content="Des présocratiques au structuralisme, des Upanishads au zen, du kalâm à la négritude : les courants de pensée de sept traditions, période par période." />
   <SeoHead
     title="Histoire des courants de pensée du monde | LaPhilo.fr"
-    description="Des présocratiques au structuralisme, des Upanishads au bouddhisme zen : les grandes familles de pensée occidentales et orientales expliquées par période."
+    description="Des présocratiques au structuralisme, des Upanishads au zen, du kalâm à la négritude : les courants de pensée de sept traditions, période par période."
     path="/histoire-des-courants/"
     ariane={[['Les courants de pensée', '/histoire-des-courants/']]}
   />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261007" />
 </head>
 <body>
 
@@ -146,13 +180,13 @@ const cartes = items.map((it) => {
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  <nav class="def-sommaire" aria-label="Sur cette page">
-    {sections.map((section) => <a href={`#${SECTIONS[section]?.id}`}>{SECTIONS[section]?.nav ?? section}</a>)}
-    <a href="/familles-de-pensee/">Familles et grands débats →</a>
+  <nav class="def-sommaire def-sommaire--toujours" aria-label="Les sept traditions">
+    {TRADITIONS.map((t) => <a href={`#${t.id}`}>{t.nav}</a>)}
   </nav>
+  <p class="def-chapeau">Ouvrez une période pour sa présentation, une vidéo, parfois un podcast, puis retrouvez-la sur la frise des courants de sa tradition.</p>
 
-  {sections.map((section, i) => (
-    <>
+  {TRADITIONS.map((t, i) => (
+    <section class="def-tradition" aria-labelledby={t.id}>
       {i > 0 && (
         <div class="drawer-intro-sep def-sep" aria-hidden="true">
           <span class="drawer-intro-sep-line"></span>
@@ -160,11 +194,15 @@ const cartes = items.map((it) => {
           <span class="drawer-intro-sep-line"></span>
         </div>
       )}
-      <h2 class="def-titre" id={SECTIONS[section]?.id}>{SECTIONS[section]?.titre ?? section}</h2>
-      {(SECTIONS[section]?.chapeau ?? []).map((c) => <p class="def-chapeau">{c}</p>)}
+      <h2 class="def-titre" id={t.id}>{t.titre}</h2>
+      <p class="def-chapeau">{t.chapeau}</p>
+      <p class="def-frise-lien"><a href={`/courants/frise/${t.frise}/`}>La frise des courants : {t.nav} →</a></p>
 
+      {t.groupes.map((g) => (
+      <>
+      {g.titre && <h3 class="def-sous" set:html={g.titre} />}
       <div class="acc-list">
-        {cartes.filter((it) => it.section === section).map((it) => (
+        {g.cartes.map((nom) => cartes.find((it) => it.name === nom)!).map((it) => (
           <div class="acc-item">
             <button class="acc-toggle" aria-expanded="false" type="button">
               <span class="acc-name">{it.name}</span>
@@ -197,9 +235,10 @@ const cartes = items.map((it) => {
           </div>
         ))}
       </div>
-    </>
+      </>
+      ))}
+    </section>
   ))}
-
   <div class="drawer-intro-sep def-sep" aria-hidden="true">
     <span class="drawer-intro-sep-line"></span>
     <span class="drawer-intro-sep-ornament">✦</span>

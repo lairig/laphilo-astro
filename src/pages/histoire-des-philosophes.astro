@@ -13,38 +13,73 @@ const { intro, items } = data as {
   items: { name: string; tag: string; ytId: string | null; text: string }[];
 };
 
-const westernCount = 13;
-
 /* Introduction : mêmes styles que /definition/ (lettrine, texte justifié) au lieu des styles en ligne du JSON */
 const introHtml = intro
   .replace(/\s*style="[^"]*"/g, '')
   .replace('<p>', '<p class="intro-drop-cap">')
   .replaceAll('<p>', '<p class="intro-body">');
 
-/* Deux groupes, titrés comme ceux de /definition/ */
-const groupes = [
-  {
-    id: 'occidentaux', titre: 'Les philosophes occidentaux', nav: 'Occidentaux', items: items.slice(0, westernCount),
-    chapeau: [
-      'Des présocratiques grecs aux penseurs du XXIᵉ siècle, les grandes périodes de la philosophie occidentale.',
-      'Ouvrez une période pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.',
-    ],
-  },
-  {
-    id: 'non-occidentaux', titre: 'Les philosophes non-occidentaux', nav: 'Non-occidentaux', items: items.slice(westernCount),
-    chapeau: [
-      'Inde, Chine, monde arabe et islamique, Afrique, Japon, pensée juive : des traditions longtemps ignorées des histoires de la philosophie.',
-      'Ouvrez une tradition pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.',
-    ],
-  },
-];
-
 /* Les anciens boutons « Frise des … → » en fin de texte sont retirés : leurs liens
    (frise ouverte sur le premier philosophe de la période, ?p=) passent dans le bloc
    « Explorer sur LaPhilo.fr », sous des libellés plus courts. */
 const ANCIEN_BOUTON = /(?:\s*<br\s*\/?>)*\s*<p class="ldl-li"[^>]*>[\s\S]*?<\/p>/g;
 const textes = items.map((it) => ({ ...it, text: it.text.replace(ANCIEN_BOUTON, '').trim() }));
-groupes.forEach((g) => { g.items = g.items.map((it) => textes.find((t) => t.name === it.name) ?? it); });
+
+/* Les cartouches rangés par grande tradition, comme /histoire-des-courants/ ; l'Occident découpé en époques.
+   Chaque cartouche du JSON doit figurer une fois et une seule (vérifié au build). */
+type Tradition = { id: string; titre: string; nav: string; chapeau: string; groupes: { titre?: string; cartes: string[] }[] };
+const TRADITIONS: Tradition[] = [
+  {
+    id: 'orient-ancien', titre: 'Le Proche-Orient ancien', nav: 'Orient ancien',
+    chapeau: 'Égypte, Mésopotamie et Iran : les premiers sages dont l’histoire a retenu le nom.',
+    groupes: [{ cartes: ['Le Proche-Orient ancien'] }],
+  },
+  {
+    id: 'occident', titre: 'L’Occident', nav: 'Occident',
+    chapeau: 'Des présocratiques grecs aux penseurs du XXIᵉ siècle, les grandes périodes de la philosophie occidentale.',
+    groupes: [
+      { titre: 'L’Antiquité', cartes: ['Les présocratiques', 'La Grèce classique', 'La période hellénistique', 'Rome', 'L’Antiquité tardive'] },
+      { titre: 'Le Moyen Âge', cartes: ['Le haut Moyen Âge', 'La scolastique', 'La fin du Moyen Âge'] },
+      { titre: 'Les Temps modernes', cartes: ['La Renaissance et l’humanisme', 'Rationalistes et empiristes', 'Les Lumières'] },
+      { titre: 'XIX<sup>e</sup> – XXI<sup>e</sup> siècle', cartes: ['Le XIXᵉ siècle', 'Le XXᵉ siècle', 'Le XXIᵉ siècle'] },
+    ],
+  },
+  {
+    id: 'inde', titre: 'L’Inde', nav: 'Inde',
+    chapeau: 'Du Bouddha et de Shankara à Gandhi et Ambedkar : le Soi, la souffrance et la libération.',
+    groupes: [{ cartes: ['L’Inde ancienne et classique', 'L’Inde moderne'] }],
+  },
+  {
+    id: 'asie-est', titre: 'L’Asie de l’Est', nav: 'Asie de l’Est',
+    chapeau: 'Chine, Corée et Japon : de Confucius et Laozi à l’école de Kyōto.',
+    groupes: [{ cartes: ['La Chine classique', 'La Corée', 'Le Japon'] }],
+  },
+  {
+    id: 'islam-juif', titre: 'L’Islam et la pensée juive', nav: 'Islam et judaïsme',
+    chapeau: 'De Bagdad à Cordoue, du Caire à Lahore : la raison face à la révélation, d’al-Kindi à Levinas.',
+    groupes: [{ cartes: ['L’âge d’or de la pensée islamique', 'L’islam moderne', 'La pensée juive'] }],
+  },
+  {
+    id: 'russie', titre: 'La Russie', nav: 'Russie',
+    chapeau: 'De Tchaadaïev à Bakhtine, une pensée passionnée par la question de son propre destin.',
+    groupes: [{ cartes: ['La Russie'] }],
+  },
+  {
+    id: 'afrique-ameriques', titre: 'L’Afrique et les Amériques', nav: 'Afrique et Amériques',
+    chapeau: 'Des sages d’Éthiopie et du Mexique ancien aux penseurs de la décolonisation.',
+    groupes: [{ cartes: ['L’Afrique', 'Les Amériques et les Caraïbes'] }],
+  },
+];
+{
+  const places = TRADITIONS.flatMap((t) => t.groupes.flatMap((g) => g.cartes));
+  const noms = items.map((it) => it.name);
+  const manquants = noms.filter((n) => !places.includes(n));
+  const inconnus = places.filter((n) => !noms.includes(n));
+  const doubles = places.filter((n, i) => places.indexOf(n) !== i);
+  if (manquants.length || inconnus.length || doubles.length)
+    throw new Error(`histoire-des-philosophes : cartouches non rangés ${manquants}, inconnus ${inconnus}, en double ${doubles}`);
+}
+const carte = (nom: string) => textes.find((t) => t.name === nom)!;
 
 /* Bloc « Explorer » : le premier lien est le bouton principal ; la Frise des
    penseurs du monde s'ouvre dans un nouvel onglet */
@@ -57,25 +92,31 @@ const M = {
   tout: { href: '/frises/penseurs-du-monde/', label: 'Frise des penseurs du monde', monde: true },
 };
 const EXPLORER: Record<string, Lien[]> = {
-  'Présocratiques': [{ href: frise('greco-romains', 'PITTACOS de Mytilène'), label: 'Les présocratiques sur la frise' }, M.axial],
-  'Gréco-Classique': [{ href: frise('greco-romains', 'GORGIAS'), label: 'Les classiques grecs sur la frise' }, M.axial],
-  'Hellénistique': [{ href: frise('greco-romains', 'CRATÈS de Thèbes'), label: 'La période hellénistique sur la frise' }],
-  'Antiquité Romaine': [{ href: frise('greco-romains', "POSIDONIOS d'Apamée"), label: 'L’Antiquité romaine sur la frise' }],
-  'Antiquité tardive': [{ href: frise('greco-romains', 'PLOTIN'), label: 'L’Antiquité tardive sur la frise' }],
-  'Haut Moyen Âge': [{ href: frise('medievaux', "DENYS L'Aéropagite"), label: 'Le haut Moyen Âge sur la frise' }, M.orIslam],
-  'Scolastique Centrale': [{ href: frise('medievaux', "GERBERT d'Aurillac"), label: 'La scolastique sur la frise' }, M.orIslam],
-  'Fin du Moyen Âge': [{ href: frise('medievaux', 'Thierry de FREIBERG'), label: 'La fin du Moyen Âge sur la frise' }],
-  'Renaissance & Humanisme': [{ href: frise('renaissance-lumieres', 'Jean PIC de la Mirandole'), label: 'La Renaissance sur la frise' }],
-  'Moderne - Rationaliste - Empiriste': [{ href: frise('renaissance-lumieres', 'Thomas HOBBES'), label: 'Rationalistes et empiristes sur la frise' }],
-  'Moderne - Lumières': [{ href: frise('renaissance-lumieres', 'MONTESQUIEU'), label: 'Les Lumières sur la frise' }],
-  'Contemporains': [
-    { href: frise('france', 'Charles FOURIER'), label: 'Les penseurs français sur la frise' },
-    { href: frise('allemands', 'Johann Gottlieb FICHTE'), label: 'Penseurs allemands' },
+  'Le Proche-Orient ancien': [{ href: frise('proche-orient-ancien-toutes-epoques', 'IMHOTEP'), label: 'Le Proche-Orient ancien sur la frise' }],
+  'Les présocratiques': [{ href: frise('greco-romains', 'PITTACOS de Mytilène'), label: 'Les présocratiques sur la frise' }, M.axial],
+  'La Grèce classique': [{ href: frise('greco-romains', 'GORGIAS'), label: 'Les classiques grecs sur la frise' }, M.axial],
+  'La période hellénistique': [{ href: frise('greco-romains', 'CRATÈS de Thèbes'), label: 'La période hellénistique sur la frise' }],
+  'Rome': [{ href: frise('greco-romains', "POSIDONIOS d'Apamée"), label: 'L’Antiquité romaine sur la frise' }],
+  'L’Antiquité tardive': [{ href: frise('greco-romains', 'PLOTIN'), label: 'L’Antiquité tardive sur la frise' }],
+  'Le haut Moyen Âge': [{ href: frise('medievaux', "DENYS L'Aéropagite"), label: 'Le haut Moyen Âge sur la frise' }, M.orIslam],
+  'La scolastique': [{ href: frise('medievaux', "GERBERT d'Aurillac"), label: 'La scolastique sur la frise' }, M.orIslam],
+  'La fin du Moyen Âge': [{ href: frise('medievaux', 'Thierry de FREIBERG'), label: 'La fin du Moyen Âge sur la frise' }],
+  'La Renaissance et l’humanisme': [{ href: frise('renaissance-lumieres', 'Jean PIC de la Mirandole'), label: 'La Renaissance sur la frise' }],
+  'Rationalistes et empiristes': [{ href: frise('renaissance-lumieres', 'Thomas HOBBES'), label: 'Rationalistes et empiristes sur la frise' }],
+  'Les Lumières': [{ href: frise('renaissance-lumieres', 'MONTESQUIEU'), label: 'Les Lumières sur la frise' }],
+  'Le XIXᵉ siècle': [
+    { href: frise('allemands', 'Frédéric HEGEL'), label: 'Le XIXᵉ siècle sur la frise' },
+    { href: frise('france', 'Charles FOURIER'), label: 'Penseurs français' },
     { href: frise('americains', 'Ralph Waldo EMERSON'), label: 'Penseurs américains' },
     { href: frise('modernes', 'Karl Leonhard REINHOLD'), label: 'Autres pays' },
     M.xix,
   ],
-  'XXIᵉ siècle': [
+  'Le XXᵉ siècle': [
+    { href: frise('occident-xxe-aujourdhui', 'Edmund HUSSERL'), label: 'Le XXᵉ siècle sur la frise' },
+    { href: frise('france', 'Henri BERGSON'), label: 'Penseurs français' },
+    { href: frise('allemands', 'Edmund HUSSERL'), label: 'Penseurs allemands' },
+  ],
+  'Le XXIᵉ siècle': [
     { href: '/philosophes-d-aujourd-hui/', label: 'Les philosophes d’aujourd’hui, par sujet et par région' },
     { href: frise('france-contemporains', 'Pierre MAGNARD'), label: 'Penseurs français actuels' },
     { href: frise('contemporains-europe'), label: 'Europe' },
@@ -84,13 +125,22 @@ const EXPLORER: Record<string, Lien[]> = {
     { href: frise('contemporains-asie-oceanie'), label: 'Asie & Océanie' },
     { href: frise('contemporains-monde', 'Hermann LUBBE'), label: 'Monde entier' },
   ],
-  "Grands sages de l'Inde ancienne": [{ href: frise('inde-bouddhisme-toutes-epoques', 'Siddharta GAUTAMA'), label: 'Les philosophes de l’Inde sur la frise' }, M.axial],
-  'Grands philosophes de la Chine classique': [{ href: frise('asie-est-toutes-epoques', 'CONFUCIUS'), label: 'Les philosophes chinois sur la frise' }, M.axial],
-  'Philosophes arabes & islamiques médiévaux': [{ href: frise('monde-islamique-toutes-epoques', 'AL-KINDI'), label: 'Le monde islamique sur la frise' }, M.orIslam],
-  'Philosophes africains': [{ href: frise('pensees-du-sud-toutes-epoques'), label: 'Les pensées africaines et du Sud sur la frise' }, M.tout],
-  'Philosophes japonais': [{ href: frise('asie-est-toutes-epoques', 'KÜKAI'), label: 'Les philosophes japonais sur la frise' }, M.tout],
-  'Philosophes hébraïques & juifs': [{ href: frise('pensee-juive-toutes-epoques', 'Moïse MAÏMONIDE'), label: 'Les philosophes juifs sur la frise' }, M.tout],
+  'L’Inde ancienne et classique': [{ href: frise('inde-bouddhisme-toutes-epoques', 'Siddharta GAUTAMA'), label: 'Les philosophes de l’Inde sur la frise' }, M.axial],
+  'L’Inde moderne': [{ href: frise('inde-bouddhisme-toutes-epoques', 'Râm Mohan ROY'), label: 'L’Inde moderne sur la frise' }, M.xix],
+  'La Chine classique': [{ href: frise('chinois-toutes-epoques', 'CONFUCIUS'), label: 'Les philosophes chinois sur la frise' }, M.axial],
+  'La Corée': [{ href: frise('coreens-toutes-epoques', 'WONHYO'), label: 'Les philosophes coréens sur la frise' }],
+  'Le Japon': [{ href: frise('japonais-toutes-epoques', 'KÜKAI'), label: 'Les philosophes japonais sur la frise' }, M.tout],
+  'L’âge d’or de la pensée islamique': [{ href: frise('monde-islamique-toutes-epoques', 'AL-KINDI'), label: 'Le monde islamique sur la frise' }, M.orIslam],
+  'L’islam moderne': [{ href: frise('monde-islamique-toutes-epoques', 'Djemal ad-Din AL-AFGHANI'), label: 'L’islam moderne sur la frise' }],
+  'La pensée juive': [{ href: frise('pensee-juive-toutes-epoques', 'Moïse MAÏMONIDE'), label: 'Les philosophes juifs sur la frise' }, M.tout],
+  'La Russie': [{ href: frise('pensee-russe-toutes-epoques', 'Piotr TCHAADAÏEV'), label: 'La pensée russe sur la frise' }],
+  'L’Afrique': [{ href: frise('afrique-subsaharienne-toutes-epoques', 'Zera YACOB'), label: 'Les philosophes africains sur la frise' }, { href: frise('pensees-du-sud-toutes-epoques'), label: 'Pensées du Sud' }],
+  'Les Amériques et les Caraïbes': [{ href: frise('pensees-du-sud-toutes-epoques', 'NEZAHUALCOYOTL'), label: 'Les pensées du Sud sur la frise' }, { href: frise('caraibes-toutes-epoques'), label: 'Penseurs des Caraïbes' }],
 };
+{
+  const inconnus = Object.keys(EXPLORER).filter((n) => !items.some((it) => it.name === n));
+  if (inconnus.length) throw new Error(`histoire-des-philosophes : liens Explorer pour des cartouches inconnus ${inconnus}`);
+}
 ---
 
 <html lang="fr">
@@ -99,18 +149,18 @@ const EXPLORER: Record<string, Lien[]> = {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <GoatCounter />
-  <title>Philosophes anciens : de Thalès au XXᵉ siècle | LaPhilo.fr</title>
-  <meta name="description" content="Des présocratiques aux grandes figures du XXᵉ siècle, d'Occident et d'ailleurs : l'histoire de la philosophie racontée époque par époque." />
+  <title>Histoire des philosophes, de Thalès à nos jours | LaPhilo.fr</title>
+  <meta name="description" content="De Thalès à Judith Butler, de Confucius à Fanon : l'histoire des philosophes de sept grandes traditions, racontée époque par époque." />
   <SeoHead
-    title="Philosophes anciens : de Thalès au XXᵉ siècle | LaPhilo.fr"
-    description="Des présocratiques aux grandes figures du XXᵉ siècle, d'Occident et d'ailleurs : l'histoire de la philosophie racontée époque par époque."
+    title="Histoire des philosophes, de Thalès à nos jours | LaPhilo.fr"
+    description="De Thalès à Judith Butler, de Confucius à Fanon : l'histoire des philosophes de sept grandes traditions, racontée époque par époque."
     path="/histoire-des-philosophes/"
-    ariane={[['Les philosophes anciens', '/histoire-des-philosophes/']]}
+    ariane={[['L’histoire des philosophes', '/histoire-des-philosophes/']]}
   />
 
   <Fonts />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261007" />
 </head>
 <body>
 
@@ -124,8 +174,8 @@ const EXPLORER: Record<string, Lien[]> = {
       <span class="sitemap-text">Accueil</span>
     </a>
   </div>
-  <h1 class="site-title">Les Philosophes anciens</h1>
-  <p class="site-subtitle">Des présocratiques grecs aux grandes figures du XXᵉ siècle</p>
+  <h1 class="site-title">L’histoire des philosophes</h1>
+  <p class="site-subtitle">De l’Antiquité à nos jours, sur tous les continents</p>
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
@@ -138,12 +188,13 @@ const EXPLORER: Record<string, Lien[]> = {
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  <nav class="def-sommaire" aria-label="Sur cette page">
-    {groupes.map((g) => <a href={`#${g.id}`}>{g.nav}</a>)}
+  <nav class="def-sommaire def-sommaire--toujours" aria-label="Les sept traditions">
+    {TRADITIONS.map((t) => <a href={`#${t.id}`}>{t.nav}</a>)}
   </nav>
+  <p class="def-chapeau">Ouvrez une période ou une tradition pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.</p>
 
-  {groupes.map((g, i) => (
-    <>
+  {TRADITIONS.map((t, i) => (
+    <section class="def-tradition" aria-labelledby={t.id}>
       {i > 0 && (
         <div class="drawer-intro-sep def-sep" aria-hidden="true">
           <span class="drawer-intro-sep-line"></span>
@@ -151,11 +202,14 @@ const EXPLORER: Record<string, Lien[]> = {
           <span class="drawer-intro-sep-line"></span>
         </div>
       )}
-      <h2 class="def-titre" id={g.id}>{g.titre}</h2>
-      {g.chapeau.map((c) => <p class="def-chapeau">{c}</p>)}
+      <h2 class="def-titre" id={t.id}>{t.titre}</h2>
+      <p class="def-chapeau">{t.chapeau}</p>
 
+      {t.groupes.map((g) => (
+      <>
+      {g.titre && <h3 class="def-sous" set:html={g.titre} />}
       <div class="acc-list">
-        {g.items.map((it) => (
+        {g.cartes.map(carte).map((it) => (
           <div class="acc-item">
             <button class="acc-toggle" aria-expanded="false" type="button">
               <span class="acc-name">{it.name}</span>
@@ -187,7 +241,9 @@ const EXPLORER: Record<string, Lien[]> = {
           </div>
         ))}
       </div>
-    </>
+      </>
+      ))}
+    </section>
   ))}
 
   <div class="drawer-intro-sep def-sep" aria-hidden="true">

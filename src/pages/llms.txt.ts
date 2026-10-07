@@ -75,7 +75,7 @@ LaPhilo.fr propose des frises chronologiques interactives couvrant ${philosophes
 - [Histoire des courants de pensée](${url('/histoire-des-courants/')}) : les grandes familles d'idées, par période
 - [Familles de pensée et grands débats](${url('/familles-de-pensee/')}) : les courants rangés par famille (filiations) et les positions rangées par grande question
 - [Les philosophes d'aujourd'hui](${url('/philosophes-d-aujourd-hui/')}) : les penseurs vivants, par sujet de travail et par région du monde
-- [Les philosophes anciens](${url('/histoire-des-philosophes/')}) : des présocratiques aux grandes figures du XXᵉ siècle
+- [L'histoire des philosophes](${url('/histoire-des-philosophes/')}) : des présocratiques à nos jours, dans sept grandes traditions (Occident, Orient ancien, Inde, Asie de l'Est, islam et pensée juive, Russie, Afrique et Amériques)
 - [Les frises](${url('/frises/')}) : toutes les frises chronologiques, par époque, pays, tradition, sujet ou courant
 
 ## Penseurs et courants du monde
