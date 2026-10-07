@@ -1,0 +1,76 @@
+/* Frises des courants (/courants/frise/…) : cartouches colorés sur la barre temporelle et titre du courant
+   (le bandeau coloré est dans courant-bandeau.css),
+   repris de l'ancien site (frise-courant-pensee-*.html). La couleur de chaque courant (--mc) vient de frise-engine.js. */
+
+/* ── Cartouche courant sur la frise ── */
+.nav-marker {
+  width: 155px;
+  height: 32px;
+  padding: 0 8px 0 12px;
+  justify-content: flex-start;
+  background: color-mix(in srgb, var(--mc, rgba(180,130,20,.5)) 22%, rgba(22,12,4,.88) 78%);
+  border-color: color-mix(in srgb, var(--mc, rgba(180,130,20,.4)) 60%, transparent);
+}
+.nav-marker::before {
+  background: color-mix(in srgb, var(--mc, rgba(180,130,20,.5)) 22%, rgba(22,12,4,.88) 78%);
+}
+.nav-marker .nav-name {
+  padding-left: 0;
+  font-size: .78rem;
+  font-weight: 700;
+  color: rgba(247,236,206,.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-marker.active .nav-name {
+  color: #fff;
+}
+/* Barre colorée à gauche du cartouche */
+.nav-marker::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 3px; bottom: 3px; width: 5px;
+  border-radius: 0 3px 3px 0;
+  background: var(--mc, rgba(180,130,20,.7));
+}
+/* Trait vertical vers l'axe */
+.nav-tick {
+  width: 2px !important;
+  background: color-mix(in srgb, var(--mc, rgba(180,130,20,.5)) 70%, transparent) !important;
+}
+/* Titre du courant dans le panneau de droite */
+.slide-headline {
+  font-size: clamp(1.4rem, 3vw, 2rem) !important;
+  font-weight: 700 !important;
+  color: color-mix(in srgb, var(--gold-light, #d4a843) 85%, white 15%) !important;
+  letter-spacing: .06em;
+  text-shadow: 0 2px 14px rgba(180,130,20,.4) !important;
+  border-bottom: 1px solid rgba(180,130,20,.2);
+  padding-bottom: .4rem;
+  margin-bottom: .5rem !important;
+}
+@media (max-width: 768px) {
+  .nav-marker {
+    width: 130px;
+    height: 26px;
+  }
+  .nav-marker .nav-name { font-size: .68rem; }
+  .slide-headline {
+    display: block !important;
+    font-size: clamp(1.1rem, 4vw, 1.4rem) !important;
+    margin-bottom: .3rem !important;
+  }
+  .slide-dates { display: block !important; }
+}
+@media (max-width: 480px) {
+  .nav-marker {
+    width: 108px;
+    height: 24px;
+  }
+  .nav-marker .nav-name { font-size: .60rem; }
+  .slide-headline {
+    display: block !important;
+    font-size: clamp(1rem, 4.5vw, 1.2rem) !important;
+  }
+}
