@@ -33,13 +33,13 @@
     { v: 'indien', fr: 'Inde & bouddhisme', grad: 'linear-gradient(180deg,#ff9933 33%,#f7f4ea 33% 66%,#138808 66%)' },
     { v: 'asie-est', fr: "Asie de l'Est", grad: 'linear-gradient(135deg,#de2910 50%,#f7f4ea 50%)' },
     { v: 'juif', fr: 'Pensée juive', grad: 'linear-gradient(180deg,#f7f4ea 50%,#2b5aa8 50%)' },
-    { v: 'indiens', fr: 'Indiens', grad: 'radial-gradient(circle,#000080 0 14%,transparent 16%),linear-gradient(180deg,#ff9933 33.3%,#f7f4ea 33.3% 66.6%,#138808 66.6%)' },
+    { v: 'indiens', fr: 'Monde indien & Tibet', grad: 'radial-gradient(circle,#000080 0 14%,transparent 16%),linear-gradient(180deg,#ff9933 33.3%,#f7f4ea 33.3% 66.6%,#138808 66.6%)' },
     { v: 'chinois', fr: 'Chinois', grad: 'radial-gradient(circle at 28% 30%,#ffde00 0 14%,transparent 16%),#de2910' },
     { v: 'coreen', fr: 'Coréens', grad: 'radial-gradient(circle,#cd2e3a 0 22%,#0047a0 22% 34%,#f7f4ea 36%)' },
     { v: 'japonais', fr: 'Japonais', grad: 'radial-gradient(circle,#bc002d 0 28%,#f7f4ea 30%)' },
     { v: 'afrique', fr: 'Afrique subsaharienne', grad: 'linear-gradient(180deg,#078930 33.3%,#fcdd09 33.3% 66.6%,#da121a 66.6%)' },
     { v: 'caraibes', fr: 'Caraïbes', grad: 'linear-gradient(135deg,#00209f 50%,#f7f4ea 50% 60%,#009739 60%)' },
-    { v: 'asie-se', fr: 'Asie du Sud-Est', grad: 'linear-gradient(180deg,#ce1126 50%,#f7f4ea 50%)' },
+    { v: 'asie-se', fr: 'Asie du Sud-Est & Pacifique', grad: 'linear-gradient(180deg,#ce1126 50%,#f7f4ea 50%)' },
     { v: 'persan-turc', fr: 'Monde persan & turc', grad: 'linear-gradient(180deg,#239f40 33.3%,#f7f4ea 33.3% 66.6%,#e30a17 66.6%)' },
     { v: 'arabe', fr: 'Monde arabe', grad: 'linear-gradient(90deg,#ce1126 0 24%,transparent 24%),linear-gradient(180deg,#1a1a1a 33.3%,#f7f4ea 33.3% 66.6%,#007a3d 66.6%)' },
   ];
@@ -53,7 +53,7 @@
   var TRADITION_RULES = {
     france: { ou: [{ nats: ['Française'] }, { noms: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'] }] },
     allemand: { nats: ['Allemande'] },
-    americain: { nats: ['Américaine'] },
+    americain: { nats: ['Américaine', 'Amérindienne'] },
     russe: { nats: ['Russe'] },
     britannique: { ou: [{ nats: ['Britannique', 'Canadienne', 'Australienne', 'Irlandaise', 'Néo-zélandaise'] }, { nats: ['Sud-Africaine'], groupe: 'occident' }] },
     italien: { nats: ['Italienne', 'Romaine'] },
@@ -61,7 +61,7 @@
     'germanophone': { nats: ['Allemande', 'Autrichienne', 'Suisse'], exclude: ['Jean Jacques ROUSSEAU', 'Charles BONNET', 'Charles SECRÉTAN', 'Jean PIAGET', 'Jean STAROBINSKI'] },
     'arabo-persan': { groupe: 'islam-juif', sansTrad: 'juive' }, /* Monde islamique */
     'africain': { ou: [{ groupe: 'sud' }, { trad: 'sud' }] }, /* Pensées du Sud : Afrique, Amérique latine, Caraïbes */
-    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'] },
+    'hispanique': { nats: ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine', 'Mésoaméricaine'] },
     'grec': { ou: [{ nats: ['Grecque', 'Byzantine', 'Arménienne', 'Géorgienne'] }, { nats: ['Égyptienne', 'Syrienne'], groupe: 'occident' }] },
     'indien': { ou: [{ groupe: 'inde' }, { trad: 'inde' }] }, /* Inde et monde bouddhiste */
     'asie-est': { ou: [{ groupe: 'asie-est' }, { trad: 'asie-est' }] },
@@ -71,7 +71,7 @@
     /* Colonne « Groupe » des xlsx (grande tradition de la Frise des penseurs du monde) */
     'orient-ancien': { groupe: 'orient-ancien' },
     /* Pays d'Asie (nationalité), en plus des grandes traditions */
-    'indiens': { nats: ['Indienne'] },
+    'indiens': { nats: ['Indienne', 'Pakistanaise', 'Sri-lankaise', 'Népalaise', 'Bangladaise', 'Bhoutanaise', 'Tibétaine'] },
     'chinois': { nats: ['Chinoise'] },
     'coreen': { nats: ['Coréenne'] },
     'japonais': { nats: ['Japonaise'] },
@@ -79,8 +79,8 @@
     'afrique': { nats: ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Nigériane', 'Béninoise', 'Togolaise', 'Ivoirienne', 'Malienne', 'Burkinabè', 'Guinéenne', 'Bissau-Guinéenne', 'Nigérienne', 'Congolaise', 'Gabonaise', 'Rwandaise', 'Burundaise', 'Éthiopienne', 'Érythréenne', 'Kényane', 'Tanzanienne', 'Ougandaise', 'Somalienne', 'Sud-Africaine', 'Zimbabwéenne', 'Zambienne', 'Mozambicaine', 'Angolaise', 'Malgache'] },
     /* Caraïbes : mêmes nationalités que la frise caraibes-toutes-epoques */
     'caraibes': { nats: ['Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Guyanaise', 'Cubaine', 'Dominicaine', 'Portoricaine', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Sainte-Lucienne', 'Bahamienne'] },
-    /* Asie du Sud-Est : mêmes nationalités que la frise asie-sud-est-toutes-epoques */
-    'asie-se': { nats: ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise'] },
+    /* Asie du Sud-Est et Pacifique : mêmes nationalités que la frise asie-sud-est-toutes-epoques */
+    'asie-se': { nats: ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise', 'Fidjienne', 'Samoane', 'Tongienne', 'Papouasienne'] },
     /* Monde persan & turc : mêmes nationalités que la frise monde-persan-turc-toutes-epoques */
     'persan-turc': { nats: ['Perse', 'Iranienne', 'Turque', 'Afghane', 'Ouzbèke', 'Tadjike', 'Turkmène', 'Kirghize', 'Kazakhe', 'Azerbaïdjanaise', 'Kurde'] },
     /* Monde arabe : mêmes règles que la frise monde-arabe-toutes-epoques (src/data/virtual-frises.ts) */
@@ -107,13 +107,13 @@
     'juif': { href: '/philosophes/frise/pensee-juive-toutes-epoques/', fr: "Voir la frise de la pensée juive" },
     'femme': { href: '/philosophes/frise/femmes-toutes-epoques/', fr: "Voir la frise des philosophes femmes" },
     'orient-ancien': { href: '/philosophes/frise/proche-orient-ancien-toutes-epoques/', fr: "Voir la frise du Proche-Orient ancien" },
-    'indiens': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes de l'Inde" },
+    'indiens': { href: '/philosophes/frise/indiens-toutes-epoques/', fr: "Voir la frise des philosophes du monde indien et du Tibet" },
     'chinois': { href: '/philosophes/frise/chinois-toutes-epoques/', fr: 'Voir la frise des philosophes chinois' },
     'coreen': { href: '/philosophes/frise/coreens-toutes-epoques/', fr: 'Voir la frise des philosophes coréens' },
     'japonais': { href: '/philosophes/frise/japonais-toutes-epoques/', fr: 'Voir la frise des philosophes japonais' },
     'afrique': { href: '/philosophes/frise/afrique-subsaharienne-toutes-epoques/', fr: "Voir la frise des philosophes d'Afrique subsaharienne" },
     'caraibes': { href: '/philosophes/frise/caraibes-toutes-epoques/', fr: 'Voir la frise des penseurs des Caraïbes' },
-    'asie-se': { href: '/philosophes/frise/asie-sud-est-toutes-epoques/', fr: "Voir la frise des penseurs d'Asie du Sud-Est" },
+    'asie-se': { href: '/philosophes/frise/asie-sud-est-toutes-epoques/', fr: "Voir la frise des penseurs d'Asie du Sud-Est et du Pacifique" },
     'persan-turc': { href: '/philosophes/frise/monde-persan-turc-toutes-epoques/', fr: 'Voir la frise des penseurs du monde persan et turc' },
     'arabe': { href: '/philosophes/frise/monde-arabe-toutes-epoques/', fr: 'Voir la frise des philosophes du monde arabe' },
   };

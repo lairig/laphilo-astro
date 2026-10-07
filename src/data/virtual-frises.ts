@@ -32,8 +32,8 @@ export const regionsContemporains: { slug: string; label: string; nats: string[]
 /* Nationalités d'Afrique subsaharienne (frise afrique-subsaharienne-toutes-epoques ; même liste dans search-full.js) */
 const NATS_AFRIQUE = ['Camerounaise', 'Sénégalaise', 'Ghanéenne', 'Nigériane', 'Béninoise', 'Togolaise', 'Ivoirienne', 'Malienne', 'Burkinabè', 'Guinéenne', 'Bissau-Guinéenne', 'Nigérienne', 'Congolaise', 'Gabonaise', 'Rwandaise', 'Burundaise', 'Éthiopienne', 'Érythréenne', 'Kényane', 'Tanzanienne', 'Ougandaise', 'Somalienne', 'Sud-Africaine', 'Zimbabwéenne', 'Zambienne', 'Mozambicaine', 'Angolaise', 'Malgache'];
 
-/* Nationalités d'Asie du Sud-Est (frise asie-sud-est-toutes-epoques ; même liste dans search-full.js) */
-const NATS_ASIE_SE = ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise'];
+/* Nationalités d'Asie du Sud-Est et du Pacifique (frise asie-sud-est-toutes-epoques ; même liste dans search-full.js) */
+const NATS_ASIE_SE = ['Indonésienne', 'Philippine', 'Malaisienne', 'Singapourienne', 'Thaïlandaise', 'Vietnamienne', 'Birmane', 'Cambodgienne', 'Laotienne', 'Bruneienne', 'Timoraise', 'Fidjienne', 'Samoane', 'Tongienne', 'Papouasienne'];
 
 /* Nationalités des Caraïbes (frise caraibes-toutes-epoques ; même liste dans search-full.js) */
 const NATS_CARAIBES = ['Haïtienne', 'Martiniquaise', 'Guadeloupéenne', 'Guyanaise', 'Cubaine', 'Dominicaine', 'Portoricaine', 'Jamaïcaine', 'Trinidadienne', 'Barbadienne', 'Guyanienne', 'Sainte-Lucienne', 'Bahamienne'];
@@ -61,7 +61,8 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'americains-toutes-epoques': {
     label: 'Philosophes américains — toutes époques',
-    match: (p) => p.nationalite === 'Américaine',
+    /* + les penseurs amérindiens (Black Elk, Vine Deloria Jr., Viola Cordova) */
+    match: (p) => ['Américaine', 'Amérindienne'].includes(p.nationalite ?? ''),
   },
   'russes-toutes-epoques': {
     label: 'Philosophes russes — toutes époques',
@@ -97,7 +98,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   'hispaniques-toutes-epoques': {
     label: 'Philosophes hispaniques — toutes époques',
-    match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine'].includes(p.nationalite ?? ''),
+    match: (p) => ['Espagnole', 'Argentine', 'Uruguayenne', 'Mexicaine', 'Portugaise', 'Vénézuélienne', 'Péruvienne', 'Brésilienne', 'Cubaine', 'Chilienne', 'Colombienne', 'Bolivienne', 'Équatorienne', 'Paraguayenne', 'Dominicaine', 'Portoricaine', 'Mésoaméricaine'].includes(p.nationalite ?? ''),
   },
   /* Colonne « Traditions » des xlsx (valeur « femme ») */
   'femmes-toutes-epoques': {
@@ -157,8 +158,9 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   /* Pays d'Asie (nationalité) : en plus des grandes traditions Inde et Asie de l'Est */
   'indiens-toutes-epoques': {
-    label: "Philosophes de l'Inde — toutes époques",
-    match: (p) => p.nationalite === 'Indienne',
+    label: "Philosophes du monde indien et du Tibet — toutes époques",
+    /* Inde, Pakistan, Sri Lanka, Népal, Bangladesh, Tibet (même liste dans search-full.js) */
+    match: (p) => ['Indienne', 'Pakistanaise', 'Sri-lankaise', 'Népalaise', 'Bangladaise', 'Bhoutanaise', 'Tibétaine'].includes(p.nationalite ?? ''),
   },
   'chinois-toutes-epoques': {
     label: 'Philosophes chinois — toutes époques',
@@ -186,7 +188,7 @@ export const virtualPhilosopheFrises: Record<string, VirtualFrise> = {
   },
   /* Asie du Sud-Est : par nationalité, quelle que soit la tradition (bouddhisme, islam, pensées du Sud, Vietnam) */
   'asie-sud-est-toutes-epoques': {
-    label: "Philosophes d'Asie du Sud-Est — toutes époques",
+    label: "Philosophes d'Asie du Sud-Est et du Pacifique — toutes époques",
     match: (p) => NATS_ASIE_SE.includes(p.nationalite ?? ''),
   },
   /* Caraïbes : par nationalité (Antilles francophones, hispanophones et anglophones) */
