@@ -188,9 +188,6 @@ const EXPLORER: Record<string, Lien[]> = {
     <span class="drawer-intro-sep-line"></span>
   </div>
 
-  <nav class="def-sommaire def-sommaire--toujours" aria-label="Les sept traditions">
-    {TRADITIONS.map((t) => <a href={`#${t.id}`}>{t.nav}</a>)}
-  </nav>
   <p class="def-chapeau">Ouvrez une période ou une tradition pour sa vidéo et ses grandes figures, puis retrouvez-les sur les frises chronologiques.</p>
 
   {TRADITIONS.map((t, i) => (

@@ -161,8 +161,6 @@
   color: #d4a843; border: 1px solid rgba(212, 168, 67, .4); background: rgba(30, 18, 8, .6);
 }
 .def-sommaire a:hover, .def-sommaire a:focus-visible { background: rgba(180, 130, 20, .2); border-color: #d4a843; color: #f7ecce; outline: none; }
-/* /histoire-des-courants/ : le sommaire des sept traditions reste visible sur ordinateur */
-@media (min-width: 900px) { .def-sommaire.def-sommaire--toujours { display: flex; } }
 
 /* ── /histoire-des-courants/ : traditions, époques de l'Occident, lien vers la frise ── */
 .def-tradition { scroll-margin-top: 1rem; }
