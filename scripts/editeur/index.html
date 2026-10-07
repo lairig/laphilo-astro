@@ -192,17 +192,17 @@
         <option value="1">Un seul philosophe</option>
         <option value="2">Deux philosophes au plus</option>
       </select>
-      <select id="f-texte" title="Longueur de référence d'un texte : 1 600 caractères">
+      <select id="f-texte" title="Longueur de référence d'un texte : 1 500 caractères (± 8 %, soit 1 380 à 1 620)">
         <option value="">Tous les textes</option>
         <option value="enrichir">À enrichir (court ou sans lien)</option>
         <option value="court">Texte court (moins de 1 200 car.)</option>
-        <option value="sous">Sous la référence (moins de 1 600 car.)</option>
+        <option value="sous">Sous la référence (moins de 1 380 car.)</option>
         <option value="sans-lien">Sans lien dans le texte</option>
       </select>
       <div class="cases">
         <label class="seulement-philo" style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
-        <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 600 caractères, du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 600</label>
+        <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 380 caractères (1 500 − 8 %), du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 380</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes sans aucun lien (le lien Wikipédia du nom, en tête, ne compte pas)"><input type="checkbox" id="f-sans-lien"> Sans lien dans le texte</label>
       </div>
       <span id="compte"></span>
@@ -282,11 +282,11 @@ try {
 } catch (e) {}
 
 /* ── Longueur des textes ───────────────────────────────── */
-const TEXTE_REF = 1600, TEXTE_COURT = 1200;
+const TEXTE_REF = 1500, TEXTE_MIN = 1380, TEXTE_COURT = 1200;  // référence 1 500 ± 8 %
 const TEXTE_FILTRES = {
   enrichir: (x) => x.lg < TEXTE_COURT || !x.liens,
   court: (x) => x.lg < TEXTE_COURT,
-  sous: (x) => x.lg < TEXTE_REF,
+  sous: (x) => x.lg < TEXTE_MIN,
   'sans-lien': (x) => !x.liens,
 };
 /* même calcul que mesure_texte() dans serveur.py : texte lu sans balises ni audio ;
@@ -319,7 +319,7 @@ function afficherListe() {
   const sl = $('#f-sans-lien').checked;
   const fp = COURANTS() ? $('#f-phi').value : '';
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
-    && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_REF)
+    && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_MIN)
     && (!sl || !x.liens) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
   // filtre de texte : du plus court (le pire) au plus long
   L.sort(ft || fc ? (a, b) => a.lg - b.lg : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
@@ -331,7 +331,7 @@ function afficherListe() {
       ${x.courant ? `<span class="pastille ${x.nb_phi === 0 ? 'sans' : x.nb_phi === 1 ? 'moyen' : ''}" title="Philosophes rattachés à ce courant">${x.nb_phi} phi</span>` : ''}
       ${!x.courant && !x.image ? '<span class="pastille sans" title="Pas d’image">img</span>' : ''}
       ${!x.video && !x.photo ? '<span class="pastille sans" title="Ni vidéo ni grande photo">vid</span>' : ''}
-      ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_REF ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
+      ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_MIN ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
       ${!x.liens ? '<span class="pastille sans" title="Aucun lien dans le texte (hors Wikipédia du nom)">lien</span>' : ''}
       <a class="ouvrir" href="${apercu(x.slug)}" target="_blank" rel="noopener" title="Voir la page sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
@@ -775,12 +775,12 @@ function brancherTexte(d) {
   };
   /* jauge : longueur du texte par rapport à la référence et nombre de liens */
   const mesurer = () => {
-    const m = mesureTexte(corps), etat = m.lg < TEXTE_COURT ? 'court' : m.lg < TEXTE_REF ? 'proche' : 'ok';
+    const m = mesureTexte(corps), etat = m.lg < TEXTE_COURT ? 'court' : m.lg < TEXTE_MIN ? 'proche' : 'ok';
     const boite = $('#mesure-texte'); boite.dataset.etat = etat;
     boite.querySelector('.jauge span').style.width = Math.min(100, (m.lg / TEXTE_REF) * 100) + '%';
     boite.querySelector('.mesure-txt').innerHTML =
       `<b>${m.lg.toLocaleString('fr-FR')}</b> caractères / ${TEXTE_REF.toLocaleString('fr-FR')} de référence`
-      + (m.lg < TEXTE_REF ? ` — il manque environ ${(TEXTE_REF - m.lg).toLocaleString('fr-FR')} caractères` : ' ✓')
+      + (m.lg < TEXTE_MIN ? ` — il manque environ ${(TEXTE_REF - m.lg).toLocaleString('fr-FR')} caractères` : ' ✓')
       + ` · <span class="${m.liens ? '' : 'manque'}">${m.liens ? m.liens + ' lien' + (m.liens > 1 ? 's' : '') + ' dans le texte' : 'aucun lien dans le texte (hors Wikipédia du nom)'}</span>`;
   };
   mesurer();
