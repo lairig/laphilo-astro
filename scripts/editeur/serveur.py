@@ -8,8 +8,8 @@ leurs fiches.
 Lancement : double-clic sur « Editeur des fiches.bat » à la racine de laphilo-astro
 (ou : python scripts/editeur/serveur.py). La page s'ouvre dans le navigateur.
 
-- Rien n'est publié : l'éditeur ne fait qu'écrire dans les xlsx (et les images
-  dans public/pho/). On publie ensuite comme d'habitude.
+- L'éditeur écrit dans les xlsx (et les images dans public/pho/) ; rien n'est mis
+  en ligne avant le bouton « Publier » (publier.py).
 - L'écriture passe par scripts/xlsx_cellules.set_cells : seules les cellules
   modifiées changent, la mise en forme du classeur est conservée.
 - Une copie du xlsx est faite avant chaque enregistrement dans
@@ -49,7 +49,7 @@ SAUVEGARDES = os.path.join(os.path.dirname(BASE), 'groupes', 'sauvegarde', 'edit
 PORT = 8765
 # Version du code : un éditeur relancé après une mise à jour remplace l'ancien encore ouvert
 def version_fichiers():
-    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py')))
+    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py', 'publier.py')))
 
 
 VERSION = version_fichiers()
@@ -76,6 +76,7 @@ sys.path.insert(0, os.path.join(BASE, 'scripts'))
 from xlsx_cellules import set_cells, first_sheet_path, col_num  # noqa: E402
 sys.path.insert(0, ICI)
 import liens  # noqa: E402  contrôle des liens morts
+import publier  # noqa: E402  bouton « Publier »
 
 _spec = importlib.util.spec_from_file_location('build_data', os.path.join(BASE, 'scripts', 'build-data.py'))
 bd = importlib.util.module_from_spec(_spec)
@@ -958,6 +959,8 @@ class Gestion(BaseHTTPRequestHandler):
                 return self.envoyer(200, infos_lien(q.get('url', '')))
             if u.path == '/api/youtube':
                 return self.envoyer(200, infos_youtube(q.get('url', '')))
+            if u.path == '/api/publication':  # état de la publication en cours (suivi des étapes)
+                return self.envoyer(200, publier.suivi_public())
             if u.path == '/api/liens-morts':  # fiches en défaut + état du contrôle complet
                 return self.envoyer(200, liste_liens_morts() if q.get('fiches') else liens.resume())
             return self.envoyer(404, {'erreur': 'introuvable'})
@@ -1014,6 +1017,10 @@ class Gestion(BaseHTTPRequestHandler):
                 self.envoyer(200, {'ok': True})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return
+            if u.path == '/api/publication-preparer':  # build-data + ce qui partira
+                return self.envoyer(200, publier.preparer())
+            if u.path == '/api/publier':
+                return self.envoyer(200, {'ok': publier.publier(d.get('message', ''), d.get('relance', False))})
             if u.path == '/api/liens-controle':  # contrôle complet, en arrière-plan
                 return self.envoyer(200, {'ok': liens.lancer_controle(toutes_les_fiches), **liens.resume()})
             if u.path == '/api/liens-fiche':  # après un enregistrement : adresses nouvelles ou en défaut

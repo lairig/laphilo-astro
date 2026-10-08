@@ -15,6 +15,8 @@
   header { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: #120a04; border-bottom: 1px solid #5c4318; }
   header h1 { margin: 0; font-size: 1.1rem; letter-spacing: .08em; color: var(--or); font-weight: normal; text-transform: uppercase; }
   header .espace { flex: 1; }
+  header h1, header button, header #etat-global { white-space: nowrap; }
+  header button { padding: .3rem .6rem; font-size: .92rem; }
   #modes { display: flex; border: 1px solid var(--or); border-radius: 5px; overflow: hidden; }
   #modes button { border: 0; border-radius: 0; background: transparent; padding: .3rem .8rem; }
   #modes button + button { border-left: 1px solid var(--or); }
@@ -108,6 +110,16 @@
   .ligne-defaut { display: grid; grid-template-columns: 1fr auto; gap: .2rem .7rem; padding: .4rem 0; border-bottom: 1px solid #d8c48c; cursor: pointer; }
   .ligne-defaut:hover { background: #f3e2b0; }
   .ligne-defaut small { grid-column: 1 / -1; color: #6b4a22; }
+  .etapes { list-style: none; margin: .6rem 0; padding: 0; }
+  .etapes li { display: flex; gap: .6rem; align-items: center; padding: .3rem 0; font-size: .98rem; }
+  .etapes .ic { width: 1.4rem; text-align: center; font-weight: bold; }
+  .etapes [data-e=ok] .ic { color: #2e7d32; } .etapes [data-e=echec] .ic { color: #b3261e; }
+  .etapes [data-e=en_cours] { font-weight: 600; } .etapes [data-e=''] { color: #8a7350; }
+  .etapes [data-e=en_cours] .ic { animation: tourne 1.2s linear infinite; display: inline-block; }
+  @keyframes tourne { to { transform: rotate(360deg); } }
+  .pub-erreur { white-space: pre-wrap; font-family: Consolas, monospace; font-size: .8rem; background: #fff1ee; border: 1px solid #b3261e; border-radius: 4px; padding: .6rem; max-height: 30vh; overflow: auto; color: #8e1d12; }
+  .pub-liste { margin: .2rem 0 .6rem; font-size: .9rem; }
+  #fenetre textarea { min-height: 3.5rem; }
   #fenetre .pastille.sans { color: #fff; background: #b3261e; }
   #fenetre .pastille.moyen { color: #fff; background: #c98a12; }
 
@@ -203,6 +215,7 @@
   <button id="btn-images"title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
   <button id="btn-domaines" title="Sites qui refusent de s'afficher dans le panneau latéral : ouverts en petite fenêtre">Sites en fenêtre</button>
   <button id="btn-build" title="Relance build-data : régénère les données du site et liste les erreurs de saisie">Vérifier les données</button>
+  <button id="btn-publier" class="principal" title="Mettre en ligne sur laphilo.fr les fiches et images modifiées">Publier</button>
 </header>
 <pre id="rapport"></pre>
 <main>
@@ -242,7 +255,7 @@
     <div id="accueil">
       <p>Choisissez une fiche dans la liste à gauche.</p>
       <p>Astuce : cochez <b>Sans image</b> ou <b>Sans vidéo</b> pour voir ce qu'il reste à remplir.</p>
-      <p>Les modifications sont écrites directement dans les fichiers xlsx (une copie de sauvegarde est faite à chaque fois). Rien n'est publié : on publie ensuite comme d'habitude.</p>
+      <p>Les modifications sont écrites directement dans les fichiers xlsx (une copie de sauvegarde est faite à chaque fois). Rien n'est mis en ligne tant que vous n'avez pas cliqué sur <b>Publier</b> (en haut à droite).</p>
     </div>
     <div id="formulaire" hidden></div>
    </div>
@@ -1273,6 +1286,76 @@ $('#btn-build').onclick = async () => {
 };
 $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
 
+/* ── Publier (serveur publier.py) ──────────────────────── */
+let suiviPub = null;
+const ICONES_ETAPE = { '': '○', en_cours: '↻', ok: '✓', echec: '✗', saute: '–' };
+function dessinerSuivi(s) {
+  const fini = !s.en_cours && (s.fin || s.erreur);
+  $('#fenetre-corps').innerHTML = `<h2>Publication sur laphilo.fr</h2>
+    <ul class="etapes">${s.liste.map((e) => `<li data-e="${e.etat}"><span class="ic">${ICONES_ETAPE[e.etat] ?? '○'}</span>${esc(e.titre)}</li>`).join('')}</ul>
+    ${s.detail ? `<p class="${s.fin ? 'ok' : 'aide'}" style="${s.fin ? 'color:#2e7d32;font-weight:600' : ''}">${esc(s.detail)}</p>` : ''}
+    ${s.fin ? `<p><a class="bouton-lien" style="color:var(--encre);border-color:#b8923c" href="https://laphilo.fr/" target="_blank" rel="noopener">↗ Voir laphilo.fr</a></p>` : ''}
+    ${s.erreur ? `<div class="pub-erreur">${esc(s.erreur)}</div>` : ''}
+    ${s.erreur && /Cloudflare|20 minutes/.test(s.erreur) ? '<p><button type="button" class="principal" id="btn-relance">Relancer la construction</button></p>' : ''}
+    ${s.en_cours ? '<p class="aide">Vous pouvez fermer cette fenêtre et continuer à travailler : la publication continue.</p>' : ''}
+    ${fini ? '<p><button type="button" id="btn-pub-nouvelle">Nouvelle publication…</button></p>' : ''}`;
+  $('#btn-relance')?.addEventListener('click', async () => { await api('/api/publier', { relance: true }); suivrePublication(); });
+  $('#btn-pub-nouvelle')?.addEventListener('click', preparerPublication);
+  $('#btn-publier').textContent = s.en_cours ? 'Publication…' : 'Publier';
+}
+function suivrePublication() {
+  clearInterval(suiviPub);
+  const tour = async () => {
+    let s; try { s = await api('/api/publication'); } catch { return; }
+    if (fenetre.open && $('#fenetre-corps .etapes')) dessinerSuivi(s);
+    $('#btn-publier').textContent = s.en_cours ? 'Publication…' : 'Publier';
+    if (!s.en_cours) { clearInterval(suiviPub); suiviPub = null; if (s.fin) chargerListe(); }
+  };
+  if (fenetre.open) $('#fenetre-corps').innerHTML = '<h2>Publication sur laphilo.fr</h2><ul class="etapes"></ul>';
+  tour(); suiviPub = setInterval(tour, 2000);
+}
+async function preparerPublication() {
+  msgFenetre('');
+  $('#fenetre-corps').innerHTML = '<h2>Publier</h2><p>Préparation : vérification des données et de ce qui a changé…</p>';
+  let r;
+  try { r = await api('/api/publication-preparer', {}); }
+  catch (e) {
+    $('#fenetre-corps').innerHTML = e.message === 'introuvable'
+      ? '<h2>Publier</h2><p><b>L’éditeur a été mis à jour pendant qu’il tournait.</b> Fermez sa fenêtre noire, puis relancez-le avec l’icône « Éditeur LaPhilo ».</p>'
+      : `<h2>Publier</h2><div class="pub-erreur">${esc(e.message)}</div>`;
+    return;
+  }
+  if (r.suivi?.en_cours) { suivrePublication(); return; }
+  const F = r.fiches, n = F.ajoutees.length + F.modifiees.length + F.retirees.length;
+  const liste = (titre, L) => (L.length ? `<p class="pub-liste"><b>${titre} (${L.length})</b> : ${L.map(esc).join(', ')}</p>` : '');
+  const rien = !r.contenu.length && !r.en_avance;
+  const nonEnr = modifications();
+  $('#fenetre-corps').innerHTML = `<h2>Publier sur laphilo.fr</h2>
+    ${r.alertes ? `<p style="color:#b3261e"><b>⚠ ${r.alertes} point(s) à relire</b> avant de pouvoir publier :</p><div class="pub-erreur">${esc(r.resume)}</div>` : ''}
+    ${nonEnr ? '<p style="color:#b3261e"><b>⚠ La fiche ouverte a des modifications non enregistrées.</b> Enregistrez-les (ou annulez-les) d’abord.</p>' : ''}
+    ${rien ? '<p><b>Rien à publier</b> : aucune fiche ni image modifiée depuis la dernière publication.</p>'
+      : `<p>Ce qui part :</p>
+        ${liste('Nouvelles fiches', F.ajoutees)}${liste('Fiches modifiées', F.modifiees)}${liste('Fiches retirées', F.retirees)}
+        ${liste('Images', r.images)}
+        ${!n && !r.images.length ? '<p class="pub-liste">Réglages et fichiers de données (aucune fiche changée).</p>' : ''}
+        <label style="margin-top:.6rem">Description de la publication (pour l’historique)<textarea id="pub-message">${esc(r.message)}</textarea></label>`}
+    ${r.autres.length ? `<details style="margin-top:.6rem"><summary class="aide" style="cursor:pointer">${r.autres.length} autre(s) fichier(s) modifié(s), non publiés par ce bouton (code du site : c’est Claude qui les publie)</summary>
+      <p class="aide">${r.autres.map(esc).join('<br>')}</p></details>` : ''}
+    ${rien ? '' : `<p style="margin-top:.8rem"><button type="button" class="principal" id="btn-pub-go" ${r.alertes || nonEnr ? 'disabled' : ''}>Publier sur laphilo.fr</button></p>
+      <p class="aide">Étapes : vérification des données, construction du site (1 min), envoi sur GitHub, mise en ligne par Cloudflare (2 à 5 min), Bing prévenu.</p>`}`;
+  $('#btn-pub-go')?.addEventListener('click', async () => {
+    if (!confirm('Mettre en ligne ces changements sur laphilo.fr ?')) return;
+    const ok = (await api('/api/publier', { message: $('#pub-message').value })).ok;
+    if (!ok) { msgFenetre('Une publication est déjà en cours.', 'aide err'); }
+    suivrePublication();
+  });
+}
+$('#btn-publier').onclick = async () => {
+  fenetre.showModal();
+  const s = await api('/api/publication').catch(() => null);
+  if (s && s.en_cours) suivrePublication(); else preparerPublication();
+};
+
 /* ── Démarrage ─────────────────────────────────────────── */
 (async () => {
   CODES = await api('/api/codes');
@@ -1290,6 +1373,7 @@ $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
   majNbImages(); majNbLiens();
+  api('/api/publication').then((s) => { if (s.en_cours) suivrePublication(); }).catch(() => {});
   $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
 </script>
