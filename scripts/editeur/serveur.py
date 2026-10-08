@@ -48,7 +48,29 @@ PHOTO = os.path.join(BASE, 'public', 'photo')  # grandes photos (colonne Image_m
 SAUVEGARDES = os.path.join(os.path.dirname(BASE), 'groupes', 'sauvegarde', 'editeur')
 PORT = 8765
 # Version du code : un éditeur relancé après une mise à jour remplace l'ancien encore ouvert
-VERSION = str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py')))
+def version_fichiers():
+    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py')))
+
+
+VERSION = version_fichiers()
+_relance = threading.Event()
+
+
+def relancer_si_mis_a_jour():
+    """Code de l'éditeur modifié depuis le lancement : un nouvel éditeur démarre (dans sa propre
+    fenêtre noire) et remplace celui-ci (il lui demande de s'arrêter). True si la relance est lancée."""
+    if version_fichiers() == VERSION:
+        return False
+    if not _relance.is_set():
+        _relance.set()
+        args = [sys.executable, os.path.abspath(__file__), '--sans-navigateur'] + (['--port', str(PORT)] if PORT != 8765 else [])
+        subprocess.Popen(args, cwd=BASE, creationflags=getattr(subprocess, 'CREATE_NEW_CONSOLE', 0))
+    return True
+
+
+PAGE_RELANCE = '''<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Mise à jour de l'éditeur…</title>
+<meta http-equiv="refresh" content="4"><style>body{margin:0;height:100vh;display:grid;place-items:center;background:#1a0f07;color:#f6ecd0;font-family:Georgia,serif}</style></head>
+<body><p>L'éditeur a été mis à jour : redémarrage… (la page se recharge toute seule)</p></body></html>'''
 
 sys.path.insert(0, os.path.join(BASE, 'scripts'))
 from xlsx_cellules import set_cells, first_sheet_path, col_num  # noqa: E402
@@ -896,6 +918,8 @@ class Gestion(BaseHTTPRequestHandler):
         q = dict(urllib.parse.parse_qsl(u.query))
         try:
             if u.path in ('/', '/index.html'):
+                if relancer_si_mis_a_jour():
+                    return self.envoyer(200, PAGE_RELANCE.encode('utf-8'), 'text/html; charset=utf-8')
                 return self.envoyer(200, open(os.path.join(ICI, 'index.html'), 'rb').read(), 'text/html; charset=utf-8')
             if u.path == '/favicon.ico':  # icône de la fenêtre et de la barre des tâches
                 return self.envoyer(200, open(os.path.join(ICI, 'editeur.ico'), 'rb').read(), 'image/x-icon')
@@ -1031,8 +1055,20 @@ if __name__ == '__main__':
     if '--port' in sys.argv:  # pour un essai à côté d'un éditeur déjà ouvert
         PORT = int(sys.argv[sys.argv.index('--port') + 1])
     adresse = f'http://127.0.0.1:{PORT}/'
+    class Serveur(ThreadingHTTPServer):
+        # Sous Windows, SO_REUSEADDR laisse un second éditeur ouvrir le même port sans erreur :
+        # l'ancien n'était alors jamais remplacé et continuait à répondre avec son ancien code.
+        allow_reuse_address = False
+        allow_reuse_port = False
+
+        def server_bind(self):
+            import socket
+            if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+            super().server_bind()
+
     def demarrer():
-        return ThreadingHTTPServer(('127.0.0.1', PORT), Gestion)
+        return Serveur(('127.0.0.1', PORT), Gestion)
     try:
         serveur = demarrer()
     except OSError:

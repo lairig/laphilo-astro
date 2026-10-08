@@ -1092,7 +1092,16 @@ $('#btn-liens').onclick = async () => {
   msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Lecture…</p>'; fenetre.showModal();
   const dessiner = async () => {
     if (!fenetre.open) { clearInterval(suiviControle); suiviControle = null; return; }
-    const r = await api('/api/liens-morts?fiches=1'), p = r.progression;
+    let r;
+    try { r = await api('/api/liens-morts?fiches=1'); }
+    catch (e) {
+      clearInterval(suiviControle); suiviControle = null;
+      $('#fenetre-corps').innerHTML = e.message === 'introuvable'
+        ? '<h2>Liens morts</h2><p><b>L’éditeur a été mis à jour pendant qu’il tournait.</b></p><p>Fermez sa fenêtre noire (ou la fenêtre de l’éditeur), puis relancez-le avec l’icône « Éditeur LaPhilo ».</p>'
+        : `<h2>Liens morts</h2><p class="err" style="color:#b3261e">⚠ ${esc(e.message)}</p>`;
+      return;
+    }
+    const p = r.progression;
     const fiches = r.fiches;
     $('#fenetre-corps').innerHTML = `<h2>Liens morts</h2>
       <p class="aide">Le contrôle vérifie toutes les adresses des textes et toutes les vidéos principales, philosophes et courants (${r.total ? r.total.toLocaleString('fr-FR') + ' adresses' : 'jamais fait'}).
