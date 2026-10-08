@@ -511,6 +511,33 @@ def chaines_youtube(fiches):
         json.dump(dict(sorted(cache.items())), fh, ensure_ascii=False, indent=1)
 
 
+def dates_modif(philosophes, courants):
+    """Tient à jour src/data/dates-modif.json : pour chaque fiche, une empreinte
+    de son contenu et la date du jour où elle a changé pour la dernière fois.
+    Le sitemap en tire le <lastmod> des pages /philosophes/… et /courants/…,
+    et scripts/indexnow.py la liste des pages à signaler à Bing."""
+    import datetime
+    import hashlib
+    chemin = os.path.join(DATA_DIR, 'dates-modif.json')
+    try:
+        ancien = json.load(open(chemin, encoding='utf-8'))
+    except (OSError, ValueError):
+        ancien = {}
+    aujourdhui = datetime.date.today().isoformat()
+    nouveau = {}
+    for rubrique, fiches in (('philosophes', philosophes), ('courants', courants)):
+        for e in fiches:
+            contenu = {k: v for k, v in e.items() if k not in ('_fichier', '_id', 'frise_label')}
+            h = hashlib.sha1(json.dumps(contenu, ensure_ascii=False, sort_keys=True).encode('utf-8')).hexdigest()[:10]
+            cle = f"{rubrique}/{e['_id']}"
+            avant = ancien.get(cle)
+            nouveau[cle] = avant if avant and avant['h'] == h else {'h': h, 'd': aujourdhui}
+    changees = sum(1 for k, v in nouveau.items() if v['d'] == aujourdhui and ancien.get(k) != v)
+    with open(chemin, 'w', encoding='utf-8') as fh:
+        json.dump(dict(sorted(nouveau.items())), fh, ensure_ascii=False, indent=0)
+    print(f'\n  Dates de modification : {changees} fiche(s) modifiée(s) ou nouvelle(s) aujourd\'hui')
+
+
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     print('\n=== Génération des données Astro depuis les xlsx ===\n')
@@ -536,3 +563,4 @@ if __name__ == '__main__':
         print(f'  - {a}')
 
     chaines_youtube(DERNIERES.get('philosophes.json', []) + DERNIERES.get('courants.json', []))
+    dates_modif(DERNIERES.get('philosophes.json', []), DERNIERES.get('courants.json', []))
