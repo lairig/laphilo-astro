@@ -28,6 +28,8 @@ scripts/rapports-seo/
 # résultat du contrôle des liens morts de l'éditeur (local)
 scripts/editeur/liens-etat.json
 scripts/editeur/liens-etat.json.tmp
+scripts/editeur/dates-etat.json
+scripts/editeur/dates-etat.json.tmp
 __pycache__/
 
 # copies de sauvegarde de scripts/xlsx_cellules.py

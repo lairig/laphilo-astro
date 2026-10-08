@@ -49,7 +49,7 @@ SAUVEGARDES = os.path.join(os.path.dirname(BASE), 'groupes', 'sauvegarde', 'edit
 PORT = 8765
 # Version du code : un éditeur relancé après une mise à jour remplace l'ancien encore ouvert
 def version_fichiers():
-    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py', 'publier.py')))
+    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py', 'publier.py', 'dates.py')))
 
 
 VERSION = version_fichiers()
@@ -77,6 +77,7 @@ from xlsx_cellules import set_cells, first_sheet_path, col_num  # noqa: E402
 sys.path.insert(0, ICI)
 import liens  # noqa: E402  contrôle des liens morts
 import publier  # noqa: E402  bouton « Publier »
+import dates  # noqa: E402  contrôle des dates par Wikidata (philosophes vivants décédés…)
 
 _spec = importlib.util.spec_from_file_location('build_data', os.path.join(BASE, 'scripts', 'build-data.py'))
 bd = importlib.util.module_from_spec(_spec)
@@ -173,6 +174,142 @@ def toutes_les_fiches():
     return out
 
 
+def anomalies_ligne(c, v):
+    """Écarts de dates avec Wikidata (dernier contrôle « Dates ») d'une ligne de philosophe."""
+    nom = valeur(c, v, 'nom')
+    return dates.anomalies(bd.slugify(str(nom)), bd.to_int(valeur(c, v, 'annee_naissance')),
+                           bd.to_int(valeur(c, v, 'annee_deces')), valeur(c, v, 'dates_affichage')) if nom else []
+
+
+def philosophes_slug_texte():
+    out = []
+    for f in bd.PHILOSOPHE_FICHIERS:
+        c = classeur(f)
+        for v in c['lignes'].values():
+            nom = valeur(c, v, 'nom')
+            if nom:
+                out.append((bd.slugify(str(nom)), valeur(c, v, 'texte_html')))
+    return out
+
+
+def liste_dates():
+    """Fiches de philosophes dont les dates diffèrent de Wikidata, décédés d'abord."""
+    out, sans = [], []
+    etat_sans = dates.etat().get('sans', {})
+    for f in bd.PHILOSOPHE_FICHIERS:
+        c = classeur(f)
+        for r, v in c['lignes'].items():
+            nom = valeur(c, v, 'nom')
+            if not nom:
+                continue
+            a = anomalies_ligne(c, v)
+            if a:
+                out.append({'f': f, 'l': r, 'nom': str(nom), 'dates': str(valeur(c, v, 'dates_affichage') or ''), 'anomalies': a})
+            raison = etat_sans.get(bd.slugify(str(nom)))
+            if raison:
+                sans.append({'f': f, 'l': r, 'nom': str(nom), 'raison': raison})
+    out.sort(key=lambda x: (not any(a['type'] == 'decede' for a in x['anomalies']), bd.normalize_header(x['nom'])))
+    return {**dates.resume(), 'fiches': out, 'non_comparees': sans}
+
+
+# ── Déplacer une fiche vers un autre fichier (philosophe décédé : fichier « actif » -> historique) ──
+def cle_entete(h):
+    return bd.normalize_header(h) if h else ''
+
+
+def retirer_ligne(p, n):
+    """Supprime la ligne n et remonte les suivantes (cellules, liens hypertexte) sans réécrire le classeur."""
+    tmp = p + '.tmp'
+    with zipfile.ZipFile(p) as zi:
+        feuille = first_sheet_path(zi)
+        xml = zi.read(feuille).decode('utf-8')
+        m = re.search(r'<row [^>]*?\br="%d"[^>]*?(/>|>.*?</row>)' % n, xml, re.S)
+        if not m:
+            raise ValueError(f'ligne {n} introuvable')
+        xml = xml[:m.start()] + xml[m.end():]
+        xml = re.sub(r'<hyperlink [^>]*?\bref="[A-Z]+%d"[^>]*/>' % n, '', xml)
+        xml = re.sub(r'<hyperlinks>\s*</hyperlinks>', '', xml)
+
+        def row(mm):
+            r = int(mm.group(2))
+            return mm.group(1) + str(r - 1 if r > n else r) + mm.group(3)
+        xml = re.sub(r'(<row [^>]*?\br=")(\d+)(")', row, xml)
+        xml = re.sub(r'(<c r="[A-Z]+)(\d+)(")', row, xml)
+        xml = re.sub(r'(<hyperlink [^>]*?\bref="[A-Z]+)(\d+)(")', row, xml)
+        with zipfile.ZipFile(tmp, 'w') as zo:
+            for it in zi.infolist():
+                zo.writestr(it, xml.encode('utf-8') if it.filename == feuille else zi.read(it.filename))
+    shutil.move(tmp, p)
+
+
+def fichier_historique_propose(f, l):
+    """Fichier conseillé pour un philosophe d'un fichier « actif » qui vient de mourir."""
+    if f == 'frise-philosophes-france-actif':
+        return 'frise-philosophes-france'
+    c = classeur(f)
+    v = c['lignes'][l]
+    nat = bd.normalize_header(valeur(c, v, 'nationalite') or '')
+    groupe = valeur(c, v, 'groupe') or ''
+    if any(x in nat for x in ('allemand', 'autrichien')):
+        return 'frise-philosophes-allemands'
+    if any(x in nat for x in ('russe', 'ukrainien', 'polonais', 'tcheque', 'hongrois', 'roumain', 'bulgare', 'serbe')):
+        return 'frise-philosophes-russes'
+    if any(x in nat for x in ('americain', 'canadien', 'bresil', 'argentin', 'mexicain', 'chilien', 'peruvien',
+                              'colombien', 'cubain', 'venezuel', 'uruguay', 'haitien', 'martiniquais')):
+        return 'frise-philosophes-americains'
+    if groupe and groupe not in ('occident', 'russe'):
+        return 'frise-philosophes-orientaux'
+    return 'frise-philosophes-modernes'
+
+
+def deplacer_fiche(f, l, cible, deces=None):
+    """Déplace la fiche vers le fichier cible (fin du fichier, mise en forme de la dernière fiche, puis rangée
+    par année), en inscrivant l'année de décès si elle est donnée. Renvoie la ligne dans le fichier cible."""
+    if f not in bd.PHILOSOPHE_FICHIERS or cible not in bd.PHILOSOPHE_FICHIERS or f == cible:
+        raise ValueError('Fichier de destination invalide')
+    ps, pc = chemin(f), chemin(cible)
+    c = classeur(f)
+    if l not in c['lignes']:
+        raise ValueError('Ligne introuvable')
+    v = c['lignes'][l]
+    valeurs = {cle_entete(h): v[i] for i, h in enumerate(c['entetes']) if h}
+    n = bd.to_int(valeurs.get('annee_naissance'))
+    m = bd.to_int(deces) if str(deces or '').strip() else None
+    if m is not None:
+        valeurs['annee_deces'] = str(m)
+        if n is not None:
+            valeurs['dates_affichage'] = dates_affichees(n, m)
+    if cible not in bd.FICHIERS_VIVANTS:
+        valeurs.pop('themes', None)  # sujets de travail : seulement pour les vivants
+    ct = classeur(cible)
+    L = lignes_annees(cible)
+    pleines = [x[0] for x in L if x[2]]
+    vides = [x[0] for x in L if not x[2]]
+    modele = pleines[-1] if pleines else 4
+    ligne = vides[0] if vides else (max([x[0] for x in L] or [3]) + 1)
+    cellules, styles, perdues = {}, {}, []
+    index_cible = {cle_entete(h): i for i, h in enumerate(ct['entetes']) if h}
+    for k, val in valeurs.items():
+        if val in (None, ''):
+            continue
+        if k not in index_cible:
+            perdues.append(k)
+            continue
+        col = get_column_letter(index_cible[k] + 1)
+        cellules[f'{col}{ligne}'] = val
+        styles[f'{col}{ligne}'] = f'{col}{modele}'
+    with verrou:
+        for p in (ps, pc):
+            if ouvert_dans_excel(p):
+                raise PermissionError(f'{os.path.basename(p)} est ouvert dans Excel : fermez-le puis recommencez.')
+        sauvegarder(ps); sauvegarder(pc)
+        set_cells(pc, cellules, style_from=styles)
+        _cache.pop(cible, None)
+        retirer_ligne(ps, l)
+        _cache.pop(f, None)
+    return placer_ligne(cible, ligne), perdues
+
+
 def liste_liens_morts():
     """Toutes les fiches qui ont au moins un lien en défaut, philosophes et courants."""
     out = []
@@ -242,8 +379,10 @@ def liste_fiches(type_='philosophes'):
             photo_ok, _ = image_locale(valeur(c, v, 'image_media'))
             lg, nb_liens = mesure_texte(valeur(c, v, 'texte_html'))
             morts, douteux = defauts_ligne(c, v)
+            an = anomalies_ligne(c, v)
             out.append({
                 'lg': lg, 'liens': nb_liens, 'morts': morts, 'douteux': douteux,
+                'decede': any(a['type'] == 'decede' for a in an), 'ecart_dates': sum(1 for a in an if a['type'] != 'decede'),
                 'f': f, 'l': r, 'nom': str(nom), 'slug': bd.slugify(str(nom)), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
                 'groupe': valeur(c, v, 'groupe') or '', 'image': img if existe else '',
                 'image_prevue': img, 'video': bool(valeur(c, v, 'youtube_id')),
@@ -274,7 +413,10 @@ def lire_fiche(f, l):
             'vivants': f in bd.FICHIERS_VIVANTS, 'courant': est_courant(f),
             'philosophes': rattaches().get(str(champs.get('Nom', '')).strip(), []) if est_courant(f) else [],
             'liens_defaut': liens.defauts_de(valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id')),
-            'liens_controle': liens.etat().get('date', '')}
+            'liens_controle': liens.etat().get('date', ''),
+            'dates_anomalies': [] if est_courant(f) else anomalies_ligne(c, v),
+            'dates_controle': dates.etat().get('date', ''),
+            'historique_propose': fichier_historique_propose(f, l) if f in bd.FICHIERS_VIVANTS else ''}
 
 
 def controler_liens_fiche(f, l):
@@ -959,6 +1101,8 @@ class Gestion(BaseHTTPRequestHandler):
                 return self.envoyer(200, infos_lien(q.get('url', '')))
             if u.path == '/api/youtube':
                 return self.envoyer(200, infos_youtube(q.get('url', '')))
+            if u.path == '/api/dates':  # écarts avec Wikidata + état du contrôle
+                return self.envoyer(200, liste_dates() if q.get('fiches') else dates.resume())
             if u.path == '/api/publication':  # état de la publication en cours (suivi des étapes)
                 return self.envoyer(200, publier.suivi_public())
             if u.path == '/api/liens-morts':  # fiches en défaut + état du contrôle complet
@@ -1017,6 +1161,14 @@ class Gestion(BaseHTTPRequestHandler):
                 self.envoyer(200, {'ok': True})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return
+            if u.path == '/api/dates-controle':
+                return self.envoyer(200, {'ok': dates.lancer_controle(philosophes_slug_texte), **dates.resume()})
+            if u.path == '/api/dates-ignorer':  # la fiche a raison : écart plus signalé
+                dates.ignorer(d['cle'])
+                return self.envoyer(200, {'ok': True})
+            if u.path == '/api/deplacer':  # philosophe décédé : fichier « actif » -> fichier historique
+                l, perdues = deplacer_fiche(d['f'], int(d['l']), d['cible'], d.get('deces'))
+                return self.envoyer(200, {'ok': True, 'f': d['cible'], 'ligne': l, 'perdues': perdues})
             if u.path == '/api/publication-preparer':  # build-data + ce qui partira
                 return self.envoyer(200, publier.preparer())
             if u.path == '/api/publier':

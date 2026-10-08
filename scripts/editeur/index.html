@@ -88,7 +88,8 @@
   .liens-texte .lt-vide { padding: .5rem .6rem; color: #8a7350; font-style: italic; }
   #editeur-visuel ::selection { background: #ffd666; }
   /* liens en défaut (dernier contrôle des liens) : encadré en tête de fiche */
-  #liens-defaut:empty { display: none; }
+  #liens-defaut:empty, #dates-defaut:empty { display: none; }
+  .defauts select { font-size: .85rem; padding: .15rem .3rem; width: auto; }
   .defauts { margin: 0 0 1rem; border: 2px solid #b3261e; border-radius: 6px; background: #fff1ee; color: var(--encre); font-size: .9rem; }
   .defauts.doute { border-color: #c98a12; background: #fff7e3; }
   .defauts .df-tete { display: flex; align-items: center; gap: .6rem; padding: .45rem .8rem; border-bottom: 1px solid #efc9c2; }
@@ -211,7 +212,8 @@
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
-  <button id="btn-liens" title="Contrôle des liens de toutes les fiches (textes, audio et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
+  <button id="btn-wikidata" title="Dates des philosophes comparées à Wikidata : philosophes vivants décédés depuis, années différentes">Dates <span id="nb-dates"></span></button>
+  <button id="btn-liens"title="Contrôle des liens de toutes les fiches (textes, audio et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
   <button id="btn-images"title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
   <button id="btn-domaines" title="Sites qui refusent de s'afficher dans le panneau latéral : ouverts en petite fenêtre">Sites en fenêtre</button>
   <button id="btn-build" title="Relance build-data : régénère les données du site et liste les erreurs de saisie">Vérifier les données</button>
@@ -244,6 +246,7 @@
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 380 caractères (1 500 − 8 %), du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 380</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes sans aucun lien (le lien Wikipédia du nom, en tête, ne compte pas)"><input type="checkbox" id="f-sans-lien"> Sans lien dans le texte</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Fiches avec un lien mort ou à vérifier (texte ou vidéo principale), d'après le dernier contrôle des liens"><input type="checkbox" id="f-liens-morts"> Liens morts</label>
+        <label class="seulement-philo" style="flex-direction:row;align-items:center;color:inherit" title="Philosophes décédés selon Wikidata, ou dont les années diffèrent de Wikidata (dernier contrôle « Dates »)"><input type="checkbox" id="f-dates"> Dates à vérifier</label>
       </div>
       <span id="compte"></span>
     </div>
@@ -356,13 +359,14 @@ async function chargerListe(garderSelection = true) {
 function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
   const si = !COURANTS() && $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
-  const sl = $('#f-sans-lien').checked, lm = $('#f-liens-morts').checked;
+  const sl = $('#f-sans-lien').checked, lm = $('#f-liens-morts').checked, fd = !COURANTS() && $('#f-dates').checked;
   const fp = COURANTS() ? $('#f-phi').value : '';
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
     && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_MIN)
-    && (!sl || !x.liens) && (!lm || x.morts || x.douteux) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
+    && (!sl || !x.liens) && (!lm || x.morts || x.douteux) && (!fd || x.decede || x.ecart_dates) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
   // filtre de texte : du plus court (le pire) au plus long ; liens morts : les morts sûrs d'abord
   L.sort(ft || fc ? (a, b) => a.lg - b.lg
+    : fd ? (a, b) => (b.decede - a.decede) || (a.annee ?? 0) - (b.annee ?? 0)
     : lm ? (a, b) => (b.morts - a.morts) || (b.douteux - a.douteux) || (a.annee ?? 0) - (b.annee ?? 0)
     : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
   const mot = COURANTS() ? 'courant' : 'fiche';
@@ -376,6 +380,8 @@ function afficherListe() {
       ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_MIN ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
       ${!x.liens ? '<span class="pastille sans" title="Aucun lien dans le texte (hors Wikipédia du nom)">lien</span>' : ''}
       ${x.morts ? `<span class="pastille sans" title="Lien${x.morts > 1 ? 's' : ''} mort${x.morts > 1 ? 's' : ''} (texte ou vidéo principale)">✗ ${x.morts}</span>` : ''}
+      ${x.decede ? '<span class="pastille sans" title="Décédé(e) selon Wikidata : fiche encore parmi les vivants">†</span>' : ''}
+      ${x.ecart_dates ? '<span class="pastille moyen" title="Année(s) différente(s) de Wikidata">date</span>' : ''}
       ${x.douteux ? `<span class="pastille moyen" title="Lien${x.douteux > 1 ? 's' : ''} à vérifier à la main (site qui bloque les vérifications automatiques…)">? ${x.douteux}</span>` : ''}
       <a class="ouvrir" href="${apercu(x.slug)}" target="_blank" rel="noopener" title="Voir la page sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
@@ -386,7 +392,7 @@ $('#liste').addEventListener('click', (e) => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   ouvrir(li.dataset.f, +li.dataset.l);
 });
-['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-liens-morts', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-liens-morts', '#f-dates', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
 
 /* ── Changer de mode (philosophes / courants) ──────────── */
 async function changerMode(m) {
@@ -428,6 +434,7 @@ async function ouvrir(f, l) {
   noterDefauts(d.liens_defaut);
   brancher(d);
   afficherDefauts(d.liens_defaut || [], d.liens_controle);
+  afficherDates(d);
   afficherListe();
   $('#defile').scrollTop = 0;
 }
@@ -448,6 +455,7 @@ function gabarit(d) {
       <button type="button" id="btn-trier" title="Remettre toutes les lignes de ce fichier dans l'ordre des années de naissance">Trier ce fichier par année</button>
       <a class="bouton-lien" href="${enLigne(d.slug)}" target="_blank" rel="noopener" title="La page publiée sur laphilo.fr">↗ En ligne</a>
       <a class="bouton-lien" href="${apercu(d.slug)}" target="_blank" rel="noopener" title="La page sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
+    <div id="dates-defaut"></div>
     <div id="liens-defaut"></div>
 
     <section class="bloc"><h3>Identité</h3>
@@ -1170,6 +1178,11 @@ async function enregistrer() {
       message(r.deplacee ? `✓ Enregistré, et ${courante.courant ? 'courant replacé par année' : 'fiche replacée par année de naissance'} (ligne ${r.ligne}).${renom}` : `✓ Enregistré.${renom}`, 'ok');
     } else { marquer(); message(`✓ Enregistré (${r.cellules} cellule${r.cellules > 1 ? 's' : ''}).`, 'ok'); }
     if (champ('texte_html') in ch || champ('youtube_id') in ch) controlerLiensFiche();
+    if (!courante.courant && (champ('annee_naissance') in ch || champ('annee_deces') in ch)) {  // écarts avec Wikidata à jour
+      api(`/api/fiche?f=${encodeURIComponent(courante.f)}&l=${courante.l}`).then((d2) => {
+        Object.assign(courante, { dates_anomalies: d2.dates_anomalies }); afficherDates(courante); majNbDates();
+      }).catch(() => {});
+    }
     chargerListe();
   } catch (e) { message('⚠ ' + e.message, 'err'); }
 }
@@ -1286,6 +1299,109 @@ $('#btn-build').onclick = async () => {
 };
 $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
 
+/* ── Dates comparées à Wikidata (serveur dates.py) ─────── */
+function afficherDates(d) {
+  const boite = $('#dates-defaut'); if (!boite) return;
+  const A = d.dates_anomalies || [];
+  if (!A.length) { boite.innerHTML = ''; return; }
+  const decede = A.some((x) => x.type === 'decede');
+  boite.innerHTML = `<div class="defauts ${decede ? '' : 'doute'}"><div class="df-tete"><b>${decede ? '⚠ Décédé(e) selon Wikidata' : `Date${A.length > 1 ? 's' : ''} différente${A.length > 1 ? 's' : ''} de Wikidata`}</b>
+      <small>contrôle « Dates » du ${dateControle(d.dates_controle)}</small></div>
+    <ul>${A.map((x, i) => `<li data-i="${i}"><span class="df-st ${x.statut === 'MORT' ? '' : 'doute'}">${x.type === 'decede' ? 'décès' : x.type === 'naissance' ? 'naissance' : 'décès'}</span>
+      <span><b>${esc(x.detail)}</b>
+        ${x.type === 'decede' ? `<span class="df-det" style="color:#5c3d1e">${d.historique_propose
+          ? 'La fiche est encore dans un fichier de philosophes vivants. Le bouton inscrit l’année de décès et range la fiche dans le fichier choisi. Pensez ensuite à mettre le texte au passé.'
+          : 'Inscrivez l’année de décès, puis mettez le texte au passé.'}</span>` : ''}</span>
+      <span class="df-act"><a class="bouton-lien" href="${esc(x.lien)}" target="_blank" rel="noopener" title="Voir l’élément Wikidata">Wikidata ↗</a>
+        ${x.type === 'decede' && d.historique_propose
+          ? `<select data-cible>${CODES.fichiers.filter((y) => !/-actif$/.test(y.f)).map((y) => `<option value="${y.f}" ${y.f === d.historique_propose ? 'selected' : ''}>${esc(y.label)}</option>`).join('')}</select>
+             <button type="button" class="principal" data-dt="deplacer">Inscrire le décès (${x.annee}) et déplacer</button>`
+          : x.type === 'decede' ? `<button type="button" data-dt="prendre">Inscrire ${x.annee}</button>`
+          : `<button type="button" data-dt="prendre" title="Remplace l’année de la fiche ; vérifiez ensuite les dates affichées">Prendre ${x.annee < 0 ? -x.annee + ' av. J.-C.' : x.annee}</button>
+             <button type="button" data-dt="ignorer" title="L’année de la fiche est la bonne : ne plus signaler cet écart">La fiche a raison</button>`}</span></li>`).join('')}</ul></div>`;
+  boite.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-dt]'); if (!b) return;
+    const x = A[+b.closest('li').dataset.i];
+    if (b.dataset.dt === 'prendre') {
+      const champ = $(x.type === 'naissance' ? '[data-c=annee_naissance]' : '[data-c=annee_deces]');
+      champ.value = x.annee; $('#btn-dates').click(); marquer();
+      champ.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      message('Année remplacée : vérifiez les dates affichées, puis enregistrez.', 'info');
+    } else if (b.dataset.dt === 'ignorer') {
+      await api('/api/dates-ignorer', { cle: x.cle });
+      d.dates_anomalies = A.filter((y) => y !== x); afficherDates(d); chargerListe(); majNbDates();
+    } else if (b.dataset.dt === 'deplacer') {
+      if (modifications()) { alert('Enregistrez (ou annulez) d’abord les modifications de la fiche.'); return; }
+      const cible = b.parentElement.querySelector('[data-cible]').value;
+      if (!confirm(`Inscrire le décès (${x.annee}) et déplacer la fiche vers « ${libelleFichier(cible)} » ?`)) return;
+      try {
+        b.disabled = true;
+        const r = await api('/api/deplacer', { f: d.f, l: d.l, cible, deces: x.annee });
+        await chargerListe(); await ouvrir(r.f, r.ligne); majNbDates();
+        message(`✓ Fiche déplacée dans « ${libelleFichier(r.f)} » (ligne ${r.ligne}), décès ${x.annee} inscrit. Mettez maintenant le texte au passé.`
+          + (r.perdues.length ? ` Colonnes absentes du fichier cible, non reprises : ${r.perdues.join(', ')}.` : ''), 'ok');
+      } catch (e) { b.disabled = false; message('⚠ ' + e.message, 'err'); }
+    }
+  };
+}
+async function majNbDates() {
+  try {
+    const r = await api('/api/dates?fiches=1');
+    const morts = r.fiches.filter((x) => x.anomalies.some((a) => a.type === 'decede')).length;
+    $('#nb-dates').textContent = r.progression.en_cours ? '(contrôle…)' : r.fiches.length ? `(${morts ? morts + ' † + ' : ''}${r.fiches.length - morts})` : r.date ? '✓' : '';
+    return r;
+  } catch { return null; }
+}
+let suiviDates = null;
+$('#btn-wikidata').onclick = async () => {
+  msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Lecture…</p>'; fenetre.showModal();
+  const dessiner = async () => {
+    if (!fenetre.open) { clearInterval(suiviDates); suiviDates = null; return; }
+    let r;
+    try { r = await api('/api/dates?fiches=1'); }
+    catch (e) {
+      clearInterval(suiviDates); suiviDates = null;
+      $('#fenetre-corps').innerHTML = e.message === 'introuvable'
+        ? '<h2>Dates</h2><p><b>L’éditeur a été mis à jour pendant qu’il tournait.</b> Fermez sa fenêtre noire, puis relancez-le avec l’icône « Éditeur LaPhilo ».</p>'
+        : `<h2>Dates</h2><div class="pub-erreur">${esc(e.message)}</div>`;
+      return;
+    }
+    const p = r.progression;
+    const morts = r.fiches.filter((x) => x.anomalies.some((a) => a.type === 'decede'));
+    const ecarts = r.fiches.filter((x) => !morts.includes(x));
+    const ligne = (x, i, groupe) => `<div class="ligne-defaut" data-g="${groupe}" data-i="${i}"><span><b>${esc(x.nom)}</b> <small style="display:inline">${esc(x.dates)} · ${esc(libelleFichier(x.f))}</small></span><span></span>
+      <small>${x.anomalies.map((a) => esc(a.detail)).join(' · ')}</small></div>`;
+    $('#fenetre-corps').innerHTML = `<h2>Dates comparées à Wikidata</h2>
+      <p class="aide">Pour chaque philosophe, l’élément Wikidata de la page Wikipédia du nom donne la naissance et le décès.
+        Sont signalés : les philosophes encore parmi les vivants que Wikidata dit décédés, et les années qui diffèrent : d’au moins 1 an depuis 1500, 5 ans de 500 à 1500, 20 ans avant (les historiens divergent souvent sur les dates anciennes). « La fiche a raison » fait taire un écart voulu.</p>
+      ${p.en_cours ? `<p><b>Contrôle en cours</b> — ${esc(p.phase)} : ${p.fait} / ${p.total}</p>
+          <div class="barre-progres"><span style="width:${p.total ? Math.round(100 * p.fait / p.total) : 2}%"></span></div>
+          <p class="aide">Une à deux minutes.</p>`
+        : `<p>${r.date ? `Dernier contrôle : <b>${dateControle(r.date)}</b> (${r.compares} philosophes comparés)` : 'Aucun contrôle pour l’instant.'}
+          <button type="button" class="principal" id="btn-controle-dates" style="margin-left:.6rem">${r.date ? 'Relancer le contrôle' : 'Lancer le contrôle'}</button></p>`}
+      ${p.erreur ? `<div class="pub-erreur">${esc(p.erreur)}</div>` : ''}
+      ${morts.length ? `<h3 style="color:#b3261e;margin:.8rem 0 .2rem">Décédés selon Wikidata (${morts.length})</h3>` + morts.map((x, i) => ligne(x, i, 'm')).join('') : ''}
+      ${ecarts.length ? `<h3 style="color:#8a5a06;margin:.8rem 0 .2rem">Dates différentes (${ecarts.length})</h3>` + ecarts.map((x, i) => ligne(x, i, 'e')).join('') : ''}
+      ${r.date && !p.en_cours && !r.fiches.length ? '<p><b>Aucun écart avec Wikidata.</b> ✓</p>' : ''}
+      ${r.non_comparees.length ? `<details style="margin-top:.8rem"><summary class="aide" style="cursor:pointer">${r.non_comparees.length} fiche(s) non comparées (pas de lien Wikipédia sur le nom, ou ce n’est pas une personne)</summary>
+        <p class="aide">${r.non_comparees.map((x) => `${esc(x.nom)} — ${esc(x.raison)}`).join('<br>')}</p></details>` : ''}`;
+    $('#btn-controle-dates')?.addEventListener('click', async () => {
+      await api('/api/dates-controle', {}); dessiner();
+      if (!suiviDates) suiviDates = setInterval(dessiner, 2000);
+    });
+    $('#fenetre-corps').querySelectorAll('.ligne-defaut').forEach((el) => (el.onclick = async () => {
+      const x = (el.dataset.g === 'm' ? morts : ecarts)[+el.dataset.i];
+      if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+      if (COURANTS()) { courante = null; await changerMode('philosophes'); }
+      fenetre.close();
+      await ouvrir(x.f, x.l);
+    }));
+    if (!p.en_cours && suiviDates) { clearInterval(suiviDates); suiviDates = null; chargerListe(); majNbDates(); }
+    if (p.en_cours && !suiviDates) suiviDates = setInterval(dessiner, 2000);
+  };
+  dessiner();
+};
+
 /* ── Publier (serveur publier.py) ──────────────────────── */
 let suiviPub = null;
 const ICONES_ETAPE = { '': '○', en_cours: '↻', ok: '✓', echec: '✗', saute: '–' };
@@ -1372,7 +1488,7 @@ $('#btn-publier').onclick = async () => {
     `<datalist id="dl-fam">${Object.entries(CODES.familles || {}).flatMap(([n, l]) => l.map((f) => `<option value="${esc(f)}" label="${n}">`)).join('')}</datalist>` +
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
-  majNbImages(); majNbLiens();
+  majNbImages(); majNbLiens(); majNbDates();
   api('/api/publication').then((s) => { if (s.en_cours) suivrePublication(); }).catch(() => {});
   $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
