@@ -1108,8 +1108,8 @@
 "d": "2026-09-29"
 },
 "philosophes/abhinavagupta": {
-"h": "c4acd7ddd9",
-"d": "2026-10-06"
+"h": "6124640033",
+"d": "2026-10-08"
 },
 "philosophes/abraham-aboulafia": {
 "h": "1ee37e0595",
@@ -1266,6 +1266,10 @@
 "philosophes/alcuin": {
 "h": "7324f8e2fb",
 "d": "2026-10-07"
+},
+"philosophes/aldous-huxley": {
+"h": "37374641c7",
+"d": "2026-10-08"
 },
 "philosophes/alejandro-korn": {
 "h": "8b95a63463",
@@ -1624,7 +1628,7 @@
 "d": "2026-10-06"
 },
 "philosophes/arthur-schopenhauer": {
-"h": "03465f17a3",
+"h": "1ec5ec834b",
 "d": "2026-10-08"
 },
 "philosophes/asanga": {
@@ -1680,8 +1684,8 @@
 "d": "2026-10-07"
 },
 "philosophes/ayn-rand": {
-"h": "afc9d56b9b",
-"d": "2026-10-06"
+"h": "4a39b4b77e",
+"d": "2026-10-08"
 },
 "philosophes/baal-shem-tov": {
 "h": "e0a4554541",
@@ -1796,8 +1800,8 @@
 "d": "2026-10-07"
 },
 "philosophes/berose": {
-"h": "313d51f340",
-"d": "2026-10-02"
+"h": "eb4b2b099b",
+"d": "2026-10-08"
 },
 "philosophes/bertrand-russell": {
 "h": "c0805a79b3",
@@ -2200,8 +2204,8 @@
 "d": "2026-10-07"
 },
 "philosophes/david-hume": {
-"h": "15ecf8f0cb",
-"d": "2026-10-06"
+"h": "5c54d3954f",
+"d": "2026-10-08"
 },
 "philosophes/david-lewis": {
 "h": "9b431d632e",
@@ -3268,8 +3272,8 @@
 "d": "2026-10-07"
 },
 "philosophes/heloise": {
-"h": "83ce0bf040",
-"d": "2026-09-29"
+"h": "9e1ef95978",
+"d": "2026-10-08"
 },
 "philosophes/henri-bergson": {
 "h": "51653de42b",
@@ -4196,8 +4200,8 @@
 "d": "2026-10-06"
 },
 "philosophes/karl-popper": {
-"h": "954eb440d8",
-"d": "2026-10-06"
+"h": "f299418e97",
+"d": "2026-10-08"
 },
 "philosophes/kate-manne": {
 "h": "505073a544",
@@ -4812,8 +4816,8 @@
 "d": "2026-10-07"
 },
 "philosophes/mircea-eliade": {
-"h": "d931057e5b",
-"d": "2026-10-06"
+"h": "6f049a84ff",
+"d": "2026-10-08"
 },
 "philosophes/mogobe-ramose": {
 "h": "bb034a51a3",
@@ -6512,7 +6516,7 @@
 "d": "2026-10-07"
 },
 "philosophes/zhang-taiyan": {
-"h": "5bc1b72889",
+"h": "b17574ccba",
 "d": "2026-10-08"
 },
 "philosophes/zhang-zai": {
