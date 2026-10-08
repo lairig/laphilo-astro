@@ -25,6 +25,11 @@ scripts/gsc-credentials.json
 scripts/seo-history.json
 scripts/rapports-seo/
 
+# résultat du contrôle des liens morts de l'éditeur (local)
+scripts/editeur/liens-etat.json
+scripts/editeur/liens-etat.json.tmp
+__pycache__/
+
 # copies de sauvegarde de scripts/xlsx_cellules.py
 data/*.bak
 rapports-seo/

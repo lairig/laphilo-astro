@@ -85,6 +85,31 @@
   .liens-texte .lt-act { display: flex; gap: .25rem; flex-wrap: wrap; justify-content: flex-end; }
   .liens-texte .lt-vide { padding: .5rem .6rem; color: #8a7350; font-style: italic; }
   #editeur-visuel ::selection { background: #ffd666; }
+  /* liens en défaut (dernier contrôle des liens) : encadré en tête de fiche */
+  #liens-defaut:empty { display: none; }
+  .defauts { margin: 0 0 1rem; border: 2px solid #b3261e; border-radius: 6px; background: #fff1ee; color: var(--encre); font-size: .9rem; }
+  .defauts.doute { border-color: #c98a12; background: #fff7e3; }
+  .defauts .df-tete { display: flex; align-items: center; gap: .6rem; padding: .45rem .8rem; border-bottom: 1px solid #efc9c2; }
+  .defauts .df-tete b { flex: 1; color: #8e1d12; }
+  .defauts.doute .df-tete b { color: #8a5a06; }
+  .defauts .df-tete small { color: #7a5a3a; }
+  .defauts ul { list-style: none; margin: 0; padding: 0; }
+  .defauts li { display: grid; grid-template-columns: 6.2rem 1fr auto; gap: .5rem; align-items: start; padding: .4rem .8rem; border-bottom: 1px solid #f3dcd6; }
+  .defauts li:last-child { border-bottom: 0; }
+  .defauts .df-st { font-size: .72rem; text-align: center; padding: .1rem .3rem; border-radius: 3px; background: #b3261e; color: #fff; }
+  .defauts .df-st.doute { background: #c98a12; }
+  .defauts .df-url { display: block; color: #8a7350; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .defauts .df-det { display: block; color: #8e1d12; font-size: .8rem; }
+  .defauts .df-act { display: flex; gap: .25rem; flex-wrap: wrap; justify-content: flex-end; }
+  .defauts button, .defauts .bouton-lien { padding: .12rem .5rem; font-size: .8rem; background: #fffbef; color: var(--encre); border-color: #b8923c; }
+  .defauts button:hover { background: #f3e2b0; }
+  .barre-progres { height: 10px; border-radius: 5px; background: #e6d8b4; overflow: hidden; margin: .5rem 0; }
+  .barre-progres span { display: block; height: 100%; background: var(--rouille); transition: width .4s; }
+  .ligne-defaut { display: grid; grid-template-columns: 1fr auto; gap: .2rem .7rem; padding: .4rem 0; border-bottom: 1px solid #d8c48c; cursor: pointer; }
+  .ligne-defaut:hover { background: #f3e2b0; }
+  .ligne-defaut small { grid-column: 1 / -1; color: #6b4a22; }
+  #fenetre .pastille.sans { color: #fff; background: #b3261e; }
+  #fenetre .pastille.moyen { color: #fff; background: #c98a12; }
 
   /* Formulaire */
   /* poignée pour élargir la colonne de gauche */
@@ -174,7 +199,8 @@
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
-  <button id="btn-images" title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
+  <button id="btn-liens" title="Contrôle des liens de toutes les fiches (textes et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
+  <button id="btn-images"title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
   <button id="btn-domaines" title="Sites qui refusent de s'afficher dans le panneau latéral : ouverts en petite fenêtre">Sites en fenêtre</button>
   <button id="btn-build" title="Relance build-data : régénère les données du site et liste les erreurs de saisie">Vérifier les données</button>
 </header>
@@ -204,6 +230,7 @@
         <label style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-video"> Sans vidéo ni photo</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes de moins de 1 380 caractères (1 500 − 8 %), du plus court au plus long"><input type="checkbox" id="f-court"> Texte au-dessous de 1 380</label>
         <label style="flex-direction:row;align-items:center;color:inherit" title="Textes sans aucun lien (le lien Wikipédia du nom, en tête, ne compte pas)"><input type="checkbox" id="f-sans-lien"> Sans lien dans le texte</label>
+        <label style="flex-direction:row;align-items:center;color:inherit" title="Fiches avec un lien mort ou à vérifier (texte ou vidéo principale), d'après le dernier contrôle des liens"><input type="checkbox" id="f-liens-morts"> Liens morts</label>
       </div>
       <span id="compte"></span>
     </div>
@@ -316,13 +343,15 @@ async function chargerListe(garderSelection = true) {
 function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
   const si = !COURANTS() && $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
-  const sl = $('#f-sans-lien').checked;
+  const sl = $('#f-sans-lien').checked, lm = $('#f-liens-morts').checked;
   const fp = COURANTS() ? $('#f-phi').value : '';
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
     && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_MIN)
-    && (!sl || !x.liens) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
-  // filtre de texte : du plus court (le pire) au plus long
-  L.sort(ft || fc ? (a, b) => a.lg - b.lg : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
+    && (!sl || !x.liens) && (!lm || x.morts || x.douteux) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
+  // filtre de texte : du plus court (le pire) au plus long ; liens morts : les morts sûrs d'abord
+  L.sort(ft || fc ? (a, b) => a.lg - b.lg
+    : lm ? (a, b) => (b.morts - a.morts) || (b.douteux - a.douteux) || (a.annee ?? 0) - (b.annee ?? 0)
+    : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
   const mot = COURANTS() ? 'courant' : 'fiche';
   $('#compte').textContent = `${L.length} ${mot}${L.length > 1 ? 's' : ''}`;
   $('#liste').innerHTML = L.map((x) => `<li data-f="${x.f}" data-l="${x.l}" class="${courante && courante.f === x.f && courante.l === x.l ? 'actif' : ''}">
@@ -333,6 +362,8 @@ function afficherListe() {
       ${!x.video && !x.photo ? '<span class="pastille sans" title="Ni vidéo ni grande photo">vid</span>' : ''}
       ${x.lg < TEXTE_COURT || ft || fc ? `<span class="pastille ${x.lg < TEXTE_COURT ? 'sans' : x.lg < TEXTE_MIN ? 'moyen' : ''}" title="Longueur du texte (référence ${TEXTE_REF} caractères)">${x.lg}</span>` : ''}
       ${!x.liens ? '<span class="pastille sans" title="Aucun lien dans le texte (hors Wikipédia du nom)">lien</span>' : ''}
+      ${x.morts ? `<span class="pastille sans" title="Lien${x.morts > 1 ? 's' : ''} mort${x.morts > 1 ? 's' : ''} (texte ou vidéo principale)">✗ ${x.morts}</span>` : ''}
+      ${x.douteux ? `<span class="pastille moyen" title="Lien${x.douteux > 1 ? 's' : ''} à vérifier à la main (site qui bloque les vérifications automatiques…)">? ${x.douteux}</span>` : ''}
       <a class="ouvrir" href="${apercu(x.slug)}" target="_blank" rel="noopener" title="Voir la page sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
 }
@@ -342,7 +373,7 @@ $('#liste').addEventListener('click', (e) => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   ouvrir(li.dataset.f, +li.dataset.l);
 });
-['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-liens-morts', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
 
 /* ── Changer de mode (philosophes / courants) ──────────── */
 async function changerMode(m) {
@@ -373,7 +404,7 @@ const champ = (cle) => COLS[cle];
 
 async function ouvrir(f, l) {
   const d = await api(`/api/fiche?f=${encodeURIComponent(f)}&l=${l}`);
-  courante = d; image = null;
+  courante = d; image = null; relisterLiens = () => {};
   Object.keys(COLS).forEach((k) => delete COLS[k]);
   d.entetes.forEach((h) => { COLS[norm(h)] = h; });
   initial = { ...d.champs };
@@ -381,7 +412,9 @@ async function ouvrir(f, l) {
   const F = $('#formulaire'); F.hidden = false;
   F.innerHTML = gabarit(d);
   $('#barre').hidden = false; message('');
+  noterDefauts(d.liens_defaut);
   brancher(d);
+  afficherDefauts(d.liens_defaut || [], d.liens_controle);
   afficherListe();
   $('#defile').scrollTop = 0;
 }
@@ -402,6 +435,7 @@ function gabarit(d) {
       <button type="button" id="btn-trier" title="Remettre toutes les lignes de ce fichier dans l'ordre des années de naissance">Trier ce fichier par année</button>
       <a class="bouton-lien" href="${enLigne(d.slug)}" target="_blank" rel="noopener" title="La page publiée sur laphilo.fr">↗ En ligne</a>
       <a class="bouton-lien" href="${apercu(d.slug)}" target="_blank" rel="noopener" title="La page sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
+    <div id="liens-defaut"></div>
 
     <section class="bloc"><h3>Identité</h3>
       <div class="grille">
@@ -750,6 +784,7 @@ async function brancherRattaches() {
 /* ── Texte : édition directe, liens, audio ───────────────── */
 const AUDIO_RE = /<audio[\s\S]*?<\/audio>/i;
 const ETATS_LIENS = new Map(); // adresse -> résultat de la dernière vérification (gardé d'une fiche à l'autre)
+let relisterLiens = () => {};
 function brancherTexte(d) {
   const complet = String(d.champs[champ('texte_html')] ?? '');
   const bloc = complet.match(AUDIO_RE);
@@ -865,6 +900,7 @@ function brancherTexte(d) {
     }
   };
   listerLiens();
+  relisterLiens = listerLiens;  // pour le contrôle des liens morts (sans toucher au texte)
 
   document.execCommand('defaultParagraphSeparator', false, 'p');
   visuel.addEventListener('input', () => { corps = visuel.innerHTML; code.value = corps; composer(); mesurer(); listerLiens(); });
@@ -991,6 +1027,107 @@ async function enregistrerImage() {
   } catch (e) { m.textContent = '⚠ ' + e.message; m.className = 'aide err'; }
 }
 
+/* ── Liens morts (contrôle des liens, serveur liens.py) ─── */
+const dateControle = (s) => (s ? new Date(s).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '');
+/* les défauts connus apparaissent aussi dans la liste « Liens du texte » (✗ ou ?) */
+function noterDefauts(defauts) {
+  for (const x of defauts || []) ETATS_LIENS.set(x.url, { ok: x.statut === 'MORT' ? false : null, message: x.detail });
+}
+function afficherDefauts(defauts, date) {
+  const boite = $('#liens-defaut'); if (!boite) return;
+  if (!defauts.length) { boite.innerHTML = ''; return; }
+  const morts = defauts.filter((x) => x.statut === 'MORT').length;
+  boite.innerHTML = `<div class="defauts ${morts ? '' : 'doute'}"><div class="df-tete"><b>${morts ? `⚠ ${morts} lien${morts > 1 ? 's' : ''} mort${morts > 1 ? 's' : ''}` : ''}${morts && defauts.length > morts ? ' et ' : ''}${defauts.length > morts ? `${defauts.length - morts} lien${defauts.length - morts > 1 ? 's' : ''} à vérifier` : ''}</b>
+      <small>${date ? `contrôle du ${dateControle(date)} · ` : ''}corrigez puis enregistrez : les liens sont revérifiés</small></div>
+    <ul>${defauts.map((x, i) => `<li data-i="${i}"><span class="df-st ${x.statut === 'MORT' ? '' : 'doute'}">${x.statut === 'MORT' ? 'mort' : 'à vérifier'}</span>
+      <span><b>${esc(x.video ? 'Vidéo principale' : x.mots || '(sans mots)')}</b><span class="df-det">${esc(x.detail)}</span>
+        <span class="df-url" title="${esc(x.url)}">${esc(decodeURIComponent(x.url.replace(/^https?:\/\/(www\.)?/, '')).slice(0, 140))}</span></span>
+      <span class="df-act"><button type="button" data-df="voir" title="${x.video ? 'Aller au champ de la vidéo' : 'Montrer ce lien dans le texte'}">Repérer</button>
+        <a class="bouton-lien" href="${esc(x.url.startsWith('/') ? 'https://laphilo.fr' + x.url : x.url)}" target="_blank" rel="noopener" title="Ouvrir pour tester">↗</a>
+        ${x.statut === 'MORT' ? '' : '<button type="button" data-df="bon" title="Le lien s’ouvre bien dans le navigateur : ne plus le signaler">Il marche</button>'}</span></li>`).join('')}</ul></div>`;
+  boite.onclick = async (ev) => {
+    const b = ev.target.closest('button[data-df]'); if (!b) return;
+    const x = defauts[+b.closest('li').dataset.i];
+    if (b.dataset.df === 'voir') {
+      if (x.video) { $('#yt-lien').scrollIntoView({ block: 'center', behavior: 'smooth' }); $('#yt-lien').focus({ preventScroll: true }); $('#yt-lien').select(); return; }
+      const i = [...$('#editeur-visuel').querySelectorAll('a')].findIndex((a) => a.getAttribute('href') === x.url);
+      const bouton = $(`#liens-texte li[data-i="${i}"] [data-lt=voir]`);
+      if (bouton) bouton.click(); else alert('Ce lien n’est plus dans le texte : enregistrez pour mettre à jour la liste.');
+    } else if (b.dataset.df === 'bon') {
+      await api('/api/liens-bon', { url: x.url });
+      ETATS_LIENS.delete(x.url);
+      afficherDefauts(defauts.filter((y) => y !== x), date);
+      relisterLiens();
+      chargerListe(); majNbLiens();
+    }
+  };
+}
+/* après un enregistrement : les adresses nouvelles ou en défaut de la fiche sont vérifiées */
+async function controlerLiensFiche() {
+  const fiche = courante; if (!fiche) return;
+  const avant = $('#message').textContent;
+  message(avant + ' Vérification des liens…', 'ok');
+  try {
+    const r = await api('/api/liens-fiche', { f: fiche.f, l: fiche.l });
+    if (courante !== fiche) return;
+    for (const a of $('#editeur-visuel')?.querySelectorAll('a') || []) ETATS_LIENS.delete(a.getAttribute('href'));
+    noterDefauts(r.liens_defaut);
+    afficherDefauts(r.liens_defaut, fiche.liens_controle);
+    relisterLiens();
+    const n = r.liens_defaut.length;
+    message(avant + (n ? ` ⚠ ${n} lien${n > 1 ? 's' : ''} en défaut (voir en haut de la fiche).` : ' Liens vérifiés ✓'), n ? 'err' : 'ok');
+    chargerListe(); majNbLiens();
+  } catch (e) { message(avant + ' (liens non vérifiés : ' + e.message + ')', 'ok'); }
+}
+
+async function majNbLiens() {
+  try {
+    const r = await api('/api/liens-morts');
+    $('#nb-liens').textContent = r.progression.en_cours ? '(contrôle en cours…)' : r.morts || r.a_verifier ? `(${r.morts} + ${r.a_verifier} ?)` : r.date ? '✓' : '';
+    return r;
+  } catch { return null; }
+}
+let suiviControle = null;
+$('#btn-liens').onclick = async () => {
+  msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Lecture…</p>'; fenetre.showModal();
+  const dessiner = async () => {
+    if (!fenetre.open) { clearInterval(suiviControle); suiviControle = null; return; }
+    const r = await api('/api/liens-morts?fiches=1'), p = r.progression;
+    const fiches = r.fiches;
+    $('#fenetre-corps').innerHTML = `<h2>Liens morts</h2>
+      <p class="aide">Le contrôle vérifie toutes les adresses des textes et toutes les vidéos principales, philosophes et courants (${r.total ? r.total.toLocaleString('fr-FR') + ' adresses' : 'jamais fait'}).
+        <b>Mort</b> : page Wikipédia inexistante, vidéo supprimée, page introuvable, site disparu. <b>À vérifier</b> : sites qui bloquent les robots, vidéos privées… à ouvrir à la main (bouton « Il marche » sur la fiche s'il s'ouvre bien).</p>
+      ${p.en_cours ? `<p><b>Contrôle en cours</b> — ${esc(p.phase)} : ${p.fait.toLocaleString('fr-FR')} / ${p.total.toLocaleString('fr-FR')}</p>
+          <div class="barre-progres"><span style="width:${p.total ? Math.round(100 * p.fait / p.total) : 2}%"></span></div>
+          <p class="aide">Environ 10 minutes. Vous pouvez fermer cette fenêtre et continuer à travailler.</p>`
+        : `<p>${r.date ? `Dernier contrôle complet : <b>${dateControle(r.date)}</b>` : 'Aucun contrôle complet pour l’instant.'}
+          <button type="button" class="principal" id="btn-controle" style="margin-left:.6rem">${r.date ? 'Relancer le contrôle' : 'Lancer le contrôle'}</button></p>`}
+      ${p.erreur ? `<p class="err" style="color:#b3261e">⚠ ${esc(p.erreur)}</p>` : ''}
+      ${fiches.length ? `<p><b>${fiches.length} fiche${fiches.length > 1 ? 's' : ''}</b> avec des liens en défaut (${r.morts} mort${r.morts > 1 ? 's' : ''}, ${r.a_verifier} à vérifier). Cliquez pour ouvrir :</p>`
+        + fiches.map((x, i) => {
+          const m = x.defauts.filter((d) => d.statut === 'MORT').length, dt = x.defauts.length - m;
+          return `<div class="ligne-defaut" data-i="${i}"><span><b>${esc(x.nom)}</b> <small style="display:inline">${x.courant ? 'courant' : 'philosophe'}</small></span>
+            <span>${m ? `<span class="pastille sans">✗ ${m}</span>` : ''} ${dt ? `<span class="pastille moyen">? ${dt}</span>` : ''}</span>
+            <small>${x.defauts.map((d) => esc(`${d.video ? 'vidéo principale' : '« ' + d.mots + ' »'} : ${d.detail}`)).join(' · ')}</small></div>`;
+        }).join('')
+        : r.date && !p.en_cours ? '<p><b>Aucun lien en défaut.</b> ✓</p>' : ''}`;
+    $('#btn-controle')?.addEventListener('click', async () => {
+      await api('/api/liens-controle', {}); majNbLiens(); dessiner();
+      if (!suiviControle) suiviControle = setInterval(dessiner, 2000);
+    });
+    $('#fenetre-corps').querySelectorAll('.ligne-defaut').forEach((el) => (el.onclick = async () => {
+      const x = fiches[+el.dataset.i];
+      if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+      if (x.courant !== COURANTS()) { courante = null; await changerMode(x.courant ? 'courants' : 'philosophes'); }
+      fenetre.close();
+      await ouvrir(x.f, x.l);
+    }));
+    if (!p.en_cours && suiviControle) { clearInterval(suiviControle); suiviControle = null; chargerListe(); majNbLiens(); }
+    if (p.en_cours && !suiviControle) suiviControle = setInterval(dessiner, 2000);
+  };
+  dessiner();
+};
+
 /* ── Enregistrer ───────────────────────────────────────── */
 async function enregistrer() {
   const ch = changements();
@@ -1007,6 +1144,7 @@ async function enregistrer() {
       await ouvrir(courante.f, r.ligne);
       message(r.deplacee ? `✓ Enregistré, et ${courante.courant ? 'courant replacé par année' : 'fiche replacée par année de naissance'} (ligne ${r.ligne}).${renom}` : `✓ Enregistré.${renom}`, 'ok');
     } else { marquer(); message(`✓ Enregistré (${r.cellules} cellule${r.cellules > 1 ? 's' : ''}).`, 'ok'); }
+    if (champ('texte_html') in ch || champ('youtube_id') in ch) controlerLiensFiche();
     chargerListe();
   } catch (e) { message('⚠ ' + e.message, 'err'); }
 }
@@ -1139,7 +1277,7 @@ $('#rapport').onclick = () => { $('#rapport').style.display = 'none'; };
     `<datalist id="dl-fam">${Object.entries(CODES.familles || {}).flatMap(([n, l]) => l.map((f) => `<option value="${esc(f)}" label="${n}">`)).join('')}</datalist>` +
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
-  majNbImages();
+  majNbImages(); majNbLiens();
   $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
 </script>

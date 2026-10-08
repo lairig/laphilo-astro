@@ -48,10 +48,12 @@ PHOTO = os.path.join(BASE, 'public', 'photo')  # grandes photos (colonne Image_m
 SAUVEGARDES = os.path.join(os.path.dirname(BASE), 'groupes', 'sauvegarde', 'editeur')
 PORT = 8765
 # Version du code : un éditeur relancé après une mise à jour remplace l'ancien encore ouvert
-VERSION = str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html')))
+VERSION = str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py')))
 
 sys.path.insert(0, os.path.join(BASE, 'scripts'))
 from xlsx_cellules import set_cells, first_sheet_path, col_num  # noqa: E402
+sys.path.insert(0, ICI)
+import liens  # noqa: E402  contrôle des liens morts
 
 _spec = importlib.util.spec_from_file_location('build_data', os.path.join(BASE, 'scripts', 'build-data.py'))
 bd = importlib.util.module_from_spec(_spec)
@@ -131,6 +133,37 @@ def mesure_texte(h):
     return len(texte), len(liens)
 
 
+def defauts_ligne(c, v):
+    """(liens morts, liens à vérifier) d'une ligne, d'après le dernier contrôle des liens."""
+    d = liens.defauts_de(valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id'))
+    return sum(1 for x in d if x['statut'] == 'MORT'), sum(1 for x in d if x['statut'] != 'MORT')
+
+
+def toutes_les_fiches():
+    """[(texte, yt_id)] de toutes les fiches, philosophes et courants (pour le contrôle complet des liens)."""
+    out = []
+    for f in list(bd.PHILOSOPHE_FICHIERS) + list(bd.COURANT_FICHIERS):
+        c = classeur(f)
+        for v in c['lignes'].values():
+            if valeur(c, v, 'nom'):
+                out.append((valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id')))
+    return out
+
+
+def liste_liens_morts():
+    """Toutes les fiches qui ont au moins un lien en défaut, philosophes et courants."""
+    out = []
+    for f in list(bd.PHILOSOPHE_FICHIERS) + list(bd.COURANT_FICHIERS):
+        c = classeur(f)
+        for r, v in c['lignes'].items():
+            nom = valeur(c, v, 'nom')
+            d = liens.defauts_de(valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id')) if nom else []
+            if d:
+                out.append({'f': f, 'l': r, 'nom': str(nom), 'courant': est_courant(f), 'defauts': d})
+    out.sort(key=lambda x: (-sum(1 for d in x['defauts'] if d['statut'] == 'MORT'), bd.normalize_header(x['nom'])))
+    return {**liens.resume(), 'fiches': out}
+
+
 def decouper_courants(s):
     return [x.strip() for x in str(s or '').replace('\xa0', ' ').split(';') if x.strip()]
 
@@ -160,9 +193,10 @@ def liste_courants():
             if not nom:
                 continue
             photo_ok, _ = image_locale(valeur(c, v, 'image_media'))
-            lg, liens = mesure_texte(valeur(c, v, 'texte_html'))
+            lg, nb_liens = mesure_texte(valeur(c, v, 'texte_html'))
+            morts, douteux = defauts_ligne(c, v)
             out.append({
-                'lg': lg, 'liens': liens, 'courant': True,
+                'lg': lg, 'liens': nb_liens, 'morts': morts, 'douteux': douteux, 'courant': True,
                 'f': f, 'l': r, 'nom': str(nom), 'slug': bd.slugify(str(nom)), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
                 'groupe': valeur(c, v, 'groupe') or '', 'image': '', 'image_prevue': '',
                 'video': bool(valeur(c, v, 'youtube_id')), 'photo': bool(valeur(c, v, 'image_media')) and photo_ok,
@@ -183,9 +217,10 @@ def liste_fiches(type_='philosophes'):
                 continue
             existe, img = image_locale(valeur(c, v, 'thumbnail_url'))
             photo_ok, _ = image_locale(valeur(c, v, 'image_media'))
-            lg, liens = mesure_texte(valeur(c, v, 'texte_html'))
+            lg, nb_liens = mesure_texte(valeur(c, v, 'texte_html'))
+            morts, douteux = defauts_ligne(c, v)
             out.append({
-                'lg': lg, 'liens': liens,
+                'lg': lg, 'liens': nb_liens, 'morts': morts, 'douteux': douteux,
                 'f': f, 'l': r, 'nom': str(nom), 'slug': bd.slugify(str(nom)), 'dates': str(valeur(c, v, 'dates_affichage') or ''),
                 'groupe': valeur(c, v, 'groupe') or '', 'image': img if existe else '',
                 'image_prevue': img, 'video': bool(valeur(c, v, 'youtube_id')),
@@ -214,7 +249,15 @@ def lire_fiche(f, l):
             'source_portrait': source_de(champs.get('Thumbnail_URL')), 'source_photo': source_de(champs.get('Image_media')),'f': f, 'l': l, 'slug': bd.slugify(str(champs.get('Nom', ''))), 'entetes': [h for h in c['entetes'] if h], 'champs': champs,
             'image_existe': existe, 'image': img, 'nat_defaut': bd.NAT_DEFAUT.get(f, ''),
             'vivants': f in bd.FICHIERS_VIVANTS, 'courant': est_courant(f),
-            'philosophes': rattaches().get(str(champs.get('Nom', '')).strip(), []) if est_courant(f) else []}
+            'philosophes': rattaches().get(str(champs.get('Nom', '')).strip(), []) if est_courant(f) else [],
+            'liens_defaut': liens.defauts_de(valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id')),
+            'liens_controle': liens.etat().get('date', '')}
+
+
+def controler_liens_fiche(f, l):
+    c = classeur(f)
+    v = c['lignes'][l]
+    return liens.controler_fiche(valeur(c, v, 'texte_html'), valeur(c, v, 'youtube_id'))
 
 
 # ── Courants : rattacher un philosophe, renommer partout ────────────────────
@@ -891,6 +934,8 @@ class Gestion(BaseHTTPRequestHandler):
                 return self.envoyer(200, infos_lien(q.get('url', '')))
             if u.path == '/api/youtube':
                 return self.envoyer(200, infos_youtube(q.get('url', '')))
+            if u.path == '/api/liens-morts':  # fiches en défaut + état du contrôle complet
+                return self.envoyer(200, liste_liens_morts() if q.get('fiches') else liens.resume())
             return self.envoyer(404, {'erreur': 'introuvable'})
         except Exception as e:
             return self.envoyer(400, {'erreur': str(e)})
@@ -945,6 +990,13 @@ class Gestion(BaseHTTPRequestHandler):
                 self.envoyer(200, {'ok': True})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return
+            if u.path == '/api/liens-controle':  # contrôle complet, en arrière-plan
+                return self.envoyer(200, {'ok': liens.lancer_controle(toutes_les_fiches), **liens.resume()})
+            if u.path == '/api/liens-fiche':  # après un enregistrement : adresses nouvelles ou en défaut
+                return self.envoyer(200, {'ok': True, 'liens_defaut': controler_liens_fiche(d['f'], int(d['l']))})
+            if u.path == '/api/liens-bon':  # « à vérifier » ouvert à la main et trouvé bon
+                liens.marquer_bon(d['url'])
+                return self.envoyer(200, {'ok': True})
             if u.path == '/api/build':
                 return self.envoyer(200, lancer_build())
             return self.envoyer(404, {'erreur': 'introuvable'})
