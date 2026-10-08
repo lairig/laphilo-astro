@@ -49,7 +49,7 @@ SAUVEGARDES = os.path.join(os.path.dirname(BASE), 'groupes', 'sauvegarde', 'edit
 PORT = 8765
 # Version du code : un éditeur relancé après une mise à jour remplace l'ancien encore ouvert
 def version_fichiers():
-    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py', 'publier.py', 'dates.py')))
+    return str(max(os.path.getmtime(os.path.join(ICI, n)) for n in ('serveur.py', 'index.html', 'liens.py', 'publier.py', 'dates.py', 'statsgoogle.py')))
 
 
 VERSION = version_fichiers()
@@ -78,6 +78,7 @@ sys.path.insert(0, ICI)
 import liens  # noqa: E402  contrôle des liens morts
 import publier  # noqa: E402  bouton « Publier »
 import dates  # noqa: E402  contrôle des dates par Wikidata (philosophes vivants décédés…)
+import statsgoogle  # noqa: E402  bouton « Google » : chiffres Search Console et indexation des fiches
 
 _spec = importlib.util.spec_from_file_location('build_data', os.path.join(BASE, 'scripts', 'build-data.py'))
 bd = importlib.util.module_from_spec(_spec)
@@ -190,6 +191,58 @@ def philosophes_slug_texte():
             if nom:
                 out.append((bd.slugify(str(nom)), valeur(c, v, 'texte_html')))
     return out
+
+
+def page_fiche(slug, courant=False):
+    """Chemin de la page publiée d'une fiche (clé des statistiques Google)."""
+    return f"/{'courants' if courant else 'philosophes'}/{slug}/"
+
+
+def google_ligne(slug, courant=False):
+    """Pour la liste : affichages des 90 derniers jours et état d'indexation."""
+    g = statsgoogle.etat()
+    ch = page_fiche(slug, courant)
+    x = g['pages'].get(ch) or {}
+    return {'g_i': x.get('i', 0), 'g_c': x.get('c', 0), 'g_idx': statsgoogle.categorie(g['index'].get(ch))}
+
+
+def toutes_les_pages():
+    """[chemin] de toutes les fiches, philosophes puis courants (pour le contrôle d'indexation)."""
+    out = []
+    for f in list(bd.PHILOSOPHE_FICHIERS) + list(bd.COURANT_FICHIERS):
+        c = classeur(f)
+        for v in c['lignes'].values():
+            nom = valeur(c, v, 'nom')
+            if nom:
+                out.append(page_fiche(bd.slugify(str(nom)), est_courant(f)))
+    return list(dict.fromkeys(out))
+
+
+def liste_google():
+    """Bilan du bouton « Google » : indexation par état, fiches les plus vues, autres pages du site."""
+    g = statsgoogle.etat()
+    fiches, chemins = [], set()
+    for f in list(bd.PHILOSOPHE_FICHIERS) + list(bd.COURANT_FICHIERS):
+        c = classeur(f)
+        for r, v in c['lignes'].items():
+            nom = valeur(c, v, 'nom')
+            if not nom:
+                continue
+            ch = page_fiche(bd.slugify(str(nom)), est_courant(f))
+            chemins.add(ch)
+            x = g['pages'].get(ch) or {}
+            fiches.append({'f': f, 'l': r, 'nom': str(nom), 'courant': est_courant(f), 'chemin': ch,
+                           'i': x.get('i', 0), 'c': x.get('c', 0), 'p': x.get('p'),
+                           'idx': statsgoogle.categorie(g['index'].get(ch))})
+    par_etat = {}
+    for x in fiches:
+        par_etat[x['idx']] = par_etat.get(x['idx'], 0) + 1
+    vues = sorted([x for x in fiches if x['i']], key=lambda x: (-x['c'], -x['i']))
+    autres = sorted(([ch, x['i'], x['c'], x['p']] for ch, x in g['pages'].items() if ch not in chemins),
+                    key=lambda y: (-y[2], -y[1]))
+    return {**statsgoogle.resume(), 'total': len(fiches), 'par_etat': par_etat, 'libelles': statsgoogle.LIBELLES,
+            'vues': vues, 'autres': autres[:40],
+            'totaux': {'i': sum(x['i'] for x in fiches), 'c': sum(x['c'] for x in fiches)}}
 
 
 def liste_dates():
@@ -361,6 +414,7 @@ def liste_courants():
                 'groupe': valeur(c, v, 'groupe') or '', 'image': '', 'image_prevue': '',
                 'video': bool(valeur(c, v, 'youtube_id')), 'photo': bool(valeur(c, v, 'image_media')) and photo_ok,
                 'annee': bd.to_int(valeur(c, v, 'annee_naissance')), 'nb_phi': len(R.get(str(nom).strip(), [])),
+                **google_ligne(bd.slugify(str(nom)), True),
             })
     return out
 
@@ -388,6 +442,7 @@ def liste_fiches(type_='philosophes'):
                 'image_prevue': img, 'video': bool(valeur(c, v, 'youtube_id')),
                 'photo': bool(valeur(c, v, 'image_media')) and photo_ok,
                 'annee': bd.to_int(valeur(c, v, 'annee_naissance')),
+                **google_ligne(bd.slugify(str(nom))),
             })
     return out
 
@@ -416,6 +471,8 @@ def lire_fiche(f, l):
             'liens_controle': liens.etat().get('date', ''),
             'dates_anomalies': [] if est_courant(f) else anomalies_ligne(c, v),
             'dates_controle': dates.etat().get('date', ''),
+            'google': {**statsgoogle.de_la_page(page_fiche(bd.slugify(str(champs.get('Nom', ''))), est_courant(f))),
+                       'releve': statsgoogle.etat().get('date', ''), 'periode': statsgoogle.etat().get('periode', [])},
             'historique_propose': fichier_historique_propose(f, l) if f in bd.FICHIERS_VIVANTS else ''}
 
 
@@ -1103,6 +1160,8 @@ class Gestion(BaseHTTPRequestHandler):
                 return self.envoyer(200, infos_youtube(q.get('url', '')))
             if u.path == '/api/dates':  # écarts avec Wikidata + état du contrôle
                 return self.envoyer(200, liste_dates() if q.get('fiches') else dates.resume())
+            if u.path == '/api/google':  # chiffres Search Console et indexation des fiches
+                return self.envoyer(200, liste_google() if q.get('fiches') else statsgoogle.resume())
             if u.path == '/api/publication':  # état de la publication en cours (suivi des étapes)
                 return self.envoyer(200, publier.suivi_public())
             if u.path == '/api/liens-morts':  # fiches en défaut + état du contrôle complet
@@ -1166,6 +1225,9 @@ class Gestion(BaseHTTPRequestHandler):
             if u.path == '/api/dates-ignorer':  # la fiche a raison : écart plus signalé
                 dates.ignorer(d['cle'])
                 return self.envoyer(200, {'ok': True})
+            if u.path == '/api/google-controle':  # chiffres + indexation (quota du jour), en arrière-plan
+                ok = statsgoogle.lancer_controle(toutes_les_pages) if d.get('index') else statsgoogle.lancer_chiffres()
+                return self.envoyer(200, {'ok': ok, **statsgoogle.resume()})
             if u.path == '/api/deplacer':  # philosophe décédé : fichier « actif » -> fichier historique
                 l, perdues = deplacer_fiche(d['f'], int(d['l']), d['cible'], d.get('deces'))
                 return self.envoyer(200, {'ok': True, 'f': d['cible'], 'ligne': l, 'perdues': perdues})

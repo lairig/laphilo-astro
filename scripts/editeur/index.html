@@ -50,6 +50,7 @@
   #liste .nom b { display: block; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #liste .nom small { color: var(--parch2); opacity: .8; }
   .pastille { font-size: .7rem; padding: 0 .3rem; border-radius: 3px; }
+  .pastille.g { color: #b9d3f0; border: 1px solid #4d79a8; }
   #liste .ouvrir { flex: none; padding: .1rem .4rem; border-radius: 4px; color: var(--or); text-decoration: none; font-size: 1rem; }
   #liste .ouvrir:hover { background: var(--rouille); color: #fff8e6; }
   .bouton-lien { align-self: center; padding: .3rem .7rem; border: 1px solid var(--or); border-radius: 4px; color: var(--parch); text-decoration: none; font-size: .88rem; white-space: nowrap; }
@@ -106,6 +107,30 @@
   .defauts .df-act { display: flex; gap: .25rem; flex-wrap: wrap; justify-content: flex-end; }
   .defauts button, .defauts .bouton-lien { padding: .12rem .5rem; font-size: .8rem; background: #fffbef; color: var(--encre); border-color: #b8923c; }
   .defauts button:hover { background: #f3e2b0; }
+  /* Google (Search Console) : encadré discret en tête de fiche */
+  #google-fiche:empty { display: none; }
+  .google { margin: 0 0 1rem; border: 1px solid #b9c7d8; border-radius: 6px; background: #f2f6fb; color: var(--encre); font-size: .88rem; }
+  .google summary { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .8rem; padding: .4rem .8rem; cursor: pointer; list-style: none; }
+  .google summary::-webkit-details-marker { display: none; }
+  .google summary::before { content: '▸'; color: #23415f; }
+  .google[open] summary::before { content: '▾'; }
+  .google .g-titre { font-weight: 600; color: #23415f; }
+  .google .g-etat { font-size: .76rem; padding: .05rem .4rem; border-radius: 3px; background: #dfe6ef; color: #23415f; }
+  .google .g-etat[data-c=indexee] { background: #dcefdc; color: #1f5e22; }
+  .google .g-etat[data-c=detectee], .google .g-etat[data-c=exploree] { background: #fbe9c4; color: #7a4c05; }
+  .google .g-etat[data-c=inconnue], .google .g-etat[data-c=autre] { background: #f6d2cc; color: #8e1d12; }
+  .google .g-corps { padding: .1rem .8rem .6rem; border-top: 1px solid #dbe3ee; }
+  .google table { border-collapse: collapse; width: 100%; margin-top: .4rem; font-size: .84rem; }
+  .google th, .google td { text-align: right; padding: .15rem .4rem; border-bottom: 1px solid #e3e9f1; }
+  .google th:first-child, .google td:first-child { text-align: left; }
+  .google .aide { color: #5a6b80; }
+  .table-google { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  .table-google th, .table-google td { text-align: right; padding: .2rem .45rem; border-bottom: 1px solid #d8c48c; }
+  .table-google th:first-child, .table-google td:first-child { text-align: left; }
+  .table-google tr[data-i] { cursor: pointer; }
+  .table-google tr[data-i]:hover { background: #f3e2b0; }
+  .etats-google { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+  .etats-google span { padding: .2rem .55rem; border-radius: 4px; background: #efe0b4; font-size: .86rem; }
   .barre-progres { height: 10px; border-radius: 5px; background: #e6d8b4; overflow: hidden; margin: .5rem 0; }
   .barre-progres span { display: block; height: 100%; background: var(--rouille); transition: width .4s; }
   .ligne-defaut { display: grid; grid-template-columns: 1fr auto; gap: .2rem .7rem; padding: .4rem 0; border-bottom: 1px solid #d8c48c; cursor: pointer; }
@@ -212,6 +237,7 @@
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
+  <button id="btn-google" title="Fiches sur Google (Search Console) : pages indexées ou non, affichages et clics des 90 derniers jours">Google <span id="nb-google"></span></button>
   <button id="btn-wikidata" title="Dates des philosophes comparées à Wikidata : philosophes vivants décédés depuis, années différentes">Dates <span id="nb-dates"></span></button>
   <button id="btn-liens"title="Contrôle des liens de toutes les fiches (textes, audio et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
   <button id="btn-images"title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
@@ -239,6 +265,13 @@
         <option value="court">Texte court (moins de 1 200 car.)</option>
         <option value="sous">Sous la référence (moins de 1 380 car.)</option>
         <option value="sans-lien">Sans lien dans le texte</option>
+      </select>
+      <select id="f-google" title="D’après le dernier relevé du bouton « Google » (Search Console)">
+        <option value="">Google : toutes les fiches</option>
+        <option value="vues">Vues sur Google (les plus vues d’abord)</option>
+        <option value="indexee">Indexées par Google</option>
+        <option value="non">Pas indexées</option>
+        <option value="non_verifiee">Indexation pas encore vérifiée</option>
       </select>
       <div class="cases">
         <label class="seulement-philo" style="flex-direction:row;align-items:center;color:inherit"><input type="checkbox" id="f-sans-image"> Sans image</label>
@@ -332,6 +365,13 @@ const TEXTE_FILTRES = {
   sous: (x) => x.lg < TEXTE_MIN,
   'sans-lien': (x) => !x.liens,
 };
+/* filtre Google (dernier relevé Search Console, serveur statsgoogle.py) */
+const GOOGLE_FILTRES = {
+  vues: (x) => x.g_i > 0,
+  indexee: (x) => x.g_idx === 'indexee',
+  non: (x) => !['indexee', 'non_verifiee'].includes(x.g_idx ?? 'non_verifiee'),
+  non_verifiee: (x) => (x.g_idx ?? 'non_verifiee') === 'non_verifiee',
+};
 /* même calcul que mesure_texte() dans serveur.py : texte lu sans balises ni audio ;
    le lien Wikipédia du nom, en tête, n'est pas compté */
 function mesureTexte(h) {
@@ -360,12 +400,14 @@ function afficherListe() {
   const q = norm($('#q').value), ff = $('#f-fichier').value, fg = $('#f-groupe').value;
   const si = !COURANTS() && $('#f-sans-image').checked, sv = $('#f-sans-video').checked, ft = $('#f-texte').value, fc = $('#f-court').checked;
   const sl = $('#f-sans-lien').checked, lm = $('#f-liens-morts').checked, fd = !COURANTS() && $('#f-dates').checked;
-  const fp = COURANTS() ? $('#f-phi').value : '';
+  const fp = COURANTS() ? $('#f-phi').value : '', fgo = $('#f-google').value;
   const L = FICHES.filter((x) => (!q || norm(x.nom).includes(q)) && (!ff || x.f === ff) && (!fg || x.groupe === fg)
     && (!si || !x.image) && (!sv || (!x.video && !x.photo)) && (!ft || TEXTE_FILTRES[ft](x)) && (!fc || x.lg < TEXTE_MIN)
-    && (!sl || !x.liens) && (!lm || x.morts || x.douteux) && (!fd || x.decede || x.ecart_dates) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1)));
-  // filtre de texte : du plus court (le pire) au plus long ; liens morts : les morts sûrs d'abord
+    && (!sl || !x.liens) && (!lm || x.morts || x.douteux) && (!fd || x.decede || x.ecart_dates) && (fp === '' || x.nb_phi <= +fp && (fp !== '1' || x.nb_phi === 1))
+    && (!fgo || GOOGLE_FILTRES[fgo](x)));
+  // filtre de texte : du plus court (le pire) au plus long ; liens morts : les morts sûrs d'abord ; Google : les plus vues d'abord
   L.sort(ft || fc ? (a, b) => a.lg - b.lg
+    : fgo === 'vues' ? (a, b) => (b.g_c - a.g_c) || (b.g_i - a.g_i)
     : fd ? (a, b) => (b.decede - a.decede) || (a.annee ?? 0) - (b.annee ?? 0)
     : lm ? (a, b) => (b.morts - a.morts) || (b.douteux - a.douteux) || (a.annee ?? 0) - (b.annee ?? 0)
     : (a, b) => (a.annee ?? 0) - (b.annee ?? 0));
@@ -382,6 +424,7 @@ function afficherListe() {
       ${x.morts ? `<span class="pastille sans" title="Lien${x.morts > 1 ? 's' : ''} mort${x.morts > 1 ? 's' : ''} (texte ou vidéo principale)">✗ ${x.morts}</span>` : ''}
       ${x.decede ? '<span class="pastille sans" title="Décédé(e) selon Wikidata : fiche encore parmi les vivants">†</span>' : ''}
       ${x.ecart_dates ? '<span class="pastille moyen" title="Année(s) différente(s) de Wikidata">date</span>' : ''}
+      ${fgo && x.g_i ? `<span class="pastille g" title="Google, 90 derniers jours : ${x.g_i} affichage${x.g_i > 1 ? 's' : ''} dans les résultats, ${x.g_c} clic${x.g_c > 1 ? 's' : ''}">${x.g_c ? x.g_c + ' clic' + (x.g_c > 1 ? 's' : '') : x.g_i + ' vue' + (x.g_i > 1 ? 's' : '')}</span>` : ''}
       ${x.douteux ? `<span class="pastille moyen" title="Lien${x.douteux > 1 ? 's' : ''} à vérifier à la main (site qui bloque les vérifications automatiques…)">? ${x.douteux}</span>` : ''}
       <a class="ouvrir" href="${apercu(x.slug)}" target="_blank" rel="noopener" title="Voir la page sur le site local, à jour de vos modifications (nouvel onglet)">↗</a>
     </li>`).join('');
@@ -392,7 +435,7 @@ $('#liste').addEventListener('click', (e) => {
   if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
   ouvrir(li.dataset.f, +li.dataset.l);
 });
-['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-liens-morts', '#f-dates', '#f-phi'].forEach((s) => $(s).addEventListener('input', afficherListe));
+['#q', '#f-fichier', '#f-groupe', '#f-texte', '#f-sans-image', '#f-sans-video', '#f-court', '#f-sans-lien', '#f-liens-morts', '#f-dates', '#f-phi', '#f-google'].forEach((s) => $(s).addEventListener('input', afficherListe));
 
 /* ── Changer de mode (philosophes / courants) ──────────── */
 async function changerMode(m) {
@@ -435,6 +478,7 @@ async function ouvrir(f, l) {
   brancher(d);
   afficherDefauts(d.liens_defaut || [], d.liens_controle);
   afficherDates(d);
+  afficherGoogle(d);
   afficherListe();
   $('#defile').scrollTop = 0;
 }
@@ -457,6 +501,7 @@ function gabarit(d) {
       <a class="bouton-lien" href="${apercu(d.slug)}" target="_blank" rel="noopener" title="La page sur le site local, à jour de vos modifications (le site local est lancé ou redémarré si besoin)">↗ Aperçu local</a></div>
     <div id="dates-defaut"></div>
     <div id="liens-defaut"></div>
+    <div id="google-fiche"></div>
 
     <section class="bloc"><h3>Identité</h3>
       <div class="grille">
@@ -1402,6 +1447,97 @@ $('#btn-wikidata').onclick = async () => {
   dessiner();
 };
 
+/* ── Google : Search Console (serveur statsgoogle.py) ───── */
+const nb = (n) => Number(n || 0).toLocaleString('fr-FR');
+const jourCourt = (s) => (s ? new Date(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
+const periodeGoogle = (p) => (p && p.length === 2 ? `du ${jourCourt(p[0])} au ${jourCourt(p[1])}` : '');
+function afficherGoogle(d) {
+  const boite = $('#google-fiche'); if (!boite) return;
+  const g = d.google;
+  if (!g || (!g.releve && !g.index)) { boite.innerHTML = ''; return; }  // aucun relevé encore : rien à montrer
+  const x = g.chiffres, ix = g.index;
+  const resume = x && x.i ? `${nb(x.i)} affichage${x.i > 1 ? 's' : ''} · ${nb(x.c)} clic${x.c > 1 ? 's' : ''} · position ${String(x.p).replace('.', ',')}`
+    : 'pas encore vue dans les résultats de Google';
+  boite.innerHTML = `<details class="google"><summary><span class="g-titre">Google</span>
+      <span class="g-etat" data-c="${g.categorie}">${esc(g.libelle)}</span><span>${resume}</span></summary>
+    <div class="g-corps">
+      <p class="aide">${g.periode?.length ? `Chiffres des 90 derniers jours (${periodeGoogle(g.periode)}). ` : ''}
+        ${ix ? `Indexation vérifiée le ${dateControle(ix.date)}${ix.crawl ? ` · dernière visite de Google : ${jourCourt(ix.crawl)}` : ''}${ix.etat ? ` · « ${esc(ix.etat)} »` : ''}.` : 'Indexation pas encore vérifiée (bouton « Google » en haut).'}
+        ${ix?.canon ? `<br><b>Google a choisi une autre adresse comme page de référence :</b> ${esc(ix.canon)}` : ''}</p>
+      ${g.requetes.length ? `<table><tr><th>Recherches qui ont mené à la fiche</th><th>Affichages</th><th>Clics</th><th>Position</th></tr>
+        ${g.requetes.map((q) => `<tr><td>${esc(q[0])}</td><td>${nb(q[1])}</td><td>${nb(q[2])}</td><td>${String(q[3]).replace('.', ',')}</td></tr>`).join('')}</table>`
+        : x && x.i ? '<p class="aide">Google ne détaille pas les recherches quand elles sont trop rares (confidentialité).</p>' : ''}
+    </div></details>`;
+}
+async function majNbGoogle() {
+  try {
+    const r = await api('/api/google');
+    $('#nb-google').textContent = r.progression.en_cours ? '(relevé…)' : '';
+    return r;
+  } catch { return null; }
+}
+let suiviGoogle = null;
+$('#btn-google').onclick = async () => {
+  msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Lecture…</p>'; fenetre.showModal();
+  const dessiner = async () => {
+    if (!fenetre.open) { clearInterval(suiviGoogle); suiviGoogle = null; return; }
+    let r;
+    try { r = await api('/api/google?fiches=1'); }
+    catch (e) {
+      clearInterval(suiviGoogle); suiviGoogle = null;
+      $('#fenetre-corps').innerHTML = e.message === 'introuvable'
+        ? '<h2>Google</h2><p><b>L’éditeur a été mis à jour pendant qu’il tournait.</b> Fermez sa fenêtre noire, puis relancez-le avec l’icône « Éditeur LaPhilo ».</p>'
+        : `<h2>Google</h2><div class="pub-erreur">${esc(e.message)}</div>`;
+      return;
+    }
+    const p = r.progression;
+    const ordre = ['indexee', 'detectee', 'exploree', 'inconnue', 'autre', 'non_verifiee'];
+    const reste = r.total - r.verifiees;
+    $('#fenetre-corps').innerHTML = `<h2>Les fiches sur Google</h2>
+      <p class="aide">Chiffres de Google Search Console. <b>Affichages</b> : nombre de fois où la fiche est apparue dans les résultats d’une recherche Google ;
+        <b>clics</b> : visites venues de Google ; <b>position</b> : rang moyen dans les résultats (1 = en tête).
+        <b>Indexée</b> : Google a mis la page dans son index et peut la montrer. <b>Détectée, pas encore indexée</b> : Google connaît l’adresse mais n’est pas encore venu la lire.
+        Google ne permet de vérifier l’indexation que d’environ 2 000 pages par jour : chaque relevé reprend les fiches vérifiées depuis le plus longtemps.</p>
+      ${p.en_cours ? `<p><b>Relevé en cours</b> — ${esc(p.phase)}${p.total ? ` : ${nb(p.fait)} / ${nb(p.total)}` : ''}</p>
+          <div class="barre-progres"><span style="width:${p.total ? Math.round(100 * p.fait / p.total) : 2}%"></span></div>
+          <p class="aide">${p.total ? 'Environ 10 minutes pour toutes les fiches. ' : ''}Vous pouvez fermer cette fenêtre et continuer à travailler.</p>`
+        : `<p>${r.date ? `Dernier relevé : <b>${dateControle(r.date)}</b> (chiffres ${periodeGoogle(r.periode)})` : 'Aucun relevé pour l’instant.'}</p>
+           <p><button type="button" class="principal" id="btn-google-tout" ${r.quota_restant ? '' : 'disabled'}>Relever les chiffres et vérifier l’indexation</button>
+             <button type="button" id="btn-google-chiffres">Seulement les chiffres</button>
+             <small class="aide">${r.quota_restant ? `${nb(Math.min(r.quota_restant, r.total))} fiches vérifiables aujourd’hui` : 'quota Google du jour épuisé : demain'}${reste > 0 ? ` · ${nb(reste)} jamais vérifiées` : ''}</small></p>`}
+      ${p.erreur ? `<div class="pub-erreur">${esc(p.erreur)}</div>` : ''}
+      ${(r.plans || []).map((x) => `<p class="aide">Plan du site (sitemap) envoyé à Google le ${jourCourt(x.envoye)}, lu par Google le ${x.lu ? jourCourt(x.lu) : '— pas encore'} :
+        ${nb(x.adresses)} adresses${x.erreurs ? `, <b>${x.erreurs} erreur(s)</b>` : ''}. Une page nouvelle met souvent plusieurs semaines à entrer dans l’index de Google.</p>`).join('')}
+      ${r.verifiees ? `<h3 style="margin:.8rem 0 .2rem">Indexation des ${nb(r.total)} fiches</h3>
+        <div class="etats-google">${ordre.filter((k) => r.par_etat[k]).map((k) => `<span>${esc(r.libelles[k])} : <b>${nb(r.par_etat[k])}</b></span>`).join('')}</div>
+        <p class="aide">Pour voir les fiches d’un état : filtre « Google » au-dessus de la liste.</p>` : ''}
+      ${r.date ? `<h3 style="margin:.8rem 0 .2rem">Fiches vues sur Google (${nb(r.vues.length)}) — ${nb(r.totaux.i)} affichages, ${nb(r.totaux.c)} clics</h3>
+        ${r.vues.length ? `<table class="table-google"><tr><th>Fiche</th><th>Affichages</th><th>Clics</th><th>Position</th></tr>
+          ${r.vues.map((x, i) => `<tr data-i="${i}"><td><b>${esc(x.nom)}</b> <small>${x.courant ? 'courant' : ''}</small></td><td>${nb(x.i)}</td><td>${nb(x.c)}</td><td>${String(x.p ?? '').replace('.', ',')}</td></tr>`).join('')}</table>`
+          : '<p>Aucune fiche n’est encore apparue dans les résultats de Google.</p>'}
+        ${r.autres.length ? `<details style="margin-top:.8rem"><summary class="aide" style="cursor:pointer">Autres pages du site vues sur Google (frises, accueil, anciennes adresses…) : ${r.autres.length}</summary>
+          <table class="table-google"><tr><th>Page</th><th>Affichages</th><th>Clics</th><th>Position</th></tr>
+          ${r.autres.map((y) => `<tr><td>${esc(y[0])}</td><td>${nb(y[1])}</td><td>${nb(y[2])}</td><td>${String(y[3] ?? '').replace('.', ',')}</td></tr>`).join('')}</table></details>` : ''}` : ''}`;
+    const lancer = async (index) => {
+      await api('/api/google-controle', { index }); majNbGoogle(); dessiner();
+      if (!suiviGoogle) suiviGoogle = setInterval(dessiner, 2000);
+    };
+    $('#btn-google-tout')?.addEventListener('click', () => lancer(true));
+    $('#btn-google-chiffres')?.addEventListener('click', () => lancer(false));
+    $('#fenetre-corps').querySelectorAll('.table-google tr[data-i]').forEach((el) => (el.onclick = async () => {
+      const x = r.vues[+el.dataset.i];
+      if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+      if (x.courant !== COURANTS()) { courante = null; await changerMode(x.courant ? 'courants' : 'philosophes'); }
+      fenetre.close();
+      await ouvrir(x.f, x.l);
+      $('#google-fiche details')?.setAttribute('open', '');
+    }));
+    if (!p.en_cours && suiviGoogle) { clearInterval(suiviGoogle); suiviGoogle = null; chargerListe(); majNbGoogle(); }
+    if (p.en_cours && !suiviGoogle) suiviGoogle = setInterval(dessiner, 2000);
+  };
+  dessiner();
+};
+
 /* ── Publier (serveur publier.py) ──────────────────────── */
 let suiviPub = null;
 const ICONES_ETAPE = { '': '○', en_cours: '↻', ok: '✓', echec: '✗', saute: '–' };
@@ -1488,7 +1624,7 @@ $('#btn-publier').onclick = async () => {
     `<datalist id="dl-fam">${Object.entries(CODES.familles || {}).flatMap(([n, l]) => l.map((f) => `<option value="${esc(f)}" label="${n}">`)).join('')}</datalist>` +
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
-  majNbImages(); majNbLiens(); majNbDates();
+  majNbImages(); majNbLiens(); majNbDates(); majNbGoogle();
   api('/api/publication').then((s) => { if (s.en_cours) suivrePublication(); }).catch(() => {});
   $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
