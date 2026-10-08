@@ -1,6 +1,7 @@
 """
-Contrôle des liens des fiches pour l'éditeur : liens du texte (Texte_HTML) et vidéo
-principale (YouTube_ID), philosophes et courants.
+Contrôle des liens des fiches pour l'éditeur : liens du texte (Texte_HTML), fichier du
+lecteur audio (<audio> du texte, podcasts Radio France) et vidéo principale (YouTube_ID),
+philosophes et courants.
 
 Le résultat est gardé par adresse dans liens-etat.json (à côté de ce fichier, non publié) :
   {"date": "...", "urls": {adresse: [statut, détail]}}
@@ -77,36 +78,48 @@ def video_url(vid):
 
 
 def liens_de(texte, yt_id=''):
-    """[(adresse, mots, est_video_principale)] d'une fiche, sans doublon d'adresse."""
+    """[(adresse, mots, genre)] d'une fiche, sans doublon d'adresse ;
+    genre : 'video' (vidéo principale), 'audio' (lecteur audio du texte) ou '' (lien du texte)."""
     out, vus = [], set()
+    texte = str(texte or '')
     vid = str(yt_id or '').strip()
     if vid:
-        out.append((video_url(vid), 'Vidéo principale', True)); vus.add(video_url(vid))
-    for m in re.finditer(r'<a\s[^>]*?href="([^"]*)"[^>]*>(.*?)</a>', str(texte or ''), re.S | re.I):
+        out.append((video_url(vid), 'Vidéo principale', 'video')); vus.add(video_url(vid))
+    for m in re.finditer(r'<audio\b(.*?)</audio>', texte, re.S | re.I):
+        src = re.search(r'\bsrc="([^"]*)"', m.group(1))
+        url = H.unescape(src.group(1).strip()) if src else ''
+        if url and url not in vus:
+            vus.add(url)
+            t = re.search(r'\btitle="([^"]*)"', m.group(1))
+            out.append((url, 'Audio : ' + (H.unescape(t.group(1)).strip() if t else 'sans titre'), 'audio'))
+    texte = re.sub(r'<audio\b.*?</audio>', '', texte, flags=re.S | re.I)
+    for m in re.finditer(r'<a\s[^>]*?href="([^"]*)"[^>]*>(.*?)</a>', texte, re.S | re.I):
         url = H.unescape(m.group(1).strip())
         if url in vus or url.startswith(('mailto:', '#')):
             continue
         vus.add(url)
         mots = re.sub(r'\s+', ' ', H.unescape(re.sub(r'<[^>]+>', '', m.group(2)))).strip()
-        out.append((url, mots, False))
+        out.append((url, mots, ''))
     return out
 
 
 def defauts_de(texte, yt_id=''):
     """Liens en défaut d'une fiche d'après le dernier contrôle."""
     res = []
-    for url, mots, video in liens_de(texte, yt_id):
+    for url, mots, genre in liens_de(texte, yt_id):
         s = statut(url)
         if s and s[0] in DEFAUTS:
-            res.append({'url': url, 'mots': mots, 'video': video, 'statut': s[0], 'detail': s[1]})
+            res.append({'url': url, 'mots': mots, 'video': genre == 'video', 'audio': genre == 'audio',
+                        'statut': s[0], 'detail': s[1]})
     return res
 
 
 # ── Vérifications ──────────────────────────────────────────────────────────
-def lire(url, ua=UA_NAV, methode='GET', timeout=20):
+def lire(url, ua=UA_NAV, methode='GET', timeout=20, max_octets=None):
+    """max_octets : ne lit que le début de la réponse (pages et fichiers audio : seul le code compte)."""
     req = urllib.request.Request(url, method=methode, headers={'User-Agent': ua, 'Accept-Language': 'fr,en;q=0.8'})
     with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
-        return r.status, r.geturl(), (r.read() if methode == 'GET' else b'')
+        return r.status, r.geturl(), (r.read(max_octets) if methode == 'GET' else b'')
 
 
 def est_wiki(u):
@@ -211,7 +224,7 @@ def verifier_autre(u):
                 lire(u, methode='HEAD')
             except urllib.error.HTTPError as e:
                 if e.code in (403, 405, 400, 501):
-                    lire(u)
+                    lire(u, max_octets=65536)
                 else:
                     raise
             return ('OK', '')
@@ -234,9 +247,18 @@ def verifier_autre(u):
             return ('A VERIFIER', f'vérification impossible ({msg[:100]})')
 
 
-def verifier(urls, videos=(), avance=lambda n: None):
-    """{url: (statut, détail)} ; videos = adresses des vidéos principales."""
-    videos = set(videos)
+def verifier_audio(u):
+    """Fichier audio (podcasts Radio France) : seul le code de réponse compte."""
+    st, det = verifier_autre(u)
+    # le stockage de Radio France répond 403 (AccessDenied) pour un fichier supprimé
+    if st == 'MORT' or det.startswith('le site répond 403'):
+        return ('MORT', 'fichier audio introuvable : podcast retiré ou déplacé par la radio')
+    return (st, det.replace('le site répond', 'le serveur audio répond'))
+
+
+def verifier(urls, videos=(), avance=lambda n: None, audios=()):
+    """{url: (statut, détail)} ; videos = adresses des vidéos principales, audios = fichiers des lecteurs audio."""
+    videos, audios = set(videos), set(audios)
     wk = [u for u in urls if est_wiki(u)]
     yt = [u for u in urls if u not in wk and youtube_id(u) is not None]
     au = [u for u in urls if u not in wk and u not in yt]
@@ -253,7 +275,7 @@ def verifier(urls, videos=(), avance=lambda n: None):
         res.update(zip(yt, ex.map(lambda u: un(u, lambda x: verifier_youtube(x, x in videos)), yt)))
     progression['phase'] = 'autres sites'
     with ThreadPoolExecutor(8) as ex:
-        res.update(zip(au, ex.map(lambda u: un(u, verifier_autre), au)))
+        res.update(zip(au, ex.map(lambda u: un(u, verifier_audio if u in audios else verifier_autre), au)))
     return res
 
 
@@ -274,19 +296,17 @@ def lancer_controle(toutes_les_fiches):
 
     def travail():
         try:
-            urls, videos = [], set()
+            urls, videos, audios = [], set(), set()
             for texte, yt in toutes_les_fiches():
-                for u, _, video in liens_de(texte, yt):
-                    if video:
-                        videos.add(u)
-                    if u not in urls:
-                        urls.append(u)
+                for u, _, genre in liens_de(texte, yt):
+                    (videos if genre == 'video' else audios if genre == 'audio' else set()).add(u)
+                    urls.append(u)
             urls = list(dict.fromkeys(urls))
             progression['total'] = len(urls)
 
             def avance(n):
                 progression['fait'] += n
-            res = verifier(urls, videos, avance)
+            res = verifier(urls, videos, avance, audios)
             # les adresses qui ne sont plus dans aucune fiche sont oubliées
             garder = set(urls)
             etat()['urls'] = {u: v for u, v in etat()['urls'].items() if u in garder}
@@ -307,7 +327,7 @@ def controler_fiche(texte, yt_id=''):
     L = liens_de(texte, yt_id)
     a_voir = [u for u, _, _ in L if (statut(u) or ['?'])[0] not in ('OK', 'OK_MAIN')]
     if a_voir:
-        enregistrer(verifier(a_voir, [u for u, _, v in L if v]))
+        enregistrer(verifier(a_voir, [u for u, _, g in L if g == 'video'], audios=[u for u, _, g in L if g == 'audio']))
         sauver()
     return defauts_de(texte, yt_id)
 

@@ -199,7 +199,7 @@
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
-  <button id="btn-liens" title="Contrôle des liens de toutes les fiches (textes et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
+  <button id="btn-liens" title="Contrôle des liens de toutes les fiches (textes, audio et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
   <button id="btn-images"title="Convertir en webp les jpg de pho-jpg attendus par des fiches">Images en attente <span id="nb-images"></span></button>
   <button id="btn-domaines" title="Sites qui refusent de s'afficher dans le panneau latéral : ouverts en petite fenêtre">Sites en fenêtre</button>
   <button id="btn-build" title="Relance build-data : régénère les données du site et liste les erreurs de saisie">Vérifier les données</button>
@@ -1042,14 +1042,17 @@ function afficherDefauts(defauts, date) {
     <ul>${defauts.map((x, i) => `<li data-i="${i}"><span class="df-st ${x.statut === 'MORT' ? '' : 'doute'}">${x.statut === 'MORT' ? 'mort' : 'à vérifier'}</span>
       <span><b>${esc(x.video ? 'Vidéo principale' : x.mots || '(sans mots)')}</b><span class="df-det">${esc(x.detail)}</span>
         <span class="df-url" title="${esc(x.url)}">${esc(decodeURIComponent(x.url.replace(/^https?:\/\/(www\.)?/, '')).slice(0, 140))}</span></span>
-      <span class="df-act"><button type="button" data-df="voir" title="${x.video ? 'Aller au champ de la vidéo' : 'Montrer ce lien dans le texte'}">Repérer</button>
+      <span class="df-act"><button type="button" data-df="voir" title="${x.video ? 'Aller au champ de la vidéo' : x.audio ? 'Aller au bloc Audio' : 'Montrer ce lien dans le texte'}">Repérer</button>
         <a class="bouton-lien" href="${esc(x.url.startsWith('/') ? 'https://laphilo.fr' + x.url : x.url)}" target="_blank" rel="noopener" title="Ouvrir pour tester">↗</a>
         ${x.statut === 'MORT' ? '' : '<button type="button" data-df="bon" title="Le lien s’ouvre bien dans le navigateur : ne plus le signaler">Il marche</button>'}</span></li>`).join('')}</ul></div>`;
   boite.onclick = async (ev) => {
     const b = ev.target.closest('button[data-df]'); if (!b) return;
     const x = defauts[+b.closest('li').dataset.i];
     if (b.dataset.df === 'voir') {
-      if (x.video) { $('#yt-lien').scrollIntoView({ block: 'center', behavior: 'smooth' }); $('#yt-lien').focus({ preventScroll: true }); $('#yt-lien').select(); return; }
+      if (x.video || x.audio) {
+        const champ = $(x.video ? '#yt-lien' : '#audio-lien');
+        champ.scrollIntoView({ block: 'center', behavior: 'smooth' }); champ.focus({ preventScroll: true }); champ.select(); return;
+      }
       const i = [...$('#editeur-visuel').querySelectorAll('a')].findIndex((a) => a.getAttribute('href') === x.url);
       const bouton = $(`#liens-texte li[data-i="${i}"] [data-lt=voir]`);
       if (bouton) bouton.click(); else alert('Ce lien n’est plus dans le texte : enregistrez pour mettre à jour la liste.');
@@ -1104,7 +1107,7 @@ $('#btn-liens').onclick = async () => {
     const p = r.progression;
     const fiches = r.fiches;
     $('#fenetre-corps').innerHTML = `<h2>Liens morts</h2>
-      <p class="aide">Le contrôle vérifie toutes les adresses des textes et toutes les vidéos principales, philosophes et courants (${r.total ? r.total.toLocaleString('fr-FR') + ' adresses' : 'jamais fait'}).
+      <p class="aide">Le contrôle vérifie toutes les adresses des textes, les fichiers des lecteurs audio et toutes les vidéos principales, philosophes et courants (${r.total ? r.total.toLocaleString('fr-FR') + ' adresses' : 'jamais fait'}).
         <b>Mort</b> : page Wikipédia inexistante, vidéo supprimée, page introuvable, site disparu. <b>À vérifier</b> : sites qui bloquent les robots, vidéos privées… à ouvrir à la main (bouton « Il marche » sur la fiche s'il s'ouvre bien).</p>
       ${p.en_cours ? `<p><b>Contrôle en cours</b> — ${esc(p.phase)} : ${p.fait.toLocaleString('fr-FR')} / ${p.total.toLocaleString('fr-FR')}</p>
           <div class="barre-progres"><span style="width:${p.total ? Math.round(100 * p.fait / p.total) : 2}%"></span></div>
