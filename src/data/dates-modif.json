@@ -1143,6 +1143,14 @@
 "h": "475908a728",
 "d": "2026-10-05"
 },
+"philosophes/abu-hayyan-al-tawhidi": {
+"h": "96ca413e7d",
+"d": "2026-10-09"
+},
+"philosophes/abu-l-barakat-al-baghdadi": {
+"h": "6c26538ae1",
+"d": "2026-10-09"
+},
 "philosophes/abu-mansur-al-maturidi": {
 "h": "7e94794437",
 "d": "2026-10-07"
@@ -1235,6 +1243,10 @@
 "h": "aad2295490",
 "d": "2026-10-09"
 },
+"philosophes/al-juwayni": {
+"h": "cd35a653e2",
+"d": "2026-10-09"
+},
 "philosophes/al-khwarizmi": {
 "h": "1ad8c024dc",
 "d": "2026-09-29"
@@ -1250,6 +1262,10 @@
 "philosophes/al-razi": {
 "h": "84314f41d3",
 "d": "2026-10-07"
+},
+"philosophes/al-shahrastani": {
+"h": "51a939729c",
+"d": "2026-10-09"
 },
 "philosophes/alain-badiou": {
 "h": "883058be8b",
@@ -1466,6 +1482,10 @@
 "philosophes/amilcar-cabral": {
 "h": "20e88dfded",
 "d": "2026-10-05"
+},
+"philosophes/aminata-diaw": {
+"h": "d99d3d5f8f",
+"d": "2026-10-09"
 },
 "philosophes/ammonios-d-alexandrie": {
 "h": "bbe33602e2",
@@ -1687,6 +1707,14 @@
 "h": "480d2bd55f",
 "d": "2026-10-07"
 },
+"philosophes/aspasie-de-milet": {
+"h": "8a9df25d1b",
+"d": "2026-10-09"
+},
+"philosophes/athanase-d-alexandrie": {
+"h": "067a24df7a",
+"d": "2026-10-09"
+},
 "philosophes/atisha": {
 "h": "34261b6219",
 "d": "2026-10-05"
@@ -1774,6 +1802,10 @@
 "philosophes/bardesane": {
 "h": "4016bfb37e",
 "d": "2026-09-29"
+},
+"philosophes/barlaam-de-calabre": {
+"h": "fe485cd771",
+"d": "2026-10-09"
 },
 "philosophes/barry-loewer": {
 "h": "c667babc4a",
@@ -1915,6 +1947,10 @@
 "h": "c7fe675f34",
 "d": "2026-09-29"
 },
+"philosophes/brajendra-nath-seal": {
+"h": "a4a04cd666",
+"d": "2026-10-09"
+},
 "philosophes/brihaspati": {
 "h": "87f967a2ec",
 "d": "2026-10-05"
@@ -2006,6 +2042,10 @@
 "philosophes/catherine-larrere": {
 "h": "534a70aada",
 "d": "2026-10-07"
+},
+"philosophes/cesare-beccaria": {
+"h": "69725e90a5",
+"d": "2026-10-09"
 },
 "philosophes/chantal-mouffe": {
 "h": "9de3503e73",
@@ -2491,6 +2531,10 @@
 "h": "084e7b3c9c",
 "d": "2026-09-29"
 },
+"philosophes/eisai": {
+"h": "e89d9de7f0",
+"d": "2026-10-09"
+},
 "philosophes/eliane-escoubas": {
 "h": "b6c306ef74",
 "d": "2026-10-07"
@@ -2743,6 +2787,10 @@
 "h": "25ff70ec36",
 "d": "2026-10-07"
 },
+"philosophes/fenelon": {
+"h": "279e13c124",
+"d": "2026-10-09"
+},
 "philosophes/feng-youlan": {
 "h": "981bc7f8a6",
 "d": "2026-10-06"
@@ -2947,6 +2995,10 @@
 "h": "9f2654d82f",
 "d": "2026-09-29"
 },
+"philosophes/gabriel-bonnot-de-mably": {
+"h": "65b4f9c7cf",
+"d": "2026-10-09"
+},
 "philosophes/gabriel-madinier": {
 "h": "a165ecdb79",
 "d": "2026-09-29"
@@ -3058,6 +3110,10 @@
 "philosophes/georges-edward-moore": {
 "h": "fd258ca217",
 "d": "2026-10-07"
+},
+"philosophes/georges-fedotov": {
+"h": "3fc8a551ae",
+"d": "2026-10-09"
 },
 "philosophes/georges-florovsky": {
 "h": "10f2d030ef",
@@ -3427,6 +3483,10 @@
 "h": "6982dbd6a6",
 "d": "2026-10-06"
 },
+"philosophes/henri-corneille-agrippa": {
+"h": "db95b96fcb",
+"d": "2026-10-09"
+},
 "philosophes/henri-de-saint-simon": {
 "h": "0bd5117c9c",
 "d": "2026-10-06"
@@ -3541,6 +3601,10 @@
 },
 "philosophes/hippias-d-elis": {
 "h": "f4a7cd17a8",
+"d": "2026-10-09"
+},
+"philosophes/hippolyte-de-rome": {
+"h": "05305fa7ad",
 "d": "2026-10-09"
 },
 "philosophes/hippolyte-taine": {
@@ -3743,6 +3807,10 @@
 "h": "af4723f21c",
 "d": "2026-10-07"
 },
+"philosophes/jacques-benigne-bossuet": {
+"h": "bd2bf83e7f",
+"d": "2026-10-09"
+},
 "philosophes/jacques-bouveresse": {
 "h": "5f4b61bdf1",
 "d": "2026-10-06"
@@ -3858,6 +3926,10 @@
 "philosophes/jean-christophe-goddard": {
 "h": "7274dfd3b7",
 "d": "2026-10-07"
+},
+"philosophes/jean-chrysostome": {
+"h": "edabc5904b",
+"d": "2026-10-09"
 },
 "philosophes/jean-claude-margolin": {
 "h": "9759c9839a",
@@ -4255,6 +4327,10 @@
 "h": "9b2c3ab02e",
 "d": "2026-09-29"
 },
+"philosophes/juan-luis-vives": {
+"h": "1bea7a7a1d",
+"d": "2026-10-09"
+},
 "philosophes/juana-ines-de-la-cruz": {
 "h": "24311a3a32",
 "d": "2026-10-07"
@@ -4435,6 +4511,10 @@
 "h": "6df43f52fb",
 "d": "2026-10-04"
 },
+"philosophes/kiyoshi-miki": {
+"h": "80a96f7fd9",
+"d": "2026-10-09"
+},
 "philosophes/kojin-karatani": {
 "h": "bd842c5251",
 "d": "2026-10-07"
@@ -4554,6 +4634,10 @@
 "philosophes/lev-chestov": {
 "h": "f226ba0460",
 "d": "2026-10-06"
+},
+"philosophes/lev-karsavine": {
+"h": "3ab02c8213",
+"d": "2026-10-09"
 },
 "philosophes/lev-lopatine": {
 "h": "9d01a1d16b",
@@ -4678,6 +4762,10 @@
 "philosophes/ludwig-feuerbach": {
 "h": "b1b5bff237",
 "d": "2026-10-06"
+},
+"philosophes/ludwig-von-mises": {
+"h": "638d919fe4",
+"d": "2026-10-09"
 },
 "philosophes/ludwig-wittgenstein": {
 "h": "452faa18eb",
@@ -5302,6 +5390,10 @@
 "philosophes/nikos-kazantzakis": {
 "h": "da8a5e363c",
 "d": "2026-10-05"
+},
+"philosophes/nimbarka": {
+"h": "92152ba9b7",
+"d": "2026-10-09"
 },
 "philosophes/noam-chomsky": {
 "h": "5c6dfe983d",
@@ -6622,6 +6714,10 @@
 "philosophes/voline": {
 "h": "c218826f6b",
 "d": "2026-09-29"
+},
+"philosophes/volney": {
+"h": "7b1779b7f1",
+"d": "2026-10-09"
 },
 "philosophes/voltaire": {
 "h": "685bbf8a25",
