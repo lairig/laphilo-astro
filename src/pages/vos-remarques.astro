@@ -38,7 +38,7 @@ const TYPES = [
 
   <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 400', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/remarques.css?v=20261011c" />
+  <link rel="stylesheet" href="/css/remarques.css?v=20261011d" />
   {TURNSTILE_SITEKEY && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 </head>
 <body>
@@ -60,10 +60,6 @@ const TYPES = [
 
 <main class="rq">
 
-  <p class="rq-accroche">
-    Écrivez-nous : <em>chaque message est lu avant d’être publié.</em>
-  </p>
-
   <aside class="rq-avertissement" aria-label="Avertissement">
     <p class="rq-avertissement-titre">Avertissement</p>
     <p>
@@ -73,6 +69,11 @@ const TYPES = [
       Si vous en repérez une, signalez-la ci-dessous : elle sera vérifiée et corrigée.
     </p>
   </aside>
+
+  <p class="rq-accroche">
+    Écrivez-nous : <em>chaque message est lu avant d’être publié.</em>
+  </p>
+  <div class="rq-separation" aria-hidden="true"><span>✦</span></div>
 
   <form id="rq-form" class="rq-form" novalidate>
     <fieldset class="rq-types">

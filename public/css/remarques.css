@@ -4,13 +4,13 @@
 .rq { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 3.5rem; }
 
 .rq-accroche {
-  margin: .4rem auto 2.2rem; max-width: 640px; text-align: center;
+  margin: 0 auto 1.3rem; max-width: 640px; text-align: center;
   font-family: 'EB Garamond', serif; font-size: 1.15rem; line-height: 1.65; color: #ead9a8;
 }
 .rq-accroche em { color: var(--gold-light, #d4a843); }
 
 .rq-avertissement {
-  max-width: 720px; margin: -.6rem auto 2.2rem; padding: .85rem 1.1rem .9rem;
+  max-width: 720px; margin: .4rem auto 1.6rem; padding: .85rem 1.1rem .9rem;
   background: rgba(30, 18, 8, .6); border: 1px solid rgba(212, 168, 67, .3); border-left: 3px solid var(--gold, #b8860b); border-radius: 4px;
 }
 .rq-avertissement p { margin: 0; font-family: 'EB Garamond', serif; font-size: .98rem; line-height: 1.6; color: #d9c48f; }
@@ -18,6 +18,13 @@
 .rq-avertissement .rq-avertissement-titre {
   margin-bottom: .3rem; font-family: 'Cinzel', serif; font-size: .66rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-light, #d4a843);
 }
+/* Séparation sous l'accroche : filet doré qui s'efface, étoile au centre */
+.rq-separation { display: flex; align-items: center; gap: .8rem; max-width: 520px; margin: 0 auto 2.2rem; color: var(--gold, #b8860b); }
+.rq-separation::before, .rq-separation::after { content: ''; flex: 1; height: 1px; }
+.rq-separation::before { background: linear-gradient(90deg, transparent, rgba(212, 168, 67, .6)); }
+.rq-separation::after { background: linear-gradient(90deg, rgba(212, 168, 67, .6), transparent); }
+.rq-separation span { font-size: .8rem; opacity: .85; }
+
 .rq-titre {
   display: block; width: 100%; margin: 0 0 1.1rem; padding: 0; text-align: center;
   font-family: 'Cinzel', serif; font-size: .85rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
@@ -189,7 +196,8 @@
   .rq { padding: 0 1rem 2.5rem; }
   .rq-accroche { font-size: 1.05rem; margin-bottom: 1.6rem; }
   .rq-accroche br { display: none; }
-  .rq-avertissement { margin: -.2rem 0 1.6rem; padding: .75rem .85rem; }
+  .rq-avertissement { margin: .2rem 0 1.3rem; padding: .75rem .85rem; }
+  .rq-separation { margin-bottom: 1.7rem; }
   .rq-parch { padding: 1.2rem 1.05rem 1.1rem; }
   .rq-champs { grid-template-columns: 1fr; }
   .rq-pied-form { flex-direction: column; align-items: stretch; }
