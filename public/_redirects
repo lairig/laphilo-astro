@@ -90,3 +90,5 @@
 # Ancienne page « Échanges & contact » remplacée par « Vos remarques » (10/10/2026)
 /echanges /vos-remarques/ 301
 /echanges/ /vos-remarques/ 301
+/data/drawers/echanges.html /vos-remarques/ 301
+/data/drawers-en/echanges.html /vos-remarques/ 301
