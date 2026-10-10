@@ -220,7 +220,8 @@ def toutes_les_pages():
 
 
 def liste_remarques():
-    """Messages de la page Vos remarques, avec la fiche de l'éditeur dont ils parlent (f, l)."""
+    """Messages de la page Vos remarques, avec la fiche de l'éditeur dont ils parlent (f, l)
+    et celle d'où venait le visiteur (pf, pl, provenance_nom)."""
     r = remarques.lister()
     fiches = {}
     for f in list(bd.PHILOSOPHE_FICHIERS) + list(bd.COURANT_FICHIERS):
@@ -228,10 +229,12 @@ def liste_remarques():
         for l, v in c['lignes'].items():
             nom = valeur(c, v, 'nom')
             if nom:
-                fiches.setdefault(page_fiche(bd.slugify(str(nom)), est_courant(f)), (f, l))
+                fiches.setdefault(page_fiche(bd.slugify(str(nom)), est_courant(f)), (f, l, str(nom)))
     for x in r['remarques']:
         if x.get('fiche') in fiches:
-            x['f'], x['l'] = fiches[x['fiche']]
+            x['f'], x['l'] = fiches[x['fiche']][:2]
+        if x.get('provenance') in fiches:
+            x['pf'], x['pl'], x['provenance_nom'] = fiches[x['provenance']]
     return r
 
 

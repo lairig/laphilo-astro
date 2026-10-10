@@ -237,6 +237,9 @@
   .rq-carte textarea { width: 100%; min-height: 4.5rem; margin-top: .35rem; font: inherit; font-size: .92rem; }
   .rq-carte .rq-boutons { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .45rem; align-items: center; }
   .rq-carte .rq-etiq { font-size: .78rem; color: #6b4a22; margin-top: .45rem; display: block; }
+  .rq-carte .rq-provenance { flex-basis: 100%; font-size: .82rem; color: #5a6b80; }
+  .rq-carte .rq-provenance b { color: #2c3e57; font-size: .85rem; }
+  .rq-carte .rq-provenance button { padding: .05rem .5rem; font-size: .78rem; }
   .rq-prive { background: #e8eefb; color: #2c4680; border-radius: 3px; padding: 0 .35rem; font-size: .8rem; }
   #rapport { white-space: pre-wrap; font-family: Consolas, monospace; font-size: .8rem; background: #120a04; border: 1px solid #5c4318; border-radius: 4px; padding: .6rem; max-height: 40vh; overflow: auto; display: none; margin: 0 1rem .6rem; }
 </style>
@@ -1601,6 +1604,10 @@ $('#btn-remarques').onclick = async () => {
         <div class="rq-tete"><b>${esc(x.nom)}</b><span>${dateControle(x.cree)}</span>
           ${x.prive ? '<span class="rq-prive">privé</span>' : ''}
           ${x.email ? `<span>${esc(x.email)}</span>` : ''}<span>${fiche}</span>
+          ${x.provenance ? `<span class="rq-provenance">↩ envoyé depuis ${x.provenance_nom
+            ? `la fiche <b>${esc(x.provenance_nom)}</b> ${x.pf ? `<button type="button" data-ouvrir-prov="${x.id}">Ouvrir</button>` : ''}`
+            : `la page <b>${esc(x.provenance)}</b>`}
+            <a href="https://laphilo.fr${esc(x.provenance)}" target="_blank" rel="noopener">↗</a></span>` : ''}
           ${x.prive ? `<span>${esc(RQ_CATEGORIES[x.categorie] || '')}</span>`
             : `<select data-champ="categorie">${Object.entries(RQ_CATEGORIES).map(([k, v]) => `<option value="${k}" ${k === x.categorie ? 'selected' : ''}>${v}</option>`).join('')}</select>`}
           ${x.etat === 'publie' ? `<span>publié le ${dateControle(x.publie_le)}</span>` : ''}</div>
@@ -1622,13 +1629,15 @@ $('#btn-remarques').onclick = async () => {
     $('#fenetre-corps').querySelectorAll('[data-onglet]').forEach((b) => (b.onclick = () => { rqOnglet = b.dataset.onglet; dessiner(); }));
     $('#fenetre-corps').querySelectorAll('.rq-carte').forEach((el) => {
       const x = L.find((y) => y.id === +el.dataset.id);
-      el.querySelector('[data-ouvrir]')?.addEventListener('click', async () => {
+      const ouvrirFiche = async (chemin, f, l) => {
         if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
-        const courant = x.fiche.startsWith('/courants/');
+        const courant = chemin.startsWith('/courants/');
         if (courant !== COURANTS()) { courante = null; await changerMode(courant ? 'courants' : 'philosophes'); }
         fenetre.close();
-        await ouvrir(x.f, x.l);
-      });
+        await ouvrir(f, l);
+      };
+      el.querySelector('[data-ouvrir]')?.addEventListener('click', () => ouvrirFiche(x.fiche, x.f, x.l));
+      el.querySelector('[data-ouvrir-prov]')?.addEventListener('click', () => ouvrirFiche(x.provenance, x.pf, x.pl));
       el.querySelectorAll('[data-a]').forEach((b) => (b.onclick = async () => {
         const action = b.dataset.a;
         if (action === 'supprimer' && !confirm(`Effacer définitivement le message de ${x.nom} ?`)) return;

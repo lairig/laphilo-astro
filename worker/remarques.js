@@ -33,7 +33,8 @@ const SCHEMA = `CREATE TABLE IF NOT EXISTS remarques (
   publie_le TEXT NOT NULL DEFAULT '',
   reponse TEXT NOT NULL DEFAULT '',
   reponse_le TEXT NOT NULL DEFAULT '',
-  ip TEXT NOT NULL DEFAULT ''
+  ip TEXT NOT NULL DEFAULT '',
+  provenance TEXT NOT NULL DEFAULT ''
 )`;
 const INDEX = 'CREATE INDEX IF NOT EXISTS remarques_etat ON remarques (etat, prive, id)';
 
@@ -43,6 +44,8 @@ async function base(env) {
   if (!env.DB) throw new Erreur(503, 'Base de données non reliée au Worker.');
   if (!schemaPret) {
     await env.DB.batch([env.DB.prepare(SCHEMA), env.DB.prepare(INDEX)]);
+    // Colonne ajoutée après la mise en ligne (10/10/2026) : absente des tables créées avant
+    await env.DB.prepare("ALTER TABLE remarques ADD COLUMN provenance TEXT NOT NULL DEFAULT ''").run().catch(() => {});
     schemaPret = true;
   }
   return env.DB;
@@ -133,6 +136,9 @@ async function deposer(env, requete) {
   let ficheNom = texte(d.fiche_nom, 120);
   if (!/^\/(philosophes|courants)\/[a-z0-9-]+\/$/.test(fiche)) fiche = ficheNom = '';
   const prive = d.prive ? 1 : 0;
+  // Page d'où vient le visiteur (fiche du lien « Une remarque sur cette fiche ? » ou page précédente du site)
+  let provenance = texte(d.provenance, 160);
+  if (!/^\/[a-z0-9\/-]*$/.test(provenance)) provenance = '';
 
   if (nom.length < 2) throw new Erreur(400, 'Indiquez votre nom ou un pseudo.');
   if (message.length < 5) throw new Erreur(400, 'Le message est vide ou trop court.');
@@ -151,9 +157,9 @@ async function deposer(env, requete) {
   if (recents.n >= MAX_PAR_HEURE) throw new Erreur(429, 'Vous avez déjà envoyé plusieurs messages : réessayez dans une heure.');
 
   await db
-    .prepare(`INSERT INTO remarques (cree, nom, email, categorie, fiche, fiche_nom, message, prive, ip)
-              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`)
-    .bind(maintenant(), nom, email, categorie, fiche, ficheNom, message, prive, marque)
+    .prepare(`INSERT INTO remarques (cree, nom, email, categorie, fiche, fiche_nom, message, prive, ip, provenance)
+              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)`)
+    .bind(maintenant(), nom, email, categorie, fiche, ficheNom, message, prive, marque, provenance)
     .run();
   return json({ ok: true });
 }
@@ -172,7 +178,7 @@ function autorise(env, requete) {
 async function adminLister(env) {
   const db = await base(env);
   const r = await db
-    .prepare(`SELECT id, cree, nom, email, categorie, fiche, fiche_nom, message, prive, etat, publie_le, reponse, reponse_le
+    .prepare(`SELECT id, cree, nom, email, categorie, fiche, fiche_nom, message, prive, etat, publie_le, reponse, reponse_le, provenance
               FROM remarques ORDER BY (etat = 'attente') DESC, id DESC LIMIT 1000`)
     .all();
   return json({ remarques: r.results });

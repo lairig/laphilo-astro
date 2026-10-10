@@ -170,40 +170,6 @@
 }
 .rq-plus:hover { background: rgba(70, 45, 15, .85); }
 
-/* ── Fiche dont parle le message ── */
-.rq-ancre { display: block; position: relative; top: -1rem; }
-.rq-venue {
-  display: flex; align-items: center; gap: .9rem; margin: 0 0 1.6rem; padding: .85rem 1rem;
-  background: linear-gradient(150deg, rgba(90, 58, 18, .92), rgba(50, 30, 10, .92));
-  border: 1px solid var(--gold-light, #d4a843); border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(212, 168, 67, .25), 0 0 26px rgba(212, 168, 67, .22), 0 6px 20px rgba(0, 0, 0, .4);
-  animation: rq-apparait .5s ease-out;
-}
-.rq-venue[hidden] { display: none; }
-@keyframes rq-apparait { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-.rq-venue-img {
-  flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--gold-light, #d4a843); box-shadow: 0 2px 8px rgba(0, 0, 0, .5); background: #2a1806;
-}
-.rq-venue-img[hidden], .rq-venue-pastille[hidden] { display: none; }
-.rq-venue-pastille { width: 3.1rem; height: 3.1rem; font-size: 1.2rem; }
-.rq-venue-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
-.rq-venue-etiq { font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: #d9c48f; }
-.rq-venue-txt a { text-decoration: none; }
-.rq-venue-txt strong { font-family: 'Cinzel', serif; font-size: 1.12rem; font-weight: 700; letter-spacing: .04em; color: #fff4dc; border-bottom: 1px solid rgba(212, 168, 67, .45); }
-.rq-venue-txt a:hover strong { border-bottom-color: var(--gold-light, #d4a843); }
-.rq-venue-dates { font-family: 'EB Garamond', serif; font-style: italic; font-size: .95rem; color: #d9c48f; }
-.rq-venue-changer {
-  flex-shrink: 0; padding: .45rem .8rem; border-radius: 2rem; cursor: pointer;
-  font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
-  color: #e6cf94; background: transparent; border: 1px solid rgba(212, 168, 67, .5);
-}
-.rq-venue-changer:hover { color: #fff4dc; border-color: var(--gold-light, #d4a843); }
-@media (max-width: 600px) {
-  .rq-venue { flex-wrap: wrap; gap: .7rem; padding: .8rem .85rem; }
-  .rq-venue-img { width: 48px; height: 48px; }
-  .rq-venue-changer { width: 100%; }
-}
 /* ── Téléphone ── */
 @media (max-width: 760px) {
   .rq-types-grille { grid-template-columns: 1fr 1fr; gap: .55rem; }

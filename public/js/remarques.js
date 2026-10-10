@@ -21,6 +21,16 @@
     catch (e) { return ''; }
   }
 
+  /* Page d'où vient le visiteur, pour l'éditeur seulement (jamais affichée) : la fiche du lien
+     « Une remarque sur cette fiche ? », sinon la page précédente du site. */
+  var provenance = new URLSearchParams(location.search).get('fiche') || '';
+  if (!provenance && document.referrer) {
+    try {
+      var precedente = new URL(document.referrer);
+      if (precedente.host === location.host && precedente.pathname !== location.pathname) provenance = precedente.pathname;
+    } catch (e) {}
+  }
+
   /* ── Champ « À propos de » : liste des fiches ── */
   var parNom = {}, parChemin = {};
   var champFiche = $('#rq-fiche');
@@ -37,7 +47,6 @@
       /* Venu d'une fiche (« Une remarque sur cette fiche ? ») : fiche déjà choisie */
       var demande = new URLSearchParams(location.search).get('fiche');
       if (demande && parChemin[demande]) champFiche.value = parChemin[demande][1];
-      majVenue();
     })
     .catch(function () {});
 
@@ -45,28 +54,6 @@
     var x = parNom[champFiche.value.trim().toLowerCase()];
     return x ? { fiche: x[0], fiche_nom: x[1] } : { fiche: '', fiche_nom: '' };
   }
-
-  /* Bandeau « Votre message portera sur la fiche … » : portrait, nom, dates, lien vers la fiche */
-  var venue = $('#rq-venue');
-  function majVenue() {
-    var x = parNom[champFiche.value.trim().toLowerCase()];
-    venue.hidden = !x;
-    if (!x) return;
-    $('#rq-venue-nom').textContent = x[1].replace(/ \(courant\)$/, '');
-    $('#rq-venue-lien').href = x[0];
-    $('#rq-venue-dates').textContent = (/ \(courant\)$/.test(x[1]) ? 'Courant de pensée' : 'Philosophe') + (x[2] ? ' · ' + x[2] : '');
-    var img = $('#rq-venue-img');
-    img.hidden = !x[3];
-    $('#rq-venue-pastille').hidden = !!x[3];
-    if (x[3]) img.src = x[3];
-  }
-  champFiche.addEventListener('input', majVenue);
-  champFiche.addEventListener('change', majVenue);
-  $('#rq-venue-changer').addEventListener('click', function () {
-    champFiche.value = '';
-    majVenue();
-    champFiche.focus();
-  });
 
   /* ── Message privé : e-mail nécessaire ── */
   var prive = $('#rq-prive'), email = $('#rq-email');
@@ -98,6 +85,7 @@
       message: message,
       prive: prive.checked,
       site: form.elements.site.value,
+      provenance: provenance,
       turnstile: jeton ? jeton.value : '',
     };
     bouton.disabled = true;
@@ -108,9 +96,7 @@
       })
       .then(function (x) {
         if (!x.ok) throw new Error(x.d.erreur || 'Le message n’a pas pu être envoyé. Réessayez plus tard.');
-        var sujet = champFiche.value;
         form.reset();
-        champFiche.value = sujet; // le sujet reste choisi pour un message suivant
         prive.dispatchEvent(new Event('change'));
         dire(donnees.prive
           ? 'Merci ! Votre message a bien été envoyé à l’auteur du site.'

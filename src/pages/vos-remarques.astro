@@ -38,7 +38,7 @@ const TYPES = [
 
   <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 400', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/remarques.css?v=20261011b" />
+  <link rel="stylesheet" href="/css/remarques.css?v=20261011" />
   {TURNSTILE_SITEKEY && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 </head>
 <body>
@@ -66,19 +66,6 @@ const TYPES = [
   </p>
 
   <form id="rq-form" class="rq-form" novalidate>
-    <span id="laisser" class="rq-ancre" aria-hidden="true"></span>
-    <!-- Fiche dont parle le message (venu d'une fiche, ou choisie dans « À propos de ») -->
-    <div class="rq-venue" id="rq-venue" hidden>
-      <img class="rq-venue-img" id="rq-venue-img" alt="" width="56" height="56" hidden />
-      <span class="rq-pastille rq-venue-pastille" id="rq-venue-pastille" aria-hidden="true">✦</span>
-      <div class="rq-venue-txt">
-        <span class="rq-venue-etiq">Votre message portera sur la fiche</span>
-        <a id="rq-venue-lien" href="/"><strong id="rq-venue-nom"></strong></a>
-        <span class="rq-venue-dates" id="rq-venue-dates"></span>
-      </div>
-      <button type="button" class="rq-venue-changer" id="rq-venue-changer">Changer de sujet</button>
-    </div>
-
     <fieldset class="rq-types">
       <legend class="rq-titre">Vous souhaitez partager…</legend>
       <div class="rq-types-grille">
@@ -92,7 +79,7 @@ const TYPES = [
       </div>
     </fieldset>
 
-    <section class="rq-parch" aria-label="Votre message">
+    <section class="rq-parch" id="laisser" aria-label="Votre message">
       <div class="rq-champs">
         <label class="rq-champ">
           <span class="rq-etiq">Votre nom ou pseudo</span>
@@ -164,7 +151,7 @@ const TYPES = [
 </footer>
 
 <script is:inline src="/js/home-main.js" defer></script>
-<script is:inline src="/js/remarques.js?v=20261011b" defer></script>
+<script is:inline src="/js/remarques.js?v=20261011c" defer></script>
 
 </body>
 </html>
