@@ -79,6 +79,10 @@
   "url": "https://www.youtube.com/@RadioJFrance",
   "nom_youtube": "Radio J"
  },
+ "regards protestants": {
+  "url": "https://www.youtube.com/@Regardsprotestantsofficiel",
+  "nom_youtube": "Regards protestants"
+ },
  "resonances": {
   "url": "https://www.youtube.com/@Resonances",
   "nom_youtube": "Résonance[s]"
@@ -95,8 +99,16 @@
   "url": "https://www.youtube.com/@Spiritual-Quest",
   "nom_youtube": "Spiritual Quest"
  },
+ "stay curious radio": {
+  "url": "https://www.youtube.com/@stycrs",
+  "nom_youtube": "stay curious radio"
+ },
  "therence carvalho": {
   "url": "https://www.youtube.com/@Th%C3%A9rence.Carvalho",
   "nom_youtube": "Thérence Carvalho"
+ },
+ "vox temporis": {
+  "url": "https://www.youtube.com/@Aetora_1",
+  "nom_youtube": "Vox Temporis"
  }
 }
