@@ -813,6 +813,17 @@
     }
     updateNav();
     updateSlides();
+    majLienRemarque();
+  }
+
+  /* Pied de page : « Une remarque sur <fiche affichée> ? » mène à la page Vos remarques
+     avec cette fiche déjà choisie (et notée comme provenance du message pour l'éditeur). */
+  function majLienRemarque() {
+    const lien = document.querySelector('.ff-remarque');
+    const d = DATA[current];
+    if (!lien || !d || !d.fiche) return;
+    lien.href = '/vos-remarques/?fiche=' + encodeURIComponent(d.fiche) + '#laisser';
+    lien.textContent = 'Une remarque sur ' + d.name + ' ?';
   }
 
   function updateNav() {

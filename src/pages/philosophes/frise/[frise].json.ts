@@ -51,6 +51,7 @@ export const GET: APIRoute = async ({ params }) => {
       .filter((x): x is { href: string; label: string } => x !== null);
 
     return {
+      fiche: `/philosophes/${entry.id}/`, // lien « Une remarque sur … ? » du pied de page
       year: p.year,
       end_year: p.end_year,
       display_date: p.display_date,

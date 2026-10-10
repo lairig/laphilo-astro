@@ -105,6 +105,7 @@ export const GET: APIRoute = async ({ params }) => {
     }));
 
     return {
+      fiche: `/courants/${entry.id}/`, // lien « Une remarque sur … ? » du pied de page
       year: c.year,
       end_year: c.end_year,
       display_date: c.display_date,
