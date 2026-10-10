@@ -43,3 +43,6 @@ rapports-seo/
 
 # jetbrains setting folder
 .idea/
+
+# clé de modération de la page Vos remarques (secret ADMIN_TOKEN du Worker)
+scripts/editeur/remarques-cle.txt

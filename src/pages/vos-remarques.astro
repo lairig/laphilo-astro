@@ -1,0 +1,157 @@
+---
+import Favicons from '../components/Favicons.astro';
+import BackButton from '../components/BackButton.astro';
+import Fonts from '../components/Fonts.astro';
+import GoatCounter from '../components/GoatCounter.astro';
+import SeoHead from '../components/SeoHead.astro';
+
+/* Clé publique de la vérification anti-robot Cloudflare Turnstile (tableau de bord
+   Cloudflare > Turnstile). Vide : pas de vérification, le Worker se contente du champ
+   piège et de la limite de messages par heure. */
+const TURNSTILE_SITEKEY = '';
+
+const title = 'Vos remarques sur les philosophes | LaPhilo.fr';
+const description = 'Une erreur dans une fiche, un philosophe oublié, une question ? Laissez votre remarque : chaque message est lu avant d’être publié.';
+const CATEGORIES = [
+  ['erreur', 'Erreur à signaler'],
+  ['suggestion', 'Suggestion'],
+  ['question', 'Question'],
+  ['autre', 'Remarque générale'],
+];
+---
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <Favicons />
+  <GoatCounter />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead
+    title={title}
+    description={description}
+    path="/vos-remarques/"
+    ariane={[['Vos remarques', '/vos-remarques/']]}
+  />
+
+  <Fonts />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+  <link rel="stylesheet" href="/css/remarques.css?v=20261010" />
+  {TURNSTILE_SITEKEY && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+</head>
+<body>
+
+<a href="#" id="back-to-top" title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</a>
+
+<header class="site-header">
+  <div class="sitemap-switcher">
+    <BackButton />
+    <a href="/" class="sitemap-btn" aria-label="Retour à l'accueil">
+      <span class="sitemap-flag" aria-hidden="true">⌂</span>
+      <span class="sitemap-text">Accueil</span>
+    </a>
+  </div>
+  <h1 class="site-title">Vos remarques</h1>
+  <p class="site-subtitle">Une erreur, une idée, une question : écrivez-nous</p>
+  <div class="header-rule" aria-hidden="true"></div>
+</header>
+
+<main class="definition-page">
+<div class="soc-page-wrap">
+
+  <p class="rq-intro">
+    Une erreur dans une fiche, un philosophe oublié, une question, un mot d’encouragement ?
+    Laissez votre message ci-dessous. <strong>Chaque message est lu avant d’être publié.</strong>
+  </p>
+
+  <div class="soc-section-block soc-panel soc-panel--gold" id="laisser">
+    <p class="soc-section-label soc-section-label--gold">✎ Laisser un message</p>
+
+    <form id="rq-form" class="soc-form" novalidate>
+      <div class="rq-ligne">
+        <div class="soc-form-group">
+          <label for="rq-nom" class="soc-form-label">Nom ou pseudo</label>
+          <input type="text" id="rq-nom" name="nom" required maxlength="60" autocomplete="nickname" class="soc-form-input" />
+        </div>
+        <div class="soc-form-group">
+          <label for="rq-email" class="soc-form-label" id="rq-email-label">E-mail (facultatif, jamais affiché)</label>
+          <input type="email" id="rq-email" name="email" maxlength="120" autocomplete="email" class="soc-form-input" />
+        </div>
+      </div>
+
+      <div class="rq-ligne">
+        <div class="soc-form-group">
+          <label for="rq-categorie" class="soc-form-label">Type de message</label>
+          <select id="rq-categorie" name="categorie" class="soc-form-input">
+            {CATEGORIES.map(([v, l]) => <option value={v} selected={v === 'autre'}>{l}</option>)}
+          </select>
+        </div>
+        <div class="soc-form-group">
+          <label for="rq-fiche" class="soc-form-label">À propos de (facultatif)</label>
+          <input type="text" id="rq-fiche" list="rq-fiches" maxlength="120" placeholder="Nom d’un philosophe ou d’un courant…" class="soc-form-input" autocomplete="off" />
+          <datalist id="rq-fiches"></datalist>
+        </div>
+      </div>
+
+      <div class="soc-form-group">
+        <label for="rq-message" class="soc-form-label">Message</label>
+        <textarea id="rq-message" name="message" required rows="6" maxlength="4000" class="soc-form-textarea"></textarea>
+      </div>
+
+      <label class="rq-prive">
+        <input type="checkbox" id="rq-prive" name="prive" />
+        <span>Ne pas publier : message pour l’auteur du site uniquement (indiquez alors votre e-mail pour recevoir la réponse)</span>
+      </label>
+
+      <input type="text" name="site" class="soc-form-honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      {TURNSTILE_SITEKEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITEKEY} data-language="fr" data-theme="light" data-size="flexible"></div>}
+
+      <button type="submit" class="soc-form-submit" id="rq-envoyer">Envoyer →</button>
+      <p id="rq-retour" class="rq-retour" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <section class="rq-liste" aria-labelledby="rq-titre-liste">
+    <div class="rq-entete">
+      <h2 id="rq-titre-liste" class="soc-section-label soc-section-label--gold">Messages publiés <span id="rq-total"></span></h2>
+      <div class="rq-filtres" role="group" aria-label="Filtrer par type">
+        <button type="button" class="rq-filtre actif" data-cat="">Tous</button>
+        <button type="button" class="rq-filtre" data-cat="erreur">Erreurs</button>
+        <button type="button" class="rq-filtre" data-cat="suggestion">Suggestions</button>
+        <button type="button" class="rq-filtre" data-cat="question">Questions</button>
+        <button type="button" class="rq-filtre" data-cat="autre">Remarques</button>
+      </div>
+    </div>
+    <div id="rq-messages"><p class="rq-vide">Chargement des messages…</p></div>
+    <p class="rq-plus-ligne"><button type="button" id="rq-plus" class="rq-plus" hidden>Voir les messages plus anciens</button></p>
+  </section>
+
+</div>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-social-nav" aria-label="Lien Social">
+    <a class="footer-social-btn" href="/" aria-label="Accueil">
+      <span class="footer-social-icon">⌂</span>
+      <span class="footer-social-label">Accueil</span>
+    </a>
+    <a class="footer-social-btn" href="/plan-du-site/" aria-label="Plan du site">
+      <span class="footer-social-icon">🗺</span>
+      <span class="footer-social-label">Plan du site</span>
+    </a>
+    <a class="footer-social-btn" href="/recherche/" aria-label="Recherche">
+      <span class="footer-social-icon">🔍</span>
+      <span class="footer-social-label">Recherche</span>
+    </a>
+  </nav>
+  <p>© 2026 – laphilo.fr – Tous droits réservés</p>
+</footer>
+
+<script src="/js/home-main.js" defer></script>
+<script src="/js/remarques.js?v=20261010" defer></script>
+
+</body>
+</html>

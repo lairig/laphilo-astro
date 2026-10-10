@@ -71,6 +71,7 @@ LaPhilo.fr propose des frises chronologiques interactives couvrant ${philosophes
 - [Bienvenue](${url('/bienvenue/')}) : présentation du site et parcours conseillé
 - [Plan du site](${url('/plan-du-site/')}) : liste complète des ressources
 - [Recherche](${url('/recherche/')}) : recherche par nom, filtres par époque, nationalité, branche, courant
+- [Vos remarques](${url('/vos-remarques/')}) : messages des lecteurs (erreurs signalées, suggestions, questions), publiés après relecture
 - [Définition de la philosophie](${url('/definition/')}) : les 7 grandes branches et les branches spécialisées
 - [Histoire des courants de pensée](${url('/histoire-des-courants/')}) : les grandes familles d'idées, par période
 - [Familles de pensée et grands débats](${url('/familles-de-pensee/')}) : les courants rangés par famille (filiations) et les positions rangées par grande question

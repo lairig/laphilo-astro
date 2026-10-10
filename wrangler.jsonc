@@ -1,16 +1,30 @@
 // Déploiement Cloudflare (Workers Builds, déclenché à chaque push sur main).
-// Site 100 % statique : Cloudflare lance `npm run build` (commande de build
+// Site statique : Cloudflare lance `npm run build` (commande de build
 // réglée dans le tableau de bord ; le même build qu'en local, sous Node) puis
 // `wrangler deploy` publie le dossier dist tel quel, avec ses fichiers
 // _redirects et _headers. Sans ce fichier, Cloudflare reconfigurait le projet à
 // chaque build (adaptateur @astrojs/cloudflare, rendu dans workerd), et le build
 // en ligne pouvait échouer alors que le build local passait.
+//
+// Seules les adresses /api/* passent par le petit Worker worker/remarques.js
+// (page « Vos remarques », messages gardés dans la base D1 ci-dessous) ;
+// toutes les autres pages restent servies directement depuis dist/.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "laphilo-astro",
   "compatibility_date": "2026-09-30",
+  "main": "./worker/remarques.js",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "laphilo-remarques",
+      "database_id": "e908ef5b-132e-4b85-83b1-3e9225e09816"
+    }
+  ]
 }

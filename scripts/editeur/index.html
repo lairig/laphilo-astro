@@ -228,6 +228,16 @@
   .ligne-img img { width: 60px; height: 70px; object-fit: contain; background: #efe0b4; border-radius: 3px; }
   .domaines { display: flex; flex-wrap: wrap; gap: .35rem; }
   .avis { margin: .5rem 0 0; padding: .45rem .7rem; border-radius: 4px; background: #fff3cf; border: 1px solid #e0b44a; font-size: .88rem; display: flex; gap: .6rem; align-items: center; }
+  .rq-onglets { display: flex; flex-wrap: wrap; gap: .3rem; margin: .5rem 0 .7rem; }
+  .rq-onglets button.on { background: var(--rouille); border-color: #c0662e; color: #fff8e6; font-weight: 600; }
+  .rq-carte { border: 1px solid #d8c48c; border-radius: 5px; padding: .6rem .8rem; margin-bottom: .7rem; background: #fffaf0; }
+  .rq-carte[data-etat="attente"] { border-left: 4px solid var(--rouille); }
+  .rq-carte .rq-tete { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: baseline; font-size: .86rem; color: #6b4a22; }
+  .rq-carte .rq-tete b { color: #2b1a08; font-size: .95rem; }
+  .rq-carte textarea { width: 100%; min-height: 4.5rem; margin-top: .35rem; font: inherit; font-size: .92rem; }
+  .rq-carte .rq-boutons { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .45rem; align-items: center; }
+  .rq-carte .rq-etiq { font-size: .78rem; color: #6b4a22; margin-top: .45rem; display: block; }
+  .rq-prive { background: #e8eefb; color: #2c4680; border-radius: 3px; padding: 0 .35rem; font-size: .8rem; }
   #rapport { white-space: pre-wrap; font-family: Consolas, monospace; font-size: .8rem; background: #120a04; border: 1px solid #5c4318; border-radius: 4px; padding: .6rem; max-height: 40vh; overflow: auto; display: none; margin: 0 1rem .6rem; }
 </style>
 </head>
@@ -237,6 +247,7 @@
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
   <span class="info" id="etat-global"></span>
   <span class="espace"></span>
+  <button id="btn-remarques" title="Messages laissés par les visiteurs sur la page « Vos remarques » : publier, refuser, corriger, répondre">Remarques <span id="nb-remarques"></span></button>
   <button id="btn-google" title="Fiches sur Google (Search Console) : pages indexées ou non, affichages et clics des 90 derniers jours">Google <span id="nb-google"></span></button>
   <button id="btn-wikidata" title="Dates des philosophes comparées à Wikidata : philosophes vivants décédés depuis, années différentes">Dates <span id="nb-dates"></span></button>
   <button id="btn-liens"title="Contrôle des liens de toutes les fiches (textes, audio et vidéos principales) : fiches avec des liens morts">Liens morts <span id="nb-liens"></span></button>
@@ -1538,6 +1549,105 @@ $('#btn-google').onclick = async () => {
   dessiner();
 };
 
+/* ── Remarques : modération de la page Vos remarques (serveur remarques.py) ── */
+const RQ_CATEGORIES = { erreur: 'Erreur à signaler', suggestion: 'Suggestion', question: 'Question', autre: 'Remarque générale' };
+const RQ_ONGLETS = [
+  ['attente', 'À relire', (x) => x.etat === 'attente' && !x.prive],
+  ['prives', 'Messages privés', (x) => x.prive && x.etat !== 'archive'],
+  ['publie', 'Publiés', (x) => x.etat === 'publie'],
+  ['refuse', 'Refusés et archivés', (x) => x.etat === 'refuse' || x.etat === 'archive'],
+];
+let rqOnglet = 'attente';
+async function majNbRemarques() {
+  try {
+    const r = await api('/api/remarques');
+    const n = r.remarques.filter((x) => x.etat === 'attente').length;
+    $('#nb-remarques').textContent = n ? `(${n})` : '';
+    return r;
+  } catch { $('#nb-remarques').textContent = ''; return null; }
+}
+$('#btn-remarques').onclick = async () => {
+  msgFenetre(''); $('#fenetre-corps').innerHTML = '<p>Lecture des messages sur laphilo.fr…</p>'; fenetre.showModal();
+  const dessiner = async () => {
+    let r;
+    try { r = await api('/api/remarques'); }
+    catch (e) {
+      if (e.message === 'introuvable') {
+        $('#fenetre-corps').innerHTML = '<h2>Vos remarques</h2><p><b>L’éditeur a été mis à jour pendant qu’il tournait.</b> Fermez sa fenêtre noire, puis relancez-le avec l’icône « Éditeur LaPhilo ».</p>';
+        return;
+      }
+      const cle = await api('/api/remarques-cle').catch(() => ({ cle: '' }));
+      $('#fenetre-corps').innerHTML = `<h2>Vos remarques</h2><div class="pub-erreur">${esc(e.message)}</div>
+        <p class="aide">Clé de l’éditeur, à enregistrer dans Cloudflare comme secret <b>ADMIN_TOKEN</b> du Worker laphilo-astro :<br>
+        <code style="user-select:all">${esc(cle.cle)}</code></p>`;
+      return;
+    }
+    const L = r.remarques;
+    $('#nb-remarques').textContent = r.attente ? `(${r.attente})` : '';
+    const filtre = RQ_ONGLETS.find((o) => o[0] === rqOnglet)[2];
+    const liste = L.filter(filtre);
+    const carte = (x) => {
+      const fiche = x.fiche ? `à propos de <b>${esc(x.fiche_nom)}</b>
+          ${x.f ? `<button type="button" data-ouvrir="${x.id}">Ouvrir la fiche</button>` : ''}
+          <a href="https://laphilo.fr${esc(x.fiche)}" target="_blank" rel="noopener">↗</a>` : 'remarque générale';
+      const actions = x.prive
+        ? `${x.email ? `<a class="bouton-lien" href="mailto:${esc(x.email)}?subject=${encodeURIComponent('Votre message sur laphilo.fr')}">Répondre par e-mail</a>` : ''}
+           ${x.etat === 'archive' ? '<button type="button" data-a="attente">Remettre à lire</button>' : '<button type="button" class="principal" data-a="archiver">Marquer comme lu</button>'}`
+        : `${x.etat !== 'publie' ? '<button type="button" class="principal" data-a="publier">Publier</button>' : '<button type="button" data-a="modifier">Enregistrer les corrections</button>'}
+           ${x.etat === 'attente' ? '<button type="button" data-a="refuser">Refuser</button>' : ''}
+           ${x.etat === 'publie' ? '<button type="button" data-a="attente">Retirer du site</button>' : ''}
+           ${x.etat === 'refuse' ? '<button type="button" data-a="attente">Remettre à relire</button>' : ''}`;
+      return `<div class="rq-carte" data-id="${x.id}" data-etat="${x.etat}">
+        <div class="rq-tete"><b>${esc(x.nom)}</b><span>${dateControle(x.cree)}</span>
+          ${x.prive ? '<span class="rq-prive">privé</span>' : ''}
+          ${x.email ? `<span>${esc(x.email)}</span>` : ''}<span>${fiche}</span>
+          ${x.prive ? `<span>${esc(RQ_CATEGORIES[x.categorie] || '')}</span>`
+            : `<select data-champ="categorie">${Object.entries(RQ_CATEGORIES).map(([k, v]) => `<option value="${k}" ${k === x.categorie ? 'selected' : ''}>${v}</option>`).join('')}</select>`}
+          ${x.etat === 'publie' ? `<span>publié le ${dateControle(x.publie_le)}</span>` : ''}</div>
+        ${x.prive ? `<p style="white-space:pre-wrap;margin:.4rem 0 0">${esc(x.message)}</p>`
+          : `<span class="rq-etiq">Message (vous pouvez le corriger avant de publier)</span>
+             <textarea data-champ="message">${esc(x.message)}</textarea>
+             <span class="rq-etiq">Votre réponse, affichée sous le message, signée « laphilo.fr » (facultatif)</span>
+             <textarea data-champ="reponse" style="min-height:2.6rem">${esc(x.reponse)}</textarea>`}
+        <div class="rq-boutons">${actions}<span style="flex:1"></span>
+          <button type="button" data-a="supprimer" title="Effacer définitivement ce message">Supprimer</button></div>
+      </div>`;
+    };
+    $('#fenetre-corps').innerHTML = `<h2>Vos remarques</h2>
+      <p class="aide">Messages laissés sur <a href="https://laphilo.fr/vos-remarques/" target="_blank" rel="noopener">laphilo.fr/vos-remarques/</a>.
+        Rien n’apparaît sur le site avant « Publier », et la publication est immédiate (pas besoin du bouton « Publier » de l’éditeur).
+        Une copie de tous les messages est gardée chaque jour dans groupes/sauvegarde/remarques/.</p>
+      <div class="rq-onglets">${RQ_ONGLETS.map(([k, t, f]) => `<button type="button" data-onglet="${k}" class="${k === rqOnglet ? 'on' : ''}">${t} (${L.filter(f).length})</button>`).join('')}</div>
+      ${liste.length ? liste.map(carte).join('') : '<p class="aide">Aucun message ici.</p>'}`;
+    $('#fenetre-corps').querySelectorAll('[data-onglet]').forEach((b) => (b.onclick = () => { rqOnglet = b.dataset.onglet; dessiner(); }));
+    $('#fenetre-corps').querySelectorAll('.rq-carte').forEach((el) => {
+      const x = L.find((y) => y.id === +el.dataset.id);
+      el.querySelector('[data-ouvrir]')?.addEventListener('click', async () => {
+        if (modifications() && !confirm('Des modifications ne sont pas enregistrées. Les abandonner ?')) return;
+        const courant = x.fiche.startsWith('/courants/');
+        if (courant !== COURANTS()) { courante = null; await changerMode(courant ? 'courants' : 'philosophes'); }
+        fenetre.close();
+        await ouvrir(x.f, x.l);
+      });
+      el.querySelectorAll('[data-a]').forEach((b) => (b.onclick = async () => {
+        const action = b.dataset.a;
+        if (action === 'supprimer' && !confirm(`Effacer définitivement le message de ${x.nom} ?`)) return;
+        if (action === 'refuser' && !confirm(`Refuser le message de ${x.nom} ? Il ne sera pas publié.`)) return;
+        const champs = {};
+        el.querySelectorAll('[data-champ]').forEach((c) => (champs[c.dataset.champ] = c.value));
+        try {
+          b.disabled = true;
+          await api('/api/remarque', { id: x.id, action, champs });
+          msgFenetre({ publier: '✓ Message publié sur laphilo.fr.', refuser: 'Message refusé.', archiver: 'Message marqué comme lu.',
+            attente: 'Message remis à relire.', modifier: '✓ Corrections enregistrées sur laphilo.fr.', supprimer: 'Message effacé.' }[action], 'aide ok');
+          dessiner();
+        } catch (e) { b.disabled = false; msgFenetre('⚠ ' + e.message, 'aide err'); }
+      }));
+    });
+  };
+  dessiner();
+};
+
 /* ── Publier (serveur publier.py) ──────────────────────── */
 let suiviPub = null;
 const ICONES_ETAPE = { '': '○', en_cours: '↻', ok: '✓', echec: '✗', saute: '–' };
@@ -1624,7 +1734,7 @@ $('#btn-publier').onclick = async () => {
     `<datalist id="dl-fam">${Object.entries(CODES.familles || {}).flatMap(([n, l]) => l.map((f) => `<option value="${esc(f)}" label="${n}">`)).join('')}</datalist>` +
     `<datalist id="dl-photo">${(CODES.photos ||= []).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>`);
   await chargerListe();
-  majNbImages(); majNbLiens(); majNbDates(); majNbGoogle();
+  majNbImages(); majNbLiens(); majNbDates(); majNbGoogle(); majNbRemarques();
   api('/api/publication').then((s) => { if (s.en_cours) suivrePublication(); }).catch(() => {});
   $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
