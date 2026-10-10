@@ -48,7 +48,7 @@
   /* ── Message privé : e-mail nécessaire ── */
   var prive = $('#rq-prive'), email = $('#rq-email');
   prive.addEventListener('change', function () {
-    $('#rq-email-label').textContent = prive.checked ? 'E-mail (pour vous répondre, jamais affiché)' : 'E-mail (facultatif, jamais affiché)';
+    $('#rq-email-label').innerHTML = 'E-mail <small>' + (prive.checked ? 'pour vous répondre, jamais affiché' : 'facultatif, jamais affiché') + '</small>';
     email.required = prive.checked;
   });
 
@@ -69,7 +69,7 @@
     var donnees = {
       nom: nom,
       email: email.value.trim(),
-      categorie: $('#rq-categorie').value,
+      categorie: (form.querySelector('[name="categorie"]:checked') || {}).value || 'autre',
       fiche: f.fiche,
       fiche_nom: f.fiche_nom,
       message: message,
@@ -106,13 +106,15 @@
     var sujet = x.fiche
       ? 'à propos de <a href="' + esc(x.fiche) + '">' + esc(x.fiche_nom) + '</a>'
       : 'remarque générale';
+    var initiale = (x.nom.match(/[A-Za-zÀ-ÿ0-9]/) || ['✦'])[0].toUpperCase();
     return '<article class="rq-message" data-cat="' + esc(x.categorie) + '">'
-      + '<p class="rq-meta"><b>' + esc(x.nom) + '</b> · ' + jour(x.cree) + ' · ' + sujet
-      + ' <span class="rq-badge">' + esc(CATEGORIES[x.categorie] || 'Remarque') + '</span></p>'
-      + '<div class="rq-texte">' + paragraphes(x.message) + '</div>'
-      + (x.reponse ? '<div class="rq-reponse"><p class="rq-meta"><b>↳ laphilo.fr</b>' + (x.reponse_le ? ' · ' + jour(x.reponse_le) : '') + '</p>'
+      + '<span class="rq-avatar" aria-hidden="true">' + esc(initiale) + '</span>'
+      + '<p class="rq-meta"><strong>' + esc(x.nom) + '</strong><span>' + jour(x.cree) + '</span><span>' + sujet + '</span>'
+      + '<span class="rq-badge">' + esc(CATEGORIES[x.categorie] || 'Remarque') + '</span></p>'
+      + '<div class="rq-texte">' + paragraphes(x.message)
+      + (x.reponse ? '<div class="rq-reponse"><p class="rq-meta"><strong>laphilo.fr</strong>' + (x.reponse_le ? '<span>' + jour(x.reponse_le) + '</span>' : '') + '</p>'
         + paragraphes(x.reponse) + '</div>' : '')
-      + '</article>';
+      + '</div></article>';
   }
 
   function charger(ajouter) {
@@ -125,12 +127,24 @@
         if (ajouter) zone.insertAdjacentHTML('beforeend', html);
         else zone.innerHTML = html || '<p class="rq-vide">' + (categorie ? 'Aucun message de ce type pour l’instant.' : 'Aucun message publié pour l’instant : soyez le premier !') + '</p>';
         if (!categorie) total.textContent = d.total ? '(' + d.total + ')' : '';
+        compter(d);
         plus.hidden = (d.page + 1) * d.par_page >= d.total;
       })
       .catch(function () {
         if (!ajouter) zone.innerHTML = '<p class="rq-vide">Les messages ne peuvent pas être affichés pour le moment.</p>';
       })
       .then(function () { plus.disabled = false; });
+  }
+
+  /* Nombre de messages publiés de chaque type, sur les boutons de filtre */
+  function compter(d) {
+    var n = d.par_categorie || {}, tous = 0;
+    Object.keys(n).forEach(function (k) { tous += n[k]; });
+    document.querySelectorAll('.rq-filtre').forEach(function (b) {
+      var k = b.getAttribute('data-cat'), v = k ? n[k] || 0 : tous;
+      var s = b.querySelector('small') || b.appendChild(document.createElement('small'));
+      s.textContent = v ? v : '';
+    });
   }
 
   plus.addEventListener('click', function () { page += 1; charger(true); });

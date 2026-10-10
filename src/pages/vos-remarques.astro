@@ -12,11 +12,12 @@ const TURNSTILE_SITEKEY = '0x4AAAAAAFTRHfZ70DJRAIIN';
 
 const title = 'Vos remarques sur les philosophes | LaPhilo.fr';
 const description = 'Une erreur dans une fiche, un philosophe oublié, une question ? Laissez votre remarque : chaque message est lu avant d’être publié.';
-const CATEGORIES = [
-  ['erreur', 'Erreur à signaler'],
-  ['suggestion', 'Suggestion'],
-  ['question', 'Question'],
-  ['autre', 'Remarque générale'],
+/* Types de message : code, titre, sous-titre, signe dans la pastille dorée */
+const TYPES = [
+  ['erreur', 'Une erreur', 'Une date, un nom, un lien', '!'],
+  ['suggestion', 'Une suggestion', 'Un penseur oublié, une idée', '✦'],
+  ['question', 'Une question', 'Sur un philosophe, un courant', '?'],
+  ['autre', 'Un mot', 'Une remarque, un encouragement', '✎'],
 ];
 ---
 
@@ -35,11 +36,10 @@ const CATEGORIES = [
     ariane={[['Vos remarques', '/vos-remarques/']]}
   />
 
-  <Fonts />
+  <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 400', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
-  <link rel="stylesheet" href="/css/remarques.css?v=20261010" />
-  {TURNSTILE_SITEKEY && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+  <link rel="stylesheet" href="/css/remarques.css?v=20261011" />
+  {TURNSTILE_SITEKEY && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 </head>
 <body>
 
@@ -54,82 +54,82 @@ const CATEGORIES = [
     </a>
   </div>
   <h1 class="site-title">Vos remarques</h1>
-  <p class="site-subtitle">Une erreur, une idée, une question : écrivez-nous</p>
+  <p class="site-subtitle">Le site s’écrit aussi avec ses lecteurs</p>
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
-<div class="soc-page-wrap">
+<main class="rq">
 
-  <p class="rq-intro">
-    Une erreur dans une fiche, un philosophe oublié, une question, un mot d’encouragement ?
-    Laissez votre message ci-dessous. <strong>Chaque message est lu avant d’être publié.</strong>
+  <p class="rq-accroche">
+    Une date erronée, un penseur oublié, une question qui vous travaille ? <br />
+    Écrivez-nous : <em>chaque message est lu avant d’être publié.</em>
   </p>
 
-  <div class="soc-section-block soc-panel soc-panel--gold" id="laisser">
-    <p class="soc-section-label soc-section-label--gold">✎ Laisser un message</p>
-
-    <form id="rq-form" class="soc-form" novalidate>
-      <div class="rq-ligne">
-        <div class="soc-form-group">
-          <label for="rq-nom" class="soc-form-label">Nom ou pseudo</label>
-          <input type="text" id="rq-nom" name="nom" required maxlength="60" autocomplete="nickname" class="soc-form-input" />
-        </div>
-        <div class="soc-form-group">
-          <label for="rq-email" class="soc-form-label" id="rq-email-label">E-mail (facultatif, jamais affiché)</label>
-          <input type="email" id="rq-email" name="email" maxlength="120" autocomplete="email" class="soc-form-input" />
-        </div>
+  <form id="rq-form" class="rq-form" novalidate>
+    <fieldset class="rq-types">
+      <legend class="rq-titre">Vous souhaitez partager…</legend>
+      <div class="rq-types-grille">
+        {TYPES.map(([v, t, s, ic]) => (
+          <label class="rq-type">
+            <input type="radio" name="categorie" value={v} checked={v === 'autre'} />
+            <span class="rq-pastille" aria-hidden="true">{ic}</span>
+            <span class="rq-type-txt"><strong>{t}</strong><span>{s}</span></span>
+          </label>
+        ))}
       </div>
+    </fieldset>
 
-      <div class="rq-ligne">
-        <div class="soc-form-group">
-          <label for="rq-categorie" class="soc-form-label">Type de message</label>
-          <select id="rq-categorie" name="categorie" class="soc-form-input">
-            {CATEGORIES.map(([v, l]) => <option value={v} selected={v === 'autre'}>{l}</option>)}
-          </select>
-        </div>
-        <div class="soc-form-group">
-          <label for="rq-fiche" class="soc-form-label">À propos de (facultatif)</label>
-          <input type="text" id="rq-fiche" list="rq-fiches" maxlength="120" placeholder="Nom d’un philosophe ou d’un courant…" class="soc-form-input" autocomplete="off" />
+    <section class="rq-parch" id="laisser" aria-label="Votre message">
+      <div class="rq-champs">
+        <label class="rq-champ">
+          <span class="rq-etiq">Votre nom ou pseudo</span>
+          <input type="text" id="rq-nom" name="nom" required maxlength="60" autocomplete="nickname" />
+        </label>
+        <label class="rq-champ">
+          <span class="rq-etiq" id="rq-email-label">E-mail <small>facultatif, jamais affiché</small></span>
+          <input type="email" id="rq-email" name="email" maxlength="120" autocomplete="email" />
+        </label>
+        <label class="rq-champ rq-champ--large">
+          <span class="rq-etiq">À propos de <small>facultatif</small></span>
+          <input type="text" id="rq-fiche" list="rq-fiches" maxlength="120" placeholder="Nom d’un philosophe ou d’un courant…" autocomplete="off" />
           <datalist id="rq-fiches"></datalist>
-        </div>
+        </label>
+        <label class="rq-champ rq-champ--large">
+          <span class="rq-etiq">Votre message</span>
+          <textarea id="rq-message" name="message" required rows="6" maxlength="4000"></textarea>
+        </label>
       </div>
 
-      <div class="soc-form-group">
-        <label for="rq-message" class="soc-form-label">Message</label>
-        <textarea id="rq-message" name="message" required rows="6" maxlength="4000" class="soc-form-textarea"></textarea>
-      </div>
-
-      <label class="rq-prive">
+      <label class="rq-interrupteur">
         <input type="checkbox" id="rq-prive" name="prive" />
-        <span>Ne pas publier : message pour l’auteur du site uniquement (indiquez alors votre e-mail pour recevoir la réponse)</span>
+        <span class="rq-curseur" aria-hidden="true"></span>
+        <span><strong>Message privé</strong> : ne pas publier, pour l’auteur du site uniquement
+          <small>(indiquez alors votre e-mail pour recevoir la réponse)</small></span>
       </label>
 
-      <input type="text" name="site" class="soc-form-honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="text" name="site" class="rq-piege" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
-      {TURNSTILE_SITEKEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITEKEY} data-language="fr" data-theme="light" data-size="flexible"></div>}
-
-      <button type="submit" class="soc-form-submit" id="rq-envoyer">Envoyer →</button>
+      <div class="rq-pied-form">
+        {TURNSTILE_SITEKEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITEKEY} data-language="fr" data-theme="light"></div>}
+        <button type="submit" class="rq-envoyer" id="rq-envoyer">Envoyer le message</button>
+      </div>
       <p id="rq-retour" class="rq-retour" role="status" aria-live="polite"></p>
-    </form>
-  </div>
+    </section>
+  </form>
 
   <section class="rq-liste" aria-labelledby="rq-titre-liste">
-    <div class="rq-entete">
-      <h2 id="rq-titre-liste" class="soc-section-label soc-section-label--gold">Messages publiés <span id="rq-total"></span></h2>
-      <div class="rq-filtres" role="group" aria-label="Filtrer par type">
-        <button type="button" class="rq-filtre actif" data-cat="">Tous</button>
-        <button type="button" class="rq-filtre" data-cat="erreur">Erreurs</button>
-        <button type="button" class="rq-filtre" data-cat="suggestion">Suggestions</button>
-        <button type="button" class="rq-filtre" data-cat="question">Questions</button>
-        <button type="button" class="rq-filtre" data-cat="autre">Remarques</button>
-      </div>
+    <h2 id="rq-titre-liste" class="rq-titre">Ce que vous nous avez écrit <span id="rq-total"></span></h2>
+    <div class="rq-filtres" role="group" aria-label="Filtrer par type">
+      <button type="button" class="rq-filtre actif" data-cat="">Tous</button>
+      <button type="button" class="rq-filtre" data-cat="erreur">Erreurs</button>
+      <button type="button" class="rq-filtre" data-cat="suggestion">Suggestions</button>
+      <button type="button" class="rq-filtre" data-cat="question">Questions</button>
+      <button type="button" class="rq-filtre" data-cat="autre">Remarques</button>
     </div>
     <div id="rq-messages"><p class="rq-vide">Chargement des messages…</p></div>
-    <p class="rq-plus-ligne"><button type="button" id="rq-plus" class="rq-plus" hidden>Voir les messages plus anciens</button></p>
+    <p class="rq-plus-ligne"><button type="button" id="rq-plus" class="rq-plus" hidden>Messages plus anciens</button></p>
   </section>
 
-</div>
 </main>
 
 <footer class="site-footer">
@@ -150,8 +150,8 @@ const CATEGORIES = [
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
-<script src="/js/home-main.js" defer></script>
-<script src="/js/remarques.js?v=20261010" defer></script>
+<script is:inline src="/js/home-main.js" defer></script>
+<script is:inline src="/js/remarques.js?v=20261011" defer></script>
 
 </body>
 </html>
