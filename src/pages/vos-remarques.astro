@@ -38,7 +38,7 @@ const TYPES = [
 
   <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 400', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/remarques.css?v=20261011" />
+  <link rel="stylesheet" href="/css/remarques.css?v=20261011c" />
   {TURNSTILE_SITEKEY && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 </head>
 <body>
@@ -64,6 +64,16 @@ const TYPES = [
     Une date erronée, un penseur oublié, une question qui vous travaille ? <br />
     Écrivez-nous : <em>chaque message est lu avant d’être publié.</em>
   </p>
+
+  <aside class="rq-avertissement" aria-label="Avertissement">
+    <p class="rq-avertissement-titre">Avertissement</p>
+    <p>
+      LaPhilo.fr est un travail personnel, mené avec soin à partir de sources publiques
+      (encyclopédies, ouvrages, Wikipédia…). Malgré cette attention, des <strong>erreurs involontaires</strong> peuvent subsister dans les fiches (dates, noms, textes, liens) ou ailleurs sur le site.
+      Les informations sont données à titre indicatif et ne remplacent pas les ouvrages de référence.
+      Si vous en repérez une, signalez-la ci-dessous : elle sera vérifiée et corrigée.
+    </p>
+  </aside>
 
   <form id="rq-form" class="rq-form" novalidate>
     <fieldset class="rq-types">
