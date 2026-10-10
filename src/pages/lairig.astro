@@ -4,6 +4,21 @@ import BackButton from '../components/BackButton.astro';
 import Fonts from '../components/Fonts.astro';
 import GoatCounter from '../components/GoatCounter.astro';
 import SeoHead from '../components/SeoHead.astro';
+
+const title = 'Lairig Music | LaPhilo.fr';
+const description = 'Lairig, projet de musique instrumentale aux sonorités orientales et new age, tissé pour accompagner la réflexion et la méditation philosophique.';
+
+/* Les cinq morceaux : nom, ère de la pensée, identifiant Spotify du titre
+   (bouton « Écouter » : lecteur Spotify ouvert sous la ligne par /js/soc-widgets.js) */
+const MORCEAUX = [
+  ['Persans', 'Monde arabo-islamique', '7v401fL4xOdzuYTP4HHEpp'],
+  ['Hangqin', 'Philosophie orientale', '49GEs4q6oZPBiV10cQQ43p'],
+  ['Vocum', 'Antiquité grecque', '3uLOfirnlEiJmshJNCVVad'],
+  ['Mediger', 'Moyen-Âge', '2Ut4IkllcfPwiduW0u9b7B'],
+  ['Feverlam', 'Existentialisme', '6QqTsluKgTljCUxjsFMo6R'],
+];
+const SPOTIFY = 'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z';
+const ROMAINS = ['I', 'II', 'III', 'IV', 'V'];
 ---
 
 <html lang="fr">
@@ -12,17 +27,123 @@ import SeoHead from '../components/SeoHead.astro';
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <Favicons />
   <GoatCounter />
-  <title>Lairig Music | LaPhilo.fr</title>
-  <meta name="description" content="Lairig, projet de musique instrumentale aux sonorités orientales et new age, tissé pour accompagner la réflexion et la méditation philosophique." />
-  <SeoHead
-    title="Lairig Music | LaPhilo.fr"
-    description="Lairig, projet de musique instrumentale aux sonorités orientales et new age, tissé pour accompagner la réflexion et la méditation philosophique."
-    path="/lairig/"
-  />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <SeoHead title={title} description={description} path="/lairig/" ariane={[['Lairig Music', '/lairig/']]} />
 
-  <Fonts />
+  <Fonts faces={['Cinzel Decorative 700', 'Cinzel 400', 'Cinzel 600', 'Cinzel 700', 'EB Garamond 400', 'EB Garamond 500', 'EB Garamond 400 italic']} />
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/definition.css?v=20261001" />
+  <style>
+    /* Page Lairig : violet nuit (comme la carte Lairig de « Pourquoi ce site ? »), or pour les titres */
+    .lg { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 3.5rem; --lilas: #c9bbf5; --lilas-clair: #e4def8; --nuit: #1c1638; }
+    .lg-titre {
+      margin: 0 0 1.1rem; text-align: center;
+      font-family: 'Cinzel', serif; font-size: .85rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--lilas); text-shadow: 0 1px 12px rgba(150, 130, 230, .35);
+    }
+    .lg-titre::before, .lg-titre::after { content: ' ✦ '; color: var(--gold-light, #d4a843); }
+
+    /* Présentation : grande image, logo en médaillon, étiquettes, texte */
+    .lg-hero {
+      position: relative; overflow: hidden; border-radius: 8px; border: 1px solid rgba(170, 150, 240, .45);
+      background: linear-gradient(180deg, #1f1940 0%, #1c1638 60%, #120e24 100%);
+      box-shadow: 0 16px 48px rgba(5, 3, 15, .55);
+    }
+    .lg-hero-image { position: relative; aspect-ratio: 21 / 8; overflow: hidden; }
+    .lg-hero-image img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; display: block; }
+    .lg-hero-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 25%, rgba(31, 25, 64, .55) 60%, rgba(31, 25, 64, .9) 88%, #1f1940 100%); }
+    .lg-hero-corps { position: relative; padding: 0 2.1rem 1.8rem; text-align: center; }
+    .lg-logo {
+      width: 104px; height: 104px; margin: -60px auto .9rem; border-radius: 50%; object-fit: cover; display: block; position: relative;
+      border: 3px solid var(--gold-light, #d4a843);
+      box-shadow: 0 0 0 6px rgba(212, 168, 67, .14), 0 0 34px rgba(212, 168, 67, .28), 0 10px 28px rgba(0, 0, 0, .6);
+    }
+    .lg-etiquettes { display: flex; justify-content: center; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+    .lg-etiquettes span {
+      padding: .25rem .75rem; border-radius: 2rem; font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--lilas-clair); background: rgba(170, 150, 240, .14); border: 1px solid rgba(170, 150, 240, .4);
+    }
+    .lg-hero p { max-width: 640px; margin: 0 auto; font-family: 'EB Garamond', serif; font-size: 1.12rem; line-height: 1.75; color: var(--lilas-clair); }
+    .lg-hero p strong { color: #fff; font-weight: 500; }
+    .lg-bouton {
+      display: inline-flex; align-items: center; gap: .55rem; padding: .75rem 1.4rem; border-radius: 4px; text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: .74rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+      transition: transform .15s, filter .15s;
+    }
+    .lg-bouton:hover { transform: translateY(-1px); filter: brightness(1.07); }
+    .lg-bouton--lilas { margin-top: 1.3rem; color: var(--nuit); background: linear-gradient(150deg, #e2d8ff 0%, #b9a8f0 60%, #9a86e0 100%); box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
+
+    /* Séparation : filet doré, étoile au centre */
+    .lg-separation { display: flex; align-items: center; gap: .8rem; max-width: 520px; margin: 2.8rem auto; color: var(--gold, #b8860b); }
+    .lg-separation::before, .lg-separation::after { content: ''; flex: 1; height: 1px; }
+    .lg-separation::before { background: linear-gradient(90deg, transparent, rgba(212, 168, 67, .6)); }
+    .lg-separation::after { background: linear-gradient(90deg, rgba(212, 168, 67, .6), transparent); }
+    .lg-separation span { font-size: .8rem; opacity: .85; }
+    .lg-separation--fin { margin-bottom: 0; }
+
+    /* Dernier album : pochette + texte, sur fond de la seconde image */
+    .lg-album {
+      position: relative; overflow: hidden; display: grid; grid-template-columns: 230px 1fr; gap: 1.8rem; align-items: center;
+      padding: 1.6rem; border-radius: 8px; border: 1px solid rgba(212, 168, 67, .45); box-shadow: 0 16px 48px rgba(5, 3, 15, .55);
+      background: linear-gradient(100deg, rgba(18, 14, 36, .96) 35%, rgba(18, 14, 36, .5)), url('/photo/lairig-aouei.webp') center / cover;
+    }
+    .lg-pochette { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; display: block; box-shadow: 0 12px 30px rgba(0, 0, 0, .65), 0 0 0 1px rgba(212, 168, 67, .4); }
+    .lg-album-label { font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold-light, #d4a843); }
+    .lg-album h2 { margin: .25rem 0 .7rem; font-family: 'Cinzel Decorative', serif; font-size: 2rem; font-weight: 700; color: #fff4dc; text-shadow: 0 2px 18px rgba(170, 150, 240, .4); }
+    .lg-album p { margin: 0; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.1rem; line-height: 1.65; color: var(--lilas-clair); }
+    .lg-bouton--spotify { margin-top: 1.2rem; color: #fff; background: #1db954; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
+    .lg-bouton--spotify svg { fill: #fff; }
+
+    /* Les cinq morceaux */
+    .lg-morceaux { display: flex; flex-direction: column; gap: .6rem; }
+    .lg-morceaux .soc-track-row {
+      display: flex; align-items: center; gap: 1rem; padding: .75rem 1rem; border-radius: 6px;
+      background: linear-gradient(160deg, rgba(43, 35, 82, .9), rgba(28, 22, 56, .9)); border: 1px solid rgba(170, 150, 240, .35);
+      transition: border-color .2s, background .2s;
+    }
+    .lg-morceaux .soc-track-row:hover { border-color: rgba(212, 168, 67, .6); }
+    .lg-numero {
+      flex-shrink: 0; width: 2.4rem; height: 2.4rem; border-radius: 50%; display: grid; place-items: center;
+      font-family: 'Cinzel', serif; font-weight: 700; font-size: .82rem; color: #2a1806;
+      background: radial-gradient(circle at 33% 33%, #f3d78a, var(--gold, #b8860b) 60%, #6b4700);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, .5), 0 2px 6px rgba(0, 0, 0, .45);
+    }
+    .lg-morceau { flex: 1; min-width: 0; }
+    .lg-morceau strong { display: block; font-family: 'Cinzel', serif; font-size: .95rem; font-weight: 700; letter-spacing: .06em; color: #fff4dc; }
+    .lg-morceau span { font-family: 'EB Garamond', serif; font-style: italic; font-size: 1rem; color: var(--lilas); }
+    .lg-morceaux .soc-btn-listen {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .95rem; border-radius: 2rem; cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff; background: rgba(29, 185, 84, .18); border: 1px solid rgba(29, 185, 84, .65); transition: background .2s;
+    }
+    .lg-morceaux .soc-btn-listen:hover { background: rgba(29, 185, 84, .35); }
+    .lg-morceaux .soc-btn-listen svg { fill: #1db954; }
+    .lg-morceaux .soc-btn-listen-label { color: #eafff1; font-size: .64rem; letter-spacing: .12em; }
+    .lg-morceaux .lrg-embed { display: none; margin-top: -.3rem; }
+
+    /* Réseaux */
+    .lg-reseaux { display: flex; justify-content: center; flex-wrap: wrap; gap: .7rem; }
+    .lg-reseaux a {
+      display: inline-flex; align-items: center; gap: .55rem; padding: .65rem 1.15rem; border-radius: 4px; text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff4dc; background: rgba(30, 18, 8, .72); border: 1px solid rgba(212, 168, 67, .5); transition: background .2s, transform .2s;
+    }
+    .lg-reseaux a:hover { background: rgba(70, 45, 15, .85); transform: translateY(-2px); }
+
+    @media (max-width: 700px) {
+      .lg { padding: 0 1rem 2.5rem; }
+      .lg-hero-image { aspect-ratio: 16 / 9; }
+      .lg-hero-corps { padding: 0 1.1rem 1.4rem; }
+      .lg-hero p { font-size: 1.04rem; }
+      .lg-album { grid-template-columns: 1fr; text-align: center; gap: 1.1rem; padding: 1.3rem 1.1rem; }
+      .lg-pochette { max-width: 220px; margin: 0 auto; }
+      .lg-album h2 { font-size: 1.6rem; }
+      .lg-morceaux .soc-track-row { gap: .7rem; padding: .65rem .75rem; }
+      .lg-morceaux .soc-btn-listen { padding: .45rem .7rem; }
+      .lg-separation { margin: 2.2rem auto; }
+      .lg-separation--fin { margin-bottom: 0; }
+    }
+  </style>
 </head>
 <body>
 
@@ -41,153 +162,78 @@ import SeoHead from '../components/SeoHead.astro';
   <div class="header-rule" aria-hidden="true"></div>
 </header>
 
-<main class="definition-page">
-<div class="soc-page-wrap">
+<main class="lg">
 
-  <div class="soc-lairig-header">
-    <div class="soc-lairig-logo-wrap">
-      <img src="/photo/logo-lairig.webp" class="soc-lairig-logo" alt="Lairig" />
-    </div>
-    <div class="soc-lairig-info">
-      <div class="soc-tags">
-        <span class="soc-tag soc-tag--ambient">Ambient</span>
-        <span class="soc-tag soc-tag--newage">New Age</span>
-        <span class="soc-tag soc-tag--oriental">Oriental</span>
-      </div>
-      <p class="soc-lairig-desc">
+  <section class="lg-hero" aria-label="Présentation de Lairig">
+    <div class="lg-hero-image"><img src="/photo/lairig-main.webp" alt="" /></div>
+    <div class="lg-hero-corps">
+      <img src="/photo/logo-lairig.webp" class="lg-logo" alt="Lairig" width="104" height="104" />
+      <div class="lg-etiquettes"><span>Ambient</span><span>New Age</span><span>Oriental</span></div>
+      <p>
         <strong>Lairig</strong> est un projet de musique instrumentale aux sonorités orientales et new age — tissé pour accompagner la réflexion et la méditation philosophique. Chaque morceau traverse une ère de la pensée humaine, de la Grèce antique aux rivages contemporains.
       </p>
-      <a href="https://lairig.com" target="_blank" rel="noopener" class="soc-btn-web">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#d4a843"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93s3.06-7.44 7-7.93v15.86zm2-15.86c1.03.13 2 .45 2.87.93H13v-.93zM13 7h5.24c.25.31.48.65.68 1H13V7zm0 3h6.74c.08.33.15.66.19 1H13v-1zm0 9.93V19h2.87c-.87.48-1.84.8-2.87.93zM18.24 17H13v-1h5.92c-.2.35-.43.69-.68 1zm1.5-3H13v-1h6.93c-.04.34-.11.67-.19 1z"></path></svg>
-        <span class="soc-btn-web-label">♪ Site web — lairig.com</span>
+      <a href="https://lairig.com" target="_blank" rel="noopener" class="lg-bouton lg-bouton--lilas">♪ Site web — lairig.com</a>
+    </div>
+  </section>
+
+  <div class="lg-separation" aria-hidden="true"><span>✦</span></div>
+
+  <section class="lg-album" aria-label="Dernier album">
+    <img src="/photo/lairig-heaven-night.webp" class="lg-pochette" alt="Pochette de l'album Heaven Night" />
+    <div>
+      <span class="lg-album-label">Dernier album</span>
+      <h2>Heaven Night</h2>
+      <p>Un voyage sonore à travers les nuits de la pensée — ambiances profondes pour la lecture et la méditation philosophique.</p>
+      <a href="https://open.spotify.com/intl-fr/album/6LR3XJBapUmsLGNrfvrmF4" target="_blank" rel="noopener" class="lg-bouton lg-bouton--spotify">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d={SPOTIFY}></path></svg>
+        Album complet sur Spotify
       </a>
     </div>
-  </div>
+  </section>
 
-  <div class="soc-photo-grid-2">
-    <div class="soc-photo-frame--16-9">
-      <img src="/photo/lairig-main.webp" alt="Lairig" />
+  <div class="lg-separation" aria-hidden="true"><span>✦</span></div>
+
+  <section aria-labelledby="lg-voyages">
+    <h2 class="lg-titre" id="lg-voyages">Cinq voyages sonores</h2>
+    <div class="lg-morceaux">
+      {MORCEAUX.map(([nom, ere, tid], i) => (
+        <>
+          <div class="soc-track-row">
+            <span class="lg-numero" aria-hidden="true">{ROMAINS[i]}</span>
+            <div class="lg-morceau"><strong>{nom}</strong><span>{ere}</span></div>
+            <button type="button" class="soc-btn-listen" data-lrg-tid={tid} aria-label={`Écouter ${nom}`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d={SPOTIFY}></path></svg>
+              <span class="soc-btn-listen-label">▶ Écouter</span>
+            </button>
+          </div>
+          <div class="lrg-embed"></div>
+        </>
+      ))}
     </div>
-    <div class="soc-photo-frame--16-9">
-      <img src="/photo/lairig-aouei.webp" alt="Lairig" />
-    </div>
-  </div>
+  </section>
 
-  <div class="soc-album-card">
-    <div class="soc-album-cover-wrap">
-      <img src="/photo/lairig-heaven-night.webp" class="soc-album-cover" alt="Heaven Night" />
-    </div>
-    <div class="soc-album-info">
-      <div class="soc-album-label">Dernier album</div>
-      <div class="soc-album-title">Heaven Night</div>
-      <p class="soc-album-desc">
-        Un voyage sonore à travers les nuits de la pensée — ambiances profondes pour la lecture et la méditation philosophique.
-      </p>
-      <div>
-        <a href="https://open.spotify.com/intl-fr/album/6LR3XJBapUmsLGNrfvrmF4" target="_blank" rel="noopener" class="soc-btn-spotify">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-          <span class="soc-btn-spotify-label">Album complet</span>
-        </a>
-      </div>
-    </div>
-  </div>
+  <div class="lg-separation" aria-hidden="true"><span>✦</span></div>
 
-  <div class="soc-separator--sm">✦ ◈ ✦</div>
-
-  <div class="soc-tracks">
-    <div class="soc-section-title-center">✧ Cinq voyages sonores ✧</div>
-
-    <div class="soc-track-row">
-      <span class="soc-track-icon">♪</span>
-      <div class="soc-track-meta">
-        <div class="soc-track-name">Persans</div>
-        <div class="soc-track-era">Monde arabo-islamique</div>
-      </div>
-      <button class="soc-btn-listen" data-lrg-tid="7v401fL4xOdzuYTP4HHEpp">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-        <span class="soc-btn-listen-label">▶ Écouter</span>
-      </button>
-    </div>
-    <div class="lrg-embed"></div>
-
-    <div class="soc-track-row">
-      <span class="soc-track-icon">♪</span>
-      <div class="soc-track-meta">
-        <div class="soc-track-name">Hangqin</div>
-        <div class="soc-track-era">Philosophie orientale</div>
-      </div>
-      <button class="soc-btn-listen" data-lrg-tid="49GEs4q6oZPBiV10cQQ43p">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-        <span class="soc-btn-listen-label">▶ Écouter</span>
-      </button>
-    </div>
-    <div class="lrg-embed"></div>
-
-    <div class="soc-track-row">
-      <span class="soc-track-icon">♪</span>
-      <div class="soc-track-meta">
-        <div class="soc-track-name">Vocum</div>
-        <div class="soc-track-era">Antiquité grecque</div>
-      </div>
-      <button class="soc-btn-listen" data-lrg-tid="3uLOfirnlEiJmshJNCVVad">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-        <span class="soc-btn-listen-label">▶ Écouter</span>
-      </button>
-    </div>
-    <div class="lrg-embed"></div>
-
-    <div class="soc-track-row">
-      <span class="soc-track-icon">♪</span>
-      <div class="soc-track-meta">
-        <div class="soc-track-name">Mediger</div>
-        <div class="soc-track-era">Moyen-Âge</div>
-      </div>
-      <button class="soc-btn-listen" data-lrg-tid="2Ut4IkllcfPwiduW0u9b7B">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-        <span class="soc-btn-listen-label">▶ Écouter</span>
-      </button>
-    </div>
-    <div class="lrg-embed"></div>
-
-    <div class="soc-track-row">
-      <span class="soc-track-icon">♪</span>
-      <div class="soc-track-meta">
-        <div class="soc-track-name">Feverlam</div>
-        <div class="soc-track-era">Existentialisme</div>
-      </div>
-      <button class="soc-btn-listen" data-lrg-tid="6QqTsluKgTljCUxjsFMo6R">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"></path></svg>
-        <span class="soc-btn-listen-label">▶ Écouter</span>
-      </button>
-    </div>
-    <div class="lrg-embed"></div>
-  </div>
-
-  <div class="soc-separator--sm">✦ ◈ ✦</div>
-
-  <div>
-    <div class="soc-social-title">Retrouver Lairig</div>
-    <div class="soc-social-row">
-
-      <a href="https://www.instagram.com/lairigmusic" target="_blank" rel="noopener" title="Instagram" class="soc-btn-instagram">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="#C13584"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
-        <span class="soc-btn-instagram-label">Instagram</span>
+  <section aria-labelledby="lg-retrouver">
+    <h2 class="lg-titre" id="lg-retrouver">Retrouver Lairig</h2>
+    <div class="lg-reseaux">
+      <a href="https://www.instagram.com/lairigmusic" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="#e1306c" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
+        Instagram
       </a>
-
-      <a href="https://www.tiktok.com/@lairigmusic" target="_blank" rel="noopener" title="TikTok" class="soc-btn-tiktok">
-        <svg width="12" height="13" viewBox="0 0 24 24" fill="#EE1D52"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9a8.22 8.22 0 004.81 1.54V7.1a4.85 4.85 0 01-1.04-.41z"></path></svg>
-        <span class="soc-btn-tiktok-label">TikTok</span>
+      <a href="https://www.tiktok.com/@lairigmusic" target="_blank" rel="noopener">
+        <svg width="14" height="15" viewBox="0 0 24 24" fill="#ee1d52" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9a8.22 8.22 0 004.81 1.54V7.1a4.85 4.85 0 01-1.04-.41z"></path></svg>
+        TikTok
       </a>
-
-      <a href="https://linktr.ee/lairigmusic" target="_blank" rel="noopener" title="Tous les liens — Linktr.ee" class="soc-btn-linktree">
-        <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="#0a5e20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path></svg>
-        <span class="soc-btn-linktree-label">Linktr.ee</span>
+      <a href="https://linktr.ee/lairigmusic" target="_blank" rel="noopener" title="Tous les liens — Linktr.ee">
+        <svg width="14" height="15" viewBox="0 0 24 24" fill="none" stroke="#43e660" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path></svg>
+        Linktr.ee
       </a>
-
     </div>
-  </div>
+  </section>
 
-</div>
+  <div class="lg-separation lg-separation--fin" aria-hidden="true"><span>✦</span></div>
+
 </main>
 
 <footer class="site-footer">
@@ -212,8 +258,8 @@ import SeoHead from '../components/SeoHead.astro';
   <p>© 2026 – laphilo.fr – Tous droits réservés</p>
 </footer>
 
-<script src="/js/home-main.js" defer></script>
-<script src="/js/soc-widgets.js" defer></script>
+<script is:inline src="/js/home-main.js" defer></script>
+<script is:inline src="/js/soc-widgets.js" defer></script>
 
 </body>
 </html>

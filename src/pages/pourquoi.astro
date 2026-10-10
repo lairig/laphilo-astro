@@ -8,9 +8,9 @@ import SeoHead from '../components/SeoHead.astro';
 const title = 'Pourquoi ce site ? | LaPhilo.fr';
 const description = 'La genèse de LaPhilo.fr : pourquoi ce site, par qui, et le lien entre philosophie et musique dans le projet Lairig.';
 const PHOTOS = [
-  ['/photo/lairig-nature.webp', 'Nature'],
-  ['/photo/lairig-outside.webp', 'Vibration'],
-  ['/photo/lairig-man.webp', 'Sérénité'],
+  ['/photo/lairig-nature.webp', 'Nature', 'Marcher, écouter le paysage : c’est souvent là que naissent les premières notes.'],
+  ['/photo/lairig-outside.webp', 'Vibration', 'Bols chantants et gongs : quand le son se partage et se ressent autant qu’il s’écoute.'],
+  ['/photo/lairig-man.webp', 'Sérénité', 'Face à l’eau, le temps ralentit et les idées trouvent le calme pour se déposer.'],
 ];
 ---
 
@@ -70,8 +70,42 @@ const PHOTOS = [
       float: left; line-height: .8; margin: .08em .12em 0 0;
     }
 
+    /* Liens vers les grandes frises : dans le texte, puis encart sous le texte */
+    .pq-parch strong { color: var(--rust, #8b3a0f); font-weight: 600; }
+    .pq-parch p a { color: var(--rust, #8b3a0f); font-weight: 500; text-decoration: none; border-bottom: 1px solid rgba(139, 58, 15, .4); transition: border-color .2s, background .2s; }
+    .pq-parch p a:hover { border-bottom-color: var(--rust, #8b3a0f); background: rgba(184, 134, 11, .12); }
+    .pq-explorer { margin-top: 1.3rem; padding-top: 1.1rem; border-top: 1px solid rgba(180, 130, 50, .35); }
+    .pq-explorer .pq-explorer-titre {
+      margin: 0 0 .8rem; text-align: center; font-family: 'Cinzel', serif; font-size: .7rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--rust, #8b3a0f);
+    }
+    .pq-explorer-grille { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .pq-explorer-bloc {
+      display: flex; flex-direction: column; gap: .45rem; padding: .8rem .9rem;
+      background: rgba(30, 18, 8, .86); border: 1px solid rgba(212, 168, 67, .5); border-radius: 6px; box-shadow: 0 4px 14px rgba(60, 35, 5, .3);
+    }
+    .pq-explorer-nom { font-family: 'Cinzel', serif; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #fff4dc; margin-bottom: .1rem; }
+    .pq-explorer-bloc a {
+      display: flex; align-items: center; gap: .6rem; padding: .35rem .4rem; border-radius: 4px; text-decoration: none;
+      font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.02rem; color: #e6cf94; transition: background .2s, color .2s;
+    }
+    .pq-explorer-bloc a:hover { background: rgba(212, 168, 67, .14); color: #fff4dc; }
+    .pq-pastille {
+      flex-shrink: 0; width: 1.9rem; height: 1.9rem; border-radius: 50%; display: grid; place-items: center;
+      font-style: normal; font-size: .95rem; color: #2a1806;
+      background: radial-gradient(circle at 33% 33%, #f3d78a, var(--gold, #b8860b) 60%, #6b4700);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, .5), 0 2px 5px rgba(0, 0, 0, .45);
+    }
+
+    /* Séparation au-dessus de la citation : filet doré qui s'efface, étoile au centre */
+    .pq-separation { display: flex; align-items: center; gap: .8rem; max-width: 520px; margin: 2.8rem auto 0; color: var(--gold, #b8860b); }
+    .pq-separation::before, .pq-separation::after { content: ''; flex: 1; height: 1px; }
+    .pq-separation::before { background: linear-gradient(90deg, transparent, rgba(212, 168, 67, .6)); }
+    .pq-separation::after { background: linear-gradient(90deg, rgba(212, 168, 67, .6), transparent); }
+    .pq-separation span { font-size: .8rem; opacity: .85; }
+    .pq-separation--dessous { margin: 0 auto 2.8rem; }
+
     /* Citation */
-    .pq-citation { margin: 2.8rem auto; max-width: 640px; text-align: center; }
+    .pq-citation { margin: 1.8rem auto; max-width: 640px; text-align: center; }
     .pq-citation blockquote {
       margin: 0; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.55rem; line-height: 1.4; color: #f1e3bd;
       text-shadow: 0 2px 18px rgba(212, 168, 67, .25);
@@ -105,7 +139,7 @@ const PHOTOS = [
     .pq-titre--lairig { color: #c9bbf5; text-shadow: 0 1px 12px rgba(150, 130, 230, .35); }
 
     /* Photos */
-    .pq-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.6rem; }
+    .pq-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.8rem; }
     .pq-photo { margin: 0; text-align: center; }
     .pq-photo-cadre {
       overflow: hidden; aspect-ratio: 4 / 3; border-radius: 6px; border: 1px solid rgba(212, 168, 67, .55);
@@ -113,6 +147,7 @@ const PHOTOS = [
     }
     .pq-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
     .pq-photo:hover img { transform: scale(1.05); }
+    .pq-photo figcaption span { display: block; margin: .35rem auto 0; max-width: 260px; font-family: 'EB Garamond', serif; font-style: italic; font-size: .98rem; line-height: 1.45; letter-spacing: 0; text-transform: none; color: #d9c48f; }
     .pq-photo figcaption { margin-top: .6rem; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-light, #d4a843); }
 
     @media (max-width: 600px) {
@@ -122,10 +157,13 @@ const PHOTOS = [
       .pq-parch, .pq-lairig { padding: 1.25rem 1.1rem 1.15rem; }
       .pq-parch p, .pq-lairig p { font-size: 1.02rem; text-align: left; }
       .pq-lettrine::first-letter { font-size: 2.5rem; }
-      .pq-citation { margin: 2.2rem auto; }
+      .pq-citation { margin: 1.5rem auto; }
+      .pq-separation { margin-top: 2.2rem; }
+      .pq-separation--dessous { margin: 0 auto 2.2rem; }
       .pq-citation blockquote { font-size: 1.3rem; }
       .pq-lairig-lien { display: flex; justify-content: center; }
       .pq-photos { grid-template-columns: 1fr; gap: 1.3rem; }
+      .pq-explorer-grille { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -160,18 +198,40 @@ const PHOTOS = [
     <h2 class="pq-titre" id="pq-genese">La genèse de LaPhilo.fr</h2>
     <div class="pq-parch">
       <p class="pq-lettrine">
-        Ce site est né d'un constat simple : la philosophie est immense, souvent intimidante, et pourtant profondément humaine. J'ai voulu créer un espace de découverte visuelle et chronologique — non pas un cours magistral, mais une invitation à voyager à travers les idées, les époques et les cultures.
+        Ce site est né d'un constat simple : la philosophie est immense, souvent intimidante, et pourtant profondément humaine. J'ai longtemps cherché sur le web une frise temporelle qui montre d'un seul regard qui a pensé quoi, à quelle époque, et aux côtés de qui. <strong>Je n'en ai trouvé aucune.</strong> Les encyclopédies alignent des articles, les manuels des listes de noms ; rien ne permettait de voir qu'Averroès et Maïmonide sont nés dans la même ville, Cordoue, à quelques années d'écart, ni de suivre une idée d'une culture à l'autre.
+      </p>
+      <p>
+        J'ai donc voulu créer l'outil qui me manquait : un espace de découverte visuelle et chronologique — non pas un cours magistral, mais une invitation à voyager à travers les idées, les époques et les cultures, des sages de l'Égypte ancienne aux penseurs d'aujourd'hui.
       </p>
       <p>
         Les frises temporelles sont le cœur du projet : elles permettent de situer chaque penseur dans son contexte historique, de voir les filiations entre les courants, de comprendre comment une idée en engendre une autre à travers les siècles. La philosophie n'est pas une collection de citations isolées — c'est un dialogue vivant, qui dure depuis 2 500 ans.
       </p>
+      <nav class="pq-explorer" aria-label="Les grandes frises du monde">
+        <p class="pq-explorer-titre">Explorer les grandes frises</p>
+        <div class="pq-explorer-grille">
+          <div class="pq-explorer-bloc">
+            <span class="pq-explorer-nom">Les penseurs du monde</span>
+            <a href="/frises/penseurs-du-monde/"><span class="pq-pastille" aria-hidden="true">⟷</span>La frise</a>
+            <a href="/frises/tableau-des-penseurs/"><span class="pq-pastille" aria-hidden="true">▦</span>Le tableau par époque</a>
+          </div>
+          <div class="pq-explorer-bloc">
+            <span class="pq-explorer-nom">Les courants de pensée du monde</span>
+            <a href="/frises/courants-du-monde/"><span class="pq-pastille" aria-hidden="true">⟷</span>La frise</a>
+            <a href="/frises/tableau-des-courants/"><span class="pq-pastille" aria-hidden="true">▦</span>Le tableau par époque</a>
+          </div>
+        </div>
+      </nav>
     </div>
   </section>
+
+  <div class="pq-separation" aria-hidden="true"><span>✦</span></div>
 
   <figure class="pq-citation">
     <blockquote>Sans la musique, la vie serait une erreur.</blockquote>
     <figcaption>Nietzsche</figcaption>
   </figure>
+
+  <div class="pq-separation pq-separation--dessous" aria-hidden="true"><span>✦</span></div>
 
   <section aria-labelledby="pq-lairig">
     <h2 class="pq-titre pq-titre--lairig" id="pq-lairig">♪ Lairig Music — l'autre face du projet</h2>
@@ -186,11 +246,13 @@ const PHOTOS = [
     </div>
   </section>
 
+  <div class="pq-separation" aria-hidden="true"><span>✦</span></div>
+
   <div class="pq-photos">
-    {PHOTOS.map(([src, legende]) => (
+    {PHOTOS.map(([src, legende, texte]) => (
       <figure class="pq-photo">
         <div class="pq-photo-cadre"><img src={src} alt={legende} loading="lazy" /></div>
-        <figcaption>{legende}</figcaption>
+        <figcaption>{legende}<span>{texte}</span></figcaption>
       </figure>
     ))}
   </div>
