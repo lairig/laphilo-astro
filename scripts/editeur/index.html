@@ -15,7 +15,7 @@
   header { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: #120a04; border-bottom: 1px solid #5c4318; }
   header h1 { margin: 0; font-size: 1.1rem; letter-spacing: .08em; color: var(--or); font-weight: normal; text-transform: uppercase; }
   header .espace { flex: 1; }
-  header h1, header button, header #etat-global { white-space: nowrap; }
+  header h1, header button { white-space: nowrap; }
   header button { padding: .3rem .6rem; font-size: .92rem; }
   #modes { display: flex; border: 1px solid var(--or); border-radius: 5px; overflow: hidden; }
   #modes button { border: 0; border-radius: 0; background: transparent; padding: .3rem .8rem; }
@@ -248,7 +248,6 @@
 <header>
   <h1>✦ Éditeur des fiches</h1>
   <div id="modes" role="tablist"><button type="button" data-mode="philosophes" class="on">Philosophes</button><button type="button" data-mode="courants">Courants de pensée</button></div>
-  <span class="info" id="etat-global"></span>
   <span class="espace"></span>
   <button id="btn-remarques" title="Messages laissés par les visiteurs sur la page « Vos remarques » : publier, refuser, corriger, répondre">Remarques <span id="nb-remarques"></span></button>
   <button id="btn-google" title="Fiches sur Google (Search Console) : pages indexées ou non, affichages et clics des 90 derniers jours">Google <span id="nb-google"></span></button>
@@ -1745,7 +1744,6 @@ $('#btn-publier').onclick = async () => {
   await chargerListe();
   majNbImages(); majNbLiens(); majNbDates(); majNbGoogle(); majNbRemarques();
   api('/api/publication').then((s) => { if (s.en_cours) suivrePublication(); }).catch(() => {});
-  $('#etat-global').textContent = `${CODES.fichiers.length + CODES.fichiers_courants.length} fichiers xlsx`;
 })();
 </script>
 </body>
